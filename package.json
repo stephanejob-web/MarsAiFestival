@@ -7,9 +7,15 @@
     "prestart": "echo \"\n🚀 Démarrage de MarsAiFestival...\n   Backend  → http://localhost:5500\n   Frontend → http://localhost:5173\n\"",
     "start": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "format": "prettier --write \"backend/src/**/*.{ts,json}\" \"frontend/src/**/*.{ts,tsx,json}\"",
-    "format:check": "prettier --check \"backend/src/**/*.{ts,json}\" \"frontend/src/**/*.{ts,tsx,json}\""
+    "format:check": "prettier --check \"backend/src/**/*.{ts,json}\" \"frontend/src/**/*.{ts,tsx,json}\"",
+    "lint": "concurrently -n frontend,backend -c magenta,red \"npm run lint --prefix frontend\" \"npm run lint --prefix backend\"",
+    "test": "concurrently -n frontend,backend -c cyan,blue \"npm test --prefix frontend -- --run\" \"npm test --prefix backend\"",
+    "check": "concurrently -n format,lint,tests -c yellow,magenta,cyan \"npm run format\" \"npm run lint\" \"npm run test\"",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1"
   }
 }
