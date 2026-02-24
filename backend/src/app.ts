@@ -1,0 +1,13 @@
+import express, { Application } from "express";
+import cors from "cors";
+
+const app: Application = express();
+
+app.use(cors());
+app.use(express.json());
+
+// Routes
+import homeRouter from "./routes/home.routes";
+app.use("/", homeRouter);
+
+export default app;

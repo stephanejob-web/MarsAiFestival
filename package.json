@@ -1,0 +1,12 @@
+{
+  "name": "marsaifestival",
+  "version": "1.0.0",
+  "description": "Projet Mars AI Festival - React + Express TypeScript",
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "start": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
