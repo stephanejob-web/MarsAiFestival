@@ -52,6 +52,14 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
+## Règle équipe — Utilisation des LLMs
+
+> **Avant de coder une nouvelle feature avec un LLM (ChatGPT, Claude, Copilot...), lire obligatoirement :**
+> [`frontend/src/prompts/system.md`](./frontend/src/prompts/system.md)
+
+Copier le contenu de ce fichier et le coller en début de conversation avec le LLM.
+Cela garantit que le code généré respecte l'architecture et les conventions du projet.
+
 ## Structure du projet
 
 ```
