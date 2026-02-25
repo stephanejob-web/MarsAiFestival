@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copier uniquement les fichiers de dépendances
+COPY package.json package-lock.json ./
+
+# Installer les dépendances
+RUN npm install
+
+# Le code source sera monté via bind mount (pas COPY)
+# → ts-node-dev redémarre automatiquement à chaque changement
+
+EXPOSE 5500
+
+CMD ["npm", "run", "dev"]

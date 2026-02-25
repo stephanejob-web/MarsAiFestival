@@ -1,0 +1,73 @@
+services:
+  # ───────────────────────────────────────────
+  # Frontend — React + Vite (HMR)
+  # ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # Bind mount : ton code local est synchronisé en temps réel
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
+      # Volume anonyme : protège les node_modules du container
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5500
+    depends_on:
+      - backend
+
+  # ───────────────────────────────────────────
+  # Backend — Express + ts-node-dev (auto-restart)
+  # ───────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    ports:
+      - "5500:5500"
+    volumes:
+      # Bind mount : ton code local est synchronisé en temps réel
+      - ./backend/src:/app/src
+      - ./backend/tsconfig.json:/app/tsconfig.json
+      # Volume anonyme : protège les node_modules du container
+      - /app/node_modules
+    environment:
+      - PORT=5500
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=marsaifestival
+      - DB_USER=root
+      - DB_PASSWORD=marsai_dev_2026
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ───────────────────────────────────────────
+  # MySQL 8
+  # ───────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "33060:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: marsai_dev_2026
+      MYSQL_DATABASE: marsaifestival
+    volumes:
+      # Volume persistant : les données survivent aux redémarrages
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:

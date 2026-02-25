@@ -8,3 +8,6 @@ frontend/.env
 # IDE
 .idea/
 .vscode/
+
+# Docker
+mysql_data/
