@@ -61,10 +61,35 @@ Après chaque composant, génère son fichier `NomComposant.test.tsx` dans le m�
 Puis donne cette commande au développeur pour lancer les tests :
 
 ```bash
-npm test --prefix frontend
+npm run check --prefix frontend
 ```
 
 Si les tests peuvent échouer à cause d'un mock manquant ou d'une dépendance, indique-le explicitement et fournis le correctif.
+
+---
+
+## Étape 4 — Validation obligatoire avant de terminer
+
+**À la fin de chaque feature, lance impérativement :**
+
+```bash
+npm run check --prefix frontend
+```
+
+Ce script enchaîne dans l'ordre :
+1. `tsc --noEmit` — vérifie les types TypeScript
+2. `eslint .` — vérifie les règles de lint
+3. `vitest run` — exécute tous les tests
+
+**Règle absolue : tant que `npm run check` n'est pas vert, la feature n'est pas terminée.**
+
+Si le check échoue :
+1. Lis attentivement l'erreur
+2. Corrige le code fautif
+3. Relance `npm run check`
+4. Répète jusqu'à ce que tout passe
+
+Ne jamais soumettre un travail avec des erreurs TypeScript, des violations ESLint ou des tests en échec.
 
 ---
 
@@ -312,7 +337,7 @@ export const CHAT_ENDPOINT = "/api/chat";
 ### 3. Commande à lancer après intégration
 
 ```bash
-npm test --prefix frontend
+npm run check --prefix frontend
 ```
 
 Si des erreurs sont prévisibles (mock d'API, dépendance manquante), les signaler avant et fournir la solution.
@@ -414,6 +439,6 @@ BREAKING CHANGE: clients doivent supprimer leurs tokens localStorage
 - [ ] Les constantes sont dans `src/constants/`
 - [ ] Les erreurs asynchrones sont catchées et affichées à l'utilisateur
 - [ ] Chaque composant a son fichier `.test.tsx` avec au moins 3 cas de test
-- [ ] La commande `npm test --prefix frontend` est fournie à la fin
+- [ ] La commande `npm run check --prefix frontend` est fournie à la fin
 - [ ] Aucun `console.log` ni code commenté
 - [ ] Tous les fichiers sont complets — pas de `// TODO` ni de `// ...`
