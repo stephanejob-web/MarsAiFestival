@@ -7,7 +7,9 @@ frontend/.env
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
 # Docker
 mysql_data/

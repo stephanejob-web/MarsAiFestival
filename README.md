@@ -55,13 +55,22 @@ cd MarsAiFestival
 
 ### Option A — Avec Docker (recommandé)
 
-Une seule commande installe tout et lance le projet :
+#### 2. Installer les dépendances localement (pour l'IDE)
+
+```bash
+npm install
+```
+
+> Cette étape installe les `node_modules` en local **uniquement pour VSCode** (autocompletion TypeScript, ESLint, Prettier).
+> Docker utilise ses propres `node_modules` séparés — il n'y a aucun conflit.
+
+#### 3. Lancer le projet
 
 ```bash
 docker compose up --build
 ```
 
-> Les fois suivantes, `docker compose up` suffit (pas besoin de `--build`).  
+> Les fois suivantes, `docker compose up` suffit (pas besoin de `--build`).
 > Rebuilder uniquement si `package.json` change : `docker compose up --build`
 
 Pour arrêter :
