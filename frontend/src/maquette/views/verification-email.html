@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification Email — Marseille AI Festival</title>
+
+  <!-- Jetons de design (variables CSS globales) -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <!-- Reset navigateur -->
+  <link rel="stylesheet" href="../css/reset.css">
+  <!-- Effet grain en surimpression -->
+  <link rel="stylesheet" href="../css/grain.css">
+  <!-- Styles propres à la page de vérification -->
+  <link rel="stylesheet" href="../css/verification.css">
+  <!-- Barre de navigation maquette (dev) -->
+  <link rel="stylesheet" href="../css/dev-nav.css">
+</head>
+<body>
+
+  <!-- ─── PANNEAU GAUCHE — Visuel festival ─── -->
+  <aside class="panel-left">
+    <div class="left-logo">
+      <div class="logo-text">mars<span>AI</span></div>
+    </div>
+
+    <div class="left-hero">
+      <div class="left-pretitle">Dépôt de film</div>
+      <h1 class="left-big-title">
+        Votre minute<br>
+        <span class="grad">change tout.</span>
+      </h1>
+      <p class="left-desc">
+        60 secondes pour raconter l'avenir. Rejoignez les créateurs qui explorent les frontières entre intelligence artificielle et narration humaine.
+      </p>
+
+      <!-- Cartes descriptives du festival -->
+      <div class="left-cards">
+        <div class="left-card">
+          <div class="left-card-icon lci-1">🎬</div>
+          <div class="left-card-text">
+            <div class="lct-title">Film de 60 secondes</div>
+            <div class="lct-sub">MP4 · MOV · WebM — jusqu'à 2 Go</div>
+          </div>
+          <div class="left-card-check">✓</div>
+        </div>
+        <div class="left-card">
+          <div class="left-card-icon lci-2">🤖</div>
+          <div class="left-card-text">
+            <div class="lct-title">Outils IA documentés</div>
+            <div class="lct-sub">Image, son, hybridation — tous acceptés</div>
+          </div>
+          <div class="left-card-check">✓</div>
+        </div>
+        <div class="left-card">
+          <div class="left-card-icon lci-3">🌍</div>
+          <div class="left-card-text">
+            <div class="lct-title">Gratuit & international</div>
+            <div class="lct-sub">Ouvert à tous, sous-titres FR requis</div>
+          </div>
+          <div class="left-card-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      © 2026 marsAI · La Plateforme × Mobile Film Festival · Marseille
+    </div>
+  </aside>
+
+  <!-- ─── PANNEAU DROIT — Formulaire de vérification ─── -->
+  <main class="panel-right">
+
+    <a href="index.html" class="right-back">← Retour au site</a>
+
+    <div class="form-box">
+
+      <!-- Indicateur d'étapes (progression) -->
+      <div class="steps" id="steps-bar">
+        <div class="step-item">
+          <div class="step-circle active" id="sc-1">1</div>
+          <span class="step-label active-label" id="sl-1">Email</span>
+        </div>
+        <div class="step-connector" id="conn-1"></div>
+        <div class="step-item">
+          <div class="step-circle pending" id="sc-2">2</div>
+          <span class="step-label dim" id="sl-2">Code</span>
+        </div>
+        <div class="step-connector" id="conn-2"></div>
+        <div class="step-item">
+          <div class="step-circle pending" id="sc-3">3</div>
+          <span class="step-label dim" id="sl-3">Dépôt</span>
+        </div>
+      </div>
+
+      <!-- ─── VUE 1 : Saisie de l'email ─── -->
+      <div class="view active" id="view-1">
+        <div class="form-title">Votre adresse email</div>
+        <p class="form-subtitle">
+          Entrez votre email pour recevoir un code de vérification. Aucun mot de passe requis.
+        </p>
+
+        <div class="field-wrap">
+          <label class="field-label">Adresse email</label>
+          <input
+            class="input-email"
+            type="email"
+            id="email-input"
+            placeholder="vous@exemple.com"
+            value="marie.dupont@example.com"
+            autocomplete="email"
+            spellcheck="false"
+          >
+          <div class="field-msg" id="field-msg"></div>
+        </div>
+
+        <button class="btn-main" id="btn-send" onclick="sendCode()">
+          Recevoir le code →
+        </button>
+
+        <div class="security-row">
+          <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1L1.5 3V7C1.5 9.76 3.48 12.34 6 13C8.52 12.34 10.5 9.76 10.5 7V3L6 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          Email utilisé uniquement pour les communications du festival
+        </div>
+      </div>
+
+      <!-- ─── VUE 2 : Saisie du code OTP ─── -->
+      <div class="view" id="view-2">
+        <div class="form-title">Code de vérification</div>
+        <p class="form-subtitle">
+          Un code à 6 chiffres a été envoyé à votre adresse email.
+        </p>
+
+        <!-- Affichage de l'email avec option de modification -->
+        <div class="email-display">
+          <div class="email-display-left">
+            <div class="email-dot"></div>
+            <span class="email-display-addr" id="display-email">—</span>
+          </div>
+          <button class="email-change" onclick="goBack()">Modifier</button>
+        </div>
+
+        <label class="otp-label">Code de vérification</label>
+        <div class="otp-wrap" id="otp-wrap">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d1">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d2">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d3">
+          <span class="otp-sep">—</span>
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d4">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d5">
+          <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d6">
+        </div>
+
+        <!-- Message d'erreur OTP -->
+        <div class="otp-error-msg" id="otp-error">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="6" stroke="#FF6B6B" stroke-width="1.2"/><line x1="6.5" y1="3.5" x2="6.5" y2="7.5" stroke="#FF6B6B" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.5" cy="9.5" r="0.7" fill="#FF6B6B"/></svg>
+          Code incorrect. Réessayez.
+        </div>
+
+        <button class="btn-main" id="btn-verify" onclick="verifyCode()" disabled>
+          Vérifier
+        </button>
+
+        <!-- Section de renvoi du code -->
+        <div class="resend-section">
+          <span class="resend-left">Pas reçu le code ?</span>
+          <div class="resend-right">
+            <button class="btn-resend" id="btn-resend" onclick="resendCode()" disabled>Renvoyer</button>
+            <span class="resend-timer" id="resend-timer">0:30</span>
+          </div>
+        </div>
+
+        <!-- Indice pour la maquette de démonstration -->
+        <div class="demo-hint">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#F5E642" stroke-width="1.2"/><line x1="7" y1="5" x2="7" y2="9" stroke="#F5E642" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="3.5" r="0.7" fill="#F5E642"/></svg>
+          Maquette — tapez <span>1 2 3 4 5 6</span> pour valider
+        </div>
+      </div>
+
+      <!-- ─── VUE 3 : Confirmation de succès ─── -->
+      <div class="view" id="view-3">
+        <div class="success-wrap">
+          <div class="success-ring">
+            <span class="success-check">✓</span>
+          </div>
+          <div class="form-title">Email confirmé !</div>
+          <p class="form-subtitle">
+            Parfait. Vous pouvez maintenant déposer votre film pour la sélection officielle.
+          </p>
+
+          <!-- Liste des prochaines étapes -->
+          <ul class="checklist">
+            <li>
+              <span class="check-icon">1</span>
+              Uploader votre vidéo de 60 secondes
+            </li>
+            <li>
+              <span class="check-icon">2</span>
+              Joindre vos sous-titres en français
+            </li>
+            <li>
+              <span class="check-icon">3</span>
+              Documenter vos outils IA
+            </li>
+          </ul>
+
+          <button class="btn-solar" onclick="goToSubmission()">
+            Accéder au formulaire de dépôt →
+          </button>
+
+          <div class="security-row" style="justify-content:center;">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1L1.5 3V7C1.5 9.76 3.48 12.34 6 13C8.52 12.34 10.5 9.76 10.5 7V3L6 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            Session sécurisée · Données protégées
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /form-box -->
+  </main>
+
+  <!-- ─── Logique de vérification email (OTP) ─── -->
+  <script src="../js/verification-email.js"></script>
+
+  <!-- ─── Barre de navigation maquette (dev) ─── -->
+  <div id="dev-nav">
+    <span class="dn-label">Maquette</span>
+    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-sep"></div>
+    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
+    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
+  </div>
+</body>
+</html>

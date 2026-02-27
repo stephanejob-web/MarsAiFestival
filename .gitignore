@@ -7,4 +7,12 @@ frontend/.env
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Docker
+mysql_data/
+
+# Maquette — assets binaires (vidéos, images lourdes) — partager via Drive/Notion
+frontend/src/maquette/assets/

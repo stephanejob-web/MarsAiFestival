@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\"",
+    "check": "tsc --noEmit && eslint . && vitest run"
   },
   "dependencies": {
     "react": "^19.2.0",

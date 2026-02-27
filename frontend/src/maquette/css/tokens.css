@@ -1,0 +1,29 @@
+/* ================================================================
+   FICHIER — tokens.css
+   Jetons de design unifiés du projet marsAI : couleurs, typographies,
+   transitions et polices Google Fonts.
+   ================================================================ */
+
+/* ── POLICES GOOGLE ────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── COULEURS & TYPOGRAPHIE ────────────────────────────────────── */
+:root {
+  --solar:      #F5E642;
+  --aurora:     #4EFFCE;
+  --deep-sky:   #0A0F2E;
+  --horizon:    #1A1F4E;
+  --surface:    #0F1535;
+  --surface-2:  #141B3E;
+  --coral:      #FF6B6B;
+  --lavande:    #C084FC;
+  --white-soft: #F0F4FF;
+  --mist:       #8892B0;
+  --mist-light: #9DA7BF;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}

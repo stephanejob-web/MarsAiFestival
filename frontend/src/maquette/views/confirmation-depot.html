@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dépôt confirmé — Marseille AI Festival</title>
+
+  <!-- ============================================================
+       STYLES — Tokens, reset, grain, dev-nav, puis page-specific
+       ============================================================ -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/grain.css">
+  <link rel="stylesheet" href="../css/dev-nav.css">
+  <link rel="stylesheet" href="../css/confirmation.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       ORBES — Arrière-plan lumineux animé
+       ============================================================ -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- ============================================================
+       LOGO — Lien discret vers l'accueil
+       ============================================================ -->
+  <a href="index.html" class="logo">mars<span>AI</span></a>
+
+  <!-- ============================================================
+       CARTE — Contenu principal de confirmation
+       ============================================================ -->
+  <div class="card">
+
+    <div class="success-ring">
+      <span class="success-icon">🎬</span>
+    </div>
+
+    <h1 class="title">Film déposé<br><span class="grad">avec succès !</span></h1>
+    <p class="subtitle">
+      Votre candidature a été enregistrée.<br>
+      L'équipe marsAI vous contactera sous 4 semaines.
+    </p>
+
+    <div class="dossier-badge">
+      <span class="dossier-label">Dossier</span>
+      <span class="dossier-num" id="dossier-num">MAI-2026-—</span>
+    </div>
+    <br>
+    <div class="email-badge">
+      <span class="email-dot"></span>
+      <span class="email-addr" id="confirm-email">—</span>
+      <span class="verified-chip">✓ Vérifié</span>
+    </div>
+
+    <div class="next-steps">
+      <div class="next-steps-title">La suite</div>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Présélection jury</strong>
+          <span>Les jurys visionnent les films — résultats sous 4 semaines</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Top 50 annoncé le 12/12/2026</strong>
+          <span>Les 50 finalistes reçoivent un email de confirmation</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Mars.AI Night — Marseille</strong>
+          <span>Cérémonie de remise des prix · Top 5 sur grand écran</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="index.html" class="btn-primary">← Retour au site marsAI</a>
+      <a href="formulaire-depot.html" class="btn-secondary">Soumettre un autre film</a>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       SCRIPT — Lecture sessionStorage (dossier + email)
+       ============================================================ -->
+  <script src="../js/confirmation-depot.js"></script>
+
+  <!-- ============================================================
+       DEV-NAV — Navigation maquette (développement uniquement)
+       ============================================================ -->
+  <div id="dev-nav">
+    <span class="dn-label">Maquette</span>
+    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-sep"></div>
+    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
+    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
+  </div>
+
+</body>
+</html>

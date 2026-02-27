@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>marsAI — Concours International de Courts-Métrages IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────── */
+    :root {
+      --solar:      #F5E642;
+      --aurora:     #4EFFCE;
+      --deep-sky:   #0A0F2E;
+      --horizon:    #1A1F4E;
+      --coral:      #FF6B6B;
+      --lavande:    #C084FC;
+      --white-soft: #F0F4FF;
+      --mist:       #8892B0;
+
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'Inter', sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── RESET ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--deep-sky);
+      color: var(--white-soft);
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── GRAIN OVERLAY ──────────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── NAV ────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 60px;
+      background: linear-gradient(to bottom, rgba(10,15,46,0.95) 0%, transparent 100%);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .logo .ai { color: var(--aurora); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--mist);
+    }
+    .nav-links li:hover { color: var(--white-soft); cursor: pointer; transition: color 0.2s; }
+    .nav-links a { color: inherit; text-decoration: none; }
+    .btn-nav {
+      background: var(--aurora);
+      color: var(--deep-sky);
+      padding: 10px 24px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(78,255,206,0.5);
+    }
+    /* Dev nav */
+    .dev-nav {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .dev-nav-label {
+      font-size: 0.65rem;
+      color: var(--mist);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      text-align: right;
+    }
+    .dev-nav-links {
+      display: flex;
+      gap: 8px;
+    }
+    .dev-btn {
+      background: var(--horizon);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--white-soft);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .dev-btn:hover { border-color: rgba(78,255,206,0.4); color: var(--aurora); }
+    .dev-btn.current { border-color: rgba(78,255,206,0.4); color: var(--aurora); background: rgba(78,255,206,0.08); }
+
+    /* ─── CANVAS MARS ────────────────────────────────────── */
+    #mars-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── AURORA BACKGROUND ──────────────────────────────── */
+    .aurora-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .aurora-bg::before {
+      content: "";
+      position: absolute;
+      top: -20%;
+      left: -10%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(ellipse, rgba(78,255,206,0.12) 0%, transparent 65%);
+      animation: float1 10s ease-in-out infinite alternate;
+    }
+    .aurora-bg::after {
+      content: "";
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(ellipse, rgba(192,132,252,0.1) 0%, transparent 65%);
+      animation: float2 13s ease-in-out infinite alternate;
+    }
+    @keyframes float1 {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(4%, 6%) scale(1.1); }
+    }
+    @keyframes float2 {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-4%, -6%) scale(1.15); }
+    }
+
+    /* ─── HERO ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 60px 80px;
+      overflow: hidden;
+    }
+
+    /* Video background */
+    .hero-video-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .hero-video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.40;
+    }
+    .hero-video-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right,  rgba(10,15,46,0.88) 35%, rgba(10,15,46,0.30) 100%),
+        linear-gradient(to top,    rgba(10,15,46,0.80) 0%,  transparent 35%),
+        linear-gradient(to bottom, rgba(10,15,46,0.50) 0%,  transparent 20%);
+    }
+    /* Badge IA généré */
+    .hero-ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(192,132,252,0.12);
+      border: 1px solid rgba(192,132,252,0.30);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--lavande);
+      letter-spacing: 0.06em;
+      margin-top: 14px;
+      opacity: 0.85;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 750px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(78,255,206,0.1);
+      border: 1px solid rgba(78,255,206,0.3);
+      border-radius: 9999px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--aurora);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+    .hero-badge::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--aurora);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .hero-title .gradient-text {
+      background: linear-gradient(90deg, var(--aurora) 0%, var(--lavande) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 400;
+      color: var(--mist);
+      letter-spacing: -0.01em;
+      margin-bottom: 40px;
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    .tag {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.90rem;
+      color: var(--mist);
+    }
+    .tag strong { color: var(--white-soft); }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--solar);
+      color: var(--deep-sky);
+      padding: 16px 36px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(245,230,66,0.4);
+    }
+    .btn-primary .arrow {
+      width: 20px; height: 20px;
+      background: var(--deep-sky);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+    }
+    .btn-ghost {
+      color: var(--white-soft);
+      padding: 16px 24px;
+      font-weight: 500;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-ghost:hover { opacity: 1; }
+
+    /* ─── HERO PARTNERS ──────────────────────────────────── */
+    .hero-partners {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 14px;
+      padding: 12px 20px;
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+    }
+    .hero-partners-label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--mist);
+      white-space: nowrap;
+      padding-right: 4px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+    }
+    .hero-partners-logo {
+      display: flex;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+    .hero-partners-logo img {
+      height: 34px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.90;
+      transition: opacity 0.2s;
+    }
+    .hero-partners-logo:hover img { opacity: 1; }
+    .hero-partners-sep {
+      color: var(--aurora);
+      font-family: var(--font-display);
+      font-size: 1.0rem;
+      opacity: 0.55;
+    }
+    .hero-partners-name {
+      font-size: 0.90rem;
+      font-weight: 700;
+      color: var(--white-soft);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    /* ─── COUNTDOWN ──────────────────────────────────────── */
+    .countdown-wrapper {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 22px 60px 34px;
+      background: linear-gradient(to top, rgba(10,15,46,0.85) 0%, transparent 100%);
+    }
+    .countdown-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .countdown-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .countdown-top-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(78,255,206,0.35));
+    }
+    .countdown-top-line.r {
+      background: linear-gradient(90deg, rgba(78,255,206,0.35), transparent);
+    }
+    .countdown-label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--mist);
+      white-space: nowrap;
+    }
+    .countdown-units {
+      display: flex;
+      align-items: flex-start;
+    }
+    .countdown-unit {
+      text-align: center;
+      padding: 0 44px;
+    }
+    .countdown-unit + .countdown-unit {
+      border-left: 1px solid rgba(255,255,255,0.07);
+    }
+    .countdown-num {
+      font-family: var(--font-mono);
+      font-size: 3.8rem;
+      font-weight: 500;
+      color: var(--white-soft);
+      display: block;
+      text-align: center;
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(78,255,206,0.28);
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      min-width: auto;
+    }
+    .countdown-sep { display: none; }
+    .countdown-lbl {
+      font-size: 0.73rem;
+      color: var(--mist);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+
+    /* ─── SECTION COMMONS ────────────────────────────────── */
+    section { position: relative; }
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 60px;
+    }
+    .section-label {
+      font-size: 0.80rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--aurora);
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--mist);
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    /* ─── CONCEPT SECTION ────────────────────────────────── */
+    .concept {
+      background: rgba(10,15,46,0.75);
+      backdrop-filter: blur(2px);
+    }
+    .concept::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(78,255,206,0.3), transparent);
+    }
+    .concept-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2px;
+      margin-top: 64px;
+    }
+    .concept-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 40px 36px;
+      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s;
+      cursor: default;
+      margin: 1px;
+    }
+    .concept-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 50px rgba(78,255,206,0.15);
+      border-color: rgba(78,255,206,0.3);
+    }
+    .concept-card:nth-child(2):hover {
+      box-shadow: 0 0 50px rgba(192,132,252,0.15);
+      border-color: rgba(192,132,252,0.3);
+    }
+    .concept-card:nth-child(3):hover {
+      box-shadow: 0 0 50px rgba(245,230,66,0.15);
+      border-color: rgba(245,230,66,0.2);
+    }
+    .concept-icon {
+      font-size: 2.5rem;
+      margin-bottom: 24px;
+      display: block;
+    }
+    .concept-num {
+      font-family: var(--font-mono);
+      font-size: 3.5rem;
+      font-weight: 500;
+      color: var(--aurora);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .concept-card:nth-child(2) .concept-num { color: var(--lavande); }
+    .concept-card:nth-child(3) .concept-num { color: var(--solar); }
+    .concept-card-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .concept-card p {
+      font-size: 0.9rem;
+      color: var(--mist);
+      line-height: 1.65;
+    }
+
+    /* ─── ABOUT FESTIVAL SECTION ─────────────────────────── */
+    .about {
+      position: relative;
+      overflow: hidden;
+      background: rgba(10,15,46,0.75);
+      backdrop-filter: blur(2px);
+    }
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .about-visual {
+      position: relative;
+    }
+    .venue-card {
+      background: var(--horizon);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+    .venue-map {
+      height: 300px;
+      position: relative;
+      overflow: hidden;
+    }
+    .venue-map iframe {
+      width: 100%; height: 115%; border: none;
+      filter: saturate(0.2) brightness(0.55) hue-rotate(185deg);
+      margin-top: -7%;
+      display: block;
+    }
+    .venue-map-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(10,15,46,0.2) 0%, rgba(10,15,46,0.75) 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+    }
+    .venue-pin {
+      font-size: 2.8rem;
+      display: block;
+      animation: bounce 2s ease-in-out infinite;
+      filter: drop-shadow(0 6px 16px rgba(78,255,206,0.45));
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-9px); }
+    }
+    .venue-coords-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--aurora);
+      background: rgba(10,15,46,0.75);
+      border: 1px solid rgba(78,255,206,0.22);
+      border-radius: 30px;
+      padding: 6px 16px;
+      letter-spacing: 0.07em;
+      backdrop-filter: blur(8px);
+    }
+    .venue-info {
+      padding: 24px 28px 28px;
+    }
+    .venue-name {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .venue-address {
+      font-size: 0.85rem;
+      color: var(--mist);
+      margin-bottom: 16px;
+    }
+    .venue-tags {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .venue-tag {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: var(--mist);
+    }
+    .venue-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(78,255,206,0.08);
+      border: 1px solid rgba(78,255,206,0.25);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-family: var(--font-body);
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--aurora);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .venue-btn:hover { background: rgba(78,255,206,0.16); transform: translateY(-1px); }
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    /* ─── PROGRAMME ─── */
+    .event-programme {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 28px;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      padding-left: 24px;
+    }
+    .prog-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .prog-item:last-child { border-bottom: none; }
+    .prog-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+      position: absolute;
+      left: -29px;
+      box-shadow: 0 0 10px currentColor;
+    }
+    .prog-day {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--white-soft);
+      margin-bottom: 3px;
+    }
+    .prog-desc {
+      font-size: 0.78rem;
+      color: var(--mist);
+      line-height: 1.5;
+    }
+    .stat-chip {
+      background: rgba(78,255,206,0.07);
+      border: 1px solid rgba(78,255,206,0.15);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      color: var(--aurora);
+      font-weight: 500;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--mist);
+      margin-top: 2px;
+    }
+
+    /* ─── CTA SECTION ────────────────────────────────────── */
+    .cta-section {
+      padding: 0 60px 100px;
+    }
+    .cta-block {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(78,255,206,0.08) 0%, rgba(192,132,252,0.08) 50%, rgba(10,15,46,0) 100%);
+      border: 1px solid rgba(78,255,206,0.2);
+      border-radius: 24px;
+      padding: 72px 80px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-block::before {
+      content: "APPEL À PROJETS";
+      position: absolute;
+      top: -20px;
+      right: 60px;
+      font-family: var(--font-display);
+      font-size: 8rem;
+      font-weight: 800;
+      color: rgba(78,255,206,0.04);
+      letter-spacing: -0.04em;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .cta-requirements {
+      list-style: none;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .cta-requirements li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--mist);
+    }
+    .cta-requirements li::before {
+      content: "✓";
+      color: var(--aurora);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .cta-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+    .deadline-badge {
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.3);
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+    }
+    .deadline-badge .label { font-size: 0.7rem; color: var(--coral); letter-spacing: 0.1em; text-transform: uppercase; }
+    .deadline-badge .date { font-family: var(--font-mono); font-size: 1.1rem; color: var(--white-soft); margin-top: 4px; }
+    .btn-cta-main {
+      background: linear-gradient(135deg, var(--solar) 0%, #FFD700 100%);
+      color: var(--deep-sky);
+      padding: 18px 44px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      white-space: nowrap;
+    }
+    .btn-cta-main:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 60px rgba(245,230,66,0.45);
+    }
+    .cta-free {
+      font-size: 0.78rem;
+      color: var(--mist);
+    }
+
+    /* ─── GALLERY SECTION ────────────────────────────────── */
+    /* ─── GALERIE ─────────────────────────────────────────── */
+    .gallery-section {
+      background: rgba(10,15,46,0.75);
+      backdrop-filter: blur(2px);
+      position: relative;
+      overflow: hidden;
+    }
+    .gallery-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 0%, rgba(78,255,206,0.04) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(192,132,252,0.04) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .gallery-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .gallery-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 9999px;
+      padding: 7px 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--mist);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: rgba(78,255,206,0.1);
+      border-color: rgba(78,255,206,0.35);
+      color: var(--aurora);
+    }
+
+    /* ── Featured Grand Prix ── */
+    .film-featured {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      cursor: pointer;
+      height: 400px;
+    }
+    .featured-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #080f30 0%, #18083a 40%, #220820 100%);
+      transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    .film-featured:hover .featured-bg { transform: scale(1.04); }
+    .featured-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.007) 3px, rgba(255,255,255,0.007) 4px);
+    }
+    .featured-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.055;
+      mix-blend-mode: overlay;
+    }
+    .featured-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(5,8,24,0.96) 0%, rgba(5,8,24,0.65) 35%, rgba(5,8,24,0.15) 65%, transparent 100%);
+    }
+    .featured-play {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.10);
+      border: 2px solid rgba(255,255,255,0.28);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; padding-left: 5px;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.2s;
+      backdrop-filter: blur(6px);
+      z-index: 2;
+    }
+    .film-featured:hover .featured-play { transform: translate(-50%,-50%) scale(1.12); background: rgba(255,255,255,0.18); }
+    .featured-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 32px;
+      z-index: 3;
+    }
+    .featured-top { display: flex; align-items: center; justify-content: space-between; }
+    .featured-prize {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(245,230,66,0.14); border: 1px solid rgba(245,230,66,0.32);
+      border-radius: 9999px; padding: 6px 18px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--solar);
+    }
+    .featured-duration {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+      background: rgba(0,0,0,0.38); padding: 4px 10px; border-radius: 6px;
+    }
+    .featured-num {
+      font-family: var(--font-mono); font-size: 0.63rem;
+      color: var(--aurora); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .featured-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.05;
+      margin-bottom: 8px; color: var(--white-soft);
+    }
+    .featured-author { font-size: 0.88rem; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+    .featured-tags { display: flex; gap: 6px; }
+
+    /* ── Grille films ── */
+    .films-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .film-card {
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      background: transparent;
+    }
+    .film-card:hover { transform: translateY(-8px); }
+
+    .film-thumb {
+      aspect-ratio: 16/9;
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-bottom: 11px;
+    }
+    .film-thumb-bg {
+      width: 100%; height: 100%;
+      position: absolute; inset: 0;
+      transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .film-card:hover .film-thumb-bg { transform: scale(1.08); }
+    .film-thumb-bg::after {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.06;
+    }
+    /* Gradient overlay bas */
+    .film-thumb::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(5,8,24,0.90) 0%, rgba(5,8,24,0.42) 42%, transparent 72%);
+      z-index: 1;
+    }
+    /* Play button centré */
+    .film-thumb-play {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.65);
+      z-index: 3;
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.88rem; padding-left: 3px;
+      opacity: 0;
+      transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s;
+      backdrop-filter: blur(4px);
+    }
+    .film-card:hover .film-thumb-play { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    /* Titre en overlay */
+    .film-thumb-title {
+      position: absolute; bottom: 10px; left: 12px; right: 12px;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-size: 0.84rem; font-weight: 800; line-height: 1.2;
+      color: var(--white-soft);
+    }
+    /* Numéro */
+    .film-num {
+      position: absolute; top: 10px; left: 12px; z-index: 2;
+      font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+      color: rgba(255,255,255,0.35); letter-spacing: 0.1em;
+    }
+    /* Prix badge */
+    .film-prize {
+      position: absolute; top: 10px; left: 12px; z-index: 4;
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(245,230,66,0.16); border: 1px solid rgba(245,230,66,0.38);
+      border-radius: 5px; padding: 2px 9px;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--solar); text-transform: uppercase;
+    }
+    /* Durée */
+    .film-duration {
+      position: absolute; top: 10px; right: 10px; z-index: 2;
+      background: rgba(0,0,0,0.52); border-radius: 5px;
+      padding: 2px 7px; font-family: var(--font-mono);
+      font-size: 0.67rem; color: rgba(255,255,255,0.65);
+    }
+    /* Meta sous la vignette */
+    .film-meta { padding: 0 4px; }
+    .film-author {
+      font-size: 0.74rem; color: var(--mist);
+      margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+    }
+    .film-flag { font-size: 0.88rem; }
+    .film-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+    .badge {
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em;
+      padding: 3px 9px; border-radius: 9999px; text-transform: uppercase;
+    }
+    .badge-image   { background: rgba(78,255,206,0.1);  color: var(--aurora); }
+    .badge-son     { background: rgba(192,132,252,0.1); color: var(--lavande); }
+    .badge-hybride { background: rgba(245,230,66,0.1);  color: var(--solar); }
+    .badge-winner  { background: rgba(255,107,107,0.1); color: var(--coral); }
+    .ftag { padding: 4px 12px; border-radius: 9999px; font-size: 0.67rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* Couleurs thumbnails */
+    .fc-bg-1 { background: linear-gradient(135deg,#0a1840 0%,#200840 55%,#280820 100%); }
+    .fc-bg-2 { background: linear-gradient(135deg,#07192a 0%,#0a2e18 55%,#040e12 100%); }
+    .fc-bg-3 { background: linear-gradient(135deg,#260808 0%,#18081e 55%,#080826 100%); }
+    .fc-bg-4 { background: linear-gradient(135deg,#1c0e06 0%,#061618 55%,#06062c 100%); }
+    .fc-bg-5 { background: linear-gradient(135deg,#061c08 0%,#082608 55%,#06062c 100%); }
+    .fc-bg-6 { background: linear-gradient(135deg,#1c0616 0%,#080616 55%,#061618 100%); }
+    .fc-bg-7 { background: linear-gradient(135deg,#061616 0%,#061608 55%,#160606 100%); }
+    .fc-bg-8 { background: linear-gradient(135deg,#160616 0%,#260826 55%,#061224 100%); }
+    .fc-bg-9 { background: linear-gradient(135deg,#0a1840 0%,#181206 55%,#260606 100%); }
+
+    /* Pagination */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 52px;
+    }
+    .page-btn {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 9px; color: var(--mist); font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s; font-family: var(--font-body);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn:hover { background: rgba(255,255,255,0.08); color: var(--white-soft); border-color: rgba(255,255,255,0.15); }
+    .page-btn.active { background: var(--aurora); border-color: var(--aurora); color: var(--deep-sky); font-weight: 700; }
+    .page-info { font-family: var(--font-mono); font-size: 0.72rem; color: var(--mist); margin-left: 10px; }
+
+    /* ─── SUBMISSION PREVIEW ─────────────────────────────── */
+    /* ─── COMMENT ÇA MARCHE ─── */
+    .how-section {
+      position: relative;
+      overflow: hidden;
+      background: rgba(10,15,46,0.75);
+      backdrop-filter: blur(2px);
+    }
+    .how-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    /* Ligne de connexion */
+    .how-steps::before {
+      content: "";
+      position: absolute;
+      top: 36px;
+      left: calc(12.5% + 20px);
+      right: calc(12.5% + 20px);
+      height: 1px;
+      background: linear-gradient(90deg,
+        var(--aurora), var(--lavande), var(--solar), var(--coral));
+      opacity: 0.25;
+    }
+    .how-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 24px 32px;
+      position: relative;
+    }
+    .how-num-wrap {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .how-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s;
+    }
+    .how-card:hover .how-circle { transform: scale(1.08); }
+    .hc-1 { background: rgba(78,255,206,0.1);  border: 1.5px solid rgba(78,255,206,0.3);  box-shadow: 0 0 24px rgba(78,255,206,0.12); }
+    .hc-2 { background: rgba(192,132,252,0.1); border: 1.5px solid rgba(192,132,252,0.3); box-shadow: 0 0 24px rgba(192,132,252,0.12); }
+    .hc-3 { background: rgba(245,230,66,0.08); border: 1.5px solid rgba(245,230,66,0.25); box-shadow: 0 0 24px rgba(245,230,66,0.1); }
+    .hc-4 { background: rgba(255,107,107,0.08); border: 1.5px solid rgba(255,107,107,0.25); box-shadow: 0 0 24px rgba(255,107,107,0.1); }
+    .how-step-num {
+      position: absolute;
+      top: -6px; right: -6px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--deep-sky);
+      border: 1px solid rgba(255,255,255,0.15);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--mist);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .how-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--white-soft);
+    }
+    .how-desc {
+      font-size: 0.8rem;
+      color: var(--mist);
+      line-height: 1.65;
+    }
+    .how-tag {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .ht-1 { background: rgba(78,255,206,0.1);  color: var(--aurora); }
+    .ht-2 { background: rgba(192,132,252,0.1); color: var(--lavande); }
+    .ht-3 { background: rgba(245,230,66,0.1);  color: var(--solar); }
+    .ht-4 { background: rgba(255,107,107,0.1); color: var(--coral); }
+    .how-cta {
+      text-align: center;
+      margin-top: 48px;
+    }
+
+    /* ─── PLAYER SECTION ─────────────────────────────────── */
+    .player-section {
+      background: rgba(6,9,30,0.82);
+      backdrop-filter: blur(2px);
+      padding: 80px 60px;
+    }
+    .player-preview {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .player-window {
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
+    }
+    .player-screen {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #0d1b3e 0%, #1a0a3e 50%, #0a2e2e 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-center-play {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .player-center-play:hover {
+      transform: scale(1.1);
+      background: rgba(78,255,206,0.2);
+    }
+    .player-subtitle-bar {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      border-radius: 6px;
+      padding: 8px 20px;
+      font-size: 1.1rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+    .player-controls {
+      padding: 16px 24px 20px;
+      background: rgba(255,255,255,0.03);
+    }
+    .player-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .progress-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    .progress-fill {
+      width: 65%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--aurora), var(--lavande));
+      border-radius: 2px;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: "";
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px; height: 12px;
+      background: var(--white-soft);
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(78,255,206,0.6);
+    }
+    .time-display {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--mist);
+      white-space: nowrap;
+    }
+    .player-btns {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .player-left-btns {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .player-btn {
+      background: none;
+      border: none;
+      color: var(--mist);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 4px;
+    }
+    .player-btn:hover { color: var(--white-soft); }
+    .player-btn.play-main {
+      width: 38px; height: 38px;
+      background: var(--aurora);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--deep-sky);
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .subtitle-toggle {
+      background: rgba(78,255,206,0.1);
+      border: 1px solid rgba(78,255,206,0.3);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: var(--aurora);
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+    .film-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding: 0 4px;
+    }
+    .film-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--mist);
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .film-nav-btn:hover {
+      color: var(--white-soft);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .film-counter {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--mist);
+    }
+
+    /* ─── PALMARÈS ────────────────────────────────────────── */
+    .palmares-section {
+      position: relative;
+      background: rgba(10,15,46,0.72);
+      backdrop-filter: blur(2px);
+      padding: 100px 0;
+      overflow: hidden;
+    }
+    .palmares-section::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(245,230,66,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .palmares-intro {
+      text-align: center;
+      color: var(--mist);
+      font-size: 0.88rem;
+      margin: 0 auto 64px;
+      max-width: 440px;
+    }
+
+    /* Grand Prix */
+    .award-grand {
+      position: relative;
+      overflow: hidden;
+      max-width: 680px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, rgba(245,230,66,0.06) 0%, rgba(245,230,66,0.02) 60%, rgba(245,230,66,0.06) 100%);
+      border: 1px solid rgba(245,230,66,0.22);
+      border-radius: 24px;
+      padding: 44px 48px;
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .award-grand-shine {
+      position: absolute; top: 0; bottom: 0; left: 0;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(245,230,66,0.06), transparent);
+      animation: palmares-shine 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes palmares-shine {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(500%); }
+    }
+    .award-grand-icon {
+      width: 80px; height: 80px; flex-shrink: 0;
+      border-radius: 20px;
+      background: rgba(245,230,66,0.07);
+      border: 1px solid rgba(245,230,66,0.18);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .award-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(245,230,66,0.6);
+      margin-bottom: 10px;
+    }
+    .award-grand-name {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--solar);
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+    .award-grand-desc {
+      font-size: 0.85rem;
+      color: var(--mist);
+      line-height: 1.65;
+      margin-bottom: 18px;
+    }
+    .award-bourse {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--solar);
+      background: rgba(245,230,66,0.06);
+      border: 1px solid rgba(245,230,66,0.15);
+      border-radius: 30px;
+      padding: 5px 14px;
+      letter-spacing: 0.06em;
+    }
+
+    /* Prix secondaires */
+    .awards-secondary {
+      max-width: 680px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .award-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 28px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .award-card:hover { transform: translateY(-4px); }
+    .award-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .award-jury::before  { background: linear-gradient(90deg, transparent, var(--lavande), transparent); }
+    .award-jury:hover    { border-color: rgba(192,132,252,0.2); }
+    .award-public::before { background: linear-gradient(90deg, transparent, var(--aurora), transparent); }
+    .award-public:hover  { border-color: rgba(78,255,206,0.2); }
+    .award-innov::before { background: linear-gradient(90deg, transparent, var(--coral), transparent); }
+    .award-innov:hover   { border-color: rgba(255,107,107,0.2); }
+
+    .award-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      margin-bottom: 18px;
+    }
+    .award-jury  .award-icon { background: rgba(192,132,252,0.08); }
+    .award-public .award-icon { background: rgba(78,255,206,0.08); }
+    .award-innov .award-icon { background: rgba(255,107,107,0.08); }
+
+    .award-name {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .award-jury  .award-name { color: var(--lavande); }
+    .award-public .award-name { color: var(--aurora); }
+    .award-innov .award-name { color: var(--coral); }
+
+    .award-desc {
+      font-size: 0.76rem;
+      color: var(--mist);
+      line-height: 1.6;
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    footer {
+      background: rgba(10,15,46,0.82);
+      backdrop-filter: blur(4px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 60px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+    .footer-brand .logo { font-size: 1.5rem; margin-bottom: 16px; display: block; }
+    .footer-desc {
+      font-size: 0.85rem;
+      color: var(--mist);
+      line-height: 1.65;
+      max-width: 280px;
+    }
+    .footer-col h4 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-bottom: 20px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .footer-links a {
+      font-size: 0.88rem;
+      color: rgba(240,244,255,0.6);
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--white-soft); }
+    .footer-partners {
+      max-width: 1200px;
+      margin: 36px auto 0;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-partners-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--mist);
+      padding-right: 20px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-partners-logo img {
+      height: 32px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      opacity: 0.65;
+      transition: opacity 0.2s;
+      display: block;
+    }
+    .footer-partners-logo:hover img { opacity: 1; }
+    .footer-partners-sep {
+      color: var(--mist);
+      font-size: 1rem;
+      opacity: 0.35;
+    }
+    .footer-partners-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--white-soft);
+      opacity: 0.55;
+      transition: opacity 0.2s;
+    }
+    .footer-partners-name:hover { opacity: 0.9; }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 28px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--mist);
+    }
+
+    /* ─── SECTION DIVIDER ────────────────────────────────── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    }
+
+    /* ─── SCROLL ANIMATIONS ──────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-in:nth-child(2) { transition-delay: 0.1s; }
+    .fade-in:nth-child(3) { transition-delay: 0.2s; }
+    .fade-in:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ─── MOBILE RESPONSIVE (basique) ────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 24px 80px; }
+      .section-inner { padding: 64px 24px; }
+      .concept-grid { grid-template-columns: 1fr; }
+      .about-inner { grid-template-columns: 1fr; }
+      .how-steps { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .how-steps::before { display: none; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .films-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-block { grid-template-columns: 1fr; padding: 40px 32px; }
+      .countdown-wrapper { right: 24px; bottom: 24px; }
+      .scroll-hint { display: none; }
+      .player-section { padding: 48px 24px; }
+      .cta-section { padding: 0 24px 64px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="mars-canvas" aria-hidden="true"></canvas>
+
+  <!-- ─── NAVIGATION ──────────────────────────────────── -->
+  <nav>
+    <div class="logo">mars<span>AI</span></div>
+    <ul class="nav-links">
+      <li><a href="#concours">Le Concours</a></li>
+      <li><a href="#programme">Programme</a></li>
+      <li><a href="#films">Films</a></li>
+      <li><a href="login-jury.html" style="color:var(--white-soft);text-decoration:none;display:flex;align-items:center;gap:5px;"><span style="font-size:0.7rem;color:var(--aurora);">⬡</span> Espace Jury</a></li>
+      <li><a href="#presse">Presse</a></li>
+      <li><a class="btn-nav" href="verification-email.html">Soumettre un film</a></li>
+      <li style="display:flex;gap:6px;">
+        <button id="btn-fr" onclick="setLang('fr')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(78,255,206,0.4);border-radius:6px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;" title="Français">🇫🇷</button>
+        <button id="btn-en" onclick="setLang('en')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;" title="English">🇬🇧</button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ─── HERO ────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="aurora-bg"></div>
+    <div class="hero-video-bg">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="../assets/ia2.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="hero-content">
+
+      <!-- Partenariat — mis en avant en premier -->
+      <div class="hero-partners">
+        <span class="hero-partners-label">Co-organisé par</span>
+        <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="hero-partners-logo">
+          <img src="../assets/logo-laplateforme.png" alt="La Plateforme · Coding School">
+        </a>
+        <span class="hero-partners-sep">×</span>
+        <span class="hero-partners-name">Mobile Film Festival</span>
+      </div>
+
+      <div class="hero-badge">Concours International · Première Édition 2026</div>
+
+      <h1 class="hero-title">
+        mars<span class="gradient-text">AI</span>
+      </h1>
+      <p class="hero-subtitle" data-fr="Imaginez des futurs souhaitables." data-en="Imagine desirable futures.">Imaginez des futurs souhaitables.</p>
+      <div class="hero-ai-badge">✦ Extrait généré par IA · Courts-métrages 60 secondes</div>
+
+      <div class="hero-tags">
+        <span class="tag"><strong>60 secondes</strong> pile</span>
+        <span class="tag"><strong>120+</strong> pays représentés</span>
+        <span class="tag"><strong>20 000</strong> candidatures attendues</span>
+        <span class="tag"><strong>Millions</strong> de vues en ligne</span>
+      </div>
+
+      <div class="hero-cta">
+        <a href="formulaire-depot.html" class="btn-primary">
+          Soumettre mon film
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Countdown pleine largeur -->
+    <div class="countdown-wrapper">
+      <div class="countdown-inner">
+        <div class="countdown-top">
+          <span class="countdown-top-line"></span>
+          <span class="countdown-label">Clôture des dépôts · 30 septembre 2026</span>
+          <span class="countdown-top-line r"></span>
+        </div>
+        <div class="countdown-units">
+          <div class="countdown-unit">
+            <span class="countdown-num" id="days">221</span>
+            <div class="countdown-lbl">Jours</div>
+          </div>
+          <div class="countdown-unit">
+            <span class="countdown-num" id="hours">08</span>
+            <div class="countdown-lbl">Heures</div>
+          </div>
+          <div class="countdown-unit">
+            <span class="countdown-num" id="minutes">33</span>
+            <div class="countdown-lbl">Minutes</div>
+          </div>
+          <div class="countdown-unit">
+            <span class="countdown-num" id="seconds">47</span>
+            <div class="countdown-lbl">Secondes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONCEPT SECTION ──────────────────────────────── -->
+  <section class="concept" id="concours">
+    <div class="section-inner">
+      <div class="section-label">Le Concept</div>
+      <h2 class="section-title">Une contrainte absolue,<br>une liberté totale</h2>
+      <p class="section-desc">marsAI est un concours international de courts-métrages d'une minute intégralement générés par IA. Co-organisé par <strong style="color:var(--white-soft)">La Plateforme</strong> et le <strong style="color:var(--white-soft)">Mobile Film Festival</strong>. L'humain reste au cœur de la création.</p>
+
+      <div class="concept-grid">
+        <div class="concept-card fade-in">
+          <span class="concept-num">1'</span>
+          <div class="concept-card-title">1 Minute, 1 Film</div>
+          <p>La règle d'or : 60 secondes pile. Chaque seconde compte pour raconter quelque chose qui dure.</p>
+        </div>
+        <div class="concept-card fade-in">
+          <span class="concept-num">IA</span>
+          <div class="concept-card-title">L'humain au cœur de l'IA</div>
+          <p>Scénario, génération image/vidéo, post-production — tous les outils IA sont documentés. Un réalisateur peut soumettre plusieurs films.</p>
+        </div>
+        <div class="concept-card fade-in">
+          <span class="concept-num">50</span>
+          <div class="concept-card-title">Films en compétition</div>
+          <p>Le jury sélectionne 50 œuvres parmi 20 000 candidatures. Grand Prix, Prix du Jury, Prix du Public — modèle Cannes avec bourses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT FESTIVAL ───────────────────────────────── -->
+  <section class="about" id="programme">
+    <div class="aurora-bg" style="opacity:0.5"></div>
+    <div class="section-inner">
+      <div class="about-inner">
+        <div class="about-text">
+          <div class="section-label">L'Événement · Marseille 2026</div>
+          <h2 class="section-title">Vivez la naissance<br>d'un nouveau cinéma</h2>
+          <p class="section-desc">Trois jours aux Friches Belle de Mai — une ancienne manufacture industrielle transformée en capitale culturelle. Salles de projection, lumières basses, jury international, et sur scène : les créateurs qui réinventent le 7e art avec l'IA. Vous y serez.</p>
+
+          <!-- Programme -->
+          <div class="event-programme">
+
+            <div class="prog-item">
+              <span class="prog-dot" style="background:var(--aurora)"></span>
+              <div>
+                <div class="prog-day">Vendredi soir — Ouverture</div>
+                <div class="prog-desc">Séance inaugurale & cocktail de bienvenue · 120+ pays représentés</div>
+                <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                  <span style="font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.18);color:var(--aurora);">🎤 Conférence d'ouverture</span>
+                  <span style="font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--mist);">Free access</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="prog-item">
+              <span class="prog-dot" style="background:var(--lavande)"></span>
+              <div>
+                <div class="prog-day">Samedi — Deux journées de conférences</div>
+                <div class="prog-desc">Projections publiques · Village IA & démos live · Tables rondes</div>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:10px;background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.12);border-radius:8px;padding:8px 12px;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;">👤</div>
+                    <div>
+                      <div style="font-size:0.78rem;font-weight:700;color:var(--white-soft);">Speaker à confirmer</div>
+                      <div style="font-size:0.68rem;color:var(--mist);">IA & Cinéma — Keynote</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.12);border-radius:8px;padding:8px 12px;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;">👤</div>
+                    <div>
+                      <div style="font-size:0.78rem;font-weight:700;color:var(--white-soft);">Speaker à confirmer</div>
+                      <div style="font-size:0.68rem;color:var(--mist);">Création générative — Panel</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="prog-item">
+              <span class="prog-dot" style="background:var(--solar)"></span>
+              <div>
+                <div class="prog-day">Dimanche — Gala de clôture</div>
+                <div class="prog-desc">Délibérations du jury · Cérémonie des Prix marsAI · Bourses</div>
+              </div>
+            </div>
+
+            <!-- Mars.AI Night — mise en avant -->
+            <div class="prog-item" style="margin-top:4px;">
+              <span class="prog-dot" style="background:var(--coral)"></span>
+              <div style="background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,rgba(192,132,252,0.06) 100%);border:1px solid rgba(255,107,107,0.18);border-radius:12px;padding:14px 16px;width:100%;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <span style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral);">✦ Événement exclusif</span>
+                </div>
+                <div class="prog-day" style="font-size:1rem;color:var(--white-soft);">Mars.AI Night 🌙</div>
+                <div class="prog-desc" style="margin-top:4px;">Soirée de gala · Remise des prix · Performances live IA · DJ set génératif</div>
+                <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;padding:4px 12px;border-radius:20px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:var(--coral);">🎟 Sur invitation</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;">
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">50</div>
+              <div class="stat-label">Films en compétition</div>
+            </div>
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">120+</div>
+              <div class="stat-label">Pays représentés</div>
+            </div>
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">Gratuit</div>
+              <div class="stat-label">Accès public</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-visual">
+          <div class="venue-card">
+            <div class="venue-map">
+              <iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=5.3536%2C43.2864%2C5.3936%2C43.3064&layer=mapnik&marker=43.2964%2C5.3736"
+                loading="lazy"
+                title="Carte La Plateforme — Marseille"
+              ></iframe>
+              <div class="venue-map-overlay">
+                <span class="venue-pin">📍</span>
+                <div class="venue-coords-badge">43°17'47"N — 5°22'25"E</div>
+              </div>
+            </div>
+            <div class="venue-info">
+              <div class="venue-name">La Plateforme</div>
+              <div class="venue-address">Friches Belle de Mai · Marseille, 13003</div>
+              <div class="venue-tags">
+                <span class="venue-tag">🎬 Projections officielles</span>
+                <span class="venue-tag">🤖 Démos IA live</span>
+                <span class="venue-tag">🌍 Jury international</span>
+              </div>
+              <a href="https://www.google.com/maps/search/?api=1&query=La+Plateforme+Friches+Belle+de+Mai+Marseille" target="_blank" class="venue-btn">
+                ↗ Ouvrir l'itinéraire
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── CTA APPEL À PROJETS ──────────────────────────── -->
+  <section id="soumettre" style="padding: 100px 0 0;">
+    <div class="cta-section">
+      <div class="cta-block">
+        <div class="cta-left">
+          <div class="section-label">Appel à Projets</div>
+          <h2 class="section-title" style="max-width: 440px;">Votre film a sa place ici</h2>
+          <ul class="cta-requirements">
+            <li>Durée : <strong>60 secondes pile</strong></li>
+            <li>IA entière ou hybride — documentée dans la fiche IA</li>
+            <li>Formats : <strong>MP4 ou MOV</strong> · 200 à 300 Mo · Ratio 16:9</li>
+            <li>Plusieurs films par réalisateur acceptés</li>
+            <li>Groupes autorisés — 1 réalisateur référent pour les droits</li>
+            <li>Ouvert à 120+ pays · Gratuit · Sous-titres FR et EN bienvenus</li>
+          </ul>
+        </div>
+        <div class="cta-right">
+          <div class="deadline-badge">
+            <div class="label">Clôture des dépôts</div>
+            <div class="date">30 septembre 2026</div>
+          </div>
+          <a href="verification-email.html" class="btn-cta-main">Déposer mon film →</a>
+          <span class="cta-free">Participation gratuite · Toutes nationalités</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMMENT ÇA MARCHE ───────────────────────────── -->
+  <section class="how-section">
+    <div class="section-inner">
+
+      <div class="how-header fade-in">
+        <div class="section-label">Dépôt de film</div>
+        <h2 class="section-title">Comment ça marche ?</h2>
+        <p class="section-desc" style="max-width:520px;margin:0 auto;">Un tunnel guidé en 4 étapes — de votre profil à la soumission finale. Moins de 10 minutes.</p>
+      </div>
+
+      <div class="how-steps">
+
+        <div class="how-card fade-in">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-1">👤</div>
+            <div class="how-step-num">01</div>
+          </div>
+          <div class="how-title">Profil réalisateur</div>
+          <p class="how-desc">Renseignez votre identité, pays de résidence et email de contact. Un seul référent pour les droits d'auteur.</p>
+          <span class="how-tag ht-1">Identité & contact</span>
+        </div>
+
+        <div class="how-card fade-in">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-2">🎬</div>
+            <div class="how-step-num">02</div>
+          </div>
+          <div class="how-title">Le Film</div>
+          <p class="how-desc">Déposez votre court-métrage de 60 secondes. La durée est vérifiée automatiquement côté client et serveur.</p>
+          <span class="how-tag ht-2">Titre · Synopsis · Vidéo</span>
+        </div>
+
+        <div class="how-card fade-in">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-3">🤖</div>
+            <div class="how-step-num">03</div>
+          </div>
+          <div class="how-title">Fiche IA</div>
+          <p class="how-desc">Documentez les outils d'IA utilisés — image/vidéo obligatoire, son, scénario et post-production en option.</p>
+          <span class="how-tag ht-3">Outils · Sous-titres FR/EN</span>
+        </div>
+
+        <div class="how-card fade-in">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-4">✅</div>
+            <div class="how-step-num">04</div>
+          </div>
+          <div class="how-title">Confirmation</div>
+          <p class="how-desc">Récapitulatif complet, acceptation des droits RGPD et soumission. Vous recevez un numéro de dossier instantanément.</p>
+          <span class="how-tag ht-4">RGPD · Dossier MAI-2026</span>
+        </div>
+
+      </div>
+
+      <div class="how-cta fade-in">
+        <a href="formulaire-depot.html" class="btn-primary">
+          Déposer mon film maintenant
+          <span class="arrow">→</span>
+        </a>
+        <p style="margin-top:14px;font-size:0.78rem;color:var(--mist);">Participation gratuite · Ouvert à 120+ pays · Clôture le 30 sept. 2026</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── GALERIE FILMS ────────────────────────────────── -->
+  <section class="gallery-section" id="films">
+    <div class="section-inner">
+      <div class="gallery-header">
+        <div>
+          <div class="section-label">Sélection Officielle marsAI 2026</div>
+          <h2 class="section-title" style="margin-bottom:0">50 Films · Imaginez des futurs souhaitables</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+          <div class="gallery-filters">
+            <span class="filter-chip active" onclick="setFilter(this)">Tous</span>
+            <span class="filter-chip" onclick="setFilter(this)">IA Pure</span>
+            <span class="filter-chip" onclick="setFilter(this)">Hybride</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--mist);">20 films / page · Pagination</div>
+        </div>
+      </div>
+
+      <div class="films-grid">
+        <!-- Film 1 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇫🇷</span> Léa Fontaine</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Rêves de Silicium</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 2 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇹🇳</span> Amira Ben Said</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">L'Enfant-Pixel</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 3 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-3"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇯🇵</span> Kenji Ito</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Archipel 2048</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 4 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-4"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇪🇸</span> Carlos Ruiz</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Mémoire Vive</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 5 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-5"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇮🇳</span> Priya Mehta</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Les Nouveaux Soleils</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 6 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-6"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇸🇳</span> Omar Diallo</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Frontières Douces</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 7 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-7"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇸🇪</span> Sofia Ek</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Vague Numérique</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 8 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-8"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇨🇳</span> Lin Wei</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Jardin des Codes</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 9 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-9"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇧🇷</span> Yuki Tanaka</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Cartographie</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 10 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1" style="filter:hue-rotate(40deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇩🇪</span> Mia Schultz</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Horizon Zéro</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 11 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2" style="filter:hue-rotate(120deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇰🇷</span> Ji-young Park</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Résonance Digitale</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 12 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-3" style="filter:hue-rotate(60deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇧🇷</span> Valentina Costa</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Archipel d'Âmes</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 13 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-4" style="filter:hue-rotate(180deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇲🇦</span> Yasmine El Fassi</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Lumière Artificielle</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 14 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-5" style="filter:hue-rotate(90deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇺🇸</span> Alex Chen</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Demain Commence</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 15 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-6" style="filter:hue-rotate(45deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇮🇹</span> Marco Ferretti</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Ombres Portées</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 16 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-7" style="filter:hue-rotate(210deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇳🇬</span> Chioma Adeyemi</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Racines Futures</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 17 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-8" style="filter:hue-rotate(150deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇷🇺</span> Anastasia Volkov</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Code Vivant</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 18 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-9" style="filter:hue-rotate(90deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇦🇺</span> Noah Williams</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Le Dernier Pixel</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 19 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1" style="filter:hue-rotate(200deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇵🇱</span> Maja Kowalski</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Entre les Lignes</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 20 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2" style="filter:hue-rotate(270deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇲🇽</span> Diego Hernández</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Futur Passé</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:48px;">
+        <button onclick="this.style.opacity=1" style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">←</button>
+        <button style="width:36px;height:36px;background:var(--aurora);border:none;border-radius:8px;color:var(--deep-sky);font-weight:700;font-size:0.85rem;cursor:pointer;">1</button>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">2</button>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">3</button>
+        <span style="color:var(--mist);font-size:0.85rem;">…</span>
+        <span style="font-size:0.75rem;color:var(--mist);margin-left:8px;font-family:var(--font-mono);">20 films / page · 3 pages</span>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">→</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PLAYER SECTION ──────────────────────────────── -->
+  <section class="player-section">
+    <div style="max-width:1200px;margin:0 auto 48px;display:flex;gap:12px;align-items:center;">
+      <span class="section-label" style="margin:0">Lecteur Intégré</span>
+      <span style="font-size:0.8rem;color:var(--mist);">— support sous-titres · HLS adaptatif · plein écran</span>
+    </div>
+
+    <div class="player-preview">
+      <div class="player-window">
+        <div class="player-screen">
+          <div class="player-center-play">▶</div>
+          <div class="player-subtitle-bar">
+            "Les machines ont appris à rêver — mais rêvent-elles en couleurs ?"
+          </div>
+        </div>
+        <div class="player-controls">
+          <div class="player-progress">
+            <div class="progress-track">
+              <div class="progress-fill"></div>
+            </div>
+            <span class="time-display">0:39 / 1:00</span>
+          </div>
+          <div class="player-btns">
+            <div class="player-left-btns">
+              <button class="player-btn">⏮</button>
+              <button class="player-btn play-main">▶</button>
+              <button class="player-btn">⏭</button>
+              <button class="player-btn">🔊</button>
+              <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--mist);">Rêves de Silicium — Léa Fontaine</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <span class="subtitle-toggle">CC FR</span>
+              <button class="player-btn">⛶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="film-nav">
+        <div class="film-nav-btn">← Film précédent</div>
+        <span class="film-counter">5 / 50</span>
+        <div class="film-nav-btn">Film suivant →</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRIX SECTION ────────────────────────────────── -->
+  <section class="palmares-section" id="palmares">
+    <div class="section-inner">
+      <div class="section-label" style="text-align:center;margin-bottom:14px;">Palmarès · Modèle Cannes</div>
+      <h2 class="section-title" style="text-align:center;margin-bottom:16px;">Les Prix marsAI</h2>
+      <p class="palmares-intro">Bourses et récompenses décernées par le jury international au terme des projections officielles.</p>
+
+      <!-- Grand Prix -->
+      <div class="award-grand">
+        <div class="award-grand-shine"></div>
+        <div class="award-grand-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 3L21.8 13.1H32.6L24 19.4L27.2 29.5L18 23.2L8.8 29.5L12 19.4L3.4 13.1H14.2L18 3Z" fill="rgba(245,230,66,0.85)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="award-eyebrow">✦ Prix Principal · marsAI 2026</div>
+          <div class="award-grand-name">Grand Prix</div>
+          <div class="award-grand-desc">Meilleur film toutes catégories — décerné par le jury international à l'issue des délibérations finales de la cérémonie de clôture.</div>
+          <div class="award-bourse">✦ Bourse de création · Remise lors du Gala</div>
+        </div>
+      </div>
+
+      <!-- Prix secondaires -->
+      <div class="awards-secondary">
+        <div class="award-card award-jury">
+          <div class="award-icon">⚖️</div>
+          <div class="award-name">Prix du Jury</div>
+          <div class="award-desc">Coup de cœur artistique — sélection spéciale décernée par le jury international.</div>
+        </div>
+        <div class="award-card award-public">
+          <div class="award-icon">🌍</div>
+          <div class="award-name">Prix du Public</div>
+          <div class="award-desc">Vote ouvert en ligne pendant le festival — le public désigne son film favori.</div>
+        </div>
+        <div class="award-card award-innov">
+          <div class="award-icon">🤖</div>
+          <div class="award-name">Prix Innovation IA</div>
+          <div class="award-desc">Usage le plus audacieux et créatif de l'intelligence artificielle dans la création.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ──────────────────────────────────────── -->
+  <footer id="presse">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">mars<span class="ai">AI</span></span>
+        <p class="footer-desc">Le premier concours international de courts-métrages d'une minute intégralement générés par IA. 120+ pays. "Imaginez des futurs souhaitables."</p>
+      </div>
+      <div class="footer-col">
+        <h4>Festival</h4>
+        <ul class="footer-links">
+          <li><a href="#concours">Le Concept</a></li>
+          <li><a href="#programme">Programme</a></li>
+          <li><a href="login-jury.html">Jury</a></li>
+          <li><a href="https://laplateforme.io" target="_blank">La Plateforme</a></li>
+          <li><a href="#presse">Presse</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Films</h4>
+        <ul class="footer-links">
+          <li><a href="#films">Galerie</a></li>
+          <li><a href="#palmares">Palmarès</a></li>
+          <li><a href="verification-email.html">Soumettre</a></li>
+          <li><a href="#">Règlement</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul class="footer-links">
+          <li><a href="mailto:contact@marsai.fr">contact@marsai.fr</a></li>
+          <li><a href="https://instagram.com/marsaifestival" target="_blank">Instagram</a></li>
+          <li><a href="https://linkedin.com/company/marsai-festival" target="_blank">LinkedIn</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Co-organisateurs -->
+    <div class="footer-partners">
+      <span class="footer-partners-label">Co-organisé par</span>
+      <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="footer-partners-logo">
+        <img src="../assets/logo-laplateforme.png" alt="La Plateforme · Coding School">
+      </a>
+      <span class="footer-partners-sep">×</span>
+      <span class="footer-partners-name">Mobile Film Festival</span>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 marsAI · Une co-création La Plateforme × Mobile Film Festival</span>
+      <span style="font-family:var(--font-mono);font-size:0.72rem;">Imaginez des futurs souhaitables · Première Édition</span>
+    </div>
+  </footer>
+
+  <!-- ─── DEV NAVIGATION ──────────────────────────────── -->
+  <div class="dev-nav">
+    <div class="dev-nav-label">Prototype — Navigation</div>
+    <div class="dev-nav-links">
+      <a href="index.html" class="dev-btn current">🏠 Accueil</a>
+      <a href="verification-email.html" class="dev-btn">✉️ Vérif. Email</a>
+      <a href="formulaire-depot.html" class="dev-btn">📝 Formulaire</a>
+      <a href="login-jury.html" class="dev-btn">🔐 Connexion Jury</a>
+      <a href="admin-jury.html" class="dev-btn">⚖️ Interface Jury</a>
+    </div>
+  </div>
+
+  <!-- ─── JAVASCRIPT ───────────────────────────────────── -->
+  <script>
+    // Countdown live — clôture des dépôts : 30 septembre 2026
+    const deadline = new Date('2026-09-30T23:59:59');
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = deadline - now;
+      if (diff <= 0) return;
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('days').textContent    = String(d).padStart(2, '0');
+      document.getElementById('hours').textContent   = String(h).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(m).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Filter chips interactivity
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+
+    // Toggle FR / EN
+    let lang = 'fr';
+    function setLang(newLang) {
+      lang = newLang;
+      document.getElementById('btn-fr').style.borderColor = lang === 'fr' ? 'rgba(78,255,206,0.4)' : 'rgba(255,255,255,0.12)';
+      document.getElementById('btn-en').style.borderColor = lang === 'en' ? 'rgba(78,255,206,0.4)' : 'rgba(255,255,255,0.12)';
+      document.querySelectorAll('[data-fr]').forEach(el => {
+        el.textContent = lang === 'en' ? el.dataset.en : el.dataset.fr;
+      });
+    }
+
+    // Nav scroll effect
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 80) {
+        nav.style.background = 'rgba(10,15,46,0.97)';
+      } else {
+        nav.style.background = 'linear-gradient(to bottom, rgba(10,15,46,0.95) 0%, transparent 100%)';
+      }
+    });
+  </script>
+
+  <!-- ── AURORA MORPHING ───────────────────────────────────── -->
+  <script>
+  (function() {
+    const canvas = document.getElementById('mars-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    /*
+     * 6 blobs de couleur fluides — chacun se déplace lentement sur
+     * une trajectoire sinusoïdale indépendante. Les gradients se
+     * superposent pour créer un effet aurora liquide premium.
+     *
+     * bx / by  : position de base (fraction de l'écran)
+     * ox / oy  : amplitude du mouvement (fraction de l'écran)
+     * fx / fy  : fréquence angulaire (rad/s) — lent = ~20-30s de cycle
+     * px / py  : phase initiale (rad) — décale les blobs dans le temps
+     * r        : rayon = fraction de la diagonale de l'écran
+     * c        : [R, G, B]
+     */
+    const blobs = [
+      { bx:0.18, by:0.25, ox:0.10, oy:0.08, fx:0.27, fy:0.21, px:0.0,  py:1.2,  r:0.50, c:[78,255,206]  }, // aurora — haut gauche
+      { bx:0.82, by:0.72, ox:0.09, oy:0.11, fx:0.20, fy:0.32, px:2.1,  py:0.7,  r:0.54, c:[245,230,66]  }, // solar  — bas droite
+      { bx:0.50, by:0.42, ox:0.08, oy:0.09, fx:0.34, fy:0.24, px:1.5,  py:3.8,  r:0.44, c:[192,132,252] }, // lavande — centre
+      { bx:0.10, by:0.78, ox:0.07, oy:0.08, fx:0.29, fy:0.37, px:4.3,  py:2.0,  r:0.38, c:[78,255,206]  }, // aurora — bas gauche
+      { bx:0.88, by:0.20, ox:0.08, oy:0.07, fx:0.23, fy:0.28, px:0.9,  py:5.1,  r:0.40, c:[245,230,66]  }, // solar  — haut droite
+      { bx:0.62, by:0.80, ox:0.11, oy:0.07, fx:0.31, fy:0.19, px:3.3,  py:1.8,  r:0.36, c:[192,132,252] }, // lavande — bas centre
+    ];
+
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W;
+      canvas.height = H;
+    }
+
+    let lastFrame = 0;
+    function draw(ts) {
+      requestAnimationFrame(draw);
+      if (ts - lastFrame < 33) return; // ~30 fps
+      lastFrame = ts;
+      const t = ts * 0.001;
+
+      ctx.clearRect(0, 0, W, H);
+
+      blobs.forEach(b => {
+        const cx  = (b.bx + Math.sin(t * b.fx + b.px) * b.ox) * W;
+        const cy  = (b.by + Math.cos(t * b.fy + b.py) * b.oy) * H;
+        const rad = Math.hypot(W, H) * b.r;
+
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        const [r, gv, bv] = b.c;
+        g.addColorStop(0,    `rgba(${r},${gv},${bv},0.14)`);
+        g.addColorStop(0.35, `rgba(${r},${gv},${bv},0.07)`);
+        g.addColorStop(0.70, `rgba(${r},${gv},${bv},0.02)`);
+        g.addColorStop(1,    `rgba(${r},${gv},${bv},0)`);
+
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      });
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(draw);
+  })();
+  </script>
+
+
+</body>
+</html>

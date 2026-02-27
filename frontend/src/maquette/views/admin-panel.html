@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — marsAI 2026</title>
+
+  <!-- Feuilles de style partagées et spécifiques -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/dev-nav.css">
+  <link rel="stylesheet" href="../css/admin-layout.css">
+  <link rel="stylesheet" href="../css/admin-panel.css">
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">mars<span class="ai">AI</span></div>
+    <div class="logo-sub">Panneau d'administration</div>
+  </div>
+
+  <div class="admin-identity">
+    <div class="admin-avatar">AD</div>
+    <div class="admin-info">
+      <div class="name">Admin marsAI</div>
+      <div class="role">Administrateur</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Gestion</div>
+
+    <div class="nav-item active" onclick="showView('users', this)">
+      <span class="icon">👥</span>
+      Utilisateurs
+      <span class="nav-count nc-aurora" id="count-users">6</span>
+    </div>
+
+    <div class="nav-item" onclick="showView('assign', this)">
+      <span class="icon">🎬</span>
+      Assignation films
+      <span class="nav-count" id="count-assign">50</span>
+    </div>
+
+    <div class="nav-label" style="margin-top:8px;">Concours</div>
+
+    <div class="nav-item" onclick="showView('phases', this)">
+      <span class="icon">📅</span>
+      Phases & Dates
+    </div>
+
+    <div class="nav-label" style="margin-top:8px;">Site</div>
+
+    <div class="nav-item" onclick="showView('site', this)">
+      <span class="icon">🌐</span>
+      Administration site
+    </div>
+
+    <div class="nav-label" style="margin-top:8px;">Compte</div>
+
+    <div class="nav-item" onclick="window.location.href='index.html'" style="color:var(--coral);">
+      <span class="icon">🔒</span>
+      Déconnexion
+    </div>
+  </nav>
+</aside>
+
+<!-- ══════════ ZONE PRINCIPALE ══════════ -->
+<div class="main">
+
+  <!-- Barre supérieure -->
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Gestion des utilisateurs</span>
+    <div class="topbar-sep"></div>
+    <span class="topbar-info" id="topbar-info">Jurys et modérateurs — accès par token permanent</span>
+    <div class="topbar-right">
+      <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--mist);background:rgba(245,230,66,0.07);border:1px solid rgba(245,230,66,0.2);border-radius:6px;padding:4px 10px;">🛡️ Admin</span>
+    </div>
+  </div>
+
+  <!-- ══════ VUE UTILISATEURS ══════ -->
+  <div class="content" id="view-users">
+
+    <!-- Statistiques -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-card-label">Jurys</div>
+        <div class="stat-card-val sv-aurora">4</div>
+        <div class="stat-card-sub">membres actifs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Modérateurs</div>
+        <div class="stat-card-val sv-lavande">2</div>
+        <div class="stat-card-sub">comptes actifs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Comptes désactivés</div>
+        <div class="stat-card-val sv-coral">1</div>
+        <div class="stat-card-sub">accès révoqué</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Tokens envoyés</div>
+        <div class="stat-card-val sv-solar">6</div>
+        <div class="stat-card-sub">liens permanents</div>
+      </div>
+    </div>
+
+    <!-- Tableau utilisateurs -->
+    <div class="section-head">
+      <div>
+        <h2>Comptes jury & modérateurs</h2>
+        <p>L'administrateur est le seul habilité à créer et gérer les accès.</p>
+      </div>
+      <button class="btn-create" onclick="openModal('create')">+ Créer un compte</button>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div style="position:relative;margin-bottom:14px;">
+      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;opacity:0.4;pointer-events:none;">🔍</span>
+      <input
+        id="user-search"
+        type="text"
+        placeholder="Rechercher par nom, email ou rôle…"
+        oninput="filterUsers(this.value)"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:10px;padding:9px 14px 9px 36px;font-family:var(--font-body);font-size:0.85rem;color:var(--white-soft);outline:none;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='rgba(78,255,206,0.4)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.09)'"
+      >
+    </div>
+
+    <div class="user-table-wrap">
+      <table class="user-table" id="user-table">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Rôle</th>
+            <th>Films assignés</th>
+            <th>Token d'accès</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="user-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ══════ VUE ASSIGNATION ══════ -->
+  <div class="content" id="view-assign" style="display:none;">
+    <div class="section-head" style="margin-bottom:16px;">
+      <div>
+        <h2>Films soumis</h2>
+        <p>Visionnez chaque film et assignez-le au jury de votre choix.</p>
+      </div>
+    </div>
+
+    <!-- Barre de recherche films -->
+    <div style="position:relative;margin-bottom:16px;">
+      <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:0.85rem;opacity:0.4;pointer-events:none;">🔍</span>
+      <input
+        id="film-search"
+        type="text"
+        placeholder="Rechercher par titre, réalisateur ou pays…"
+        oninput="filterFilms(this.value)"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:10px;padding:9px 14px 9px 36px;font-family:var(--font-body);font-size:0.85rem;color:var(--white-soft);outline:none;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='rgba(78,255,206,0.4)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.09)'"
+      >
+    </div>
+
+    <!-- Filtre par pays -->
+    <div style="position:relative;margin-bottom:16px;" id="country-filter-wrap">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="country-btn" onclick="toggleCountryDropdown()">
+          <span id="country-btn-icon">🌍</span>
+          <span id="country-btn-label">Tous les pays</span>
+          <span id="country-btn-arrow" style="font-size:0.7rem;opacity:0.6;margin-left:2px;">▾</span>
+        </button>
+        <button id="country-reset-btn" onclick="resetCountryFilter()" style="display:none;align-items:center;gap:5px;padding:7px 12px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.22);border-radius:10px;font-family:var(--font-body);font-size:0.78rem;color:var(--coral);cursor:pointer;transition:all 0.2s;">
+          × Réinitialiser
+        </button>
+      </div>
+      <div id="country-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--surface-2);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:8px;min-width:230px;max-height:340px;box-shadow:0 16px 48px rgba(0,0,0,0.5);">
+        <input type="text" id="country-search" placeholder="Filtrer les pays…" oninput="renderCountryDropdown(this.value)" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-family:var(--font-body);font-size:0.8rem;color:var(--white-soft);outline:none;margin-bottom:6px;" autocomplete="off">
+        <div id="country-list" style="overflow-y:auto;max-height:260px;"></div>
+      </div>
+    </div>
+
+    <!-- Onglets -->
+    <div class="film-tabs">
+      <button class="film-tab pending-tab active" id="tab-pending" onclick="switchFilmTab('pending')">
+        🎬 À assigner
+        <span class="tab-count" id="count-pending">—</span>
+      </button>
+      <button class="film-tab assigned-tab" id="tab-assigned" onclick="switchFilmTab('assigned')">
+        ✓ Assignés
+        <span class="tab-count" id="count-assigned">—</span>
+      </button>
+    </div>
+
+    <div id="assign-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
+
+    <!-- État vide -->
+    <div id="assign-empty" style="display:none;text-align:center;padding:60px 20px;">
+      <div style="font-size:3rem;margin-bottom:16px;">🎉</div>
+      <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--white-soft);margin-bottom:8px;">Tous les films sont assignés !</div>
+      <div style="font-size:0.8rem;color:var(--mist);">Retrouvez-les dans l'onglet "Assignés".</div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;"></div>
+  </div>
+
+  <!-- ══════ VUE PHASES ══════ -->
+  <div class="content" id="view-phases" style="display:none;">
+    <div class="section-head" style="margin-bottom:20px;">
+      <div><h2>Gestion des phases d'évaluation</h2><p>Définissez les dates d'ouverture de chaque session du jury.</p></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:760px;">
+      <!-- Phase 1 -->
+      <div style="background:var(--surface-2);border:1px solid rgba(78,255,206,0.2);border-radius:14px;padding:22px;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--aurora);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Phase 1</div>
+        <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:4px;">Présélection Top 50</div>
+        <div style="font-size:0.75rem;color:var(--mist);margin-bottom:18px;line-height:1.5;">Évaluation des 50 premières vidéos. Chaque jury évalue ses films assignés.</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:6px;">Date d'ouverture</label>
+          <input type="date" value="2026-12-12" style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(78,255,206,0.25);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:0.85rem;color:var(--white-soft);outline:none;color-scheme:dark;">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:6px;">Date de clôture</label>
+          <input type="date" value="2026-12-19" style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:0.85rem;color:var(--white-soft);outline:none;color-scheme:dark;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(78,255,206,0.06);border-radius:8px;font-size:0.75rem;color:var(--aurora);">
+          ✓ 50 films en compétition · 4 jurys assignés
+        </div>
+        <button onclick="showToast('Phase 1 sauvegardée', 'ok')" style="margin-top:14px;width:100%;padding:9px;background:rgba(78,255,206,0.1);border:1px solid rgba(78,255,206,0.3);border-radius:8px;font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--aurora);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(78,255,206,0.18)'" onmouseout="this.style.background='rgba(78,255,206,0.1)'">Enregistrer les dates</button>
+      </div>
+
+      <!-- Phase 2 -->
+      <div style="background:var(--surface-2);border:1px solid rgba(192,132,252,0.2);border-radius:14px;padding:22px;">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--lavande);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Phase 2</div>
+        <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-bottom:4px;">Finale Top 5</div>
+        <div style="font-size:0.75rem;color:var(--mist);margin-bottom:18px;line-height:1.5;">Évaluation des 5 films finalistes. Session supplémentaire après délibération Phase 1.</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:6px;">Date d'ouverture</label>
+          <input type="date" value="2026-12-22" style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(192,132,252,0.25);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:0.85rem;color:var(--white-soft);outline:none;color-scheme:dark;">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:6px;">Date de clôture</label>
+          <input type="date" value="2026-12-28" style="width:100%;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;font-family:var(--font-mono);font-size:0.85rem;color:var(--white-soft);outline:none;color-scheme:dark;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(192,132,252,0.06);border-radius:8px;font-size:0.75rem;color:var(--lavande);">
+          ⏳ 5 finalistes · À confirmer après Phase 1
+        </div>
+        <button onclick="showToast('Phase 2 sauvegardée', 'ok')" style="margin-top:14px;width:100%;padding:9px;background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.3);border-radius:8px;font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--lavande);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(192,132,252,0.18)'" onmouseout="this.style.background='rgba(192,132,252,0.1)'">Enregistrer les dates</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ VUE SITE ══════ -->
+  <div class="content" id="view-site" style="display:none;max-width:720px;">
+
+    <!-- ── 1. Vidéo Hero ── -->
+    <div class="site-section">
+      <div class="site-section-header" onclick="toggleSiteSection('sec-video', this)">
+        <div class="site-section-icon ssi-video">🎬</div>
+        <div>
+          <div class="site-section-title">Vidéo Hero</div>
+          <div class="site-section-sub">Vidéo de fond affichée en plein écran sur la page d'accueil</div>
+        </div>
+        <span class="site-chevron open">▼</span>
+      </div>
+      <div class="site-section-body" id="sec-video">
+        <div class="video-preview">
+          <video src="../assets/ia3.mp4" autoplay muted loop playsinline></video>
+          <div class="video-preview-label">✓ Vidéo actuelle — ia1.mp4</div>
+        </div>
+        <div class="video-drop" onclick="document.getElementById('hero-video-input').click()">
+          <input type="file" id="hero-video-input" accept="video/mp4,video/quicktime" onchange="handleHeroVideo(this)">
+          <div class="video-drop-icon">📁</div>
+          <div class="video-drop-title">Remplacer la vidéo</div>
+          <div class="video-drop-sub">Glissez un fichier MP4 ou MOV · Recommandé : 1920×1080, max 200 Mo</div>
+        </div>
+        <button class="btn-save-site" onclick="showToast('✓ Vidéo hero mise à jour', 'ok')">Enregistrer la vidéo →</button>
+      </div>
+    </div>
+
+    <!-- ── 2. Informations du site ── -->
+    <div class="site-section">
+      <div class="site-section-header" onclick="toggleSiteSection('sec-info', this)">
+        <div class="site-section-icon ssi-info">ℹ️</div>
+        <div>
+          <div class="site-section-title">Informations du site</div>
+          <div class="site-section-sub">Titre, description, contact et réseaux sociaux</div>
+        </div>
+        <span class="site-chevron">▼</span>
+      </div>
+      <div class="site-section-body" id="sec-info" style="display:none;">
+        <label class="site-label">Nom du festival</label>
+        <input class="site-input" type="text" value="marsAI 2026" placeholder="Nom du festival">
+        <label class="site-label">Sous-titre / accroche</label>
+        <input class="site-input" type="text" value="Le premier festival mondial du film d'intelligence artificielle" placeholder="Accroche">
+        <label class="site-label">Description courte</label>
+        <textarea class="site-input site-textarea" placeholder="Présentation du festival…">Marseille accueille la première édition de marsAI, festival international dédié aux films créés par ou avec l'intelligence artificielle.</textarea>
+        <label class="site-label">Email de contact</label>
+        <input class="site-input" type="email" value="contact@marsai.fr" placeholder="contact@festival.fr">
+        <label class="site-label">Instagram</label>
+        <input class="site-input" type="text" value="@marsai.festival" placeholder="@compte">
+        <label class="site-label">Site web</label>
+        <input class="site-input" type="url" value="https://marsai.fr" placeholder="https://…">
+        <button class="btn-save-site" onclick="showToast('✓ Informations sauvegardées', 'ok')">Enregistrer les informations →</button>
+      </div>
+    </div>
+
+    <!-- ── 3. Calendrier ── -->
+    <div class="site-section">
+      <div class="site-section-header" onclick="toggleSiteSection('sec-cal', this)">
+        <div class="site-section-icon ssi-cal">📅</div>
+        <div>
+          <div class="site-section-title">Calendrier</div>
+          <div class="site-section-sub">Dates clés affichées publiquement sur le site</div>
+        </div>
+        <span class="site-chevron">▼</span>
+      </div>
+      <div class="site-section-body" id="sec-cal" style="display:none;">
+        <div class="cal-item">
+          <div><div class="cal-name">Ouverture des candidatures</div><div class="cal-sub">Formulaire de dépôt accessible</div></div>
+          <input type="date" class="cal-date" value="2026-03-01">
+          <div class="cal-toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="cal-item">
+          <div><div class="cal-name">Clôture des candidatures</div><div class="cal-sub">Fermeture du formulaire</div></div>
+          <input type="date" class="cal-date" value="2026-10-31">
+          <div class="cal-toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="cal-item">
+          <div><div class="cal-name">Phase 1 — Jury Top 50</div><div class="cal-sub">Évaluation première sélection</div></div>
+          <input type="date" class="cal-date" value="2026-12-12">
+          <div class="cal-toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="cal-item">
+          <div><div class="cal-name">Phase 2 — Jury Top 5</div><div class="cal-sub">Délibération finale</div></div>
+          <input type="date" class="cal-date" value="2026-12-22">
+          <div class="cal-toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="cal-item">
+          <div><div class="cal-name">Cérémonie de clôture</div><div class="cal-sub">Remise des prix — Marseille</div></div>
+          <input type="date" class="cal-date" value="2027-01-15">
+          <div class="cal-toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <button class="btn-save-site" onclick="showToast('✓ Calendrier mis à jour', 'ok')">Enregistrer le calendrier →</button>
+      </div>
+    </div>
+
+    <!-- ── 4. Jury · Page d'accueil ── -->
+    <div class="site-section">
+      <div class="site-section-header" onclick="toggleSiteSection('sec-jury', this)">
+        <div class="site-section-icon" style="background:rgba(78,255,206,0.08);border-color:rgba(78,255,206,0.18);">⚖️</div>
+        <div>
+          <div class="site-section-title">Jury · Page d'accueil</div>
+          <div class="site-section-sub">Membres du jury visibles sur la page d'accueil du site</div>
+        </div>
+        <span class="site-chevron">▼</span>
+      </div>
+      <div class="site-section-body" id="sec-jury" style="display:none;">
+        <p style="font-size:0.8rem;color:var(--mist);margin-bottom:6px;line-height:1.55;">
+          ⭐ <strong style="color:var(--white-soft);">Premier membre = carte vedette</strong> (Présidence du jury) sur la page d'accueil.<br>
+          Modifiez le nom, le rôle, la photo · Activez/désactivez la visibilité · Réorganisez l'ordre.
+        </p>
+        <div id="jury-admin-list" style="margin-top:14px;"></div>
+        <button class="btn-add-jury" onclick="addJuryMember()">+ Ajouter un membre du jury</button>
+        <button class="btn-save-site" onclick="saveJuryAdmin()">Enregistrer les modifications →</button>
+      </div>
+    </div>
+
+    <!-- ── 5. Partenaires & Sponsors ── -->
+    <div class="site-section">
+      <div class="site-section-header" onclick="toggleSiteSection('sec-sponsors', this)">
+        <div class="site-section-icon" style="background:rgba(245,230,66,0.07);border-color:rgba(245,230,66,0.2);">🤝</div>
+        <div>
+          <div class="site-section-title">Partenaires & Sponsors</div>
+          <div class="site-section-sub">Logos et liens affichés sur la page d'accueil</div>
+        </div>
+        <span class="site-chevron">▼</span>
+      </div>
+      <div class="site-section-body" id="sec-sponsors" style="display:none;">
+        <p style="font-size:0.8rem;color:var(--mist);margin-bottom:14px;line-height:1.55;">
+          3 niveaux disponibles : <strong style="color:var(--solar);">Sponsor Principal</strong> · <strong style="color:var(--white-soft);">Partenaire</strong> · Institutionnel.<br>
+          Cliquez sur l'icône logo pour changer l'image. Laissez le logo vide pour afficher le nom en texte.
+        </p>
+        <div id="sponsors-admin-list"></div>
+        <button class="btn-add-sponsor" onclick="addSponsor()">+ Ajouter un partenaire</button>
+        <button class="btn-save-site" onclick="saveSponsorsAdmin()">Enregistrer les modifications →</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════ MODALE CRÉER COMPTE ══════ -->
+<div class="modal-overlay" id="modal-create">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Créer un compte</div>
+      <button class="modal-close" onclick="closeModal('create')">✕</button>
+    </div>
+
+    <div class="form-field">
+      <label>Prénom & Nom</label>
+      <input type="text" id="new-name" placeholder="ex: Sophie Martin">
+    </div>
+    <div class="form-field">
+      <label>Adresse email</label>
+      <input type="email" id="new-email" placeholder="sophie.martin@email.com">
+    </div>
+    <div class="form-field">
+      <label>Rôle</label>
+      <div class="role-picker">
+        <div class="role-opt selected" id="opt-jury" onclick="selectRole('jury')">
+          <span class="ro-icon">⚖️</span>
+          <span class="ro-label">Jury</span>
+        </div>
+        <div class="role-opt modo" id="opt-modo" onclick="selectRole('moderateur')">
+          <span class="ro-icon">🛡️</span>
+          <span class="ro-label">Modérateur</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-info">
+      <strong>Lien de connexion permanent</strong> généré automatiquement à la création.<br>
+      Il sera envoyé à l'adresse email renseignée. Aucun mot de passe requis.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('create')">Annuler</button>
+      <button class="btn-confirm" onclick="createUser()">Créer & envoyer le lien →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MODALE ASSIGNATION ══════ -->
+<div class="modal-overlay" id="modal-assign">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="assign-modal-title">Assigner des films</div>
+        <div style="font-size:0.75rem;color:var(--mist);margin-top:3px;" id="assign-modal-sub">Sélectionnez les films à assigner</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('assign')">✕</button>
+    </div>
+    <div class="assign-list" id="assign-film-list"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('assign')">Annuler</button>
+      <button class="btn-confirm" onclick="saveAssign()">Enregistrer l'assignation →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DRAWER ASSIGNATION ══ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="film-drawer">
+  <div class="drawer-header">
+    <div style="flex:1;">
+      <div class="drawer-film-title" id="drawer-title">—</div>
+      <div class="drawer-film-sub" id="drawer-sub">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-player">
+    <video id="drawer-video" src="../assets/video.mp4" muted controls preload="none" style="width:100%;display:block;max-height:190px;object-fit:cover;"></video>
+  </div>
+  <div class="drawer-jury-section">
+    <div class="drawer-jury-header">
+      <span>Jury assigné</span>
+      <span class="drawer-count" id="drawer-count">0 / 0</span>
+    </div>
+    <input class="drawer-search" id="drawer-search" type="text" placeholder="🔍 Rechercher un juré…" oninput="filterDrawerJury(this.value)" autocomplete="off">
+    <div class="drawer-jury-list" id="drawer-jury-list"></div>
+  </div>
+</div>
+
+<!-- ══ MODALE COMMENTAIRES ══ -->
+<div class="modal-overlay-comments" id="modal-comments" onclick="if(event.target===this)closeCommentsModal()">
+  <div class="modal-comments">
+    <div class="mc-header">
+      <div style="flex:1;">
+        <div class="mc-title" id="mc-film-title">—</div>
+        <div class="mc-sub" id="mc-film-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeCommentsModal()">✕</button>
+    </div>
+    <div class="mc-body" id="mc-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Script principal du panneau d'administration -->
+<script src="../js/admin-panel.js"></script>
+
+<!-- ─── NAV MAQUETTE ─── -->
+  <div id="dev-nav">
+    <span class="dn-label">Maquette</span>
+    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-sep"></div>
+    <a href="admin-panel.html" class="dn-btn espace-admin active">🛡️ Espace Admin</a>
+    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
+  </div>
+</body>
+</html>

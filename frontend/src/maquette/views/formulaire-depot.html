@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Déposer mon film — marsAI 2026</title>
+
+  <!-- ============================================================
+       FEUILLES DE STYLE — tokens, reset, grain, nav maquette, formulaire
+       ============================================================ -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/grain.css">
+  <link rel="stylesheet" href="../css/dev-nav.css">
+  <link rel="stylesheet" href="../css/form.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER — logo marsAI + indicateur de sauvegarde + lien retour
+       ============================================================ -->
+  <header>
+    <div class="logo">mars<span class="ai">AI</span></div>
+    <div class="header-right">
+      <div class="save-indicator">
+        <span class="save-dot"></span>
+        Brouillon sauvegardé automatiquement
+      </div>
+      <a href="index.html" class="back-link">← Retour</a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       PAGE — grille 2 colonnes (sidebar + contenu)
+       ============================================================ -->
+  <div class="page-wrap">
+
+    <!-- ============================================================
+         SIDEBAR — titre, navigation par etapes, regles essentielles
+         ============================================================ -->
+    <aside class="form-sidebar">
+      <div class="form-title-block">
+        <div class="form-eyebrow">Dépôt de film</div>
+        <h1 class="form-main-title">Candidature marsAI 2026</h1>
+        <p class="form-main-sub">Thème : "Imaginez des futurs souhaitables"</p>
+      </div>
+
+      <div class="steps-nav" id="steps-nav">
+        <div class="step-nav-item active" data-step="1" onclick="goStep(1)">
+          <div class="sni-circle active" id="snc-1">1</div>
+          <div class="sni-text">
+            <div class="sni-title">Profil réalisateur</div>
+            <div class="sni-sub">Identité & contact</div>
+          </div>
+        </div>
+        <div class="step-nav-item locked" data-step="2" onclick="goStep(2)">
+          <div class="sni-circle pending" id="snc-2">2</div>
+          <div class="sni-text">
+            <div class="sni-title">Le Film</div>
+            <div class="sni-sub">Titre FR/EN, synopsis, vidéo</div>
+          </div>
+        </div>
+        <div class="step-nav-item locked" data-step="3" onclick="goStep(3)">
+          <div class="sni-circle pending" id="snc-3">3</div>
+          <div class="sni-text">
+            <div class="sni-title">Déclaration IA</div>
+            <div class="sni-sub">Type de prod. & outils</div>
+          </div>
+        </div>
+        <div class="step-nav-item locked" data-step="4" onclick="goStep(4)">
+          <div class="sni-circle pending" id="snc-4">4</div>
+          <div class="sni-text">
+            <div class="sni-title">Confirmation</div>
+            <div class="sni-sub">Récap & RGPD</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rules-block">
+        <h4>Règles essentielles</h4>
+        <div class="rule-item"><div class="rule-dot"></div><span>Durée : <strong>60 secondes</strong> pile</span></div>
+        <div class="rule-item"><div class="rule-dot"></div><span>Formats : <strong>MP4, MOV</strong></span></div>
+        <div class="rule-item"><div class="rule-dot"></div><span>Résolution min. : <strong>1920×1080</strong> · Ratio <strong>16:9</strong></span></div>
+        <div class="rule-item"><div class="rule-dot"></div><span>Taille : <strong>200 à 300 Mo</strong></span></div>
+        <div class="rule-item"><div class="rule-dot"></div><span>Plusieurs films par réalisateur <strong>autorisés</strong></span></div>
+        <div class="rule-item"><div class="rule-dot"></div><span>Ouverture : <strong>2 mois</strong>, fermeture auto</span></div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         CONTENU PRINCIPAL — panneaux des 4 etapes du formulaire
+         ============================================================ -->
+    <div class="form-content">
+
+      <!-- ============================================================
+           ETAPE 1 — Profil realisateur (identite, contact, adresse)
+           ============================================================ -->
+      <div class="step-panel active" id="step-1">
+        <div class="step-panel-header">
+          <div class="step-icon si-1">👤</div>
+          <div>
+            <h2>Profil réalisateur</h2>
+            <p>Informations d'identité et de contact — conservées 3 ans (RGPD)</p>
+          </div>
+        </div>
+
+        <!-- Civilité -->
+        <div class="field" style="margin-bottom:20px;">
+          <label class="field-label">Civilité <span class="req">● requis</span></label>
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="civilite" value="M" checked>
+              <span class="radio-card-dot"></span>M.
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="civilite" value="Mme">
+              <span class="radio-card-dot"></span>Mme
+            </label>
+          </div>
+        </div>
+
+        <div class="fields-grid col2">
+
+          <div class="field">
+            <label class="field-label">Prénom <span class="req">● requis</span></label>
+            <input type="text" id="f-prenom" placeholder="Marie" autocomplete="given-name">
+            <div class="field-error" id="err-prenom">Champ requis</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Nom <span class="req">● requis</span></label>
+            <input type="text" id="f-nom" placeholder="Fontaine" autocomplete="family-name">
+            <div class="field-error" id="err-nom">Champ requis</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Date de naissance <span class="req">● requis</span></label>
+            <input type="date" id="f-dob" autocomplete="bday" onchange="validateAge(this)">
+            <div class="field-hint">Vous devez avoir au moins 18 ans pour candidater</div>
+            <div class="field-error" id="err-dob">Vous devez avoir 18 ans révolus à la date de dépôt</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Métier actuel <span class="req">● requis</span></label>
+            <input type="text" id="f-metier" placeholder="ex : Réalisateur, Étudiant, Designer…" autocomplete="organization-title">
+            <div class="field-error" id="err-metier">Champ requis</div>
+          </div>
+
+          <div class="field span2">
+            <label class="field-label">Email de contact <span class="req">● requis</span></label>
+            <input type="email" id="f-email" placeholder="vous@exemple.com" autocomplete="email" value="marie.dupont@" class="err">
+            <div class="field-hint">Utilisé pour les notifications de sélection et la gestion de votre dossier</div>
+            <div class="field-error show" id="err-email">Adresse email invalide — vérifiez le format (ex : vous@domaine.com)</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Téléphone <span class="opt">(facultatif)</span></label>
+            <input type="tel" id="f-tel" placeholder="+33 1 00 00 00 00" autocomplete="tel-national">
+          </div>
+
+          <div class="field">
+            <label class="field-label">Mobile <span class="req">● requis</span></label>
+            <input type="tel" id="f-mobile" placeholder="+33 6 00 00 00 00" autocomplete="tel">
+            <div class="field-error" id="err-mobile">Numéro de mobile requis</div>
+          </div>
+
+        </div>
+
+        <hr class="section-sep">
+        <div class="section-title-inline">Adresse postale</div>
+
+        <div class="fields-grid" style="margin-bottom:12px;">
+          <div class="field">
+            <label class="field-label">Rue / Numéro <span class="req">● requis</span></label>
+            <input type="text" id="f-rue" placeholder="12 rue de la République" autocomplete="street-address">
+            <div class="field-error" id="err-rue">Champ requis</div>
+          </div>
+        </div>
+
+        <div class="fields-grid col3">
+          <div class="field">
+            <label class="field-label">Code postal <span class="req">● requis</span></label>
+            <input type="text" id="f-cp" placeholder="13001" autocomplete="postal-code" maxlength="10">
+            <div class="field-error" id="err-cp">Champ requis</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Ville <span class="req">● requis</span></label>
+            <input type="text" id="f-ville" placeholder="Marseille" autocomplete="address-level2">
+            <div class="field-error" id="err-ville">Champ requis</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Pays <span class="req">● requis</span></label>
+            <select id="f-pays" autocomplete="country">
+              <option value="">— Pays —</option>
+              <option value="FR">🇫🇷 France</option>
+              <option value="BE">🇧🇪 Belgique</option>
+              <option value="CH">🇨🇭 Suisse</option>
+              <option value="CA">🇨🇦 Canada</option>
+              <option value="MA">🇲🇦 Maroc</option>
+              <option value="TN">🇹🇳 Tunisie</option>
+              <option value="DZ">🇩🇿 Algérie</option>
+              <option value="SN">🇸🇳 Sénégal</option>
+              <option value="JP">🇯🇵 Japon</option>
+              <option value="US">🇺🇸 États-Unis</option>
+              <option value="GB">🇬🇧 Royaume-Uni</option>
+              <option value="DE">🇩🇪 Allemagne</option>
+              <option value="ES">🇪🇸 Espagne</option>
+              <option value="IT">🇮🇹 Italie</option>
+              <option value="BR">🇧🇷 Brésil</option>
+              <option value="IN">🇮🇳 Inde</option>
+              <option value="CN">🇨🇳 Chine</option>
+              <option value="AU">🇦🇺 Australie</option>
+              <option value="other">🌍 Autre pays</option>
+            </select>
+            <div class="field-error" id="err-pays">Sélectionnez votre pays</div>
+          </div>
+        </div>
+
+        <hr class="section-sep">
+        <div class="section-title-inline">Réseaux sociaux <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.7rem;color:var(--mist);opacity:0.8;">(facultatif — utilisés pour promouvoir votre film si sélectionné)</span></div>
+
+        <div class="social-grid">
+          <div class="social-input-wrap">
+            <span class="social-icon">▶</span>
+            <input type="text" class="social-input" id="f-youtube" placeholder="YouTube — @chaîne ou URL">
+          </div>
+          <div class="social-input-wrap">
+            <span class="social-icon">📸</span>
+            <input type="text" class="social-input" id="f-instagram" placeholder="Instagram — @votre_compte">
+          </div>
+          <div class="social-input-wrap">
+            <span class="social-icon" style="font-family:serif;font-weight:700;font-size:0.75rem;">in</span>
+            <input type="text" class="social-input" id="f-linkedin" placeholder="LinkedIn — profil ou URL">
+          </div>
+          <div class="social-input-wrap">
+            <span class="social-icon" style="font-weight:700;font-size:0.8rem;">f</span>
+            <input type="text" class="social-input" id="f-facebook" placeholder="Facebook — page ou URL">
+          </div>
+          <div class="social-input-wrap">
+            <span class="social-icon" style="font-weight:700;">𝕏</span>
+            <input type="text" class="social-input" id="f-xtwitter" placeholder="X / Twitter — @votre_compte">
+          </div>
+        </div>
+
+        <hr class="section-sep">
+
+        <div class="fields-grid col2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="field-label">Comment avez-vous connu marsAI ? <span class="opt">(facultatif)</span></label>
+            <select id="f-discovery">
+              <option value="">— Sélectionnez —</option>
+              <option value="rs">Réseaux sociaux</option>
+              <option value="presse">Presse / Média</option>
+              <option value="bouche">Bouche à oreille</option>
+              <option value="ecole">École / Université</option>
+              <option value="partenaire">Partenaire / Festival</option>
+              <option value="newsletter">Newsletter</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="rgpd-item" id="newsletter-item" onclick="this.classList.toggle('checked');document.getElementById('chk-newsletter').checked=this.classList.contains('checked');" style="cursor:pointer;">
+          <input type="checkbox" id="chk-newsletter" style="display:none;">
+          <div class="rgpd-box"></div>
+          <div class="rgpd-text">
+            <div class="rgpd-title">Newsletter marsAI <span class="opt">(facultatif)</span></div>
+            <div class="rgpd-sub">Je souhaite recevoir les actualités du festival, les annonces de résultats et les informations sur les prochaines éditions.</div>
+          </div>
+        </label>
+
+        <div class="step-nav-btns">
+          <div></div>
+          <button class="btn-next" onclick="nextStep(1)">Étape suivante — Le Film →</button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ETAPE 2 — Le Film (titre, synopsis, upload video, intention)
+           ============================================================ -->
+      <div class="step-panel" id="step-2">
+        <div class="step-panel-header">
+          <div class="step-icon si-2">🎬</div>
+          <div>
+            <h2>Le Film</h2>
+            <p>Titre, synopsis, fichier vidéo et note d'intention</p>
+          </div>
+        </div>
+
+        <div class="fields-grid col2">
+
+          <div class="field">
+            <label class="field-label">Titre original <span class="req">● requis</span></label>
+            <input type="text" id="f-titre" placeholder="Titre en français" maxlength="100" oninput="countChars(this,'cc-titre',100)">
+            <div class="char-counter" id="cc-titre">0 / 100</div>
+            <div class="field-error" id="err-titre">Champ requis</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Titre traduit en anglais <span class="req">● requis</span></label>
+            <input type="text" id="f-titre-en" placeholder="English title" maxlength="100" oninput="countChars(this,'cc-titre-en',100)">
+            <div class="char-counter" id="cc-titre-en">0 / 100</div>
+            <div class="field-error" id="err-titre-en">Champ requis</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Langue parlée du film <span class="req">● requis</span></label>
+            <select id="f-langue">
+              <option value="">— Sélectionnez —</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="en">🇬🇧 Anglais</option>
+              <option value="es">🇪🇸 Espagnol</option>
+              <option value="ar">🌍 Arabe</option>
+              <option value="de">🇩🇪 Allemand</option>
+              <option value="it">🇮🇹 Italien</option>
+              <option value="pt">🇧🇷 Portugais</option>
+              <option value="zh">🇨🇳 Mandarin</option>
+              <option value="ja">🇯🇵 Japonais</option>
+              <option value="sans">🔇 Sans dialogue (film muet)</option>
+              <option value="autre">Autre langue</option>
+            </select>
+            <div class="field-error" id="err-langue">Sélectionnez la langue du film</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Tags thématiques <span class="opt">(max 5, séparés par des virgules)</span></label>
+            <input type="text" id="f-tags" placeholder="ex: espoir, nature, technologie, solidarité…" maxlength="150">
+            <div class="field-hint">En lien avec le thème "Futurs souhaitables"</div>
+          </div>
+
+        </div>
+
+        <div class="fields-grid" style="margin-top:4px;">
+
+          <div class="field">
+            <label class="field-label">Synopsis en français <span class="req">● requis</span></label>
+            <textarea id="f-synopsis" rows="4" placeholder="Décrivez brièvement votre film en 2-3 phrases…" maxlength="300" oninput="countChars(this,'cc-synopsis',300)"></textarea>
+            <div class="char-counter" id="cc-synopsis">0 / 300</div>
+            <div class="field-error" id="err-synopsis">Champ requis</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Synopsis en anglais <span class="req">● requis</span></label>
+            <textarea id="f-synopsis-en" rows="4" placeholder="Briefly describe your film in 2-3 sentences…" maxlength="300" oninput="countChars(this,'cc-synopsis-en',300)"></textarea>
+            <div class="char-counter" id="cc-synopsis-en">0 / 300</div>
+            <div class="field-error" id="err-synopsis-en">English synopsis required</div>
+          </div>
+
+        </div>
+
+        <hr class="section-sep">
+        <div class="section-title-inline">Fichier vidéo</div>
+
+        <!-- Upload video — input cache, declenche programmatiquement -->
+        <input type="file" id="video-input" accept=".mp4,.mov,video/mp4,video/quicktime" onchange="handleVideo(this)" style="display:none;">
+
+        <div id="upload-zone-wrap">
+
+          <!-- ============================================================
+               ZONE DE DEPOT — glisser-deposer ou clic pour la video
+               ============================================================ -->
+          <div class="upload-zone" id="upload-zone"
+            ondragenter="onDragEnter(event)"
+            ondragover="onDragOver(event)"
+            ondragleave="onDragLeave(event)"
+            ondrop="onDrop(event)"
+            onclick="document.getElementById('video-input').click()">
+
+            <!-- Etat par defaut -->
+            <div id="uz-state-default">
+              <div class="uz-cloud">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--aurora)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 16 12 12 8 16"></polyline>
+                  <line x1="12" y1="12" x2="12" y2="21"></line>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                </svg>
+              </div>
+              <div class="uz-drop-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 16 12 12 8 16"></polyline>
+                  <line x1="12" y1="12" x2="12" y2="21"></line>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                </svg>
+                Glisser-déposer votre film
+              </div>
+              <div class="uz-or">— ou —</div>
+              <div class="uz-browse">Cliquer pour parcourir vos fichiers</div>
+              <div class="uz-specs">
+                <span class="uz-spec">MP4</span>
+                <span class="uz-spec">MOV</span>
+                <span class="uz-spec">200–300 Mo</span>
+                <span class="uz-spec">16:9</span>
+                <span class="uz-spec">60 sec pile</span>
+              </div>
+            </div>
+
+            <!-- Etat : fichier survole (dragover) -->
+            <div id="uz-state-drag" style="display:none;">
+              <div style="font-size:3.5rem;margin-bottom:16px;animation:uz-bounce 0.45s ease-in-out infinite alternate;filter:drop-shadow(0 4px 20px rgba(78,255,206,0.5));">⬇️</div>
+              <div style="font-size:1.15rem;font-weight:700;font-family:var(--font-display);color:var(--aurora);margin-bottom:8px;">Relâchez pour déposer</div>
+              <div style="font-size:0.82rem;color:rgba(78,255,206,0.7);">MP4 ou MOV — votre film va être analysé</div>
+            </div>
+
+            <!-- Etat : format refuse -->
+            <div id="uz-state-error" style="display:none;">
+              <div style="font-size:3.5rem;margin-bottom:16px;">🚫</div>
+              <div style="font-size:1.15rem;font-weight:700;font-family:var(--font-display);color:var(--coral);margin-bottom:8px;">Format non accepté</div>
+              <div style="font-size:0.82rem;color:rgba(255,107,107,0.8);">Uniquement MP4 ou MOV sont acceptés</div>
+            </div>
+
+          </div><!-- /upload-zone -->
+
+          <!-- ============================================================
+               FILE CARD — apercu du fichier apres selection
+               ============================================================ -->
+          <div class="file-card" id="file-card" style="display:none;margin-top:12px;">
+            <div class="file-card-header">
+              <div class="file-card-thumb">
+                <canvas id="video-thumb" width="192" height="108"></canvas>
+                <div class="file-card-thumb-ph" id="thumb-placeholder">🎬</div>
+              </div>
+              <div class="file-card-info">
+                <div class="file-card-name" id="preview-name">—</div>
+                <div class="file-card-meta">
+                  <span class="file-card-ext" id="preview-ext">—</span>
+                  <span class="file-card-size" id="preview-size">—</span>
+                  <span class="file-card-warn" id="preview-size-warn" style="display:none;">⚠ &gt; 300 Mo</span>
+                </div>
+              </div>
+              <button class="file-card-remove" onclick="resetVideoUpload(event)">✕ Changer</button>
+            </div>
+            <div class="file-card-progress">
+              <div class="file-card-bar-track">
+                <div class="file-card-bar-fill" id="up-bar" style="width:0%"></div>
+              </div>
+              <div class="file-card-status">
+                <span class="file-card-pct" id="up-pct">0%</span>
+                <span class="file-card-msg" id="up-msg">Upload en cours…</span>
+              </div>
+            </div>
+          </div><!-- /file-card -->
+
+        </div><!-- /upload-zone-wrap -->
+
+        <!-- Resultat de la verification de duree -->
+        <div class="duration-result" id="dur-result">
+          <div class="dur-icon" id="dur-icon">⏱️</div>
+          <div class="dur-text">
+            <div class="dur-value" id="dur-value">—</div>
+            <div class="dur-label" id="dur-label">Vérification de la durée…</div>
+          </div>
+        </div>
+        <div class="field-error" id="err-video" style="margin-top:8px;">Fichier vidéo requis</div>
+
+        <hr class="section-sep">
+
+        <div class="fields-grid">
+          <div class="field">
+            <label class="field-label">Note d'intention <span class="req">● requis</span></label>
+            <textarea id="f-intention" rows="5"
+              placeholder="Comment votre film s'inscrit-il dans le thème "Imaginez des futurs souhaitables" ? Décrivez votre démarche artistique et votre rapport à l'IA…"
+              maxlength="1000" oninput="countChars(this,'cc-intention',1000)"></textarea>
+            <div class="char-counter" id="cc-intention">0 / 1000</div>
+            <div class="field-hint">Cette note est lue par le jury lors de la présélection</div>
+            <div class="field-error" id="err-intention">La note d'intention est requise</div>
+          </div>
+        </div>
+
+        <div class="step-nav-btns">
+          <button class="btn-prev" onclick="prevStep(2)">← Retour</button>
+          <button class="btn-next" onclick="nextStep(2)">Étape suivante — Fiche IA →</button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ETAPE 3 — Declaration IA (classification, outils, sous-titres)
+           ============================================================ -->
+      <div class="step-panel" id="step-3">
+        <div class="step-panel-header">
+          <div class="step-icon si-3">🤖</div>
+          <div>
+            <h2>Déclaration d'Usage de l'IA</h2>
+            <p>Type de production, outils utilisés et sous-titres</p>
+          </div>
+        </div>
+
+        <!-- Classification IA -->
+        <div class="field" style="margin-bottom:24px;">
+          <label class="field-label">Type de production IA <span class="req">● requis</span></label>
+          <div class="ia-class-cards">
+            <label class="ia-class-card">
+              <input type="radio" name="ia-class" value="full" checked>
+              <div class="ia-class-dot"></div>
+              <div>
+                <div class="ia-class-title">Génération intégrale</div>
+                <div class="ia-class-desc">Le film a été entièrement généré par IA, sans éléments filmés, dessinés ou enregistrés par un humain. Textes, images, sons et montage sont tous issus d'outils IA.</div>
+                <span class="ia-class-badge badge-full">100% IA</span>
+              </div>
+            </label>
+            <label class="ia-class-card">
+              <input type="radio" name="ia-class" value="hybrid">
+              <div class="ia-class-dot"></div>
+              <div>
+                <div class="ia-class-title">Production hybride</div>
+                <div class="ia-class-desc">Le film combine des éléments humains (tournage, dessin, voix, musique composée) et des outils IA utilisés en post-production ou en complément créatif.</div>
+                <span class="ia-class-badge badge-hybrid">Hybride IA + Humain</span>
+              </div>
+            </label>
+          </div>
+          <div class="field-error" id="err-ia-class">Sélectionnez le type de production</div>
+        </div>
+
+        <hr class="section-sep">
+        <div class="section-title-inline">Outils utilisés</div>
+
+        <!-- Outils IA -->
+        <div class="field">
+          <label class="field-label">Outils IA — images ou vidéo <span class="req">● requis</span></label>
+          <input type="text" id="img-other" placeholder="ex : Runway ML, Sora, Midjourney…">
+          <div class="field-error" id="err-ia-img">Champ requis</div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Outils IA — son & musique <span class="opt">(facultatif)</span></label>
+          <input type="text" id="son-other" placeholder="ex : Suno AI, ElevenLabs, MusicGen…">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Outils IA — scénario & écriture <span class="opt">(facultatif)</span></label>
+          <input type="text" id="sc-other" placeholder="ex : ChatGPT, Claude, Mistral…">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Outils IA — post-production <span class="opt">(facultatif)</span></label>
+          <input type="text" id="post-other" placeholder="ex : Topaz Video AI, CapCut AI…">
+        </div>
+
+        <hr class="section-sep">
+        <div class="section-title-inline">Sous-titres</div>
+
+        <!-- Avertissement sous-titres -->
+        <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(245,230,66,0.04);border:1px solid rgba(245,230,66,0.18);border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">⚠️</span>
+          <div style="font-size:0.8rem;color:var(--mist);line-height:1.6;">
+            <strong style="color:var(--solar);display:block;margin-bottom:3px;">Ne pas incruster les sous-titres dans la vidéo</strong>
+            Fournissez-les en fichier séparé (SRT ou VTT). Le festival les applique dynamiquement sur la plateforme de diffusion, permettant au spectateur de les activer ou désactiver.
+          </div>
+        </div>
+
+        <!-- Upload sous-titres FR -->
+        <div class="subtitle-upload" id="sub-fr-zone" onclick="">
+          <input type="file" id="sub-fr" accept=".srt,.vtt" onchange="handleSubtitle(this,'sub-fr-status')">
+          <div class="sub-icon">💬</div>
+          <div class="sub-text">
+            <div class="sub-title">Sous-titres Français <span class="req">● requis</span></div>
+            <div class="sub-sub">Formats SRT ou VTT</div>
+          </div>
+          <div class="sub-status" id="sub-fr-status">+ Ajouter</div>
+        </div>
+        <div class="field-error" id="err-sub-fr" style="margin-top:6px;margin-bottom:4px;">Sous-titres français requis</div>
+
+        <!-- Upload sous-titres EN -->
+        <div class="subtitle-upload" style="margin-top:8px;">
+          <input type="file" id="sub-en" accept=".srt,.vtt" onchange="handleSubtitle(this,'sub-en-status')">
+          <div class="sub-icon">🌐</div>
+          <div class="sub-text">
+            <div class="sub-title">Sous-titres Anglais <span class="req">● requis</span></div>
+            <div class="sub-sub">Formats SRT ou VTT</div>
+          </div>
+          <div class="sub-status" id="sub-en-status">+ Ajouter</div>
+        </div>
+        <div class="field-error" id="err-sub-en" style="margin-top:6px;">Sous-titres anglais requis</div>
+
+        <div class="step-nav-btns">
+          <button class="btn-prev" onclick="prevStep(3)">← Retour</button>
+          <button class="btn-next" onclick="nextStep(3)">Étape suivante — Confirmation →</button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ETAPE 4 — Confirmation (recapitulatif, RGPD, soumission)
+           ============================================================ -->
+      <div class="step-panel" id="step-4">
+        <div class="step-panel-header">
+          <div class="step-icon si-4">✅</div>
+          <div>
+            <h2>Confirmation & Droits</h2>
+            <p>Vérifiez votre dossier, acceptez les conditions et soumettez</p>
+          </div>
+        </div>
+
+        <!-- Recapitulatif -->
+        <div class="recap-block">
+          <div class="recap-header">Récapitulatif du dossier</div>
+          <div class="recap-body">
+            <div class="recap-row">
+              <span class="recap-key">Réalisateur</span>
+              <span class="recap-val" id="rc-nom">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Date de naissance</span>
+              <span class="recap-val" id="rc-dob">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Email</span>
+              <span class="recap-val mono" id="rc-email">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Mobile</span>
+              <span class="recap-val mono" id="rc-mobile">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Ville / Pays</span>
+              <span class="recap-val" id="rc-pays">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Titre du film (FR)</span>
+              <span class="recap-val" id="rc-titre">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Titre (EN)</span>
+              <span class="recap-val" id="rc-titre-en">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Durée</span>
+              <span class="recap-val ok" id="rc-dur">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Type de production</span>
+              <span class="recap-val" id="rc-ia-class">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Outils IA image</span>
+              <span class="recap-val" id="rc-tools">—</span>
+            </div>
+            <div class="recap-row">
+              <span class="recap-key">Sous-titres</span>
+              <span class="recap-val" id="rc-subs">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RGPD et droits (checkbox bloquante) -->
+        <div class="section-title-inline">Conditions obligatoires</div>
+        <div class="rgpd-checks">
+
+          <div class="rgpd-item" id="rgpd-1" onclick="toggleRgpd('rgpd-1')">
+            <input type="checkbox" id="chk-rgpd1">
+            <div class="rgpd-box"></div>
+            <div class="rgpd-text">
+              <div class="rgpd-title">Cession de droits de diffusion <span class="req">● obligatoire</span></div>
+              <div class="rgpd-sub">J'accorde à marsAI et à ses partenaires (La Plateforme, Mobile Film Festival) le droit de diffuser, projeter et archiver mon film dans le cadre du festival et de sa plateforme en ligne, pour une durée de 5 ans.</div>
+            </div>
+          </div>
+
+          <div class="rgpd-item" id="rgpd-2" onclick="toggleRgpd('rgpd-2')">
+            <input type="checkbox" id="chk-rgpd2">
+            <div class="rgpd-box"></div>
+            <div class="rgpd-text">
+              <div class="rgpd-title">Conformité RGPD <span class="req">● obligatoire</span></div>
+              <div class="rgpd-sub">J'accepte que mes données personnelles (nom, email, pays) soient conservées 3 ans après le festival conformément au RGPD, puis supprimées ou anonymisées. Je peux exercer mes droits d'accès et de suppression à tout moment.</div>
+            </div>
+          </div>
+
+          <div class="rgpd-item" id="rgpd-3" onclick="toggleRgpd('rgpd-3')">
+            <input type="checkbox" id="chk-rgpd3">
+            <div class="rgpd-box"></div>
+            <div class="rgpd-text">
+              <div class="rgpd-title">Originalité de l'œuvre <span class="req">● obligatoire</span></div>
+              <div class="rgpd-sub">Je certifie être l'auteur ou co-auteur de ce film, que celui-ci n'a pas été soumis à un autre festival concurrent, et que l'usage des outils IA déclarés est exact et complet.</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="rgpd-req-note" id="rgpd-warn">Vous devez accepter toutes les conditions pour soumettre votre film.</div>
+
+        <div class="step-nav-btns">
+          <button class="btn-prev" onclick="prevStep(4)">← Retour</button>
+          <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+            🎬 Soumettre mon film
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ECRAN DE SUCCES — confirmation + validation YouTube
+           ============================================================ -->
+      <div class="success-screen" id="success-screen">
+
+        <!-- En-tete dossier -->
+        <div class="success-ring">🎬</div>
+        <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;margin-bottom:8px;">Dossier enregistré !</h2>
+        <p style="color:var(--mist);font-size:0.88rem;margin-bottom:0;">Votre film a été reçu. Une confirmation a été envoyée à votre adresse validée.</p>
+
+        <div class="success-dossier">
+          📄 Dossier n° <span id="dossier-num">MAI-2026-00000</span>
+        </div>
+
+        <p style="color:var(--mist);font-size:0.82rem;margin-bottom:24px;">
+          Email de confirmation envoyé à <strong id="confirm-email" style="color:var(--white-soft)">—</strong>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;margin-left:8px;color:var(--aurora);background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.2);border-radius:20px;padding:2px 10px;">✓ Email vérifié (OTP)</span>
+        </p>
+
+        <!-- Validation YouTube — etat en attente -->
+        <div id="yt-pending" style="max-width:480px;margin:0 auto 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:16px;overflow:hidden;">
+          <div style="background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 20px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1rem;">▶️</span>
+            <span style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);">Validation YouTube API</span>
+            <span id="yt-status-badge" style="margin-left:auto;font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(245,230,66,0.1);border:1px solid rgba(245,230,66,0.25);color:var(--solar);">⏳ En cours…</span>
+          </div>
+          <div style="padding:20px;">
+            <!-- Barre de progression YouTube -->
+            <div style="margin-bottom:14px;">
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--mist);margin-bottom:6px;">
+                <span id="yt-step-label">Upload sur la chaîne YouTube sécurisée…</span>
+                <span id="yt-pct" style="font-family:var(--font-mono);">0%</span>
+              </div>
+              <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+                <div id="yt-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#FF0000,#FF4444);border-radius:2px;transition:width 0.3s;"></div>
+              </div>
+            </div>
+            <!-- Etapes de controle -->
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="yt-check-item" id="ytc-upload">
+                <span class="yt-check-icon">⏳</span>
+                <span class="yt-check-label">Upload vidéo</span>
+              </div>
+              <div class="yt-check-item" id="ytc-copyright">
+                <span class="yt-check-icon" style="opacity:0.3;">○</span>
+                <span class="yt-check-label" style="opacity:0.4;">Vérification copyright Content ID</span>
+              </div>
+              <div class="yt-check-item" id="ytc-policy">
+                <span class="yt-check-icon" style="opacity:0.3;">○</span>
+                <span class="yt-check-label" style="opacity:0.4;">Analyse contenu (politique YouTube)</span>
+              </div>
+              <div class="yt-check-item" id="ytc-confirm">
+                <span class="yt-check-icon" style="opacity:0.3;">○</span>
+                <span class="yt-check-label" style="opacity:0.4;">Confirmation et indexation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultat : APPROUVE -->
+        <div id="yt-approved" style="display:none;max-width:480px;margin:0 auto 24px;background:rgba(78,255,206,0.05);border:1px solid rgba(78,255,206,0.2);border-radius:16px;padding:20px 24px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(78,255,206,0.1);border:1.5px solid rgba(78,255,206,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">✓</div>
+            <div>
+              <div style="font-weight:700;color:var(--aurora);font-size:0.95rem;">Film validé par YouTube</div>
+              <div style="font-size:0.75rem;color:var(--mist);margin-top:2px;">Aucune violation détectée — votre film est en compétition</div>
+            </div>
+          </div>
+          <div class="success-steps" style="margin:0;">
+            <div class="ss-item"><span class="ss-icon">⏳</span>Présélection jury — résultats sous 1 mois</div>
+            <div class="ss-item"><span class="ss-icon">📢</span>Les 50 finalistes annoncés à J+90</div>
+            <div class="ss-item"><span class="ss-icon">🏆</span>Cérémonie à Marseille · Mars.AI Night</div>
+          </div>
+        </div>
+
+        <!-- Resultat : REJETE par YouTube -->
+        <div id="yt-rejected" style="display:none;max-width:480px;margin:0 auto 24px;">
+          <div style="background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.25);border-radius:16px;padding:20px 24px;margin-bottom:16px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,107,107,0.1);border:1.5px solid rgba(255,107,107,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">✗</div>
+              <div>
+                <div style="font-weight:700;color:var(--coral);font-size:0.95rem;">Film rejeté par YouTube</div>
+                <div style="font-size:0.75rem;color:var(--mist);margin-top:2px;" id="yt-reject-reason">Violation de la politique de contenu détectée</div>
+              </div>
+            </div>
+            <div style="font-size:0.8rem;color:var(--mist);line-height:1.65;border-top:1px solid rgba(255,107,107,0.12);padding-top:14px;">
+              Votre film n'a pas pu être publié car YouTube a détecté un contenu non conforme à sa politique (contenu inapproprié, violation de droits d'auteur, etc.).
+            </div>
+          </div>
+
+          <!-- Apercu de l'email envoye -->
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;">
+            <div style="background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.07);padding:12px 18px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:0.9rem;">✉️</span>
+              <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mist);">Email envoyé automatiquement à</span>
+              <span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--aurora);" id="yt-reject-email">—</span>
+            </div>
+            <!-- Corps de l'email -->
+            <div style="padding:20px 22px;font-size:0.82rem;line-height:1.75;color:var(--mist);">
+              <div style="font-weight:700;color:var(--white-soft);margin-bottom:12px;font-size:0.88rem;">Objet : [marsAI 2026] Votre film nécessite une nouvelle soumission — Dossier <span id="yt-reject-dossier">MAI-2026-XXXXX</span></div>
+              <p>Bonjour <strong id="yt-reject-prenom" style="color:var(--white-soft);">—</strong>,</p>
+              <br>
+              <p>Nous avons bien reçu votre film <em id="yt-reject-titre" style="color:var(--white-soft);">"—"</em> (dossier <span id="yt-reject-dossier2">MAI-2026-XXXXX</span>).</p>
+              <br>
+              <p>Malheureusement, lors de la mise en ligne sur notre plateforme de diffusion, YouTube a automatiquement détecté un contenu non conforme :</p>
+              <div style="margin:12px 0;padding:10px 14px;background:rgba(255,107,107,0.06);border-left:3px solid var(--coral);border-radius:4px;color:var(--coral);font-size:0.8rem;" id="yt-reject-detail">
+                Violation détectée : Contenu inapproprié
+              </div>
+              <p>Votre dossier reste enregistré. Vous pouvez soumettre une nouvelle version de votre film en utilisant le lien ci-dessous :</p>
+              <br>
+              <div style="text-align:center;margin:16px 0;">
+                <div style="display:inline-block;background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.25);border-radius:10px;padding:10px 22px;font-family:var(--font-mono);font-size:0.78rem;color:var(--aurora);">
+                  🔗 Lien de re-soumission (données pré-remplies, valable 7 jours)
+                </div>
+              </div>
+              <p style="font-size:0.78rem;opacity:0.7;">Ce lien contient toutes les informations de votre dossier original. Vous n'aurez qu'à remplacer le fichier vidéo.</p>
+              <br>
+              <p>Pour toute question : <a href="mailto:contact@marsai.fr" style="color:var(--aurora);">contact@marsai.fr</a></p>
+              <br>
+              <p>Cordialement,<br><strong style="color:var(--white-soft);">L'équipe marsAI</strong><br><span style="font-size:0.75rem;opacity:0.6;">La Plateforme × Mobile Film Festival</span></p>
+            </div>
+          </div>
+
+          <!-- Bouton re-soumission -->
+          <div style="text-align:center;margin-top:16px;">
+            <a href="formulaire-depot.html" style="display:inline-flex;align-items:center;gap:8px;background:var(--aurora);color:var(--deep-sky);padding:12px 28px;border-radius:10px;font-weight:700;font-size:0.88rem;text-decoration:none;">
+              ↺ Soumettre une nouvelle version
+            </a>
+          </div>
+        </div>
+
+        <!-- Bouton retour -->
+        <a href="index.html" style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 24px;font-size:0.85rem;color:var(--mist);text-decoration:none;margin-top:8px;">← Retour au site</a>
+
+        <!-- [MAQUETTE] Simuler le resultat YouTube -->
+        <div style="margin-top:32px;padding:16px 20px;background:rgba(192,132,252,0.05);border:1px dashed rgba(192,132,252,0.2);border-radius:12px;font-size:0.75rem;color:var(--mist);text-align:left;max-width:480px;margin-left:auto;margin-right:auto;">
+          <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lavande);margin-bottom:10px;">⬡ Mode maquette — simuler la réponse YouTube</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="simulateYouTube('approved')" style="background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.25);border-radius:8px;padding:7px 16px;font-size:0.78rem;color:var(--aurora);cursor:pointer;font-family:var(--font-body);">✓ Simuler : Approuvé</button>
+            <button onclick="simulateYouTube('copyright')" style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);border-radius:8px;padding:7px 16px;font-size:0.78rem;color:var(--coral);cursor:pointer;font-family:var(--font-body);">✗ Simuler : Copyright</button>
+            <button onclick="simulateYouTube('content')" style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);border-radius:8px;padding:7px 16px;font-size:0.78rem;color:var(--coral);cursor:pointer;font-family:var(--font-body);">✗ Simuler : Contenu interdit</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /form-content -->
+  </div><!-- /page-wrap -->
+
+  <!-- ============================================================
+       DEV NAV — barre de navigation maquette (bas de page)
+       ============================================================ -->
+  <div id="dev-nav">
+    <span class="dn-label">Maquette</span>
+    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-sep"></div>
+    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
+    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
+  </div>
+
+  <!-- ============================================================
+       SCRIPT PRINCIPAL — logique du formulaire multi-etapes
+       ============================================================ -->
+  <script src="../js/formulaire-depot.js"></script>
+</body>
+</html>

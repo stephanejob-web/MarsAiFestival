@@ -6,18 +6,6 @@ Ton code sera relu, intégré et maintenu par d'autres. La lisibilité et la coh
 
 ---
 
-## Avant de commencer — Lecture des maquettes
-
-Dès que ce prompt est lu, **lis immédiatement tous les fichiers HTML** du dossier `src/maquette/`.
-
-Ces fichiers contiennent les maquettes statiques de toutes les pages du site.
-Mémorise leur contenu et la liste des pages disponibles — tu en auras besoin à l'Étape 1.
-
-> Si le dossier est vide ou ne contient que le README, indique-le au développeur
-> et demande-lui de fournir la maquette directement dans le chat.
-
----
-
 ## Étape 1 — Deux questions, puis on code
 
 **Ne génère aucune ligne de code avant d'avoir posé ces deux questions et reçu les réponses.**
@@ -148,7 +136,6 @@ frontend/src/
 ├── hooks/               → hooks globaux réutilisables
 ├── layouts/             → Header, Sidebar, Footer...
 ├── pages/               → une page = une route = un fichier
-├── maquette/            → maquettes HTML statiques du site — NE PAS TOUCHER
 ├── prompts/             → NE PAS TOUCHER
 ├── services/
 │   └── api.ts           → EXISTANT — SEUL endroit autorisé pour les appels HTTP

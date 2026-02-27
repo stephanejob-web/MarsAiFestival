@@ -1,0 +1,56 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/getting-started/configure-coderabbit
+
+language: "fr-FR"
+
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "develop"
+      - "main"
+
+  profile: "assertive"
+
+  poem: false
+  collapse_walkthrough: false
+
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+    - "!build/**"
+    - "!coverage/**"
+    - "!*.lock"
+    - "!package-lock.json"
+
+  path_instructions:
+    - path: "frontend/**/*.tsx"
+      instructions: |
+        - Vérifier que le composant est fonctionnel (pas de classe)
+        - Vérifier TypeScript strict : pas de any, typer tous les props
+        - Pas de inline styles, utiliser les classes CSS existantes
+        - Vérifier la présence de tests unitaires associés
+        - Réutiliser les composants existants dans /frontend/components
+        - Vérifier que le composant correspond à la maquette HTML dans /mockups
+
+    - path: "frontend/**/*.test.tsx"
+      instructions: |
+        - Vérifier que les tests couvrent le rendu, les interactions et les cas d'erreur
+        - Pas de tests vides ou triviaux
+
+    - path: "backend/**/*.ts"
+      instructions: |
+        - Vérifier la sécurité : pas d'injection SQL, pas de données sensibles exposées
+        - Vérifier la gestion des erreurs sur chaque route
+        - TypeScript strict : pas de any
+        - Valider et sanitizer tous les inputs utilisateur
+        - Vérifier que les routes sont protégées si nécessaire
+
+    - path: "backend/**/*.test.ts"
+      instructions: |
+        - Vérifier que les routes API sont testées (200, 400, 401, 404, 500)
+        - Vérifier les cas limites et les cas d'erreur
+
+chat:
+  auto_reply: true

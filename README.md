@@ -23,8 +23,18 @@ Le dossier racine contient un seul `package.json` qui orchestre les deux. Avec u
 - **Backend** : Express.js, TypeScript, ts-node-dev
 - **Base de données** : MySQL
 - **Architecture** : MVC (backend)
+- **Conteneurisation** : Docker + Docker Compose
 
 ## Prérequis
+
+### Option A — Avec Docker (recommandé)
+
+- [Docker](https://docs.docker.com/get-docker/) v24 ou supérieur
+- [Docker Compose](https://docs.docker.com/compose/install/) v2 ou supérieur
+
+> Pour vérifier : `docker --version` et `docker compose version`
+
+### Option B — Sans Docker
 
 - [Node.js](https://nodejs.org/) v18 ou supérieur
 - npm v9 ou supérieur
@@ -43,7 +53,38 @@ git clone <url-du-repo>
 cd MarsAiFestival
 ```
 
-### 2. Configurer les variables d'environnement
+### Option A — Avec Docker (recommandé)
+
+#### 2. Installer les dépendances localement (pour l'IDE)
+
+```bash
+npm install
+```
+
+> Cette étape installe les `node_modules` en local **uniquement pour VSCode** (autocompletion TypeScript, ESLint, Prettier).
+> Docker utilise ses propres `node_modules` séparés — il n'y a aucun conflit.
+
+#### 3. Lancer le projet
+
+```bash
+docker compose up --build
+```
+
+> Les fois suivantes, `docker compose up` suffit (pas besoin de `--build`).
+> Rebuilder uniquement si `package.json` change : `docker compose up --build`
+
+Pour arrêter :
+
+```bash
+docker compose down        # arrêter les containers
+docker compose down -v     # arrêter + supprimer les données MySQL
+```
+
+**Hot reload inclus** : modifie un fichier dans `frontend/src/` ou `backend/src/` → les changements sont appliqués instantanément, sans rebuild.
+
+### Option B — Sans Docker
+
+#### 2. Configurer les variables d'environnement
 
 ```bash
 cp backend/.env.example backend/.env
@@ -63,7 +104,7 @@ DB_PASSWORD=ton_mot_de_passe
 
 > Le fichier `.env` est ignoré par Git. Ne jamais le committer.
 
-### 3. Installer les dépendances
+#### 3. Installer les dépendances
 
 ```bash
 npm install
@@ -71,7 +112,7 @@ npm install
 
 > Installe tout en une fois : le backend et le frontend.
 
-### 4. Lancer le projet
+#### 4. Lancer le projet
 
 ```bash
 npm start
@@ -79,10 +120,13 @@ npm start
 
 Ouvre ensuite `http://localhost:5173` dans ton navigateur.
 
+### Ports
+
 | Service  | URL                   |
 |----------|-----------------------|
 | Frontend | http://localhost:5173 |
 | Backend  | http://localhost:5500 |
+| MySQL    | localhost:33060 (Docker uniquement) |
 
 ## Qualité du code
 
@@ -140,6 +184,10 @@ MarsAiFestival/
 │       └── index.ts         # point d'entrée
 ├── frontend/
 │   └── src/                 # composants React
+├── Dockerfile.backend       # image Docker backend (dev)
+├── Dockerfile.frontend      # image Docker frontend (dev)
+├── docker-compose.yml       # orchestration des 3 services
+├── .dockerignore            # fichiers exclus du build Docker
 ├── .prettierrc              # règles de formatage
 ├── package.json             # scripts racine
 └── README.md

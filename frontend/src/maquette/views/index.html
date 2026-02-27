@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>marsAI — Concours International de Courts-Métrages IA</title>
+
+  <!-- ============================================================
+       FEUILLES DE STYLES
+       ============================================================ -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/grain.css">
+  <link rel="stylesheet" href="../css/index.css">
+
+  <!-- ============================================================
+       SCRIPTS EXTERNES — GSAP + Three.js ImportMap
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ============================================================
+       CANVAS THREE.JS — Arrière-plan 3D (sphère interactive)
+       ============================================================ -->
+  <canvas id="webgl-canvas" aria-hidden="true"></canvas>
+
+  <!-- ============================================================
+       NAVIGATION PRINCIPALE
+       ============================================================ -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#home" class="logo">mars<span class="ai">AI</span></a>
+      <ul class="nav-links">
+        <li><a href="#concours"  class="nav-item" data-section="concours">Le Concours</a></li>
+        <li><a href="#programme" class="nav-item" data-section="programme">Programme</a></li>
+        <li><a href="#films"     class="nav-item" data-section="films">Films</a></li>
+        <li><a href="#jury"      class="nav-item" data-section="jury">Le Jury</a></li>
+        <li><a href="#palmares"  class="nav-item" data-section="palmares">Les Prix</a></li>
+        <li><a href="#presse"    class="nav-item" data-section="presse">Contact</a></li>
+        <li><a href="login-jury.html" class="nav-jury"><span class="nav-jury-dot"></span>Espace Jury</a></li>
+        <li><a class="btn-nav" href="formulaire-depot.html">Soumettre un film</a></li>
+        <li>
+          <div class="lang-switch">
+            <button id="btn-fr" class="lang-btn active" onclick="setLang('fr')" title="Français">FR</button>
+            <span class="lang-sep">╱</span>
+            <button id="btn-en" class="lang-btn" onclick="setLang('en')" title="English">EN</button>
+          </div>
+        </li>
+      </ul>
+      <!-- Menu hamburger mobile -->
+      <div class="nav-mobile-right">
+        <div class="lang-switch">
+          <button class="lang-btn active" onclick="setLang('fr')" title="Français">FR</button>
+          <span class="lang-sep">╱</span>
+          <button class="lang-btn" onclick="setLang('en')" title="English">EN</button>
+        </div>
+        <button class="nav-burger" id="nav-burger" onclick="toggleMenu()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       PANNEAU MENU MOBILE
+       ============================================================ -->
+  <div class="nav-panel" id="nav-panel">
+    <a href="#concours"  class="nav-panel-link" onclick="closeMenu()">Le Concours</a>
+    <a href="#programme" class="nav-panel-link" onclick="closeMenu()">Programme</a>
+    <a href="#films"     class="nav-panel-link" onclick="closeMenu()">Films</a>
+    <a href="#jury"      class="nav-panel-link" onclick="closeMenu()">Le Jury</a>
+    <a href="#palmares"  class="nav-panel-link" onclick="closeMenu()">Les Prix</a>
+    <a href="#presse"    class="nav-panel-link" onclick="closeMenu()">Contact</a>
+    <div class="nav-panel-sep"></div>
+    <a href="login-jury.html" class="nav-panel-link nav-panel-jury">
+      <span style="width:5px;height:5px;border-radius:50%;background:var(--aurora);display:inline-block;flex-shrink:0;"></span>
+      Espace Jury
+    </a>
+    <a href="formulaire-depot.html" class="nav-panel-cta" onclick="closeMenu()">
+      Soumettre un film →
+    </a>
+  </div>
+
+  <!-- ============================================================
+       HERO — Section d'accueil avec titre, partenaires et player
+       ============================================================ -->
+  <section class="hero" id="home">
+    <div class="aurora-bg"></div>
+    <div class="hero-canvas-bg"></div>
+
+    <div class="hero-content">
+
+      <!-- Colonne gauche — texte principal -->
+      <div class="hero-left">
+
+        <!-- Partenaires -->
+        <div class="hero-partners">
+          <span class="hero-partners-label">Une co-création</span>
+          <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="hero-partners-logo">
+            <img src="../assets/logo-laplateforme.png" alt="La Plateforme · Coding School">
+          </a>
+          <span class="hero-partners-sep">&</span>
+          <span class="hero-partners-name">Mobile Film Festival</span>
+        </div>
+
+        <!-- Badge concours -->
+        <div class="hero-badge">Festival International · Première Édition · Marseille 2026</div>
+
+        <!-- Titre marque -->
+        <h1 class="hero-title">
+          mars<span class="gradient-text">AI</span>
+        </h1>
+
+        <!-- Description claire — ce que c'est -->
+        <p class="hero-desc">
+          <strong>Le premier festival mondial du cinéma généré par intelligence artificielle.</strong>
+        </p>
+
+        <!-- Tags essentiels -->
+        <div class="hero-tags">
+          <span class="tag"><strong>60s</strong> chrono</span>
+          <span class="tag"><strong>120+</strong> pays</span>
+          <span class="tag"><strong>100%</strong> gratuit</span>
+          <span class="tag"><strong>Prix</strong> Marseille</span>
+        </div>
+
+        <!-- Accroche + CTA -->
+        <div class="hero-accroche">
+          <p class="hero-accroche-title">
+            Voici ce qu'une IA peut créer.<br>
+            <span style="color:var(--aurora);">Imaginez ce que vous allez faire.</span>
+          </p>
+          <div class="hero-cta">
+            <a href="formulaire-depot.html" class="btn-primary">
+              Soumettre un film <span class="arrow">→</span>
+            </a>
+            <button class="btn-demo" onclick="window.open('../assets/video.mp4','_blank')">
+              Démo
+              <span class="btn-demo-laser"></span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /hero-left -->
+
+      <!-- Colonne droite — Marseille + countdown -->
+      <div class="hero-right">
+        <div class="hero-city">Marseille</div>
+        <div class="countdown-inline">
+          <span class="countdown-label">Clôture des dépôts · 30 sept. 2026</span>
+          <div class="countdown-units">
+            <div class="countdown-unit">
+              <span class="countdown-num" id="days">217</span>
+              <div class="countdown-lbl">Jours</div>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="hours">08</span>
+              <div class="countdown-lbl">Heures</div>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="minutes">33</span>
+              <div class="countdown-lbl">Minutes</div>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="seconds">47</span>
+              <div class="countdown-lbl">Secondes</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /hero-right -->
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONCEPT — Présentation des 3 piliers du concours
+       ============================================================ -->
+  <section class="concept" id="concours">
+
+    <!-- Robot IA — haut à droite -->
+    <div class="robot-wrap reveal" data-delay="2">
+      <img class="robot-img" src="../assets/Robot2.png" alt="" loading="lazy">
+    </div>
+
+    <div class="section-inner">
+      <div class="section-label reveal">Le Concept</div>
+      <h2 class="section-title reveal" data-delay="1">Une contrainte absolue,<br>une liberté totale</h2>
+      <p class="section-desc reveal" data-delay="2">marsAI est un concours international de courts-métrages d'une minute intégralement générés par IA. Co-organisé par <strong style="color:var(--white-soft)">La Plateforme</strong> et le <strong style="color:var(--white-soft)">Mobile Film Festival</strong>. L'humain reste au cœur de la création.</p>
+
+      <div class="concept-grid">
+        <div class="concept-card reveal" data-delay="3">
+          <span class="concept-num">1'</span>
+          <div class="concept-card-title">1 Minute, 1 Film</div>
+          <p>La règle d'or : 60 secondes pile. Chaque seconde compte pour raconter quelque chose qui dure.</p>
+        </div>
+        <div class="concept-card reveal" data-delay="4">
+          <span class="concept-num">IA</span>
+          <div class="concept-card-title">L'humain au cœur de l'IA</div>
+          <p>Scénario, génération image/vidéo, post-production — tous les outils IA sont documentés. Un réalisateur peut soumettre plusieurs films.</p>
+        </div>
+        <div class="concept-card reveal" data-delay="5">
+          <span class="concept-num">50</span>
+          <div class="concept-card-title">Films en compétition</div>
+          <p>Le jury sélectionne 50 œuvres parmi 20 000 candidatures. Grand Prix, Prix du Jury, Prix du Public — modèle Cannes avec bourses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       MANIFESTE — Déclaration d'intention avec fond shader WebGL
+       ============================================================ -->
+  <section class="manifeste-section">
+
+    <!-- Image d'arrière-plan + Canvas shader WebGL (chargé paresseusement) -->
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5b2b94ae-4a0b-458d-b838-58b0fb5fadfd_3840w.webp" alt="" class="manifeste-bg-img">
+    <canvas id="manifeste-shader-canvas"></canvas>
+    <div class="manifeste-overlay"></div>
+
+    <!-- Contenu -->
+    <div class="manifeste-inner">
+
+      <div class="m-fade" style="transition-delay:0s">
+        <span class="manifeste-line dim">Le cinéma a été inventé en 1895.</span>
+      </div>
+
+      <div class="m-fade" style="transition-delay:0.15s">
+        <span class="manifeste-line dim">Pendant 130 ans, la caméra était la seule voie.</span>
+      </div>
+
+      <div class="manifeste-sep m-fade" style="transition-delay:0.35s"></div>
+
+      <div class="m-fade" style="transition-delay:0.5s">
+        <span class="manifeste-line"><span class="hl-aurora">L'IA générative</span> vient de tout réinventer.</span>
+      </div>
+
+      <div class="m-fade" style="transition-delay:0.65s">
+        <span class="manifeste-line">Et <span class="hl-solar">vous</span> êtes au bord de cette révolution.</span>
+      </div>
+
+      <div class="m-fade manifeste-sub" style="transition-delay:0.9s">
+        Sora, Runway, Kling, Pika, Stable Video, ComfyUI…<br>
+        Les outils existent. La question n'est plus <em>comment</em>.<br>
+        <strong style="color:var(--white-soft);">La question est : qu'avez-vous à dire en 60 secondes ?</strong>
+      </div>
+
+      <div class="manifeste-tools m-fade" style="transition-delay:1.1s">
+        <span class="manifeste-tool">Sora</span>
+        <span class="manifeste-tool">Runway</span>
+        <span class="manifeste-tool">Kling</span>
+        <span class="manifeste-tool">Pika</span>
+        <span class="manifeste-tool">Stable Video</span>
+        <span class="manifeste-tool">ComfyUI</span>
+        <span class="manifeste-tool">+ tous les autres</span>
+      </div>
+
+    </div><!-- /manifeste-inner -->
+
+  </section>
+
+  <!-- Shader WebGL du manifeste (chargé paresseusement, mis en pause hors écran) -->
+  <script src="../js/index-shader.js"></script>
+
+  <!-- ============================================================
+       COMPTEURS ANIMÉS — Chiffres-clés du festival
+       ============================================================ -->
+  <section class="counters-section">
+    <div class="counters-grid">
+      <div class="counter-item">
+        <span class="counter-num c-aurora" data-target="20000" data-suffix="">0</span>
+        <div class="counter-label">Candidatures attendues</div>
+      </div>
+      <div class="counter-item">
+        <span class="counter-num c-solar" data-target="120" data-suffix="+">0</span>
+        <div class="counter-label">Pays représentés</div>
+      </div>
+      <div class="counter-item">
+        <span class="counter-num c-lavande" data-target="50" data-suffix="">0</span>
+        <div class="counter-label">Films finalistes</div>
+      </div>
+      <div class="counter-item">
+        <span class="counter-num c-white" data-target="60" data-suffix="s">0</span>
+        <div class="counter-label">Secondes pour tout dire</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       À PROPOS — Événement, programme et lieu (Marseille 2026)
+       ============================================================ -->
+  <section class="about" id="programme">
+    <div class="aurora-bg" style="opacity:0.5"></div>
+    <div class="section-inner">
+      <div class="about-inner">
+        <div class="about-text">
+          <div class="section-label reveal">L'Événement · Marseille 2026</div>
+          <h2 class="section-title reveal" data-delay="1">Vivez la naissance<br>d'un nouveau cinéma</h2>
+          <p class="section-desc reveal" data-delay="2">Trois jours aux Friches Belle de Mai — une ancienne manufacture industrielle transformée en capitale culturelle. Salles de projection, lumières basses, jury international, et sur scène : les créateurs qui réinventent le 7e art avec l'IA. Vous y serez.</p>
+
+          <!-- Programme -->
+          <div class="event-programme">
+
+            <div class="prog-item reveal">
+              <span class="prog-dot" style="background:var(--aurora)"></span>
+              <div>
+                <div class="prog-day">Vendredi soir — Ouverture</div>
+                <div class="prog-desc">Séance inaugurale & cocktail de bienvenue · 120+ pays représentés</div>
+                <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+                  <span style="font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.18);color:var(--aurora);">🎤 Conférence d'ouverture</span>
+                  <span style="font-size:0.68rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--mist);">Free access</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="prog-item reveal">
+              <span class="prog-dot" style="background:var(--lavande)"></span>
+              <div>
+                <div class="prog-day">Samedi — Deux journées de conférences</div>
+                <div class="prog-desc">Projections publiques · Village IA & démos live · Tables rondes</div>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:10px;background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.12);border-radius:8px;padding:8px 12px;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;">👤</div>
+                    <div>
+                      <div style="font-size:0.78rem;font-weight:700;color:var(--white-soft);">Speaker à confirmer</div>
+                      <div style="font-size:0.68rem;color:var(--mist);">IA & Cinéma — Keynote</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.12);border-radius:8px;padding:8px 12px;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;">👤</div>
+                    <div>
+                      <div style="font-size:0.78rem;font-weight:700;color:var(--white-soft);">Speaker à confirmer</div>
+                      <div style="font-size:0.68rem;color:var(--mist);">Création générative — Panel</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="prog-item reveal">
+              <span class="prog-dot" style="background:var(--solar)"></span>
+              <div>
+                <div class="prog-day">Dimanche — Gala de clôture</div>
+                <div class="prog-desc">Délibérations du jury · Cérémonie des Prix marsAI · Bourses</div>
+              </div>
+            </div>
+
+            <!-- Mars.AI Night — mise en avant -->
+            <div class="prog-item" style="margin-top:4px;">
+              <span class="prog-dot" style="background:var(--coral)"></span>
+              <div style="background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,rgba(192,132,252,0.06) 100%);border:1px solid rgba(255,107,107,0.18);border-radius:12px;padding:14px 16px;width:100%;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <span style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--coral);">✦ Événement exclusif</span>
+                </div>
+                <div class="prog-day" style="font-size:1rem;color:var(--white-soft);">Mars.AI Night 🌙</div>
+                <div class="prog-desc" style="margin-top:4px;">Soirée de gala · Remise des prix · Performances live IA · DJ set génératif</div>
+                <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;padding:4px 12px;border-radius:20px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);color:var(--coral);">🎟 Sur invitation</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;">
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">50</div>
+              <div class="stat-label">Films en compétition</div>
+            </div>
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">120+</div>
+              <div class="stat-label">Pays représentés</div>
+            </div>
+            <div class="stat-chip" style="flex:1;min-width:110px;">
+              <div class="stat-value">Gratuit</div>
+              <div class="stat-label">Accès public</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-visual">
+          <div class="venue-card">
+            <div class="venue-map">
+              <iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=5.3536%2C43.2864%2C5.3936%2C43.3064&layer=mapnik&marker=43.2964%2C5.3736"
+                loading="lazy"
+                title="Carte La Plateforme — Marseille"
+              ></iframe>
+              <div class="venue-map-overlay">
+                <span class="venue-pin">📍</span>
+                <div class="venue-coords-badge">43°17'47"N — 5°22'25"E</div>
+              </div>
+            </div>
+            <div class="venue-info">
+              <div class="venue-name">La Plateforme</div>
+              <div class="venue-address">Friches Belle de Mai · Marseille, 13003</div>
+              <div class="venue-tags">
+                <span class="venue-tag">🎬 Projections officielles</span>
+                <span class="venue-tag">🤖 Démos IA live</span>
+                <span class="venue-tag">🌍 Jury international</span>
+              </div>
+              <a href="https://www.google.com/maps/search/?api=1&query=La+Plateforme+Friches+Belle+de+Mai+Marseille" target="_blank" class="venue-btn">
+                ↗ Ouvrir l'itinéraire
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       APPEL À PROJETS — Formulaire de soumission
+       ============================================================ -->
+  <section id="soumettre" style="padding: 100px 0 0; background: rgba(10,15,46,0.88);">
+    <div class="cta-section">
+      <div class="cta-block">
+        <div class="cta-left">
+          <div class="section-label reveal">Appel à Projets</div>
+          <h2 class="section-title reveal" data-delay="1" style="max-width: 440px;">Votre film a sa place ici</h2>
+          <ul class="cta-requirements">
+            <li>Durée : <strong>60 secondes pile</strong></li>
+            <li>IA entière ou hybride — documentée dans la fiche IA</li>
+            <li>Formats : <strong>MP4 ou MOV</strong> · 200 à 300 Mo · Ratio 16:9</li>
+            <li>Plusieurs films par réalisateur acceptés</li>
+            <li>Groupes autorisés — 1 réalisateur référent pour les droits</li>
+            <li>Ouvert à 120+ pays · Gratuit · Sous-titres FR et EN bienvenus</li>
+          </ul>
+        </div>
+        <div class="cta-right">
+          <div class="deadline-badge">
+            <div class="label">Clôture des dépôts</div>
+            <div class="date">30 septembre 2026</div>
+          </div>
+          <a href="formulaire-depot.html" class="btn-cta-main">60 secondes pour changer le cinéma →</a>
+          <span class="cta-free">Participation gratuite · Toutes nationalités</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       COMMENT ÇA MARCHE — Tunnel de dépôt en 4 étapes
+       ============================================================ -->
+  <section class="how-section">
+    <div class="section-inner">
+
+      <div class="how-header">
+        <div class="section-label reveal">Dépôt de film</div>
+        <h2 class="section-title reveal" data-delay="1">Comment ça marche ?</h2>
+        <p class="section-desc reveal" data-delay="2" style="max-width:520px;margin:0 auto;">Un tunnel guidé en 4 étapes — de votre profil à la soumission finale. Moins de 10 minutes.</p>
+      </div>
+
+      <div class="how-steps">
+
+        <div class="how-card reveal" data-delay="1">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-1">👤</div>
+            <div class="how-step-num">01</div>
+          </div>
+          <div class="how-title">Profil réalisateur</div>
+          <p class="how-desc">Renseignez votre identité, pays de résidence et email de contact. Un seul référent pour les droits d'auteur.</p>
+          <span class="how-tag ht-1">Identité & contact</span>
+        </div>
+
+        <div class="how-card reveal" data-delay="2">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-2">🎬</div>
+            <div class="how-step-num">02</div>
+          </div>
+          <div class="how-title">Le Film</div>
+          <p class="how-desc">Déposez votre court-métrage de 60 secondes. La durée est vérifiée automatiquement côté client et serveur.</p>
+          <span class="how-tag ht-2">Titre · Synopsis · Vidéo</span>
+        </div>
+
+        <div class="how-card reveal" data-delay="3">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-3">🤖</div>
+            <div class="how-step-num">03</div>
+          </div>
+          <div class="how-title">Fiche IA</div>
+          <p class="how-desc">Documentez les outils d'IA utilisés — image/vidéo obligatoire, son, scénario et post-production en option.</p>
+          <span class="how-tag ht-3">Outils · Sous-titres FR/EN</span>
+        </div>
+
+        <div class="how-card reveal" data-delay="4">
+          <div class="how-num-wrap">
+            <div class="how-circle hc-4">✅</div>
+            <div class="how-step-num">04</div>
+          </div>
+          <div class="how-title">Confirmation</div>
+          <p class="how-desc">Récapitulatif complet, acceptation des droits RGPD et soumission. Vous recevez un numéro de dossier instantanément.</p>
+          <span class="how-tag ht-4">RGPD · Dossier MAI-2026</span>
+        </div>
+
+      </div>
+
+      <div class="how-cta fade-in">
+        <a href="formulaire-depot.html" class="btn-primary">
+          Montrez votre vision du futur
+          <span class="arrow">→</span>
+        </a>
+        <p style="margin-top:14px;font-size:0.78rem;color:var(--mist);">Participation gratuite · Ouvert à 120+ pays · Clôture le 30 sept. 2026</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       GALERIE FILMS — Sélection officielle marsAI 2026
+       ============================================================ -->
+  <section class="gallery-section" id="films">
+    <div class="section-inner">
+      <div class="gallery-header">
+        <div>
+          <div class="section-label reveal">Sélection Officielle marsAI 2026</div>
+          <h2 class="section-title reveal" data-delay="1" style="margin-bottom:0">50 Films · Imaginez des futurs souhaitables</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+          <div class="gallery-filters">
+            <span class="filter-chip active" onclick="setFilter(this)">Tous</span>
+            <span class="filter-chip" onclick="setFilter(this)">IA Pure</span>
+            <span class="filter-chip" onclick="setFilter(this)">Hybride</span>
+          </div>
+          <div style="font-size:0.75rem;color:var(--mist);">20 films / page · Pagination</div>
+        </div>
+      </div>
+
+      <div class="films-grid">
+        <!-- Film 1 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇫🇷</span> Léa Fontaine</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Rêves de Silicium</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 2 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇹🇳</span> Amira Ben Said</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">L'Enfant-Pixel</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 3 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-3"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇯🇵</span> Kenji Ito</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Archipel 2048</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 4 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-4"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇪🇸</span> Carlos Ruiz</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Mémoire Vive</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 5 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-5"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇮🇳</span> Priya Mehta</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Les Nouveaux Soleils</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 6 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-6"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇸🇳</span> Omar Diallo</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Frontières Douces</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 7 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-7"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇸🇪</span> Sofia Ek</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Vague Numérique</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 8 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-8"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇨🇳</span> Lin Wei</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Jardin des Codes</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 9 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-9"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇧🇷</span> Yuki Tanaka</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Cartographie</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 10 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1" style="filter:hue-rotate(40deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇩🇪</span> Mia Schultz</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Horizon Zéro</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 11 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2" style="filter:hue-rotate(120deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇰🇷</span> Ji-young Park</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Résonance Digitale</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 12 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-3" style="filter:hue-rotate(60deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇧🇷</span> Valentina Costa</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Archipel d'Âmes</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 13 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-4" style="filter:hue-rotate(180deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇲🇦</span> Yasmine El Fassi</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Lumière Artificielle</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 14 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-5" style="filter:hue-rotate(90deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇺🇸</span> Alex Chen</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Demain Commence</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 15 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-6" style="filter:hue-rotate(45deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇮🇹</span> Marco Ferretti</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Ombres Portées</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 16 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-7" style="filter:hue-rotate(210deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇳🇬</span> Chioma Adeyemi</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Racines Futures</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 17 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-8" style="filter:hue-rotate(150deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇷🇺</span> Anastasia Volkov</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Code Vivant</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 18 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-9" style="filter:hue-rotate(90deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇦🇺</span> Noah Williams</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Le Dernier Pixel</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+        <!-- Film 19 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-1" style="filter:hue-rotate(200deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇵🇱</span> Maja Kowalski</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Entre les Lignes</div>
+            <div class="film-badges"><span class="badge badge-image">IA Pure</span></div>
+          </div>
+        </div>
+        <!-- Film 20 -->
+        <div class="film-card fade-in">
+          <div class="film-thumb">
+            <div class="film-thumb-bg fc-bg-2" style="filter:hue-rotate(270deg)"><div class="film-thumb-play">▶</div></div>
+            <span class="film-duration">1:00</span>
+          </div>
+          <div class="film-meta">
+            <div class="film-author"><span class="film-flag">🇲🇽</span> Diego Hernández</div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);margin-bottom:6px;line-height:1.3;">Futur Passé</div>
+            <div class="film-badges"><span class="badge badge-hybride">Hybride</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:48px;">
+        <button onclick="this.style.opacity=1" style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">←</button>
+        <button style="width:36px;height:36px;background:var(--aurora);border:none;border-radius:8px;color:var(--deep-sky);font-weight:700;font-size:0.85rem;cursor:pointer;">1</button>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">2</button>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">3</button>
+        <span style="color:var(--mist);font-size:0.85rem;">…</span>
+        <span style="font-size:0.75rem;color:var(--mist);margin-left:8px;font-family:var(--font-mono);">20 films / page · 3 pages</span>
+        <button style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">→</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       MARS.AI NIGHT — Soirée de gala et cérémonie de clôture
+       ============================================================ -->
+  <section class="marsnight-section" id="marsnight">
+    <div class="marsnight-bg"></div>
+
+    <div class="marsnight-content">
+      <div class="marsnight-eyebrow">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--coral);display:inline-block;animation:pulse-dot 1.6s ease-in-out infinite;"></span>
+        Événement exclusif · Sur invitation
+      </div>
+
+      <h2 class="marsnight-title">
+        La nuit où le cinéma<br>
+        bascule dans l'<span class="glow-coral">ère IA</span>.
+      </h2>
+
+      <p class="marsnight-desc">
+        Dimanche soir, Marseille s'illumine.<br>
+        Le jury délibère. Les prix sont remis.<br>
+        Les créateurs montent sur scène.<br>
+        <strong style="color:var(--white-soft);">C'est la Mars.AI Night.</strong>
+      </p>
+
+      <div class="marsnight-details">
+        <div class="marsnight-detail">🌙 Gala de clôture</div>
+        <div class="marsnight-detail">📍 Marseille · Friches Belle de Mai</div>
+        <div class="marsnight-detail">🎬 Cérémonie des Prix marsAI</div>
+        <div class="marsnight-detail">🎶 DJ set génératif live</div>
+        <div class="marsnight-detail">🌍 Jury international</div>
+      </div>
+
+      <a href="formulaire-depot.html" class="marsnight-cta">
+        Soumettre mon film · Être dans la course
+      </a>
+
+      <p style="margin-top:20px;font-size:0.78rem;color:rgba(136,146,176,0.6);">
+        Les 50 finalistes sont invités à la cérémonie · Participation gratuite
+      </p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       JURY — Président(e) et membres du jury international
+       ============================================================ -->
+  <section class="jury-section" id="jury">
+    <div class="section-inner">
+      <div class="section-label reveal">Jury International · marsAI 2026</div>
+      <h2 class="section-title reveal" data-delay="1">Le Jury</h2>
+      <p class="section-desc reveal" data-delay="2" style="margin-bottom:52px;">Des créateurs, artistes et personnalités du cinéma venus du monde entier pour évaluer les œuvres en compétition.</p>
+
+      <!-- Carte vedette (président·e) -->
+      <div id="jury-featured-wrap" class="reveal" data-delay="3"></div>
+
+      <!-- Grille des membres -->
+      <div class="jury-grid reveal" data-delay="4" id="jury-grid"></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================
+       PALMARÈS — Grand Prix et prix secondaires (modèle Cannes)
+       ============================================================ -->
+  <section class="palmares-section" id="palmares">
+    <div class="section-inner">
+      <div class="section-label reveal" style="text-align:center;margin-bottom:14px;">Palmarès · Modèle Cannes</div>
+      <h2 class="section-title reveal" data-delay="1" style="text-align:center;margin-bottom:16px;">Les Prix marsAI</h2>
+      <p class="palmares-intro">Bourses et récompenses décernées par le jury international au terme des projections officielles.</p>
+
+      <!-- Grand Prix -->
+      <div class="award-grand reveal" data-delay="2">
+        <div class="award-grand-shine"></div>
+        <div class="award-grand-icon">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 3L21.8 13.1H32.6L24 19.4L27.2 29.5L18 23.2L8.8 29.5L12 19.4L3.4 13.1H14.2L18 3Z" fill="rgba(245,230,66,0.85)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="award-eyebrow">✦ Prix Principal · marsAI 2026</div>
+          <div class="award-grand-name">Grand Prix</div>
+          <div class="award-grand-desc">Meilleur film toutes catégories — décerné par le jury international à l'issue des délibérations finales de la cérémonie de clôture.</div>
+          <div class="award-bourse">✦ Bourse de création · Remise lors du Gala</div>
+        </div>
+      </div>
+
+      <!-- Prix secondaires -->
+      <div class="awards-secondary">
+        <div class="award-card award-jury reveal" data-delay="3">
+          <div class="award-icon">⚖️</div>
+          <div class="award-name">Prix du Jury</div>
+          <div class="award-desc">Coup de cœur artistique — sélection spéciale décernée par le jury international.</div>
+        </div>
+        <div class="award-card award-public reveal" data-delay="4">
+          <div class="award-icon">🌍</div>
+          <div class="award-name">Prix du Public</div>
+          <div class="award-desc">Vote ouvert en ligne pendant le festival — le public désigne son film favori.</div>
+        </div>
+        <div class="award-card award-innov reveal" data-delay="5">
+          <div class="award-icon">🤖</div>
+          <div class="award-name">Prix Innovation IA</div>
+          <div class="award-desc">Usage le plus audacieux et créatif de l'intelligence artificielle dans la création.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SPONSORS — Partenaires et soutiens institutionnels
+       ============================================================ -->
+  <section class="sponsors-section" id="sponsors-section">
+    <div class="sponsors-inner">
+      <div class="sponsors-eyebrow">Ils soutiennent marsAI 2026</div>
+      <div id="sponsors-display"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PIED DE PAGE — Liens, co-organisateurs et mentions
+       ============================================================ -->
+  <footer id="presse">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">mars<span class="ai">AI</span></span>
+        <p class="footer-desc">Le premier concours international de courts-métrages d'une minute intégralement générés par IA. 120+ pays. "Imaginez des futurs souhaitables."</p>
+      </div>
+      <div class="footer-col">
+        <h4>Festival</h4>
+        <ul class="footer-links">
+          <li><a href="#concours">Le Concept</a></li>
+          <li><a href="#programme">Programme</a></li>
+          <li><a href="login-jury.html">Jury</a></li>
+          <li><a href="https://laplateforme.io" target="_blank">La Plateforme</a></li>
+          <li><a href="#presse">Presse</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Films</h4>
+        <ul class="footer-links">
+          <li><a href="#films">Galerie</a></li>
+          <li><a href="#palmares">Palmarès</a></li>
+          <li><a href="formulaire-depot.html">Soumettre</a></li>
+          <li><a href="#">Règlement</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul class="footer-links">
+          <li><a href="mailto:contact@marsai.fr">contact@marsai.fr</a></li>
+          <li><a href="https://instagram.com/marsaifestival" target="_blank">Instagram</a></li>
+          <li><a href="https://linkedin.com/company/marsai-festival" target="_blank">LinkedIn</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Co-organisateurs -->
+    <div class="footer-partners">
+      <span class="footer-partners-label">Co-organisé par</span>
+      <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="footer-partners-logo">
+        <img src="../assets/logo-laplateforme.png" alt="La Plateforme · Coding School">
+      </a>
+      <span class="footer-partners-sep">×</span>
+      <span class="footer-partners-name">Mobile Film Festival</span>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 marsAI · Une co-création La Plateforme × Mobile Film Festival</span>
+      <span style="font-family:var(--font-mono);font-size:0.72rem;">Imaginez des futurs souhaitables · Première Édition</span>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS PRINCIPAUX — Logique métier et interactions
+       ============================================================ -->
+  <script src="../js/index-main.js"></script>
+  <script type="module" src="../js/index-sphere.js"></script>
+
+
+</body>
+</html>

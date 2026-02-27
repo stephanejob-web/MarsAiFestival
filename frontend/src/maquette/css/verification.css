@@ -1,0 +1,660 @@
+/* ================================================================
+   FICHIER — verification.css
+   Styles de la page de vérification email (OTP).
+   Layout 2 colonnes : visuel festival + formulaire.
+   ================================================================ */
+
+/* ─── LAYOUT PRINCIPAL — Grille 2 colonnes ─── */
+body {
+  background: var(--deep-sky);
+  color: var(--white-soft);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+}
+
+/* ─── PANNEAU GAUCHE — Visuel festival ─── */
+.panel-left {
+  position: relative;
+  background: var(--horizon);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 48px;
+  overflow: hidden;
+}
+
+/* Lueurs animées du panneau gauche */
+.panel-left::before {
+  content: "";
+  position: absolute;
+  top: -30%; left: -20%;
+  width: 90%; height: 90%;
+  background: radial-gradient(ellipse, rgba(78,255,206,0.15) 0%, transparent 65%);
+  animation: glow1 10s ease-in-out infinite alternate;
+}
+.panel-left::after {
+  content: "";
+  position: absolute;
+  bottom: -20%; right: -20%;
+  width: 70%; height: 70%;
+  background: radial-gradient(ellipse, rgba(192,132,252,0.12) 0%, transparent 65%);
+  animation: glow2 13s ease-in-out infinite alternate;
+}
+@keyframes glow1 { from { transform: translate(0,0) scale(1); } to { transform: translate(4%,6%) scale(1.1); } }
+@keyframes glow2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-4%,-6%) scale(1.15); } }
+
+/* Logo */
+.left-logo {
+  position: relative; z-index: 2;
+}
+.left-logo .logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.left-logo .logo-text span { color: var(--aurora); }
+
+/* ─── Héros festival (citation + visuel) ─── */
+.left-hero {
+  position: relative; z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.left-pretitle {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--aurora);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.left-pretitle::before {
+  content: "";
+  width: 32px; height: 1px;
+  background: var(--aurora);
+}
+.left-big-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 4vw, 4.2rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+}
+.left-big-title .grad {
+  background: linear-gradient(135deg, var(--aurora) 0%, var(--lavande) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.left-desc {
+  font-size: 0.9rem;
+  color: var(--mist);
+  line-height: 1.65;
+  max-width: 340px;
+  margin-bottom: 40px;
+}
+
+/* ─── Cartes flottantes ─── */
+.left-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.left-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  backdrop-filter: blur(10px);
+}
+.left-card-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.lci-1 { background: rgba(78,255,206,0.1); }
+.lci-2 { background: rgba(192,132,252,0.1); }
+.lci-3 { background: rgba(245,230,66,0.1); }
+.left-card-text .lct-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+.left-card-text .lct-sub   { font-size: 0.75rem; color: var(--mist); }
+.left-card-check {
+  margin-left: auto;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(78,255,206,0.15);
+  border: 1px solid rgba(78,255,206,0.3);
+  color: var(--aurora);
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Pied de page du panneau gauche */
+.left-footer {
+  position: relative; z-index: 2;
+  font-size: 0.72rem;
+  color: var(--mist);
+  opacity: 0.5;
+}
+
+/* ─── PANNEAU DROIT — Formulaire ─── */
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 64px;
+  position: relative;
+  overflow-y: auto;
+  background: var(--deep-sky);
+}
+
+.right-back {
+  position: absolute;
+  top: 28px; left: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--mist);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.right-back:hover { color: var(--white-soft); }
+
+.form-box {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ─── INDICATEUR D'ETAPES ─── */
+.steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 44px;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.step-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: all 0.4s var(--ease);
+  flex-shrink: 0;
+}
+.step-circle.done {
+  background: var(--aurora);
+  color: var(--deep-sky);
+}
+.step-circle.active {
+  background: var(--aurora);
+  color: var(--deep-sky);
+  box-shadow: 0 0 0 4px rgba(78,255,206,0.15);
+}
+.step-circle.pending {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--mist);
+}
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+.step-label.active-label { color: var(--white-soft); }
+.step-label.dim { color: var(--mist); opacity: 0.5; }
+.step-connector {
+  flex: 1;
+  height: 1px;
+  margin: 0 12px;
+  background: rgba(255,255,255,0.08);
+  transition: background 0.5s;
+}
+.step-connector.done { background: var(--aurora); }
+
+/* ─── VUES (affichage conditionnel) ─── */
+.view { display: none; }
+.view.active {
+  display: block;
+  animation: slideUp 0.45s var(--ease);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── TITRES DU FORMULAIRE ─── */
+.form-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.form-subtitle {
+  font-size: 0.88rem;
+  color: var(--mist);
+  line-height: 1.6;
+  margin-bottom: 36px;
+}
+.form-subtitle strong { color: var(--white-soft); }
+
+/* ─── CHAMP EMAIL ─── */
+.field-wrap { margin-bottom: 16px; }
+.field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 8px;
+  display: block;
+}
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+.input-email {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 15px 18px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--white-soft);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input-email::placeholder { color: var(--mist); opacity: 0.5; }
+.input-email:focus {
+  border-color: rgba(78,255,206,0.5);
+  box-shadow: 0 0 0 4px rgba(78,255,206,0.08);
+  background: rgba(78,255,206,0.03);
+}
+.input-email.valid {
+  border-color: rgba(78,255,206,0.4);
+}
+.input-email.error {
+  border-color: rgba(255,107,107,0.55);
+  box-shadow: 0 0 0 4px rgba(255,107,107,0.07);
+}
+.field-msg {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  min-height: 18px;
+  transition: color 0.2s;
+}
+.field-msg.err { color: var(--coral); }
+.field-msg.ok  { color: var(--aurora); }
+
+/* ─── BOUTON PRINCIPAL ─── */
+.btn-main {
+  width: 100%;
+  background: var(--aurora);
+  color: var(--deep-sky);
+  border: none;
+  border-radius: 12px;
+  padding: 15px 24px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.btn-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+.btn-main:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(78,255,206,0.4);
+}
+.btn-main:active:not(:disabled) { transform: translateY(0); }
+.btn-main:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-main.loading { color: transparent; }
+.btn-main.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(10,15,46,0.25);
+  border-top-color: var(--deep-sky);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Bouton accent solaire (succès) */
+.btn-solar {
+  width: 100%;
+  background: linear-gradient(135deg, var(--solar) 0%, #e8d500 100%);
+  color: var(--deep-sky);
+  border: none;
+  border-radius: 12px;
+  padding: 15px 24px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-solar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(245,230,66,0.4);
+}
+
+/* ─── EMAIL AFFICHE (vue OTP) ─── */
+.email-display {
+  background: rgba(78,255,206,0.06);
+  border: 1.5px solid rgba(78,255,206,0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.email-display-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.email-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--aurora);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+.email-display-addr {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--white-soft);
+}
+.email-change {
+  font-size: 0.75rem;
+  color: var(--mist);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  transition: color 0.2s;
+}
+.email-change:hover { color: var(--white-soft); }
+
+/* ─── CHAMPS OTP (code a 6 chiffres) ─── */
+.otp-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 12px;
+  display: block;
+}
+.otp-wrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.otp-digit {
+  width: 48px;
+  height: 52px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--white-soft);
+  outline: none;
+  caret-color: var(--aurora);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+  padding: 0;
+}
+.otp-digit:focus {
+  border-color: rgba(78,255,206,0.6);
+  box-shadow: 0 0 0 4px rgba(78,255,206,0.1);
+  background: rgba(78,255,206,0.04);
+  transform: scale(1.04);
+}
+.otp-digit.filled {
+  border-color: rgba(78,255,206,0.4);
+  background: rgba(78,255,206,0.07);
+  color: var(--aurora);
+}
+.otp-digit.shake {
+  animation: shake 0.4s var(--ease);
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%  { transform: translateX(-6px); border-color: rgba(255,107,107,0.7); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+}
+.otp-digit.error-state {
+  border-color: rgba(255,107,107,0.5) !important;
+  background: rgba(255,107,107,0.05) !important;
+  color: var(--coral) !important;
+}
+
+/* Message d'erreur OTP */
+.otp-error-msg {
+  font-size: 0.78rem;
+  color: var(--coral);
+  min-height: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.2s;
+}
+.otp-error-msg.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Separateur visuel OTP */
+.otp-sep {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: rgba(136,146,176,0.3);
+  padding-bottom: 8px;
+}
+
+/* ─── RENVOI DU CODE ─── */
+.resend-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0 2px;
+}
+.resend-left {
+  font-size: 0.8rem;
+  color: var(--mist);
+}
+.resend-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-resend {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--aurora);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s;
+}
+.btn-resend:disabled { color: var(--mist); text-decoration: none; cursor: default; }
+.resend-timer {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--mist);
+}
+
+/* Indice demo (maquette) */
+.demo-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(245,230,66,0.05);
+  border: 1px solid rgba(245,230,66,0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 20px;
+  font-size: 0.78rem;
+  color: var(--mist);
+}
+.demo-hint span { font-family: var(--font-mono); color: var(--solar); font-weight: 500; }
+
+/* ─── ECRAN DE SUCCES ─── */
+.success-wrap {
+  text-align: center;
+  padding: 8px 0;
+}
+.success-ring {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: rgba(78,255,206,0.08);
+  border: 2px solid rgba(78,255,206,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.success-ring::before {
+  content: "";
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(78,255,206,0.1);
+  animation: ringPulse 2s ease-in-out infinite;
+}
+@keyframes popIn {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0; }
+}
+.success-check {
+  font-size: 2rem;
+  line-height: 1;
+}
+.success-wrap .form-title { margin-bottom: 10px; }
+.success-wrap .form-subtitle { margin-bottom: 28px; }
+
+/* ─── LISTE DE VERIFICATION (checklist succes) ─── */
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  font-size: 0.86rem;
+  color: var(--mist);
+  animation: slideIn 0.4s var(--ease) both;
+}
+.checklist li:nth-child(1) { animation-delay: 0.1s; }
+.checklist li:nth-child(2) { animation-delay: 0.2s; }
+.checklist li:nth-child(3) { animation-delay: 0.3s; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.check-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(78,255,206,0.1);
+  border: 1px solid rgba(78,255,206,0.2);
+  color: var(--aurora);
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── SECURITE ─── */
+.security-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 0.73rem;
+  color: var(--mist);
+  opacity: 0.6;
+}
+
+/* ─── RESPONSIVE — Mobile (1 colonne) ─── */
+@media (max-width: 860px) {
+  body { grid-template-columns: 1fr; }
+  .panel-left { display: none; }
+  .panel-right { padding: 48px 28px; justify-content: flex-start; padding-top: 80px; }
+}

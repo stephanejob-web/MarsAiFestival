@@ -1,0 +1,21 @@
+/* ================================================================
+   FICHIER — reset.css
+   Reset global, base body et scrollbar.
+   ================================================================ */
+
+/* ── BOX-SIZING & MARGIN RESET ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── BASE HTML & BODY ──────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+body {
+  background: var(--deep-sky);
+  color: var(--white-soft);
+  font-family: var(--font-body);
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── SCROLLBAR ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }

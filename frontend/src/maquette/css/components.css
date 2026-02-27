@@ -1,0 +1,95 @@
+/* ================================================================
+   FICHIER — components.css
+   Composants partagés entre les pages admin : logo, toast, toggle,
+   badges, tooltips.
+   ================================================================ */
+
+/* ── LOGO ──────────────────────────────────────────────────────── */
+.logo {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.logo .ai { color: var(--aurora); }
+.logo-sub {
+  font-size: 0.65rem;
+  color: var(--mist);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── TOAST ──────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface-2);
+  border: 1px solid rgba(78,255,206,0.25);
+  border-radius: 12px;
+  padding: 12px 22px;
+  font-size: 0.82rem;
+  color: var(--aurora);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s var(--ease);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── TOGGLE SWITCH ─────────────────────────────────────────────── */
+.toggle {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.toggle.on {
+  background: rgba(78,255,206,0.2);
+  border-color: rgba(78,255,206,0.4);
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mist);
+  transition: all 0.2s;
+}
+.toggle.on::after {
+  transform: translateX(16px);
+  background: var(--aurora);
+}
+
+/* ── STATUS BADGES ─────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-aurora { background: rgba(78,255,206,0.12); color: var(--aurora); }
+.badge-solar  { background: rgba(245,230,66,0.12); color: var(--solar); }
+.badge-coral  { background: rgba(255,107,107,0.12); color: var(--coral); }
+.badge-lavande{ background: rgba(192,132,252,0.12); color: var(--lavande); }

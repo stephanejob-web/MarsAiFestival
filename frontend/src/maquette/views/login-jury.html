@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Jury — marsAI 2026</title>
+
+  <!-- ── FEUILLES DE STYLES ──────────────────────────────────── -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/dev-nav.css">
+  <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+
+<!-- ── CONTENU PRINCIPAL ─────────────────────────────────────── -->
+<div class="page">
+
+  <!-- Logo -->
+  <a href="index.html" class="logo">mars<span>AI</span></a>
+
+  <!-- Carte de connexion -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🔗</div>
+      <div class="card-title">Connexion sécurisée</div>
+      <div class="card-subtitle">Aucun mot de passe requis — votre lien d'accès permanent vous est envoyé par email</div>
+    </div>
+
+    <!-- Sélecteur de rôle -->
+    <div class="role-switch">
+      <button class="role-btn active" onclick="switchRole('jury', this)">⚖️ Membre du jury</button>
+      <button class="role-btn" onclick="switchRole('admin', this)">🛡️ Administrateur</button>
+    </div>
+
+    <!-- Info token -->
+    <div style="background:rgba(78,255,206,0.05);border:1px solid rgba(78,255,206,0.15);border-radius:10px;padding:11px 14px;margin-bottom:18px;font-size:0.78rem;color:var(--mist);line-height:1.55;">
+      <span style="color:var(--aurora);font-weight:600;">Votre compte est créé par l'administrateur.</span><br>
+      Un lien de connexion permanent (sans expiration) vous a été envoyé à votre adresse email lors de la création de votre profil.
+    </div>
+
+    <!-- Message d'erreur -->
+    <div class="error-msg" id="error-msg">Aucun compte associé à cette adresse. Contactez l'administrateur.</div>
+
+    <!-- État normal : saisie email -->
+    <div id="form-state">
+      <form onsubmit="handleLogin(event)">
+        <div class="field">
+          <label>Adresse e-mail</label>
+          <input type="email" id="email" value="jury@marsai.fr" required autocomplete="email" placeholder="votre@email.com">
+        </div>
+        <button type="submit" class="btn-submit">Recevoir mon lien de connexion →</button>
+      </form>
+    </div>
+
+    <!-- État après envoi -->
+    <div id="sent-state" style="display:none;">
+      <div style="text-align:center;padding:12px 0 8px;">
+        <div style="font-size:2.5rem;margin-bottom:14px;">📬</div>
+        <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--white-soft);margin-bottom:8px;">Lien envoyé !</div>
+        <div style="font-size:0.82rem;color:var(--mist);line-height:1.6;margin-bottom:20px;">
+          Vérifiez votre boîte mail.<br>
+          Ce lien est <strong style="color:var(--white-soft);">permanent</strong> — conservez-le précieusement.
+        </div>
+        <div style="background:rgba(78,255,206,0.06);border:1px solid rgba(78,255,206,0.18);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:0.72rem;color:var(--aurora);margin-bottom:20px;" id="sent-email-display">jury@marsai.fr</div>
+        <button id="btn-access" onclick="goToSpace()" style="width:100%;padding:12px;background:var(--aurora);color:var(--deep-sky);border:none;border-radius:10px;font-family:var(--font-display);font-size:0.9rem;font-weight:800;cursor:pointer;letter-spacing:0.02em;">
+          Accéder à l'espace jury (démo) →
+        </button>
+        <button onclick="document.getElementById('sent-state').style.display='none';document.getElementById('form-state').style.display='block';" style="margin-top:10px;background:none;border:none;font-size:0.78rem;color:var(--mist);cursor:pointer;text-decoration:underline;">
+          Modifier mon adresse email
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lien de retour -->
+  <a href="index.html" class="back-link">← Retour au site</a>
+
+</div>
+
+<!-- ── NAV MAQUETTE ──────────────────────────────────────────── -->
+<div id="dev-nav">
+  <span class="dn-label">Maquette</span>
+  <a href="index.html" class="dn-btn">🏠 Accueil</a>
+  <div class="dn-sep"></div>
+  <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
+  <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
+</div>
+
+<!-- ── SCRIPTS ────────────────────────────────────────────────── -->
+<script src="../js/login-jury.js"></script>
+</body>
+</html>
