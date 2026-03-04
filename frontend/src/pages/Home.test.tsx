@@ -1,11 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import Home from "./Home";
 
+vi.mock("react-i18next", () => ({
+    useTranslation: () => ({
+        t: (key: string) => key,
+        i18n: { language: "fr", changeLanguage: vi.fn() },
+    }),
+}));
+
 describe("Home", () => {
-    it("affiche le titre Bonjour", () => {
+    it("affiche le titre hello", () => {
         render(<Home />);
-        expect(screen.getByRole("heading", { name: /bonjour/i })).toBeDefined();
+        expect(screen.getByRole("heading", { name: /hello/i })).toBeDefined();
     });
 
     it("affiche tous les membres de l'équipe", () => {
@@ -20,11 +27,16 @@ describe("Home", () => {
 
     it("affiche le badge du projet", () => {
         render(<Home />);
-        expect(screen.getByText(/MarsAI Festival/i)).toBeDefined();
+        expect(screen.getAllByText(/MarsAI Festival/i).length).toBeGreaterThan(0);
     });
 
     it("affiche le contenu dans un main", () => {
         render(<Home />);
         expect(screen.getByRole("main")).toBeDefined();
+    });
+
+    it("affiche le bouton de changement de langue", () => {
+        render(<Home />);
+        expect(screen.getByRole("button", { name: /lang/i })).toBeDefined();
     });
 });
