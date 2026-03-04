@@ -292,8 +292,8 @@ const Step1Profil = ({ data, errors, onChange }: Step1ProfilProps): React.JSX.El
                             <span className="text-slate-500 font-normal">(facultatif)</span>
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                            Je souhaite recevoir les actualités du festival, les annonces de résultats
-                            et les informations sur les prochaines éditions.
+                            Je souhaite recevoir les actualités du festival, les annonces de
+                            résultats et les informations sur les prochaines éditions.
                         </p>
                     </div>
                 </label>

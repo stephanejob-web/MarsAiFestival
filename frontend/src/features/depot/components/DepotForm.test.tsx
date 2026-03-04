@@ -18,9 +18,7 @@ describe("DepotForm", () => {
 
     it("affiche des erreurs de validation quand on clique Suivant sans remplir le formulaire", () => {
         render(<DepotForm />);
-        fireEvent.click(
-            screen.getByRole("button", { name: /étape suivante — le film/i }),
-        );
+        fireEvent.click(screen.getByRole("button", { name: /étape suivante — le film/i }));
         expect(screen.getByText(/prénom requis/i)).toBeDefined();
     });
 

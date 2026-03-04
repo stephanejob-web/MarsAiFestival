@@ -53,9 +53,7 @@ const Step2Film = ({ data, errors, onChange }: Step2FilmProps): React.JSX.Elemen
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    const isValidType = data.videoFile
-        ? ACCEPTED_VIDEO_TYPES.includes(data.videoFile.type)
-        : true;
+    const isValidType = data.videoFile ? ACCEPTED_VIDEO_TYPES.includes(data.videoFile.type) : true;
 
     return (
         <div className="flex flex-col gap-6">
@@ -266,11 +264,7 @@ const Step2Film = ({ data, errors, onChange }: Step2FilmProps): React.JSX.Elemen
             </div>
 
             {/* Note d'intention */}
-            <FormField
-                label="Note d'intention du réalisateur"
-                required
-                error={errors.intention}
-            >
+            <FormField label="Note d'intention du réalisateur" required error={errors.intention}>
                 <textarea
                     value={data.intention}
                     onChange={(e) => onChange("intention", e.target.value)}

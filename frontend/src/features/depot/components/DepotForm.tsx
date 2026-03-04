@@ -33,11 +33,7 @@ const renderStep = (form: ReturnType<typeof useDepotForm>): React.JSX.Element =>
             );
         case 3:
             return (
-                <Step3IA
-                    data={form.data.step3}
-                    errors={form.errors}
-                    onChange={form.updateStep3}
-                />
+                <Step3IA data={form.data.step3} errors={form.errors} onChange={form.updateStep3} />
             );
         case 4:
             return (

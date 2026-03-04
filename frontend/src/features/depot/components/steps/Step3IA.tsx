@@ -161,9 +161,7 @@ const Step3IA = ({ data, errors, onChange }: Step3IAProps): React.JSX.Element =>
                                 }`}
                             />
                             <div className="flex-1">
-                                <p className="text-sm font-bold text-slate-100 mb-1">
-                                    {cls.title}
-                                </p>
+                                <p className="text-sm font-bold text-slate-100 mb-1">{cls.title}</p>
                                 <p className="text-xs text-slate-400 leading-relaxed mb-2">
                                     {cls.desc}
                                 </p>
@@ -189,12 +187,7 @@ const Step3IA = ({ data, errors, onChange }: Step3IAProps): React.JSX.Element =>
                     Outils utilisés
                 </span>
                 {IA_TOOLS.map(({ field, label, required, placeholder }) => (
-                    <FormField
-                        key={field}
-                        label={label}
-                        required={required}
-                        error={errors[field]}
-                    >
+                    <FormField key={field} label={label} required={required} error={errors[field]}>
                         <input
                             type="text"
                             value={data[field] as string}
