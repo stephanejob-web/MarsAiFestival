@@ -16,6 +16,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",
     "i18next": "^25.8.14",
+    "marsaifestival": "file:..",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.4",
