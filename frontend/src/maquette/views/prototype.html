@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
+<!-- ===================== -->
+<!-- HEAD (meta, styles)   -->
+<!-- ===================== -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>marsAI — Concours International de Courts-Métrages IA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Styles intégrés — futur fichier CSS externe (tokens, reset, composants, sections, responsive) -->
   <style>
     /* ─── DESIGN TOKENS ─────────────────────────────────── */
     :root {
@@ -1637,11 +1641,18 @@
     }
   </style>
 </head>
+<!-- ===================== -->
+<!-- BODY                  -->
+<!-- ===================== -->
 <body>
 
+  <!-- Canvas de fond — Aurora Morphing (futur composant React : AuroraCanvas) -->
   <canvas id="mars-canvas" aria-hidden="true"></canvas>
 
-  <!-- ─── NAVIGATION ──────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- NAVIGATION            -->
+  <!-- ===================== -->
+  <!-- Futur composant React : Navbar -->
   <nav>
     <div class="logo">mars<span>AI</span></div>
     <ul class="nav-links">
@@ -1651,6 +1662,7 @@
       <li><a href="login-jury.html" style="color:var(--white-soft);text-decoration:none;display:flex;align-items:center;gap:5px;"><span style="font-size:0.7rem;color:var(--aurora);">⬡</span> Espace Jury</a></li>
       <li><a href="#presse">Presse</a></li>
       <li><a class="btn-nav" href="verification-email.html">Soumettre un film</a></li>
+      <!-- Sélecteur de langue (élément répétable - futur composant React possible) -->
       <li style="display:flex;gap:6px;">
         <button id="btn-fr" onclick="setLang('fr')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(78,255,206,0.4);border-radius:6px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;" title="Français">🇫🇷</button>
         <button id="btn-en" onclick="setLang('en')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:var(--font-body);transition:all 0.2s;" title="English">🇬🇧</button>
@@ -1658,9 +1670,14 @@
     </ul>
   </nav>
 
-  <!-- ─── HERO ────────────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- HERO                  -->
+  <!-- ===================== -->
+  <!-- Futur composant React : HeroSection -->
   <section class="hero" id="home">
+    <!-- Fond aurore — futur composant React : AuroraBackground -->
     <div class="aurora-bg"></div>
+    <!-- Vidéo de fond hero — futur composant React : HeroVideoBackground -->
     <div class="hero-video-bg">
       <video autoplay muted loop playsinline preload="auto">
         <source src="../assets/ia2.mp4" type="video/mp4">
@@ -1669,7 +1686,7 @@
 
     <div class="hero-content">
 
-      <!-- Partenariat — mis en avant en premier -->
+      <!-- HeroPartners (élément répétable - futur composant React possible) -->
       <div class="hero-partners">
         <span class="hero-partners-label">Co-organisé par</span>
         <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="hero-partners-logo">
@@ -1679,6 +1696,7 @@
         <span class="hero-partners-name">Mobile Film Festival</span>
       </div>
 
+      <!-- HeroBadge (élément répétable - futur composant React possible) -->
       <div class="hero-badge">Concours International · Première Édition 2026</div>
 
       <h1 class="hero-title">
@@ -1687,6 +1705,7 @@
       <p class="hero-subtitle" data-fr="Imaginez des futurs souhaitables." data-en="Imagine desirable futures.">Imaginez des futurs souhaitables.</p>
       <div class="hero-ai-badge">✦ Extrait généré par IA · Courts-métrages 60 secondes</div>
 
+      <!-- HeroTag (élément répétable - futur composant React possible) -->
       <div class="hero-tags">
         <span class="tag"><strong>60 secondes</strong> pile</span>
         <span class="tag"><strong>120+</strong> pays représentés</span>
@@ -1694,6 +1713,7 @@
         <span class="tag"><strong>Millions</strong> de vues en ligne</span>
       </div>
 
+      <!-- Boutons CTA hero — futur composant React : HeroCTA -->
       <div class="hero-cta">
         <a href="formulaire-depot.html" class="btn-primary">
           Soumettre mon film
@@ -1702,7 +1722,8 @@
       </div>
     </div>
 
-    <!-- Countdown pleine largeur -->
+    <!-- Countdown — futur composant React : CountdownTimer -->
+    <!-- CountdownUnit (élément répétable - futur composant React possible) -->
     <div class="countdown-wrapper">
       <div class="countdown-inner">
         <div class="countdown-top">
@@ -1732,13 +1753,17 @@
     </div>
   </section>
 
-  <!-- ─── CONCEPT SECTION ──────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- CONCEPT               -->
+  <!-- ===================== -->
+  <!-- Futur composant React : ConceptSection -->
   <section class="concept" id="concours">
     <div class="section-inner">
       <div class="section-label">Le Concept</div>
       <h2 class="section-title">Une contrainte absolue,<br>une liberté totale</h2>
       <p class="section-desc">marsAI est un concours international de courts-métrages d'une minute intégralement générés par IA. Co-organisé par <strong style="color:var(--white-soft)">La Plateforme</strong> et le <strong style="color:var(--white-soft)">Mobile Film Festival</strong>. L'humain reste au cœur de la création.</p>
 
+      <!-- ConceptCard (élément répétable - futur composant React possible) -->
       <div class="concept-grid">
         <div class="concept-card fade-in">
           <span class="concept-num">1'</span>
@@ -1759,7 +1784,10 @@
     </div>
   </section>
 
-  <!-- ─── ABOUT FESTIVAL ───────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- ABOUT / ÉVÉNEMENT     -->
+  <!-- ===================== -->
+  <!-- Futur composant React : AboutSection -->
   <section class="about" id="programme">
     <div class="aurora-bg" style="opacity:0.5"></div>
     <div class="section-inner">
@@ -1769,7 +1797,8 @@
           <h2 class="section-title">Vivez la naissance<br>d'un nouveau cinéma</h2>
           <p class="section-desc">Trois jours aux Friches Belle de Mai — une ancienne manufacture industrielle transformée en capitale culturelle. Salles de projection, lumières basses, jury international, et sur scène : les créateurs qui réinventent le 7e art avec l'IA. Vous y serez.</p>
 
-          <!-- Programme -->
+          <!-- Programme — futur composant React : EventProgramme -->
+          <!-- ProgItem (élément répétable - futur composant React possible) -->
           <div class="event-programme">
 
             <div class="prog-item">
@@ -1816,7 +1845,7 @@
               </div>
             </div>
 
-            <!-- Mars.AI Night — mise en avant -->
+            <!-- ProgItem spécial : Mars.AI Night (élément répétable - futur composant React possible) -->
             <div class="prog-item" style="margin-top:4px;">
               <span class="prog-dot" style="background:var(--coral)"></span>
               <div style="background:linear-gradient(135deg,rgba(255,107,107,0.06) 0%,rgba(192,132,252,0.06) 100%);border:1px solid rgba(255,107,107,0.18);border-radius:12px;padding:14px 16px;width:100%;">
@@ -1831,6 +1860,7 @@
 
           </div>
 
+          <!-- StatChip (élément répétable - futur composant React possible) -->
           <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;">
             <div class="stat-chip" style="flex:1;min-width:110px;">
               <div class="stat-value">50</div>
@@ -1847,6 +1877,7 @@
           </div>
         </div>
 
+        <!-- Carte lieu — futur composant React : VenueCard -->
         <div class="about-visual">
           <div class="venue-card">
             <div class="venue-map">
@@ -1863,6 +1894,7 @@
             <div class="venue-info">
               <div class="venue-name">La Plateforme</div>
               <div class="venue-address">Friches Belle de Mai · Marseille, 13003</div>
+              <!-- VenueTag (élément répétable - futur composant React possible) -->
               <div class="venue-tags">
                 <span class="venue-tag">🎬 Projections officielles</span>
                 <span class="venue-tag">🤖 Démos IA live</span>
@@ -1878,15 +1910,20 @@
     </div>
   </section>
 
+  <!-- Séparateur visuel — futur composant React : Divider -->
   <div class="divider"></div>
 
-  <!-- ─── CTA APPEL À PROJETS ──────────────────────────── -->
+  <!-- ===================== -->
+  <!-- CTA APPEL À PROJETS   -->
+  <!-- ===================== -->
+  <!-- Futur composant React : CTASection -->
   <section id="soumettre" style="padding: 100px 0 0;">
     <div class="cta-section">
       <div class="cta-block">
         <div class="cta-left">
           <div class="section-label">Appel à Projets</div>
           <h2 class="section-title" style="max-width: 440px;">Votre film a sa place ici</h2>
+          <!-- Exigence de soumission (élément répétable - futur composant React possible) -->
           <ul class="cta-requirements">
             <li>Durée : <strong>60 secondes pile</strong></li>
             <li>IA entière ou hybride — documentée dans la fiche IA</li>
@@ -1896,6 +1933,7 @@
             <li>Ouvert à 120+ pays · Gratuit · Sous-titres FR et EN bienvenus</li>
           </ul>
         </div>
+        <!-- Bloc deadline — futur composant React : DeadlineBadge -->
         <div class="cta-right">
           <div class="deadline-badge">
             <div class="label">Clôture des dépôts</div>
@@ -1908,7 +1946,10 @@
     </div>
   </section>
 
-  <!-- ─── COMMENT ÇA MARCHE ───────────────────────────── -->
+  <!-- ===================== -->
+  <!-- COMMENT ÇA MARCHE     -->
+  <!-- ===================== -->
+  <!-- Futur composant React : HowItWorksSection -->
   <section class="how-section">
     <div class="section-inner">
 
@@ -1918,6 +1959,7 @@
         <p class="section-desc" style="max-width:520px;margin:0 auto;">Un tunnel guidé en 4 étapes — de votre profil à la soumission finale. Moins de 10 minutes.</p>
       </div>
 
+      <!-- HowCard (élément répétable - futur composant React possible) -->
       <div class="how-steps">
 
         <div class="how-card fade-in">
@@ -1973,7 +2015,10 @@
     </div>
   </section>
 
-  <!-- ─── GALERIE FILMS ────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- GALERIE FILMS         -->
+  <!-- ===================== -->
+  <!-- Futur composant React : GallerySection -->
   <section class="gallery-section" id="films">
     <div class="section-inner">
       <div class="gallery-header">
@@ -1982,6 +2027,7 @@
           <h2 class="section-title" style="margin-bottom:0">50 Films · Imaginez des futurs souhaitables</h2>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;">
+          <!-- FilterChip (élément répétable - futur composant React possible) -->
           <div class="gallery-filters">
             <span class="filter-chip active" onclick="setFilter(this)">Tous</span>
             <span class="filter-chip" onclick="setFilter(this)">IA Pure</span>
@@ -1991,6 +2037,8 @@
         </div>
       </div>
 
+      <!-- FilmCard (élément répétable - futur composant React possible) -->
+      <!-- 20 cartes de films dans cette grille — chacune suit le même modèle -->
       <div class="films-grid">
         <!-- Film 1 -->
         <div class="film-card fade-in">
@@ -2234,7 +2282,8 @@
         </div>
       </div>
 
-      <!-- Pagination -->
+      <!-- Pagination — futur composant React : Pagination -->
+      <!-- PageButton (élément répétable - futur composant React possible) -->
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:48px;">
         <button onclick="this.style.opacity=1" style="width:36px;height:36px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--mist);font-size:0.85rem;cursor:pointer;">←</button>
         <button style="width:36px;height:36px;background:var(--aurora);border:none;border-radius:8px;color:var(--deep-sky);font-weight:700;font-size:0.85rem;cursor:pointer;">1</button>
@@ -2247,13 +2296,17 @@
     </div>
   </section>
 
-  <!-- ─── PLAYER SECTION ──────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- LECTEUR VIDÉO         -->
+  <!-- ===================== -->
+  <!-- Futur composant React : PlayerSection -->
   <section class="player-section">
     <div style="max-width:1200px;margin:0 auto 48px;display:flex;gap:12px;align-items:center;">
       <span class="section-label" style="margin:0">Lecteur Intégré</span>
       <span style="font-size:0.8rem;color:var(--mist);">— support sous-titres · HLS adaptatif · plein écran</span>
     </div>
 
+    <!-- Fenêtre lecteur — futur composant React : PlayerWindow -->
     <div class="player-preview">
       <div class="player-window">
         <div class="player-screen">
@@ -2262,6 +2315,7 @@
             "Les machines ont appris à rêver — mais rêvent-elles en couleurs ?"
           </div>
         </div>
+        <!-- Contrôles lecteur — futur composant React : PlayerControls -->
         <div class="player-controls">
           <div class="player-progress">
             <div class="progress-track">
@@ -2285,6 +2339,7 @@
         </div>
       </div>
 
+      <!-- Navigation entre films — futur composant React : FilmNav -->
       <div class="film-nav">
         <div class="film-nav-btn">← Film précédent</div>
         <span class="film-counter">5 / 50</span>
@@ -2293,14 +2348,17 @@
     </div>
   </section>
 
-  <!-- ─── PRIX SECTION ────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- PALMARÈS / PRIX       -->
+  <!-- ===================== -->
+  <!-- Futur composant React : PalmaresSection -->
   <section class="palmares-section" id="palmares">
     <div class="section-inner">
       <div class="section-label" style="text-align:center;margin-bottom:14px;">Palmarès · Modèle Cannes</div>
       <h2 class="section-title" style="text-align:center;margin-bottom:16px;">Les Prix marsAI</h2>
       <p class="palmares-intro">Bourses et récompenses décernées par le jury international au terme des projections officielles.</p>
 
-      <!-- Grand Prix -->
+      <!-- Grand Prix — futur composant React : AwardGrand -->
       <div class="award-grand">
         <div class="award-grand-shine"></div>
         <div class="award-grand-icon">
@@ -2316,7 +2374,7 @@
         </div>
       </div>
 
-      <!-- Prix secondaires -->
+      <!-- AwardCard (élément répétable - futur composant React possible) -->
       <div class="awards-secondary">
         <div class="award-card award-jury">
           <div class="award-icon">⚖️</div>
@@ -2337,13 +2395,17 @@
     </div>
   </section>
 
-  <!-- ─── FOOTER ──────────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- FOOTER                -->
+  <!-- ===================== -->
+  <!-- Futur composant React : Footer -->
   <footer id="presse">
     <div class="footer-inner">
       <div class="footer-brand">
         <span class="logo">mars<span class="ai">AI</span></span>
         <p class="footer-desc">Le premier concours international de courts-métrages d'une minute intégralement générés par IA. 120+ pays. "Imaginez des futurs souhaitables."</p>
       </div>
+      <!-- FooterColumn (élément répétable - futur composant React possible) -->
       <div class="footer-col">
         <h4>Festival</h4>
         <ul class="footer-links">
@@ -2373,7 +2435,7 @@
         </ul>
       </div>
     </div>
-    <!-- Co-organisateurs -->
+    <!-- Co-organisateurs — futur composant React : FooterPartners -->
     <div class="footer-partners">
       <span class="footer-partners-label">Co-organisé par</span>
       <a href="https://laplateforme.io/coding-school/" target="_blank" rel="noopener" class="footer-partners-logo">
@@ -2388,7 +2450,11 @@
     </div>
   </footer>
 
-  <!-- ─── DEV NAVIGATION ──────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- DEV NAVIGATION        -->
+  <!-- ===================== -->
+  <!-- Barre de navigation développeur — à retirer en production -->
+  <!-- Futur composant React : DevNav (mode dev uniquement) -->
   <div class="dev-nav">
     <div class="dev-nav-label">Prototype — Navigation</div>
     <div class="dev-nav-links">
@@ -2400,7 +2466,12 @@
     </div>
   </div>
 
-  <!-- ─── JAVASCRIPT ───────────────────────────────────── -->
+  <!-- ===================== -->
+  <!-- SCRIPTS               -->
+  <!-- ===================== -->
+
+  <!-- Script 1 : Logique interactive (countdown, scroll reveal, filtres, i18n, nav scroll) -->
+  <!-- Futurs hooks React : useCountdown, useScrollReveal, useLanguage -->
   <script>
     // Countdown live — clôture des dépôts : 30 septembre 2026
     const deadline = new Date('2026-09-30T23:59:59');
@@ -2464,7 +2535,8 @@
     });
   </script>
 
-  <!-- ── AURORA MORPHING ───────────────────────────────────── -->
+  <!-- Script 2 : Aurora Morphing Canvas (animation de fond) -->
+  <!-- Futur composant React : AuroraCanvas (useEffect + useRef) -->
   <script>
   (function() {
     const canvas = document.getElementById('mars-canvas');

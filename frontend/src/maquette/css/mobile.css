@@ -1,0 +1,441 @@
+/* ================================================================
+   RESPONSIVE MOBILE — max-width: 480px
+   Fichier dedie aux corrections mobile (iPhone SE 375px,
+   iPhone 12 390px, Galaxy S21 360px).
+   Charge APRES index.css pour surcharger les styles desktop.
+   ================================================================ */
+
+@media (max-width: 480px) {
+
+  /* ============================================================
+     0. HERO — reordonner et compacter
+     ============================================================ */
+
+  /* Reduire le padding global du hero */
+  .hero { padding: 80px 20px 100px; min-height: auto; }
+
+  /* Reduire le gap de la grille hero */
+  .hero-content { gap: 0; }
+
+  /* Eclater hero-left pour reordonner via le grid parent */
+  .hero-left { display: contents; }
+
+  /* Ordre : partenaires > badge > titre > desc > tags > countdown > accroche */
+  .hero-partners   { order: 1; }
+  .hero-badge      { order: 2; margin-bottom: 12px; }
+  .hero-title      { order: 3; margin-bottom: 6px; }
+  .hero-desc       { order: 4; margin-bottom: 10px; }
+  .hero-tags       { order: 5; margin-bottom: 16px; }
+  .hero-right      { order: 6; margin-top: 0; margin-bottom: 16px; }
+  .hero-accroche   { order: 7; margin-top: 0; padding-top: 16px; }
+
+  /* Accroche : espacement compact */
+  .hero-accroche-title { margin-bottom: 16px; }
+
+  /* Countdown centre et compact */
+  .hero-right { align-items: center; }
+  .hero-city { display: none; }
+  .countdown-inline { align-items: center; }
+  .countdown-label {
+    font-size: 0.6rem;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  /* Boutons CTA centres et compacts */
+  .hero-cta { justify-content: center; gap: 10px; }
+
+
+  /* ============================================================
+     1. MANIFESTE — texte centre + carousel en bas
+     ============================================================ */
+
+  .manifeste-section { padding: 36px 18px; }
+
+  /* Image de fond : recentree sur le visage */
+  .manifeste-bg-img {
+    object-fit: cover;
+    object-position: 80% 20%;
+    opacity: 0.55;
+    transform: scale(1.15);
+  }
+
+  /* Fond tres leger pour laisser voir l'image */
+  .manifeste-overlay {
+    background: linear-gradient(to bottom,
+      rgba(21,27,70,0.35) 0%,
+      rgba(21,27,70,0.02) 30%,
+      rgba(21,27,70,0.02) 70%,
+      rgba(21,27,70,0.35) 100%);
+  }
+
+  /* Grille : carousel en bas */
+  .manifeste-grid { gap: 20px; }
+  .manifeste-text { order: -1; gap: 8px; }
+
+  /* Lignes typographiques */
+  .manifeste-line { font-size: clamp(1.1rem, 6vw, 1.5rem); line-height: 1.25; }
+  .manifeste-line.dim { font-size: clamp(0.8rem, 3.2vw, 1rem); margin-bottom: 2px; }
+  .manifeste-sep { margin: 10px auto; }
+  .manifeste-sub { font-size: 0.78rem; line-height: 1.55; margin-top: 10px; }
+
+  /* Outils IA */
+  .manifeste-tools { gap: 6px; margin-top: 14px; }
+  .manifeste-tool { font-size: 0.7rem; padding: 6px 12px; }
+
+  /* Carousel HORIZONTAL sur mobile */
+  .carousel-viewport {
+    height: 100px;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* Flux horizontal */
+  .card-line {
+    flex-direction: row;
+    gap: 10px;
+    height: 100%;
+  }
+
+  /* Cards horizontales compactes */
+  .ev-card-wrapper {
+    height: 100%;
+    width: 140px;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+  .ev-card-overlay { padding: 6px 8px; }
+  .ev-card-title { font-size: 0.62rem; }
+  .ev-card-badge { font-size: 0.5rem; padding: 2px 5px; }
+  .ev-card-play { width: 28px; height: 28px; }
+  .ev-card-play::after {
+    border-width: 5px 0 5px 9px;
+  }
+
+  /* Cacher le scanner vertical (pas pertinent en horizontal) */
+  .scanner-beam { display: none; }
+  .scanner-canvas { display: none; }
+
+
+  /* ============================================================
+     1b. SECTION ABOUT / ÉVÉNEMENT
+     ============================================================ */
+
+  /* Texte centre */
+  .about .section-inner { text-align: center; }
+  .about .section-label { display: block; text-align: center; }
+  .about .section-title { text-align: center; font-size: clamp(1.3rem, 6vw, 1.7rem); }
+  .about .section-desc {
+    text-align: center;
+    font-size: 0.82rem;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Programme compact centre */
+  .prog-compact {
+    border-left: none;
+    padding-left: 0;
+    margin-top: 10px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .prog-line {
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+  }
+  .prog-dot-mini { margin-top: 5px; }
+  .prog-line-day { font-size: 0.78rem; min-width: 34px; text-align: left; flex-shrink: 0; }
+  .prog-line-desc { font-size: 0.7rem; text-align: left; flex: 1; }
+  .prog-dot-mini { flex-shrink: 0; }
+
+  /* Stats centrees */
+  .stat-row {
+    justify-content: center;
+    margin-top: 8px;
+    gap: 5px;
+  }
+  .stat-chip-mini { padding: 5px 8px; }
+  .stat-mini-value { font-size: 0.82rem; }
+  .stat-mini-label { font-size: 0.68rem; }
+
+  /* Globe plus compact */
+  .about-inner { gap: 16px; }
+  .globe-container {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+  .venue-overlay {
+    white-space: normal;
+    padding: 8px 12px;
+  }
+  .venue-overlay-name { font-size: 0.78rem; }
+  .venue-overlay-address { font-size: 0.6rem; }
+  .venue-overlay-coords { font-size: 0.52rem; margin-bottom: 4px; }
+  .venue-overlay-btn { font-size: 0.62rem; padding: 3px 10px; }
+
+
+  /* ============================================================
+     1c. SECTION COMMENT ÇA MARCHE — 2 colonnes compactes
+     ============================================================ */
+
+  /* Fond adapte mobile */
+  .how-section::before {
+    width: 100%;
+    opacity: 0.25;
+    background-size: cover;
+    background-position: center;
+  }
+  .how-section .section-inner { padding: 30px 0 40px; }
+
+  /* Centrer texte section */
+  .how-section .section-inner { text-align: center; }
+  .how-section .section-label { text-align: center; }
+  .how-section .section-title {
+    text-align: center;
+    font-size: clamp(1.2rem, 6vw, 1.6rem);
+  }
+  .how-section .section-desc {
+    text-align: center;
+    font-size: 0.8rem;
+    max-width: 100%;
+    margin: 0 auto 16px;
+  }
+
+  /* Grille 2 colonnes */
+  .how-steps {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Cards compactes */
+  .how-card {
+    padding: 14px 10px 16px;
+    border-radius: 14px;
+  }
+  .how-num-wrap { margin-bottom: 10px; }
+  .how-circle { width: 52px; height: 52px; font-size: 1.3rem; }
+  .how-step-num { width: 20px; height: 20px; font-size: 0.55rem; }
+  .how-title { font-size: 0.78rem; margin-bottom: 6px; }
+  .how-desc { font-size: 0.65rem; line-height: 1.5; }
+  .how-tag { font-size: 0.55rem; padding: 3px 10px; margin-top: 10px; }
+  .how-cta { margin-top: 20px; }
+
+
+  /* ============================================================
+     2. GALERIE FILMS — carousel + decorations
+     ============================================================ */
+
+  /* Cacher cameras + faisceaux lumineux */
+  .cinema-deco-wrap { display: none; }
+
+  /* Cacher decorations popcorn */
+  .gallery-deco-left,
+  .gallery-deco-right { display: none; }
+
+  /* Supprimer marges carousel */
+  .films-row-1 { margin-right: 0; }
+  .films-row-2 { margin-left: 0; }
+
+  /* Header galerie compact et centre */
+  .gallery-header { margin-bottom: 20px; }
+  .gallery-header-top { margin-bottom: 12px; }
+  .gallery-section .section-label { font-size: 0.75rem; letter-spacing: 0.1em; }
+  .gallery-section .section-title {
+    max-width: 100%;
+    font-size: clamp(1.2rem, 5.5vw, 1.6rem);
+  }
+
+  /* Filtres compacts */
+  .gallery-filters { gap: 6px; justify-content: center; }
+  .filter-chip { padding: 6px 14px; font-size: 0.7rem; }
+
+  /* Cards films compactes */
+  .film-card {
+    min-width: 130px;
+    max-width: 155px;
+    border-radius: 10px;
+  }
+  .film-meta { padding: 8px 10px 4px; }
+  .film-meta .film-author { font-size: 0.62rem; }
+  .film-meta > div[style] { font-size: 0.72rem !important; margin-bottom: 4px !important; }
+  .film-badges .badge { font-size: 0.55rem; padding: 2px 6px; }
+  .film-duration { font-size: 0.58rem; padding: 1px 5px; }
+  .film-thumb-play { width: 28px; height: 28px; font-size: 0.6rem; }
+  .gallery-section .section-inner { padding: 30px 0 16px; }
+
+  /* Section cinema films */
+  .films-cinema-section { padding: 0; }
+  .films-carousel-wrap { margin-top: 10px !important; }
+
+
+  /* ============================================================
+     2. SECTION CONCEPT — robot + cards + particules
+     ============================================================ */
+
+  /* Cacher robot et particules */
+  .robot-wrap { display: none; }
+  .concept-particles { display: none; }
+
+  /* Centrer le texte de la section */
+  .concept .section-label { justify-content: center; }
+  .concept .section-inner { text-align: center; }
+  .concept .section-title { font-size: clamp(1.3rem, 6vw, 1.7rem); }
+  .concept .section-desc {
+    font-size: 0.8rem;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Grille 2 colonnes compacte */
+  .concept-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  /* Cards tres compactes */
+  .concept-card {
+    padding: 12px 10px;
+    border-radius: 10px;
+  }
+  .concept-card-title { font-size: 0.75rem; }
+  .concept-card p { font-size: 0.65rem; line-height: 1.45; }
+  .concept-num { font-size: 1.2rem; margin-bottom: 4px; }
+
+
+  /* ============================================================
+     3. SECTION ABOUT / GLOBE
+     ============================================================ */
+
+  /* Globe limite et centre */
+  .globe-container {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* Overlay : retour a la ligne autorise */
+  .venue-overlay { white-space: normal; }
+
+
+  /* ============================================================
+     4. SECTION GALA — prix + sponsors
+     ============================================================ */
+
+  /* Pas de debordement */
+  .gala { overflow-x: hidden; }
+
+  /* Texte centre */
+  .gala-header { text-align: center; }
+  .gala-eyebrow { font-size: 0.65rem; padding: 5px 14px; }
+  .gala-title { font-size: clamp(1.2rem, 6vw, 1.6rem); }
+  .gala-desc { font-size: 0.78rem; max-width: 100%; }
+  .gala-tags { gap: 5px; }
+  .gala-tag { font-size: 0.68rem; padding: 5px 10px; }
+
+  /* 1 colonne */
+  .gala-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Padding reduit */
+  .gala-inner { padding: 28px 14px 24px; }
+
+  /* Grand Prix compact */
+  .award-grand { padding: 16px 14px; border-radius: 12px; }
+  .award-grand-icon { width: 36px; height: 36px; margin-bottom: 6px; border-radius: 10px; }
+  .award-grand-icon svg { width: 24px; height: 24px; }
+  .award-eyebrow { font-size: 0.52rem; margin-bottom: 6px; }
+  .award-grand-name { font-size: 1.1rem; margin-bottom: 6px; }
+  .award-grand-desc { font-size: 0.7rem; max-width: 100%; }
+  .award-bourse { font-size: 0.62rem; padding: 4px 10px; }
+
+  /* Prix secondaires : 2 colonnes compactes */
+  .awards-secondary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .award-card {
+    padding: 12px 10px;
+    border-radius: 10px;
+    text-align: center;
+    align-items: center;
+  }
+  .award-icon { width: 22px; height: 22px; font-size: 0.65rem; margin-bottom: 4px; }
+  .award-name { font-size: 0.7rem; margin-bottom: 3px; }
+  .award-desc { font-size: 0.6rem; line-height: 1.45; }
+
+  /* Sponsors 2 colonnes */
+  .sponsors-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .sponsor-card { padding: 10px 8px; border-radius: 10px; }
+  .sponsor-logo-img { max-height: 24px; }
+  .gala-subtitle { font-size: clamp(1rem, 4vw, 1.3rem); margin-bottom: 8px; }
+  .sponsors-tier-label { font-size: 0.6rem; margin-bottom: 8px; }
+
+  /* CTA compact */
+  .gala-cta { font-size: 0.78rem; padding: 10px 24px; border-radius: 10px; }
+  .gala-sep { margin: 14px auto; }
+  .gala-footnote { font-size: 0.65rem; }
+
+
+  /* ============================================================
+     5. SECTION JURY
+     ============================================================ */
+
+  /* Centrer texte */
+  .jury-header { text-align: center; }
+  .jury-header .section-label { text-align: center; }
+  .jury-header .section-title {
+    text-align: center;
+    font-size: clamp(1.3rem, 6vw, 1.7rem);
+  }
+  .jury-header .section-desc {
+    text-align: center;
+    font-size: 0.8rem;
+    max-width: 100%;
+  }
+  .jury-section .section-inner { padding: 28px 0 24px; }
+
+  /* Carte vedette compacte et centree */
+  .jury-featured {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .jury-featured-photo {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+  }
+  .jury-featured-badge { font-size: 0.58rem; padding: 3px 10px; }
+  .jury-featured-name { font-size: clamp(1.1rem, 5vw, 1.5rem); }
+  .jury-featured-role { font-size: 0.78rem; }
+  .jury-featured-quote { font-size: 0.72rem; text-align: left; }
+
+  /* Grille membres : 2 colonnes compactes */
+  .jury-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .jury-card { border-radius: 12px; }
+  .jury-card-info { padding: 10px 10px 12px; }
+  .jury-card-badge { font-size: 0.52rem; padding: 3px 8px; margin-bottom: 6px; }
+  .jury-card-name { font-size: 0.82rem; margin-bottom: 3px; }
+  .jury-card-role { font-size: 0.68rem; margin-bottom: 6px; }
+  .jury-card-quote { font-size: 0.62rem; padding-left: 8px; line-height: 1.5; }
+
+
+  /* ============================================================
+     6. FOOTER — masque sur mobile
+     ============================================================ */
+
+  footer { display: none; }
+
+}

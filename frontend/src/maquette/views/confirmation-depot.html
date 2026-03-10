@@ -56,6 +56,7 @@
 
     <div class="next-steps">
       <div class="next-steps-title">La suite</div>
+      <!-- Step Row (élément répétable - futur composant React possible) -->
       <div class="step-row">
         <div class="step-num">1</div>
         <div class="step-text">
@@ -63,6 +64,7 @@
           <span>Les jurys visionnent les films — résultats sous 4 semaines</span>
         </div>
       </div>
+      <!-- Step Row (élément répétable - futur composant React possible) -->
       <div class="step-row">
         <div class="step-num">2</div>
         <div class="step-text">
@@ -70,6 +72,7 @@
           <span>Les 50 finalistes reçoivent un email de confirmation</span>
         </div>
       </div>
+      <!-- Step Row (élément répétable - futur composant React possible) -->
       <div class="step-row">
         <div class="step-num">3</div>
         <div class="step-text">
@@ -95,12 +98,34 @@
        DEV-NAV — Navigation maquette (développement uniquement)
        ============================================================ -->
   <div id="dev-nav">
-    <span class="dn-label">Maquette</span>
-    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-header">
+      <span class="dn-icon-main">🧭</span>
+      <span class="dn-title">Maquette</span>
+    </div>
+    <!-- Dev Nav Link (élément répétable - futur composant React possible) -->
+    <a href="index.html" class="dn-btn">
+      <span class="dn-icon">🏠</span>
+      <span class="dn-lbl">Accueil</span>
+    </a>
     <div class="dn-sep"></div>
-    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
-    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
-  </div>
+    <!-- Dev Nav Link (élément répétable - futur composant React possible) -->
+    <a href="admin-panel.html" class="dn-btn espace-admin">
+      <span class="dn-icon">🛡️</span>
+      <span class="dn-lbl">Admin</span>
+    </a>
+    <a href="admin-jury.html" class="dn-btn espace-jury">
+      <span class="dn-icon">⚖️</span>
+      <span class="dn-lbl">Jury</span>
+    </a>
+    <a href="cahier-des-charges.html" class="dn-btn">
+      <span class="dn-icon">📄</span>
+      <span class="dn-lbl">CDC</span>
+    </a>
+      <a href="https://dylan-blanc.github.io/UserStory-MarsAI/" class="dn-btn" target="_blank">
+      <span class="dn-icon">📋</span>
+      <span class="dn-lbl">User Stories</span>
+    </a>
+</div>
 
 </body>
 </html>

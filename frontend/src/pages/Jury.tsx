@@ -1,0 +1,20 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+const Jury = (): React.JSX.Element => {
+    return (
+        <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-900 to-zinc-900 text-white">
+            <div className="max-w-2xl p-8 text-center">
+                <h1 className="text-3xl font-bold mb-4">Jury</h1>
+                <p className="mb-6">
+                    Bonjour Jean-Denis — cette page est dédiée au développement des pages Jury.
+                </p>
+                <Link to="/" className="text-sm underline">
+                    Retour à l'accueil
+                </Link>
+            </div>
+        </main>
+    );
+};
+
+export default Jury;
