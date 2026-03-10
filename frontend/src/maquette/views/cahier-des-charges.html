@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cahier des Charges — marsAI 2026</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--deep-sky);
+      color: var(--white-soft);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      line-height: 1.7;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ══════════════════════════════
+       SIDEBAR
+    ══════════════════════════════ */
+    .sidebar {
+      width: 252px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 20;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .sb-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sb-logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .sb-logo .ai { color: var(--aurora); }
+    .sb-tagline {
+      font-size: 0.65rem;
+      color: var(--mist);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+    .sb-doc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 5px 10px;
+      background: rgba(78,255,206,0.07);
+      border: 1px solid rgba(78,255,206,0.18);
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--aurora);
+      font-weight: 700;
+    }
+    .sb-doc-badge::before { content: '●'; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .sb-section-label {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(136,146,176,0.5);
+      padding: 16px 20px 6px;
+    }
+
+    .toc-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 0.76rem;
+      color: var(--mist);
+      text-decoration: none;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toc-link:hover { color: var(--white-soft); background: rgba(255,255,255,0.03); }
+    .toc-link.active {
+      color: var(--white-soft);
+      background: rgba(78,255,206,0.05);
+      border-left-color: var(--aurora);
+    }
+    .toc-num {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--aurora);
+      opacity: 0.6;
+      width: 20px;
+      flex-shrink: 0;
+    }
+    .toc-link.active .toc-num { opacity: 1; }
+
+    .sb-stats {
+      margin: 16px 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .sb-stat { text-align: center; }
+    .sb-stat-val { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: var(--aurora); }
+    .sb-stat-lab { font-size: 0.6rem; color: var(--mist); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
+
+    .sb-footer {
+      margin-top: auto;
+      padding: 16px 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .btn-print {
+      width: 100%;
+      padding: 10px;
+      background: rgba(245,230,66,0.07);
+      border: 1px solid rgba(245,230,66,0.22);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--solar);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-print:hover { background: rgba(245,230,66,0.14); }
+    .sb-version { font-size: 0.62rem; color: rgba(136,146,176,0.4); text-align: center; margin-top: 10px; font-family: var(--font-mono); }
+
+    /* ══════════════════════════════
+       MAIN
+    ══════════════════════════════ */
+    .main {
+      margin-left: 252px;
+      flex: 1;
+      max-width: 900px;
+      padding: 52px 60px 120px;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -80px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(78,255,206,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cover-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--aurora);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cover-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px; height: 1px;
+      background: var(--aurora);
+    }
+    .cover-title {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .cover-title .accent { color: var(--aurora); }
+    .cover-sub {
+      font-size: 1rem;
+      color: var(--mist);
+      margin-bottom: 24px;
+      max-width: 580px;
+    }
+
+    .cover-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+    .pill-aurora { background: rgba(78,255,206,0.07); border: 1px solid rgba(78,255,206,0.22); color: var(--aurora); }
+    .pill-solar  { background: rgba(245,230,66,0.07); border: 1px solid rgba(245,230,66,0.22); color: var(--solar); }
+    .pill-lavande{ background: rgba(192,132,252,0.07); border: 1px solid rgba(192,132,252,0.22); color: var(--lavande); }
+    .pill-mist   { background: rgba(136,146,176,0.07); border: 1px solid rgba(136,146,176,0.22); color: var(--mist); }
+
+    .cover-kpi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .kpi {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .kpi-val { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+    .kpi-lab { font-size: 0.65rem; color: var(--mist); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+    .kpi-aurora { color: var(--aurora); }
+    .kpi-solar  { color: var(--solar); }
+    .kpi-lavande{ color: var(--lavande); }
+    .kpi-coral  { color: var(--coral); }
+
+    .cover-partners {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+    }
+    .partner-label { font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+    .partner-sep { height: 20px; width: 1px; background: rgba(255,255,255,0.1); }
+    .partner-logos { display: flex; gap: 10px; }
+    .partner-logo {
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--white-soft);
+    }
+    .partner-date {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--mist);
+    }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 60px; scroll-margin-top: 28px; }
+
+    .sec-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+    .sec-num {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--aurora);
+      background: rgba(78,255,206,0.08);
+      border: 1px solid rgba(78,255,206,0.2);
+      border-radius: 6px;
+      padding: 4px 8px;
+      flex-shrink: 0;
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+    .sec-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .sec-rule {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 16px 0 20px;
+    }
+
+    p.lead { color: var(--mist-light); margin-bottom: 16px; }
+    p.lead strong { color: var(--white-soft); }
+
+    /* Info table */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .info-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .info-table tr:last-child { border-bottom: none; }
+    .info-table td { padding: 10px 16px; vertical-align: top; }
+    .info-table td:first-child {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--mist);
+      background: rgba(255,255,255,0.02);
+      width: 160px;
+      white-space: nowrap;
+    }
+    .info-table td:last-child { font-size: 0.82rem; color: var(--white-soft); }
+
+    /* Highlight box */
+    .highlight-box {
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .hb-aurora { background: rgba(78,255,206,0.06); border: 1px solid rgba(78,255,206,0.2); color: var(--mist-light); }
+    .hb-aurora strong { color: var(--aurora); }
+    .hb-solar { background: rgba(245,230,66,0.06); border: 1px solid rgba(245,230,66,0.2); color: var(--mist-light); }
+    .hb-solar strong { color: var(--solar); }
+    .hb-coral { background: rgba(255,107,107,0.06); border: 1px solid rgba(255,107,107,0.2); color: var(--mist-light); }
+    .hb-coral strong { color: var(--coral); }
+    .hb-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* Card grid */
+    .card-grid { display: grid; gap: 12px; margin-bottom: 18px; }
+    .cg-2 { grid-template-columns: repeat(2, 1fr); }
+    .cg-3 { grid-template-columns: repeat(3, 1fr); }
+    .cg-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .card-icon { font-size: 1rem; }
+    .card-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+    .cl-aurora { color: var(--aurora); border-color: rgba(78,255,206,0.2); }
+    .cl-solar  { color: var(--solar); }
+    .cl-lavande{ color: var(--lavande); }
+    .cl-coral  { color: var(--coral); }
+    .cl-mist   { color: var(--mist); }
+    .card.ca { border-color: rgba(78,255,206,0.18); }
+    .card.cs { border-color: rgba(245,230,66,0.18); }
+    .card.cl { border-color: rgba(192,132,252,0.18); }
+    .card.cc { border-color: rgba(255,107,107,0.18); }
+
+    .card ul { list-style: none; }
+    .card ul li {
+      font-size: 0.78rem;
+      color: var(--mist-light);
+      padding: 3px 0 3px 14px;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .card ul li:last-child { border-bottom: none; }
+    .card ul li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--mist);
+      opacity: 0.5;
+      font-weight: 700;
+    }
+
+    /* Status row */
+    .status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .sb-ok     { background: rgba(78,255,206,0.07);  border: 1px solid rgba(78,255,206,0.25);  color: var(--aurora); }
+    .sb-warn   { background: rgba(245,230,66,0.07);  border: 1px solid rgba(245,230,66,0.25);  color: var(--solar); }
+    .sb-refuse { background: rgba(255,107,107,0.07); border: 1px solid rgba(255,107,107,0.25); color: var(--coral); }
+
+    /* Flow steps */
+    .flow { display: flex; flex-direction: column; gap: 0; margin-bottom: 18px; }
+    .flow-step { display: flex; gap: 14px; padding: 10px 0; position: relative; }
+    .flow-step::before {
+      content: '';
+      position: absolute;
+      left: 14px; top: 38px; bottom: -4px;
+      width: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .flow-step:last-child::before { display: none; }
+    .flow-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(78,255,206,0.08);
+      border: 1px solid rgba(78,255,206,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--aurora);
+      flex-shrink: 0;
+    }
+    .flow-body { padding-top: 4px; }
+    .flow-title { font-size: 0.82rem; font-weight: 700; color: var(--white-soft); margin-bottom: 2px; }
+    .flow-desc  { font-size: 0.75rem; color: var(--mist); line-height: 1.5; }
+
+    /* Naming convention */
+    .naming {
+      background: rgba(10,15,46,0.8);
+      border: 1px solid rgba(78,255,206,0.18);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--aurora);
+      margin: 12px 0;
+      word-break: break-all;
+    }
+    .naming-ex { font-size: 0.7rem; color: var(--mist); margin-top: 6px; }
+
+    /* Phase timeline */
+    .phase-timeline { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .phase {
+      display: flex;
+      gap: 14px;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      align-items: flex-start;
+    }
+    .phase-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      letter-spacing: 0.06em;
+    }
+    .pb-1 { background: rgba(78,255,206,0.08);  color: var(--aurora);  border: 1px solid rgba(78,255,206,0.22); }
+    .pb-2 { background: rgba(245,230,66,0.08);  color: var(--solar);   border: 1px solid rgba(245,230,66,0.22); }
+    .pb-3 { background: rgba(192,132,252,0.08); color: var(--lavande); border: 1px solid rgba(192,132,252,0.22); }
+    .phase-title { font-size: 0.88rem; font-weight: 700; color: var(--white-soft); margin-bottom: 5px; }
+    .phase-desc  { font-size: 0.76rem; color: var(--mist); line-height: 1.5; }
+
+    /* Toggle option */
+    .toggle-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .to-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .to-a { background: rgba(78,255,206,0.08);  color: var(--aurora);  border: 1px solid rgba(78,255,206,0.22); }
+    .to-b { background: rgba(245,230,66,0.08);  color: var(--solar);   border: 1px solid rgba(245,230,66,0.22); }
+    .to-text { font-size: 0.78rem; color: var(--mist-light); }
+    .to-text strong { color: var(--white-soft); display: block; margin-bottom: 2px; font-size: 0.8rem; }
+
+    /* Tech grid */
+    .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+    }
+    .tech-icon { font-size: 1.1rem; }
+    .tech-name { font-size: 0.78rem; font-weight: 700; color: var(--white-soft); }
+    .tech-role { font-size: 0.66rem; color: var(--mist); }
+
+    /* ══════════════════════════════
+       USER STORIES
+    ══════════════════════════════ */
+    .persona-block { margin-bottom: 36px; }
+
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+    .ph-visiteur { background: rgba(136,146,176,0.06); border: 1px solid rgba(136,146,176,0.18); }
+    .ph-realisateur { background: rgba(78,255,206,0.05); border: 1px solid rgba(78,255,206,0.18); }
+    .ph-jury { background: rgba(192,132,252,0.05); border: 1px solid rgba(192,132,252,0.18); }
+    .ph-admin { background: rgba(255,107,107,0.05); border: 1px solid rgba(255,107,107,0.18); }
+
+    .ph-icon { font-size: 1.4rem; }
+    .ph-info { flex: 1; }
+    .ph-name { font-family: var(--font-display); font-size: 0.92rem; font-weight: 800; }
+    .ph-theme { font-size: 0.7rem; color: var(--mist); margin-top: 1px; }
+    .ph-count {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .pc-v { background: rgba(136,146,176,0.1); color: var(--mist);    border: 1px solid rgba(136,146,176,0.2); }
+    .pc-r { background: rgba(78,255,206,0.08);  color: var(--aurora);  border: 1px solid rgba(78,255,206,0.2); }
+    .pc-j { background: rgba(192,132,252,0.08); color: var(--lavande); border: 1px solid rgba(192,132,252,0.2); }
+    .pc-a { background: rgba(255,107,107,0.08); color: var(--coral);   border: 1px solid rgba(255,107,107,0.2); }
+
+    .us-table { width: 100%; border-collapse: collapse; }
+    .us-table thead tr {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .us-table thead th {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(136,146,176,0.6);
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .us-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.12s;
+    }
+    .us-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .us-table tbody tr:last-child { border-bottom: none; }
+    .us-table td { padding: 10px 10px; vertical-align: top; }
+
+    .us-id {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 5px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+    .uid-v { background: rgba(136,146,176,0.1);  color: var(--mist); }
+    .uid-r { background: rgba(78,255,206,0.08);  color: var(--aurora); }
+    .uid-j { background: rgba(192,132,252,0.08); color: var(--lavande); }
+    .uid-a { background: rgba(255,107,107,0.08); color: var(--coral); }
+
+    .us-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--mist);
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    .us-story-title { font-size: 0.8rem; font-weight: 700; color: var(--white-soft); margin-bottom: 4px; }
+    .us-formula { font-size: 0.74rem; color: var(--mist); line-height: 1.5; }
+    .us-formula em { color: var(--mist-light); font-style: normal; }
+    .us-formula .w { color: var(--white-soft); }
+    .us-formula .g { color: var(--aurora); opacity: 0.8; }
+
+    /* ── DOCUMENT FOOTER ── */
+    .doc-footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.68rem;
+      color: rgba(136,146,176,0.5);
+      font-family: var(--font-mono);
+    }
+
+    /* ══════════════════════════════
+       IMPRESSION
+    ══════════════════════════════ */
+    @media print {
+      @page {
+        size: A4;
+        margin: 18mm 16mm 18mm 16mm;
+      }
+
+      /* Masquer éléments non imprimables */
+      .sidebar, #dev-nav, .sb-footer { display: none !important; }
+      .cover::before { display: none; }
+
+      /* Reset layout */
+      body {
+        background: white !important;
+        color: #1a1a2e !important;
+        font-size: 9pt;
+        line-height: 1.5;
+        display: block;
+      }
+      .main {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      /* Couleurs texte adaptées print */
+      :root {
+        --white-soft: #1a1a2e;
+        --mist: #555;
+        --mist-light: #333;
+        --aurora: #00897b;
+        --solar: #b8860b;
+        --lavande: #7b4fa6;
+        --coral: #c0392b;
+        --surface: #f5f5f5;
+        --surface-2: #efefef;
+      }
+
+      /* Page de couverture */
+      .cover {
+        border-bottom: 2pt solid #e0e0e0 !important;
+        padding-bottom: 20pt !important;
+        margin-bottom: 24pt !important;
+        page-break-after: avoid;
+      }
+      .cover-title { font-size: 24pt !important; color: #1a1a2e !important; }
+      .cover-title .accent { color: #00897b !important; }
+      .cover-sub { color: #555 !important; font-size: 11pt !important; }
+      .cover-eyebrow { color: #00897b !important; }
+
+      .cover-kpi {
+        background: none !important;
+        border: 1pt solid #ddd !important;
+        border-radius: 6pt !important;
+      }
+      .kpi { border: none !important; background: none !important; }
+      .kpi-val { font-size: 18pt !important; }
+      .kpi-aurora { color: #00897b !important; }
+      .kpi-solar  { color: #b8860b !important; }
+      .kpi-lavande{ color: #7b4fa6 !important; }
+      .kpi-coral  { color: #c0392b !important; }
+
+      .cover-pills { gap: 6pt !important; }
+      .pill { border: 1pt solid #ccc !important; background: #f8f8f8 !important; color: #333 !important; }
+      .pill-aurora { border-color: #00897b !important; color: #00897b !important; }
+      .pill-solar  { border-color: #b8860b !important; color: #b8860b !important; }
+      .pill-lavande{ border-color: #7b4fa6 !important; color: #7b4fa6 !important; }
+
+      .cover-partners {
+        background: #f8f8f8 !important;
+        border: 1pt solid #ddd !important;
+      }
+      .partner-logo { background: #eee !important; border: 1pt solid #ccc !important; color: #333 !important; }
+      .partner-label { color: #888 !important; }
+      .partner-date { color: #888 !important; }
+
+      /* Sections */
+      .section { margin-bottom: 18pt !important; }
+      .sec-head { page-break-after: avoid; }
+      .sec-rule { background: #ddd !important; margin: 8pt 0 12pt !important; page-break-after: avoid; }
+      .sec-num {
+        background: #e8f5e9 !important;
+        border: 1pt solid #00897b !important;
+        color: #00897b !important;
+      }
+      .sec-title { color: #1a1a2e !important; font-size: 13pt !important; }
+
+      /* Info table */
+      .info-table { border: 1pt solid #ddd !important; }
+      .info-table tr { border-bottom: 1pt solid #eee !important; }
+      .info-table td:first-child { background: #f5f5f5 !important; color: #555 !important; }
+      .info-table td:last-child { color: #1a1a2e !important; }
+
+      /* Cards */
+      .card {
+        background: #f9f9f9 !important;
+        border: 1pt solid #ddd !important;
+        page-break-inside: avoid;
+      }
+      .card.ca { border-color: #00897b !important; }
+      .card.cs { border-color: #b8860b !important; }
+      .card.cl { border-color: #7b4fa6 !important; }
+      .card.cc { border-color: #c0392b !important; }
+      .card-label.cl-aurora { color: #00897b !important; }
+      .card-label.cl-solar  { color: #b8860b !important; }
+      .card-label.cl-lavande{ color: #7b4fa6 !important; }
+      .card-label.cl-coral  { color: #c0392b !important; }
+      .card ul li { color: #333 !important; border-color: #eee !important; }
+      .card ul li::before { color: #999 !important; }
+
+      /* Highlight boxes */
+      .highlight-box { border: 1pt solid #ccc !important; page-break-inside: avoid; }
+      .hb-aurora { background: #e8f5e9 !important; border-color: #00897b !important; }
+      .hb-solar  { background: #fffde7 !important; border-color: #b8860b !important; }
+      .hb-coral  { background: #fce4ec !important; border-color: #c0392b !important; }
+
+      /* Status badges */
+      .status-badge { border: 1pt solid !important; }
+      .sb-ok     { background: #e8f5e9 !important; color: #00897b !important; border-color: #00897b !important; }
+      .sb-warn   { background: #fffde7 !important; color: #b8860b !important; border-color: #b8860b !important; }
+      .sb-refuse { background: #fce4ec !important; color: #c0392b !important; border-color: #c0392b !important; }
+
+      /* Flow steps */
+      .flow-step { page-break-inside: avoid; }
+      .flow-dot { background: #e8f5e9 !important; border-color: #00897b !important; color: #00897b !important; }
+      .flow-title { color: #1a1a2e !important; }
+      .flow-desc  { color: #555 !important; }
+      .flow-step::before { background: #ddd !important; }
+
+      /* Naming box */
+      .naming { background: #f0fdf4 !important; border-color: #00897b !important; color: #00897b !important; }
+      .naming-ex { color: #666 !important; }
+
+      /* Phases */
+      .phase { background: #f9f9f9 !important; border: 1pt solid #ddd !important; page-break-inside: avoid; }
+      .pb-1 { background: #e8f5e9 !important; color: #00897b !important; border-color: #00897b !important; }
+      .pb-2 { background: #fffde7 !important; color: #b8860b !important; border-color: #b8860b !important; }
+      .pb-3 { background: #f3e5f5 !important; color: #7b4fa6 !important; border-color: #7b4fa6 !important; }
+      .phase-title { color: #1a1a2e !important; }
+      .phase-desc  { color: #555 !important; }
+
+      /* Toggle opts */
+      .toggle-opt { background: #f9f9f9 !important; border: 1pt solid #ddd !important; page-break-inside: avoid; }
+      .to-badge.to-a { background: #e8f5e9 !important; color: #00897b !important; border-color: #00897b !important; }
+      .to-badge.to-b { background: #fffde7 !important; color: #b8860b !important; border-color: #b8860b !important; }
+      .to-text { color: #333 !important; }
+      .to-text strong { color: #1a1a2e !important; }
+
+      /* Tech grid */
+      .tech-item { background: #f9f9f9 !important; border: 1pt solid #ddd !important; page-break-inside: avoid; }
+      .tech-name { color: #1a1a2e !important; }
+      .tech-role { color: #666 !important; }
+
+      /* ── USER STORIES PRINT ── */
+      .section[id^="us-"] { page-break-before: always; }
+
+      .persona-block { margin-bottom: 14pt !important; }
+      .persona-header {
+        padding: 10pt 12pt !important;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+      }
+      .ph-visiteur    { background: #f5f5f5 !important; border: 1pt solid #ccc !important; }
+      .ph-realisateur { background: #e8f5e9 !important; border: 1pt solid #00897b !important; }
+      .ph-jury        { background: #f3e5f5 !important; border: 1pt solid #7b4fa6 !important; }
+      .ph-admin       { background: #fce4ec !important; border: 1pt solid #c0392b !important; }
+      .ph-name { color: #1a1a2e !important; font-size: 11pt !important; }
+      .ph-theme { color: #555 !important; }
+      .ph-count { border: 1pt solid #ccc !important; color: #333 !important; background: white !important; }
+      .pc-v { color: #555 !important; }
+      .pc-r { color: #00897b !important; border-color: #00897b !important; background: #e8f5e9 !important; }
+      .pc-j { color: #7b4fa6 !important; border-color: #7b4fa6 !important; background: #f3e5f5 !important; }
+      .pc-a { color: #c0392b !important; border-color: #c0392b !important; background: #fce4ec !important; }
+
+      .us-table { border-collapse: collapse !important; width: 100% !important; }
+      .us-table thead { display: table-header-group; }
+      .us-table thead tr { border-bottom: 1.5pt solid #ccc !important; }
+      .us-table thead th {
+        color: #888 !important;
+        font-size: 7pt !important;
+        padding: 5pt 8pt !important;
+        background: #f5f5f5 !important;
+      }
+      .us-table tbody tr { border-bottom: 0.5pt solid #eee !important; page-break-inside: avoid; }
+      .us-table tbody tr:hover { background: none !important; }
+      .us-table td { padding: 7pt 8pt !important; }
+
+      .us-id {
+        font-size: 7pt !important;
+        padding: 2pt 5pt !important;
+      }
+      .uid-v { background: #f0f0f0 !important; color: #555 !important; }
+      .uid-r { background: #e8f5e9 !important; color: #00897b !important; }
+      .uid-j { background: #f3e5f5 !important; color: #7b4fa6 !important; }
+      .uid-a { background: #fce4ec !important; color: #c0392b !important; }
+
+      .us-tag { background: #f0f0f0 !important; border: 0.5pt solid #ccc !important; color: #666 !important; font-size: 7pt !important; }
+      .us-story-title { color: #1a1a2e !important; font-size: 9pt !important; }
+      .us-formula { color: #444 !important; font-size: 8pt !important; }
+      .us-formula .w { color: #1a1a2e !important; }
+      .us-formula .g { color: #00897b !important; opacity: 1 !important; }
+
+      /* Liens */
+      a[href] { color: #00897b !important; text-decoration: none !important; }
+
+      /* Footer */
+      .doc-footer {
+        border-top: 1pt solid #ddd !important;
+        color: #aaa !important;
+        font-size: 7pt !important;
+        margin-top: 24pt !important;
+      }
+
+      /* Grilles responsive → colonne unique sur print */
+      .card-grid.cg-3 { grid-template-columns: repeat(2, 1fr) !important; }
+      .card-grid.cg-4 { grid-template-columns: repeat(2, 1fr) !important; }
+      .tech-grid      { grid-template-columns: repeat(2, 1fr) !important; }
+      .cover-kpi      { grid-template-columns: repeat(4, 1fr) !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== -->
+<!-- SIDEBAR               -->
+<!-- ===================== -->
+<!-- Barre latérale avec sommaire et navigation — futur composant <Sidebar> -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">mars<span class="ai">AI</span></div>
+    <div class="sb-tagline">Festival Courts-Métrages IA · 2026</div>
+    <div class="sb-doc-badge">Cahier des charges v1.0</div>
+  </div>
+
+  <div class="sb-stats">
+    <div class="sb-stat"><div class="sb-stat-val">36</div><div class="sb-stat-lab">User Stories</div></div>
+    <div class="sb-stat"><div class="sb-stat-val">4</div><div class="sb-stat-lab">Personas</div></div>
+    <div class="sb-stat"><div class="sb-stat-val">9</div><div class="sb-stat-lab">Sections</div></div>
+    <div class="sb-stat"><div class="sb-stat-val">3</div><div class="sb-stat-lab">Phases</div></div>
+  </div>
+
+  <div class="sb-section-label">Sommaire</div>
+
+  <!-- .toc-link (élément répétable - futur composant React possible) -->
+  <a class="toc-link" href="#s1"><span class="toc-num">01</span>Identité &amp; Concept</a>
+  <a class="toc-link" href="#s2"><span class="toc-num">02</span>Soumission publique</a>
+  <a class="toc-link" href="#s3"><span class="toc-num">03</span>Vidéo &amp; Hébergement</a>
+  <a class="toc-link" href="#s4"><span class="toc-num">04</span>Sélection &amp; Modération</a>
+  <a class="toc-link" href="#s5"><span class="toc-num">05</span>Espace Jury</a>
+  <a class="toc-link" href="#s6"><span class="toc-num">06</span>Phases publiques</a>
+  <a class="toc-link" href="#s7"><span class="toc-num">07</span>Dashboard Admin</a>
+  <a class="toc-link" href="#s8"><span class="toc-num">08</span>Stack technique</a>
+  <a class="toc-link" href="#s9"><span class="toc-num">09</span>Authentification JWT</a>
+
+  <div class="sb-section-label">User Stories</div>
+  <a class="toc-link" href="#us-visiteur"><span class="toc-num">👤</span>Visiteur (6)</a>
+  <a class="toc-link" href="#us-realisateur"><span class="toc-num">🎬</span>Réalisateur (9)</a>
+  <a class="toc-link" href="#us-jury"><span class="toc-num">⚖️</span>Jury (9)</a>
+  <a class="toc-link" href="#us-admin"><span class="toc-num">🛡️</span>Admin (12)</a>
+  <a class="toc-link" href="https://dylan-blanc.github.io/UserStory-MarsAI/" target="_blank" style="margin-top:4px;background:rgba(78,255,206,0.05);border-left-color:rgba(78,255,206,0.4);color:var(--aurora);">
+    <span class="toc-num">↗</span>User Stories (GitHub)
+  </a>
+
+  <div class="sb-footer">
+    <button class="btn-print" onclick="window.print()">🖨️ Exporter en PDF</button>
+    <div class="sb-version">v1.0 · 25 Fév. 2026</div>
+  </div>
+</aside>
+
+<!-- ===================== -->
+<!-- CONTENU PRINCIPAL     -->
+<!-- ===================== -->
+<main class="main">
+
+  <!-- ===================== -->
+  <!-- COUVERTURE            -->
+  <!-- ===================== -->
+  <!-- Page de garde du document — futur composant <Cover> -->
+  <div class="cover">
+    <div class="cover-eyebrow">Document officiel · Confidentiel</div>
+    <h1 class="cover-title">Cahier des Charges<br><span class="accent">marsAI 2026</span></h1>
+    <p class="cover-sub">Plateforme de soumission et de gestion du Festival International de Courts-Métrages IA — Marseille</p>
+
+    <div class="cover-pills">
+      <span class="pill pill-aurora">📅 25 Février 2026</span>
+      <span class="pill pill-solar">v1.0 — En validation client</span>
+      <span class="pill pill-lavande">Stack MERN · React · Node.js</span>
+      <span class="pill pill-mist">Bilingue FR / EN</span>
+    </div>
+
+    <div class="cover-kpi">
+      <div class="kpi"><div class="kpi-val kpi-aurora">36</div><div class="kpi-lab">User Stories</div></div>
+      <div class="kpi"><div class="kpi-val kpi-solar">4</div><div class="kpi-lab">Personas</div></div>
+      <div class="kpi"><div class="kpi-val kpi-lavande">3</div><div class="kpi-lab">Phases festival</div></div>
+      <div class="kpi"><div class="kpi-val kpi-coral">0</div><div class="kpi-lab">Mot de passe requis</div></div>
+    </div>
+
+    <div class="cover-partners">
+      <div class="partner-label">Co-créateurs</div>
+      <div class="partner-sep"></div>
+      <div class="partner-logos">
+        <div class="partner-logo">La Plateforme</div>
+        <div class="partner-logo">Mobile Film Festival</div>
+      </div>
+      <div class="partner-date">Marseille · 2026</div>
+    </div>
+  </div>
+
+  <!-- ===================== -->
+  <!-- SECTION 01 — IDENTITÉ -->
+  <!-- ===================== -->
+  <!-- .section (élément répétable - futur composant React possible) -->
+  <section class="section" id="s1">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <h2 class="sec-title">Identité, Concept et Objectifs</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <table class="info-table">
+      <tr><td>Nom du projet</td><td><strong>marsAI</strong> — Festival de Courts-Métrages IA</td></tr>
+      <tr><td>Édition</td><td>2026 — Marseille, France</td></tr>
+      <tr><td>Type</td><td>Concours international, courts-métrages générés par IA</td></tr>
+      <tr><td>Durée max film</td><td>1 minute (tolérance accordée si le réalisateur peut raccourcir à 1 min)</td></tr>
+      <tr><td>Thème</td><td><em style="color:var(--aurora);">"Imaginez des futurs souhaitables"</em></td></tr>
+      <tr><td>Langues interface</td><td>Bilingue Français / Anglais</td></tr>
+      <tr><td>Co-créateurs</td><td>La Plateforme · Mobile Film Festival (logos affichés sur la plateforme)</td></tr>
+    </table>
+
+    <!-- .highlight-box (élément répétable - futur composant React possible) -->
+    <div class="highlight-box hb-aurora">
+      <div class="hb-icon">💡</div>
+      <div>Le festival marsAI est le <strong>premier festival mondial</strong> dédié aux films créés par ou avec l'intelligence artificielle. La plateforme doit refléter cette ambition : moderne, accessible à l'international, sans friction pour les réalisateurs candidats.</div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 02 — SOUMISSION -->
+  <!-- ===================== -->
+  <section class="section" id="s2">
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <h2 class="sec-title">Modalités de Soumission — Formulaire Public</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <div class="highlight-box hb-solar">
+      <div class="hb-icon">⚡</div>
+      <div><strong>Aucune inscription ni connexion requise</strong> pour les réalisateurs. Les champs saisis sont mémorisés par le navigateur à chaque étape (auto-save local). <strong>Aucune modification possible</strong> après l'envoi. Dépôts multiples autorisés avec numéros individuels.</div>
+    </div>
+
+    <!-- .card dans .card-grid (élément répétable - futur composant React possible) -->
+    <div class="card-grid cg-2">
+      <div class="card ca">
+        <div class="card-head"><div class="card-icon">🎬</div><div class="card-label cl-aurora">Fiche Film</div></div>
+        <ul>
+          <li>Titre du film</li>
+          <li>Durée + langue</li>
+          <li>Thématique abordée</li>
+          <li>Synopsis FR et EN</li>
+          <li>Outils d'IA utilisés + démarche créative</li>
+        </ul>
+      </div>
+      <div class="card cs">
+        <div class="card-head"><div class="card-icon">👤</div><div class="card-label cl-solar">Fiche Réalisateur</div></div>
+        <ul>
+          <li>Civilité, nom, prénom</li>
+          <li>Email de contact</li>
+          <li>Pays de résidence</li>
+          <li>Réseaux sociaux (optionnel)</li>
+          <li>Collaborateurs avec rôles</li>
+        </ul>
+      </div>
+      <div class="card cl">
+        <div class="card-head"><div class="card-icon">📎</div><div class="card-label cl-lavande">Médias Annexes</div></div>
+        <ul>
+          <li>Poster JPG/PNG/GIF — max 2 Mo</li>
+          <li>Galerie d'images (optionnel)</li>
+          <li>Sous-titres .srt ou .vtt</li>
+          <li>Langue natale et/ou anglais</li>
+        </ul>
+      </div>
+      <div class="card cc">
+        <div class="card-head"><div class="card-icon">✅</div><div class="card-label cl-coral">Consentements</div></div>
+        <ul>
+          <li>Acceptation du règlement</li>
+          <li>Cession droits — durée festival, non-exclusive</li>
+          <li>Autorisation modifications techniques</li>
+          <li>Newsletter (optionnel)</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="lead">À la validation, le réalisateur reçoit un <strong>email de confirmation</strong> avec son numéro de candidature unique au format <code style="font-family:var(--font-mono);font-size:0.75rem;color:var(--aurora);">MAI-2026-XXXX</code>.</p>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 03 — VIDÉO    -->
+  <!-- ===================== -->
+  <section class="section" id="s3">
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <h2 class="sec-title">Flux de Soumission Vidéo et Hébergement</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <table class="info-table" style="margin-bottom:20px;">
+      <tr><td>Formats acceptés</td><td><strong>.mp4</strong> et <strong>.mov</strong> uniquement</td></tr>
+      <tr><td>Poids fichier</td><td>Entre <strong>200 Mo</strong> et <strong>300 Mo</strong> maximum</td></tr>
+      <tr><td>Traitement</td><td>Automatisé dès la validation de la soumission</td></tr>
+    </table>
+
+    <p class="lead" style="margin-bottom:12px;"><strong>Double hébergement automatique et simultané :</strong></p>
+    <!-- .flow-step (élément répétable - futur composant React possible) -->
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-dot">1</div>
+        <div class="flow-body">
+          <div class="flow-title">Bucket S3 — Scaleway</div>
+          <div class="flow-desc">Conservation sécurisée du fichier brut original. Archive permanente de référence.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">2</div>
+        <div class="flow-body">
+          <div class="flow-title">API YouTube — Chaîne privée</div>
+          <div class="flow-desc">Upload automatique sur la chaîne YouTube gérée par le client. Statut privé jusqu'à publication manuelle par l'admin.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">3</div>
+        <div class="flow-body">
+          <div class="flow-title">Convention de nommage automatique</div>
+          <div class="flow-desc">Le fichier est renommé selon la règle suivante avant stockage :</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="naming">
+      [Titre_de_la_video]_[Nom]_[Prenom]_[Date_upload]_[Nationalite].[extension]
+      <div class="naming-ex">→ Reves_de_Silicium_Fontaine_Lea_20260301_France.mp4</div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 04 — MODÉRATION -->
+  <!-- ===================== -->
+  <section class="section" id="s4">
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <h2 class="sec-title">Processus de Sélection et Modération</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <div class="highlight-box hb-coral">
+      <div class="hb-icon">🛡️</div>
+      <div><strong>Évaluation 100% humaine</strong> — aucun score automatique. Modération entièrement interne, aucun système de signalement public.</div>
+    </div>
+
+    <p class="lead"><strong>3 statuts de décision :</strong></p>
+    <div class="status-row">
+      <div class="status-badge sb-ok">✅ Validé</div>
+      <div class="status-badge sb-warn">🔄 À Revoir</div>
+      <div class="status-badge sb-refuse">❌ Refusé</div>
+    </div>
+
+    <p class="lead" style="margin-top:8px;"><strong>Système de communication par Presets (Tags) :</strong></p>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">1</div><div class="flow-body"><div class="flow-title">Attribution du statut</div><div class="flow-desc">Le modérateur choisit Validé / À revoir / Refusé</div></div></div>
+      <div class="flow-step"><div class="flow-dot">2</div><div class="flow-body"><div class="flow-title">Sélection d'un Tag de justification</div><div class="flow-desc">Exemples : Contenu inapproprié · Mauvais sous-titrage · Hors thème · Durée non conforme · Qualité insuffisante…</div></div></div>
+      <div class="flow-step"><div class="flow-dot">3</div><div class="flow-body"><div class="flow-title">Génération du Preset modifiable</div><div class="flow-desc">Le tag produit un modèle de texte éditable dans un éditeur riche</div></div></div>
+      <div class="flow-step"><div class="flow-dot">4</div><div class="flow-body"><div class="flow-title">Envoi automatique au réalisateur</div><div class="flow-desc">Validation humaine → email personnalisé envoyé immédiatement au candidat</div></div></div>
+    </div>
+
+    <p class="lead" style="font-size:0.76rem;">L'administrateur gère les presets : ajout, modification et suppression depuis le panel d'administration.</p>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 05 — JURY     -->
+  <!-- ===================== -->
+  <section class="section" id="s5">
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <h2 class="sec-title">Espace Jury et Confidentialité</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <p class="lead">Interface <strong>distincte et cloisonnée</strong> de l'espace admin. Accès uniquement via token JWT reçu par email. Chaque juré ne voit que les films qui lui sont assignés.</p>
+
+    <div class="card-grid cg-2" style="margin-bottom:20px;">
+      <div class="card ca">
+        <div class="card-head"><div class="card-icon">▶️</div><div class="card-label cl-aurora">Actions jury disponibles</div></div>
+        <ul>
+          <li>Visionner le film (lecteur intégré)</li>
+          <li>Consulter la fiche technique</li>
+          <li>Lire la fiche IA déclarée (outils, démarche)</li>
+          <li>Rédiger une note personnelle</li>
+          <li>Décision : Validé / À revoir / Refusé</li>
+          <li>Personnaliser et envoyer le message au réalisateur</li>
+          <li>Suivre sa progression (barre + compteur)</li>
+          <li>Accéder au tableau de délibération (Phase 1 &amp; 2)</li>
+        </ul>
+      </div>
+      <div class="card cc">
+        <div class="card-head"><div class="card-icon">🔒</div><div class="card-label cl-coral">Cloisonnement par défaut</div></div>
+        <ul>
+          <li>Pas de visibilité sur les choix des pairs</li>
+          <li>Pas de visibilité sur les commentaires des pairs</li>
+          <li>L'admin ne lit pas les commentaires jury</li>
+          <li>Notes personnelles privées par défaut</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="lead"><strong>Options de visibilité — toggles dynamiques (Panel Admin) :</strong></p>
+    <!-- .toggle-opt (élément répétable - futur composant React possible) -->
+    <div class="toggle-opt">
+      <div class="to-badge to-a">OPTION A</div>
+      <div class="to-text"><strong>Affichage collaboratif entre jurés</strong>Activer/désactiver la visibilité des choix et commentaires entre membres du jury</div>
+    </div>
+    <div class="toggle-opt">
+      <div class="to-badge to-b">OPTION B</div>
+      <div class="to-text"><strong>Accès admin aux commentaires jury</strong>Activer/désactiver la lecture des commentaires jury par l'administrateur</div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 06 — PHASES   -->
+  <!-- ===================== -->
+  <section class="section" id="s6">
+    <div class="sec-head">
+      <div class="sec-num">06</div>
+      <h2 class="sec-title">Affichage Public et Phases du Festival</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <p class="lead">L'affichage public est <strong>piloté dynamiquement par l'administrateur</strong> via 3 phases. Chaque phase se déclenche à une date précise, avec compte à rebours visible jusqu'à l'ouverture.</p>
+
+    <!-- .phase dans .phase-timeline (élément répétable - futur composant React possible) -->
+    <div class="phase-timeline">
+      <div class="phase">
+        <div class="phase-badge pb-1">Phase 1</div>
+        <div>
+          <div class="phase-title">La Sélection Officielle</div>
+          <div class="phase-desc">Grille de <strong style="color:var(--white-soft);">50 films sélectionnés</strong>, 20 films par page maximum. Déclenchement basé sur une date précise avec compte à rebours visible. Affichage des films, jurés et informations du programme.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-badge pb-2">Phase 2</div>
+        <div>
+          <div class="phase-title">Les Finalistes</div>
+          <div class="phase-desc">Réduction de la grille aux <strong style="color:var(--white-soft);">5 à 10 finalistes</strong> (nombre configurable par l'admin). Accès au tableau de délibération collective pour le jury.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-badge pb-3">Phase 3</div>
+        <div>
+          <div class="phase-title">Le Palmarès — Lauréats</div>
+          <div class="phase-desc">Ordre d'affichage configurable par l'admin avec <strong style="color:var(--white-soft);">planification temporelle</strong> :<br>
+          <span style="color:var(--lavande);">① Grand Prix</span> &nbsp;
+          <span style="color:var(--lavande);">② Prix du Jury</span> &nbsp;
+          <span style="color:var(--lavande);">③ Prix du Public (?)</span> &nbsp;
+          <span style="color:var(--lavande);">④ Sélections avec mentions et badges</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 07 — ADMIN    -->
+  <!-- ===================== -->
+  <section class="section" id="s7">
+    <div class="sec-head">
+      <div class="sec-num">07</div>
+      <h2 class="sec-title">Dashboard Administrateur</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <p class="lead">Back-office centralisé, accessible sans formulaire d'inscription via <strong>token JWT envoyé par email</strong>.</p>
+
+    <div class="card-grid cg-3">
+      <div class="card ca">
+        <div class="card-head"><div class="card-icon">👥</div><div class="card-label cl-aurora">Gestion Utilisateurs</div></div>
+        <ul>
+          <li>Créer comptes jury / modérateur</li>
+          <li>Envoi automatique du token par email</li>
+          <li>Désactiver / réactiver un accès</li>
+          <li>Recherche par nom, email, rôle</li>
+        </ul>
+      </div>
+      <div class="card cs">
+        <div class="card-head"><div class="card-icon">🎬</div><div class="card-label cl-solar">Gestion Films</div></div>
+        <ul>
+          <li>Visionner les films soumis</li>
+          <li>Filtrer (titre, réalisateur, pays)</li>
+          <li>Assignation manuelle au jury</li>
+          <li>Répartition automatique équitable</li>
+          <li>Publication YouTube (API)</li>
+        </ul>
+      </div>
+      <div class="card cl">
+        <div class="card-head"><div class="card-icon">📊</div><div class="card-label cl-lavande">Statistiques</div></div>
+        <ul>
+          <li>Films soumis / validés / refusés / à revoir</li>
+          <li>Détail des films par statut</li>
+          <li>Charge de travail par juré</li>
+        </ul>
+      </div>
+      <div class="card cc">
+        <div class="card-head"><div class="card-icon">📅</div><div class="card-label cl-coral">Planning &amp; Phases</div></div>
+        <ul>
+          <li>Configurer dates Phase 1 &amp; Phase 2</li>
+          <li>Calendrier public activable/désactivable</li>
+          <li>Déclenchement par date précise</li>
+        </ul>
+      </div>
+      <div class="card ca" style="grid-column: span 2;">
+        <div class="card-head"><div class="card-icon">🖥️</div><div class="card-label cl-aurora">CMS — Gestion du Site</div></div>
+        <ul style="columns: 2; gap: 20px;">
+          <li>Modifier la vidéo hero</li>
+          <li>Modifier les contenus éditoriaux</li>
+          <li>Gestion des logos et partenaires</li>
+          <li>Gestion des sponsors</li>
+          <li>Membres du jury visibles en page d'accueil</li>
+          <li>Palmarès — ajout/modification lauréats</li>
+          <li>Planification temporelle d'affichage</li>
+          <li>Gestion des presets d'emails</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 08 — TECHNIQUE -->
+  <!-- ===================== -->
+  <section class="section" id="s8">
+    <div class="sec-head">
+      <div class="sec-num">08</div>
+      <h2 class="sec-title">Spécifications Techniques et Sécurité</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <!-- .tech-item dans .tech-grid (élément répétable - futur composant React possible) -->
+    <div class="tech-grid">
+      <div class="tech-item"><div class="tech-icon">⚛️</div><div><div class="tech-name">React.js + Tailwind CSS</div><div class="tech-role">Front-end</div></div></div>
+      <div class="tech-item"><div class="tech-icon">🟩</div><div><div class="tech-name">Node.js</div><div class="tech-role">Back-end / API</div></div></div>
+      <div class="tech-item"><div class="tech-icon">🗄️</div><div><div class="tech-name">MariaDB / MySQL</div><div class="tech-role">Base de données</div></div></div>
+      <div class="tech-item"><div class="tech-icon">☁️</div><div><div class="tech-name">Scaleway S3</div><div class="tech-role">Stockage vidéos</div></div></div>
+      <div class="tech-item"><div class="tech-icon">▶️</div><div><div class="tech-name">API YouTube</div><div class="tech-role">Hébergement &amp; publication</div></div></div>
+      <div class="tech-item"><div class="tech-icon">🖼️</div><div><div class="tech-name">Serveur classique</div><div class="tech-role">Stockage posters</div></div></div>
+    </div>
+
+    <div class="card cc">
+      <div class="card-head"><div class="card-icon">🔐</div><div class="card-label cl-coral">Sécurité &amp; Performances</div></div>
+      <ul>
+        <li>Requêtes préparées — protection injection SQL</li>
+        <li>Protection stricte des uploads vidéo (type, taille, format)</li>
+        <li>Tokens JWT uniques liés à l'adresse email cible</li>
+        <li>Aucune donnée sensible exposée côté client</li>
+        <li>Score Google Lighthouse optimal visé (perf, accessibilité, SEO)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- SECTION 09 — JWT      -->
+  <!-- ===================== -->
+  <section class="section" id="s9">
+    <div class="sec-head">
+      <div class="sec-num">09</div>
+      <h2 class="sec-title">Authentification — Connexion sans mot de passe (JWT)</h2>
+    </div>
+    <div class="sec-rule"></div>
+
+    <div class="highlight-box hb-aurora">
+      <div class="hb-icon">🔑</div>
+      <div>Toutes les connexions s'effectuent via un <strong>lien unique envoyé par email</strong> contenant un token JWT lié à l'adresse email cible. <strong>Zéro mot de passe</strong> à mémoriser pour les admins et les jurés.</div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step"><div class="flow-dot">①</div><div class="flow-body"><div class="flow-title">Administrateur</div><div class="flow-desc">Reçoit un lien unique par email → clic → accès immédiat au panel d'administration</div></div></div>
+      <div class="flow-step"><div class="flow-dot">②</div><div class="flow-body"><div class="flow-title">Création d'un compte jury (depuis l'admin)</div><div class="flow-desc">L'admin saisit le nom + email du juré → email automatique envoyé avec le lien unique → le juré clique → accès à son espace sans aucun mot de passe</div></div></div>
+      <div class="flow-step"><div class="flow-dot">③</div><div class="flow-body"><div class="flow-title">Gestion des accès</div><div class="flow-desc">L'admin peut désactiver un token (accès bloqué immédiatement) ou réactiver et renvoyer un nouveau lien en un clic</div></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- USER STORIES          -->
+  <!-- ===================== -->
+  <!-- Section regroupant les 36 user stories réparties en 4 personas -->
+  <section class="section" id="us-visiteur">
+    <div class="sec-head">
+      <div class="sec-num" style="background:rgba(136,146,176,0.08);border-color:rgba(136,146,176,0.2);color:var(--mist);">US</div>
+      <h2 class="sec-title">User Stories — 36 histoires · 4 personas</h2>
+    </div>
+    <div style="margin-bottom:20px;">
+      <a href="https://dylan-blanc.github.io/UserStory-MarsAI/" target="_blank"
+        style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:rgba(78,255,206,0.07);border:1px solid rgba(78,255,206,0.25);border-radius:10px;font-family:var(--font-mono);font-size:0.72rem;font-weight:700;color:var(--aurora);text-decoration:none;transition:all 0.15s;"
+        onmouseover="this.style.background='rgba(78,255,206,0.14)'"
+        onmouseout="this.style.background='rgba(78,255,206,0.07)'">
+        ↗ Voir la source officielle — dylan-blanc.github.io/UserStory-MarsAI
+      </a>
+    </div>
+    <div class="sec-rule"></div>
+
+    <!-- .persona-block (élément répétable - futur composant React possible) -->
+    <!-- VISITEUR -->
+    <div class="persona-block">
+      <div class="persona-header ph-visiteur">
+        <div class="ph-icon">👤</div>
+        <div class="ph-info">
+          <div class="ph-name" style="color:var(--mist-light);">Visiteur Public</div>
+          <div class="ph-theme">Navigation · Découverte · Consultation des résultats</div>
+        </div>
+        <div class="ph-count pc-v">6 stories</div>
+      </div>
+      <!-- .us-table avec lignes de user stories (élément répétable - futur composant React possible) -->
+      <table class="us-table">
+        <thead><tr><th style="width:60px;">ID</th><th style="width:90px;">Tag</th><th>Histoire utilisateur</th></tr></thead>
+        <tbody>
+          <tr><td><span class="us-id uid-v">V01</span></td><td><span class="us-tag">UX</span></td><td><div class="us-story-title">Découvrir le festival</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>accéder au concept, thème, partenaires et vidéo démo</em> afin de <em class="g">comprendre l'univers et décider de participer</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-v">V02</span></td><td><span class="us-tag">Contenu</span></td><td><div class="us-story-title">Consulter le programme</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>voir les dates, l'adresse, les films, nominés et membres du jury</em> afin de <em class="g">planifier ma venue à Marseille</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-v">V03</span></td><td><span class="us-tag">Média</span></td><td><div class="us-story-title">Visionner un film sélectionné</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>lire un film directement dans la plateforme</em> afin d'<em class="g">évaluer la qualité des œuvres avant les nominations</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-v">V04</span></td><td><span class="us-tag">Info</span></td><td><div class="us-story-title">Découvrir les jurés</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>lire les profils et expertises des membres du jury</em> afin de <em class="g">connaître les décideurs et leurs compétences</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-v">V05</span></td><td><span class="us-tag">Résultats</span></td><td><div class="us-story-title">Voir le palmarès</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>consulter les récompenses et résultats du festival</em> afin de <em class="g">découvrir les œuvres primées</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-v">V07</span></td><td><span class="us-tag">i18n</span></td><td><div class="us-story-title">Changer la langue FR/EN</div><div class="us-formula">En tant que <em class="w">visiteur</em>, je veux <em>basculer l'interface en français ou en anglais</em> afin d'<em class="g">accéder au contenu dans ma langue</em>.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RÉALISATEUR -->
+    <div class="persona-block" id="us-realisateur">
+      <div class="persona-header ph-realisateur">
+        <div class="ph-icon">🎬</div>
+        <div class="ph-info">
+          <div class="ph-name" style="color:var(--aurora);">Réalisateur (Candidat)</div>
+          <div class="ph-theme">Dépôt · Candidature · Notifications</div>
+        </div>
+        <div class="ph-count pc-r">9 stories</div>
+      </div>
+      <table class="us-table">
+        <thead><tr><th style="width:60px;">ID</th><th style="width:90px;">Tag</th><th>Histoire utilisateur</th></tr></thead>
+        <tbody>
+          <tr><td><span class="us-id uid-r">R01</span></td><td><span class="us-tag">Identité</span></td><td><div class="us-story-title">Créer son profil réalisateur</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>saisir mes données personnelles, civilités, contacts et réseaux</em> afin de <em class="g">soumettre ma candidature et permettre au festival de me contacter</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R01.1</span></td><td><span class="us-tag">Contenu</span></td><td><div class="us-story-title">Définir mes collaborateurs</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>renseigner les civilités, noms, professions et rôles de mon équipe</em> afin de <em class="g">nommer tous les contributeurs avec un réalisateur principal identifié</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R02</span></td><td><span class="us-tag">Upload</span></td><td><div class="us-story-title">Décrire mon film</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>renseigner titre, durée, langue, thématique et synopsis FR/EN</em> afin de <em class="g">décrire clairement mon œuvre et la technologie IA utilisée</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R03</span></td><td><span class="us-tag">Upload</span></td><td><div class="us-story-title">Uploader mon film</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>téléverser mon film 1 min (.mp4/.mov), sous-titres .srt, galerie et affiche</em> afin de <em class="g">respecter les règles techniques et l'identité visuelle du festival</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R03.1</span></td><td><span class="us-tag">Légal</span></td><td><div class="us-story-title">Valider la conformité légale</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>céder les droits d'auteur pour la durée du festival</em> afin de <em class="g">permettre la diffusion et les modifications techniques nécessaires</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R03.2</span></td><td><span class="us-tag">Notification</span></td><td><div class="us-story-title">Recevoir la confirmation de dépôt</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>recevoir un email avec mon numéro de candidature MAI-2026-XXXX</em> afin d'<em class="g">obtenir une preuve officielle et suivre ma candidature</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R04</span></td><td><span class="us-tag">Multi-dépôt</span></td><td><div class="us-story-title">Soumettre plusieurs films</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>déposer plusieurs candidatures distinctes avec numéros individuels</em> afin de <em class="g">ne pas limiter ma créativité à une seule œuvre</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R07</span></td><td><span class="us-tag">Notification</span></td><td><div class="us-story-title">Être notifié d'une demande de révision</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>recevoir un email avec le statut "À revoir" et la raison précise</em> afin de <em class="g">soumettre une version améliorée de mon film</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-r">R08</span></td><td><span class="us-tag">UX</span></td><td><div class="us-story-title">Bénéficier de la sauvegarde automatique</div><div class="us-formula">En tant que <em class="w">réalisateur</em>, je veux <em>que le formulaire se sauvegarde automatiquement à chaque étape (auto-save local)</em> afin de <em class="g">reprendre ma candidature sans perte de données</em>.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- JURY -->
+    <div class="persona-block" id="us-jury">
+      <div class="persona-header ph-jury">
+        <div class="ph-icon">⚖️</div>
+        <div class="ph-info">
+          <div class="ph-name" style="color:var(--lavande);">Membre du Jury</div>
+          <div class="ph-theme">Évaluation · Délibération · Confidentialité</div>
+        </div>
+        <div class="ph-count pc-j">9 stories</div>
+      </div>
+      <table class="us-table">
+        <thead><tr><th style="width:60px;">ID</th><th style="width:90px;">Tag</th><th>Histoire utilisateur</th></tr></thead>
+        <tbody>
+          <tr><td><span class="us-id uid-j">J01</span></td><td><span class="us-tag">Auth</span></td><td><div class="us-story-title">Se connecter sans mot de passe</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>accéder à mon espace via un lien permanent (token JWT) reçu par email</em> afin d'<em class="g">avoir un accès sécurisé sans avoir de mot de passe à mémoriser</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J02</span></td><td><span class="us-tag">Vue</span></td><td><div class="us-story-title">Voir mes films assignés</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>consulter uniquement mes films, triés par statut d'évaluation</em> afin de <em class="g">me concentrer sur mon lot sans distraction</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J03</span></td><td><span class="us-tag">Lecteur</span></td><td><div class="us-story-title">Visionner dans le lecteur intégré</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>utiliser un lecteur vidéo intégré (play, pause, volume, plein écran)</em> afin d'<em class="g">évaluer les films directement sans quitter l'interface</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J04</span></td><td><span class="us-tag">Technique</span></td><td><div class="us-story-title">Vérifier la fiche technique</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>accéder aux métadonnées du film (durée, format, résolution)</em> afin de <em class="g">vérifier la conformité technique avant évaluation</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J05</span></td><td><span class="us-tag">IA</span></td><td><div class="us-story-title">Lire la fiche IA déclarée</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>consulter les outils IA utilisés et la démarche créative du réalisateur</em> afin d'<em class="g">évaluer la pertinence et l'originalité de l'usage de l'IA générative</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J06</span></td><td><span class="us-tag">Évaluation</span></td><td><div class="us-story-title">Prendre ma décision</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>choisir Validé / À revoir / Refusé avec un message pré-rempli modifiable</em> afin de <em class="g">transmettre mon avis et contribuer à la constitution du Top 50</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J07</span></td><td><span class="us-tag">Collab</span></td><td><div class="us-story-title">Rédiger une note personnelle</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>écrire une note visible uniquement pour moi</em> afin de <em class="g">m'aider lors de la révision sans influencer les autres membres du jury</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J08</span></td><td><span class="us-tag">Suivi</span></td><td><div class="us-story-title">Suivre ma progression</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>voir une barre de progression et un compteur de films évalués</em> afin de <em class="g">suivre mon avancement et ne manquer aucun film</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-j">J09</span></td><td><span class="us-tag">Délibération</span></td><td><div class="us-story-title">Accéder au tableau de délibération</div><div class="us-formula">En tant que <em class="w">juré</em>, je veux <em>consulter un tableau récapitulatif des votes (Phase 1 &amp; 2)</em> afin de <em class="g">visualiser l'ensemble des décisions et délibérer collectivement</em>.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="persona-block" id="us-admin">
+      <div class="persona-header ph-admin">
+        <div class="ph-icon">🛡️</div>
+        <div class="ph-info">
+          <div class="ph-name" style="color:var(--coral);">Administrateur</div>
+          <div class="ph-theme">Gestion · Configuration · Publication</div>
+        </div>
+        <div class="ph-count pc-a">12 stories</div>
+      </div>
+      <table class="us-table">
+        <thead><tr><th style="width:60px;">ID</th><th style="width:90px;">Tag</th><th>Histoire utilisateur</th></tr></thead>
+        <tbody>
+          <tr><td><span class="us-id uid-a">A01</span></td><td><span class="us-tag">Gestion</span></td><td><div class="us-story-title">Créer un compte jury ou modérateur</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>créer des comptes depuis le panneau d'administration</em> afin d'<em class="g">accorder l'accès uniquement aux personnes autorisées</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A02</span></td><td><span class="us-tag">Auth</span></td><td><div class="us-story-title">Envoyer le token d'accès</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>déclencher l'envoi automatique du lien permanent au nouveau compte</em> afin de <em class="g">permettre une connexion immédiate sans mot de passe</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A03</span></td><td><span class="us-tag">Sécurité</span></td><td><div class="us-story-title">Révoquer ou réactiver un accès jury</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>désactiver ou réactiver un compte sans supprimer l'historique</em> afin de <em class="g">retirer rapidement un accès en cas d'indisponibilité ou d'incident</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A04</span></td><td><span class="us-tag">Recherche</span></td><td><div class="us-story-title">Rechercher un utilisateur</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>utiliser une barre de recherche par nom, email ou rôle</em> afin de <em class="g">retrouver et gérer rapidement n'importe quel compte</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A05</span></td><td><span class="us-tag">Modération</span></td><td><div class="us-story-title">Visionner les films soumis</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>visionner les films avant leur assignation au jury</em> afin de <em class="g">vérifier la conformité (durée, qualité, format)</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A06</span></td><td><span class="us-tag">Assignation</span></td><td><div class="us-story-title">Assigner des films au jury</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>assigner les films manuellement ou via une répartition automatique équitable en 1 clic</em> afin de <em class="g">répartir la charge de travail de façon juste et efficace</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A07</span></td><td><span class="us-tag">Filtrage</span></td><td><div class="us-story-title">Filtrer les candidatures</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>filtrer les films par titre, réalisateur, pays et statut d'assignation</em> afin de <em class="g">retrouver rapidement n'importe quel film dans le catalogue</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A08</span></td><td><span class="us-tag">Planning</span></td><td><div class="us-story-title">Gérer les phases et les dates</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>configurer les dates d'ouverture des Phase 1 (Top 50) et Phase 2 (Top 5)</em> afin de <em class="g">planifier le calendrier officiel du festival</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A09</span></td><td><span class="us-tag">CMS</span></td><td><div class="us-story-title">Administrer le contenu du site</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>modifier la vidéo hero, nom, description, contacts et réseaux sociaux</em> afin de <em class="g">maintenir le site à jour sans intervention technique</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A10</span></td><td><span class="us-tag">Calendrier</span></td><td><div class="us-story-title">Gérer le calendrier public</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>activer ou désactiver les étapes affichées dans le calendrier public</em> afin d'<em class="g">informer les visiteurs des dates importantes du festival</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A11</span></td><td><span class="us-tag">Gestion</span></td><td><div class="us-story-title">Gérer un site modulable</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>modifier ou ajouter des sections, titres et textes sur la page d'accueil</em> afin de <em class="g">mettre à jour la communication selon l'avancée du festival</em>.</div></td></tr>
+          <tr><td><span class="us-id uid-a">A12</span></td><td><span class="us-tag">Palmarès</span></td><td><div class="us-story-title">Gérer l'affichage du palmarès</div><div class="us-formula">En tant qu'<em class="w">admin</em>, je veux <em>modifier dynamiquement le palmarès, les images et sponsors avec une planification temporelle d'affichage</em> afin d'<em class="g">afficher les résultats au moment précis choisi</em>.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- PIED DE DOCUMENT      -->
+  <!-- ===================== -->
+  <div class="doc-footer">
+    <div>mars<strong style="color:var(--aurora);">AI</strong> 2026 — Document confidentiel · Tous droits réservés</div>
+    <div>v1.0 · 25 Février 2026 · 36 user stories</div>
+  </div>
+</main>
+
+<script>
+  // TOC highlight on scroll
+  const sections = document.querySelectorAll('.section[id], .persona-block[id]');
+  const links = document.querySelectorAll('.toc-link');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const l = document.querySelector(`.toc-link[href="#${e.target.id}"]`);
+        if (l) l.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+  sections.forEach(s => io.observe(s));
+</script>
+
+<!-- ===================== -->
+<!-- DEV-NAV               -->
+<!-- ===================== -->
+<!-- Barre de navigation développeur entre maquettes -->
+<link rel="stylesheet" href="../css/dev-nav.css">
+<div id="dev-nav">
+  <div class="dn-header">
+    <span class="dn-icon-main">🧭</span>
+    <span class="dn-title">Maquette</span>
+  </div>
+  <a href="index.html" class="dn-btn">
+    <span class="dn-icon">🏠</span>
+    <span class="dn-lbl">Accueil</span>
+  </a>
+  <div class="dn-sep"></div>
+  <a href="admin-panel.html" class="dn-btn espace-admin">
+    <span class="dn-icon">🛡️</span>
+    <span class="dn-lbl">Admin</span>
+  </a>
+  <a href="admin-jury.html" class="dn-btn espace-jury">
+    <span class="dn-icon">⚖️</span>
+    <span class="dn-lbl">Jury</span>
+  </a>
+  <a href="cahier-des-charges.html" class="dn-btn active">
+    <span class="dn-icon">📄</span>
+    <span class="dn-lbl">CDC</span>
+  </a>
+</div>
+
+</body>
+</html>

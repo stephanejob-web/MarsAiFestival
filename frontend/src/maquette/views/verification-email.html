@@ -5,20 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vérification Email — Marseille AI Festival</title>
 
-  <!-- Jetons de design (variables CSS globales) -->
+  <!-- ===================== -->
+  <!-- FEUILLES DE STYLES    -->
+  <!-- ===================== -->
   <link rel="stylesheet" href="../css/tokens.css">
-  <!-- Reset navigateur -->
   <link rel="stylesheet" href="../css/reset.css">
-  <!-- Effet grain en surimpression -->
   <link rel="stylesheet" href="../css/grain.css">
-  <!-- Styles propres à la page de vérification -->
   <link rel="stylesheet" href="../css/verification.css">
-  <!-- Barre de navigation maquette (dev) -->
   <link rel="stylesheet" href="../css/dev-nav.css">
 </head>
 <body>
 
-  <!-- ─── PANNEAU GAUCHE — Visuel festival ─── -->
+  
+  <!-- ===================== -->
+  <!-- PANNEAU GAUCHE        -->
+  <!-- ===================== -->
   <aside class="panel-left">
     <div class="left-logo">
       <div class="logo-text">mars<span>AI</span></div>
@@ -36,6 +37,7 @@
 
       <!-- Cartes descriptives du festival -->
       <div class="left-cards">
+        <!-- Left Card (élément répétable - futur composant React possible) -->
         <div class="left-card">
           <div class="left-card-icon lci-1">🎬</div>
           <div class="left-card-text">
@@ -44,6 +46,7 @@
           </div>
           <div class="left-card-check">✓</div>
         </div>
+        <!-- Left Card (élément répétable - futur composant React possible) -->
         <div class="left-card">
           <div class="left-card-icon lci-2">🤖</div>
           <div class="left-card-text">
@@ -52,6 +55,7 @@
           </div>
           <div class="left-card-check">✓</div>
         </div>
+        <!-- Left Card (élément répétable - futur composant React possible) -->
         <div class="left-card">
           <div class="left-card-icon lci-3">🌍</div>
           <div class="left-card-text">
@@ -68,7 +72,9 @@
     </div>
   </aside>
 
-  <!-- ─── PANNEAU DROIT — Formulaire de vérification ─── -->
+  <!-- ===================== -->
+  <!-- PANNEAU DROIT         -->
+  <!-- ===================== -->
   <main class="panel-right">
 
     <a href="index.html" class="right-back">← Retour au site</a>
@@ -76,6 +82,7 @@
     <div class="form-box">
 
       <!-- Indicateur d'étapes (progression) -->
+      <!-- Step Item (élément répétable - futur composant React possible) -->
       <div class="steps" id="steps-bar">
         <div class="step-item">
           <div class="step-circle active" id="sc-1">1</div>
@@ -93,7 +100,9 @@
         </div>
       </div>
 
-      <!-- ─── VUE 1 : Saisie de l'email ─── -->
+      <!-- ===================== -->
+      <!-- VUE 1 : SAISIE EMAIL  -->
+      <!-- ===================== -->
       <div class="view active" id="view-1">
         <div class="form-title">Votre adresse email</div>
         <p class="form-subtitle">
@@ -124,7 +133,9 @@
         </div>
       </div>
 
-      <!-- ─── VUE 2 : Saisie du code OTP ─── -->
+      <!-- ===================== -->
+      <!-- VUE 2 : SAISIE OTP    -->
+      <!-- ===================== -->
       <div class="view" id="view-2">
         <div class="form-title">Code de vérification</div>
         <p class="form-subtitle">
@@ -141,6 +152,7 @@
         </div>
 
         <label class="otp-label">Code de vérification</label>
+        <!-- OTP Digit Input (élément répétable - futur composant React possible) -->
         <div class="otp-wrap" id="otp-wrap">
           <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d1">
           <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" id="d2">
@@ -177,7 +189,9 @@
         </div>
       </div>
 
-      <!-- ─── VUE 3 : Confirmation de succès ─── -->
+      <!-- ===================== -->
+      <!-- VUE 3 : SUCCÈS        -->
+      <!-- ===================== -->
       <div class="view" id="view-3">
         <div class="success-wrap">
           <div class="success-ring">
@@ -190,6 +204,7 @@
 
           <!-- Liste des prochaines étapes -->
           <ul class="checklist">
+            <!-- Checklist Item (élément répétable - futur composant React possible) -->
             <li>
               <span class="check-icon">1</span>
               Uploader votre vidéo de 60 secondes
@@ -218,16 +233,40 @@
     </div><!-- /form-box -->
   </main>
 
-  <!-- ─── Logique de vérification email (OTP) ─── -->
+  <!-- ===================== -->
+  <!-- SCRIPTS              -->
+  <!-- ===================== -->
   <script src="../js/verification-email.js"></script>
 
-  <!-- ─── Barre de navigation maquette (dev) ─── -->
+  <!-- ===================== -->
+  <!-- DEV NAV MAQUETTE     -->
+  <!-- ===================== -->
   <div id="dev-nav">
-    <span class="dn-label">Maquette</span>
-    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-header">
+      <span class="dn-icon-main">🧭</span>
+      <span class="dn-title">Maquette</span>
+    </div>
+    <a href="index.html" class="dn-btn">
+      <span class="dn-icon">🏠</span>
+      <span class="dn-lbl">Accueil</span>
+    </a>
     <div class="dn-sep"></div>
-    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
-    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
-  </div>
+    <a href="admin-panel.html" class="dn-btn espace-admin">
+      <span class="dn-icon">🛡️</span>
+      <span class="dn-lbl">Admin</span>
+    </a>
+    <a href="admin-jury.html" class="dn-btn espace-jury">
+      <span class="dn-icon">⚖️</span>
+      <span class="dn-lbl">Jury</span>
+    </a>
+    <a href="cahier-des-charges.html" class="dn-btn">
+      <span class="dn-icon">📄</span>
+      <span class="dn-lbl">CDC</span>
+    </a>
+      <a href="https://dylan-blanc.github.io/UserStory-MarsAI/" class="dn-btn" target="_blank">
+      <span class="dn-icon">📋</span>
+      <span class="dn-lbl">User Stories</span>
+    </a>
+</div>
 </body>
 </html>

@@ -16,12 +16,79 @@
 </head>
 <body>
 
+  <!--
+    ================================================================
+    REACT CONVERSION — ARCHITECTURE GLOBALE
+    ================================================================
+    Ce fichier est une maquette HTML statique à convertir en React.
+
+    ARBRE DE COMPOSANTS SUGGÉRÉ :
+    ├── <FormDepotPage>            — page entière, gère tout l'état global
+    │   ├── <FormHeader>           — logo + indicateur sauvegarde auto + lien retour
+    │   └── <div.page-wrap>        — grille CSS 2 colonnes (sidebar | contenu)
+    │       ├── <FormSidebar>      — colonne gauche fixe (toujours visible)
+    │       │   ├── <StepsNav>     — navigation cliquable par étapes (1→4)
+    │       │   └── <RulesBlock>   — liste des règles du festival (statique)
+    │       └── <FormContent>      — colonne droite, affiche 1 panneau à la fois
+    │           ├── <Step1Profile> — profil réalisateur (identité, contact, adresse)
+    │           ├── <Step2Film>    — le film (titre, synopsis, vidéo, intention)
+    │           │   ├── <UploadZone>      — zone drag & drop (3 états visuels)
+    │           │   ├── <FileCard>        — prévisualisation + barre progression upload
+    │           │   └── <DurationResult>  — badge résultat vérification durée (60s)
+    │           ├── <Step3AI>      — déclaration IA (classification + outils + sous-titres)
+    │           │   └── <SubtitleUpload> — upload fichier SRT/VTT (FR et EN)
+    │           ├── <Step4Confirm> — récapitulatif + conditions RGPD + soumission
+    │           │   ├── <RecapBlock>  — tableau lecture seule des données saisies
+    │           │   └── <RGPDChecks> — 3 checkboxes obligatoires (bloquent la soumission)
+    │           └── <SuccessScreen> — écran post-soumission (remplace les step-panels)
+    │               └── <YouTubeValidation> — suivi validation YouTube API simulée
+
+    ÉTAT GLOBAL (useState ou useReducer dans <FormDepotPage>) :
+    ─ currentStep       : number         — étape visible (1 à 4)
+    ─ maxUnlocked       : number         — étape max déjà atteinte (déverrouille la nav)
+    ─ formData          : object         — toutes les valeurs des champs
+    ─ errors            : object         — map { champId: messageErreur }
+    ─ videoFile         : File | null    — fichier vidéo sélectionné
+    ─ videoValid        : boolean        — durée entre 58s et 62s vérifiée
+    ─ uploadProgress    : number         — 0–100 (simulation setInterval)
+    ─ subtitleFR        : File | null    — sous-titres français (SRT/VTT)
+    ─ subtitleEN        : File | null    — sous-titres anglais (SRT/VTT)
+    ─ rgpdChecked       : boolean[3]     — état des 3 cases RGPD
+    ─ newsletterChecked : boolean        — case newsletter (facultative)
+    ─ submissionState   : 'idle' | 'submitting' | 'success'
+    ─ youtubeStatus     : 'pending' | 'approved' | 'rejected-copyright' | 'rejected-content'
+
+    COMPORTEMENTS CLÉS À MIGRER (depuis formulaire-depot.js) :
+    ─ Navigation étapes : showStep(n) → setState currentStep + scroll top
+    ─ Verrouillage nav  : step > maxUnlocked → classe "locked" (non cliquable)
+    ─ Validation âge    : validateAge() → calculateAge(dob) >= 18, onBlur
+    ─ Compteur chars    : countChars() → value.length / maxLength, onChange live
+    ─ Drag & drop       : _dragDepth counter pour éviter dragLeave sur enfants
+    ─ Vignette vidéo    : URL.createObjectURL + <canvas> → useRef + useEffect
+    ─ Upload simulé     : setInterval avec cleanup → useEffect + clearInterval
+    ─ Récapitulatif     : fillRecap() lit le DOM → passer formData en props directes
+    ─ Soumission        : stocke depot_data en sessionStorage → redirige verification-email
+    ─ Retour OTP        : showSuccessAfterVerif() lit sessionStorage → gérer en Router
+    ─ Simulation YT     : boutons maquette uniquement — À SUPPRIMER en production
+
+    NOTES CSS :
+    ─ Classes viennent de form.css + tokens.css (à convertir en modules CSS ou Tailwind)
+    ─ Variables : --solar #F5E642, --aurora #4EFFCE, --deep-sky #0A0F2E, --coral #FF6B6B
+    ─ Fonts : Syne (--font-display), Inter (--font-body), JetBrains Mono (--font-mono)
+    ─ La barre #dev-nav (navigation maquette en bas) → À SUPPRIMER en production React
+    ================================================================
+  -->
+
   <!-- ============================================================
        HEADER — logo marsAI + indicateur de sauvegarde + lien retour
        ============================================================ -->
+  <!-- COMPONENT: <FormHeader>
+       Props : autoSaveStatus ('idle'|'saving'|'saved') pour animer le point vert
+       Le lien "← Retour" → <Link to="/">  en React Router -->
   <header>
     <div class="logo">mars<span class="ai">AI</span></div>
     <div class="header-right">
+      <!-- STATE: autoSaveStatus — la classe du .save-dot change selon l'état (pulse CSS si saving) -->
       <div class="save-indicator">
         <span class="save-dot"></span>
         Brouillon sauvegardé automatiquement
@@ -37,6 +104,8 @@
 
     <!-- ============================================================
          SIDEBAR — titre, navigation par etapes, regles essentielles
+         COMPONENT: <FormSidebar>
+         Props : currentStep, maxUnlocked (pour l'état de chaque étape nav)
          ============================================================ -->
     <aside class="form-sidebar">
       <div class="form-title-block">
@@ -45,6 +114,13 @@
         <p class="form-main-sub">Thème : "Imaginez des futurs souhaitables"</p>
       </div>
 
+      <!-- COMPONENT: <StepsNav>
+           Props : currentStep, maxUnlocked, onGoStep(n: number)
+           Logique d'état par item (calculée depuis currentStep + maxUnlocked) :
+           ─ i < currentStep  → classe "done",   cercle affiche "✓"
+           ─ i === currentStep → classe "active", cercle affiche le numéro
+           ─ i > currentStep && i <= maxUnlocked → cercle "pending", cliquable
+           ─ i > maxUnlocked  → classe "locked",  onClick ignoré -->
       <div class="steps-nav" id="steps-nav">
         <div class="step-nav-item active" data-step="1" onclick="goStep(1)">
           <div class="sni-circle active" id="snc-1">1</div>
@@ -76,6 +152,7 @@
         </div>
       </div>
 
+      <!-- COMPONENT: <RulesBlock> — contenu 100% statique, pas de props nécessaires -->
       <div class="rules-block">
         <h4>Règles essentielles</h4>
         <div class="rule-item"><div class="rule-dot"></div><span>Durée : <strong>60 secondes</strong> pile</span></div>
@@ -94,6 +171,9 @@
 
       <!-- ============================================================
            ETAPE 1 — Profil realisateur (identite, contact, adresse)
+           COMPONENT: <Step1Profile>
+           Props : formData, errors, onChange(field, value), onNext()
+           Visible si currentStep === 1 (classe "active" → affichée, sinon cachée)
            ============================================================ -->
       <div class="step-panel active" id="step-1">
         <div class="step-panel-header">
@@ -104,6 +184,7 @@
           </div>
         </div>
 
+        <!-- STATE: formData.civilite — radio group, valeur 'M' ou 'Mme', requis -->
         <!-- Civilité -->
         <div class="field" style="margin-bottom:20px;">
           <label class="field-label">Civilité <span class="req">● requis</span></label>
@@ -133,6 +214,9 @@
             <div class="field-error" id="err-nom">Champ requis</div>
           </div>
 
+          <!-- BEHAVIOR: validateAge — onBlur, calculer l'âge exact (anni pris en compte)
+               Si âge < 18 → ajouter classe 'err' + afficher err-dob
+               Initialisation : max du input = today - 18 ans (voir initDobMax dans le JS) -->
           <div class="field">
             <label class="field-label">Date de naissance <span class="req">● requis</span></label>
             <input type="date" id="f-dob" autocomplete="bday" onchange="validateAge(this)">
@@ -273,10 +357,14 @@
           <div></div>
           <button class="btn-next" onclick="nextStep(1)">Étape suivante — Le Film →</button>
         </div>
-      </div>
+      </div><!-- /fin étape 1 — <Step1Profile> -->
 
       <!-- ============================================================
            ETAPE 2 — Le Film (titre, synopsis, upload video, intention)
+           COMPONENT: <Step2Film>
+           Props : formData, errors, videoFile, videoValid, uploadProgress,
+                   onChange(field, value), onVideoSelect(file), onVideoReset(),
+                   onPrev(), onNext()
            ============================================================ -->
       <div class="step-panel" id="step-2">
         <div class="step-panel-header">
@@ -289,6 +377,8 @@
 
         <div class="fields-grid col2">
 
+          <!-- BEHAVIOR: countChars — onChange, afficher value.length + ' / ' + maxLength
+               Classe du compteur : '' normal | 'warn' si >90% | 'over' si 100% -->
           <div class="field">
             <label class="field-label">Titre original <span class="req">● requis</span></label>
             <input type="text" id="f-titre" placeholder="Titre en français" maxlength="100" oninput="countChars(this,'cc-titre',100)">
@@ -351,13 +441,26 @@
         <hr class="section-sep">
         <div class="section-title-inline">Fichier vidéo</div>
 
-        <!-- Upload video — input cache, declenche programmatiquement -->
+        <!-- Upload video — input cache, declenche programmatiquement
+             En React : useRef sur l'input, inputRef.current.click() depuis la zone -->
+
         <input type="file" id="video-input" accept=".mp4,.mov,video/mp4,video/quicktime" onchange="handleVideo(this)" style="display:none;">
 
         <div id="upload-zone-wrap">
 
           <!-- ============================================================
                ZONE DE DEPOT — glisser-deposer ou clic pour la video
+               COMPONENT: <UploadZone>
+               Props : onFileSelect(file), visible (masqué quand videoFile !== null)
+               États internes : dragState ('idle' | 'dragging' | 'error')
+               BEHAVIOR: Drag & drop — utiliser un compteur dragDepth (useRef) pour
+               éviter les faux dragLeave déclenchés par les éléments enfants.
+               onDragEnter → dragDepth++ ; onDragLeave → dragDepth-- ; si 0 → reset
+               onDrop → valider extension (mp4/mov) avant d'appeler onFileSelect(file)
+               3 états visuels (un seul affiché à la fois via état dragState) :
+               ─ 'idle'     → #uz-state-default (zone de dépôt normale)
+               ─ 'dragging' → #uz-state-drag    (fichier survolé, feedback visuel)
+               ─ 'error'    → #uz-state-error   (format refusé, affiché 2.2s puis reset)
                ============================================================ -->
           <div class="upload-zone" id="upload-zone"
             ondragenter="onDragEnter(event)"
@@ -412,6 +515,14 @@
 
           <!-- ============================================================
                FILE CARD — apercu du fichier apres selection
+               COMPONENT: <FileCard>
+               Props : file (File), progress (0–100), onReset()
+               Visible uniquement quand videoFile !== null
+               BEHAVIOR: Vignette — useEffect sur videoFile → URL.createObjectURL
+               + video element hors DOM → seeked event → drawImage sur <canvas> (useRef)
+               Penser à URL.revokeObjectURL(url) dans le cleanup du useEffect
+               BEHAVIOR: Barre progression — simulée par setInterval dans useEffect,
+               cleanup avec clearInterval au démontage ou au reset
                ============================================================ -->
           <div class="file-card" id="file-card" style="display:none;margin-top:12px;">
             <div class="file-card-header">
@@ -442,6 +553,11 @@
 
         </div><!-- /upload-zone-wrap -->
 
+        <!-- COMPONENT: <DurationResult>
+             Props : durationSec (number | null)
+             Visible uniquement quand durationSec !== null (classe 'show' ajoutée)
+             3 états : 'ok' si 58≤sec≤62 | 'warn' si trop court | 'err' si trop long
+             Ces seuils sont métier (règle festival) — les garder comme constantes -->
         <!-- Resultat de la verification de duree -->
         <div class="duration-result" id="dur-result">
           <div class="dur-icon" id="dur-icon">⏱️</div>
@@ -450,7 +566,7 @@
             <div class="dur-label" id="dur-label">Vérification de la durée…</div>
           </div>
         </div>
-        <div class="field-error" id="err-video" style="margin-top:8px;">Fichier vidéo requis</div>
+         <div class="field-error" id="err-video" style="margin-top:8px;">Fichier vidéo requis</div>
 
         <hr class="section-sep">
 
@@ -466,14 +582,29 @@
           </div>
         </div>
 
+         <div class="fields-grid">
+          <div class="field">
+            <label class="field-label">Outils utilisés et méthodes de création <span class="req">● requis</span></label>
+            <textarea id="f-outils" rows="5"
+              placeholder="Décrivez les outils (logiciels, langages, frameworks, etc.) et les méthodes de création employées pour ce dépôt..."
+              maxlength="1000" oninput="countChars(this,'cc-outils',1000)"></textarea>
+            <div class="char-counter" id="cc-outils">0 / 1000</div>
+            <div class="field-hint">Cette note est lue par le jury lors de la présélection</div>
+            <div class="field-error" id="err-outils">Les outils utilisés sont requis</div>
+          </div>
+        </div>
         <div class="step-nav-btns">
           <button class="btn-prev" onclick="prevStep(2)">← Retour</button>
           <button class="btn-next" onclick="nextStep(2)">Étape suivante — Fiche IA →</button>
         </div>
-      </div>
+      </div><!-- /fin étape 2 — <Step2Film> -->
 
       <!-- ============================================================
            ETAPE 3 — Declaration IA (classification, outils, sous-titres)
+           COMPONENT: <Step3AI>
+           Props : formData, errors, subtitleFR, subtitleEN,
+                   onChange(field, value), onSubtitleSelect(lang, file),
+                   onPrev(), onNext()
            ============================================================ -->
       <div class="step-panel" id="step-3">
         <div class="step-panel-header">
@@ -547,6 +678,9 @@
           </div>
         </div>
 
+        <!-- COMPONENT: <SubtitleUpload> (réutilisable pour FR et EN)
+             Props : lang ('fr'|'en'), file (File|null), required, onFileSelect(file)
+             Affiche le nom du fichier + classe 'added' sur .sub-status quand sélectionné -->
         <!-- Upload sous-titres FR -->
         <div class="subtitle-upload" id="sub-fr-zone" onclick="">
           <input type="file" id="sub-fr" accept=".srt,.vtt" onchange="handleSubtitle(this,'sub-fr-status')">
@@ -575,10 +709,15 @@
           <button class="btn-prev" onclick="prevStep(3)">← Retour</button>
           <button class="btn-next" onclick="nextStep(3)">Étape suivante — Confirmation →</button>
         </div>
-      </div>
+      </div><!-- /fin étape 3 — <Step3AI> -->
 
       <!-- ============================================================
            ETAPE 4 — Confirmation (recapitulatif, RGPD, soumission)
+           COMPONENT: <Step4Confirm>
+           Props : formData, videoValid, subtitleFR, subtitleEN,
+                   rgpdChecked, onToggleRgpd(index), onPrev(), onSubmit()
+           BEHAVIOR: onSubmit → stocker depot_data en sessionStorage
+           puis rediriger vers /verification-email?from=depot&email=...
            ============================================================ -->
       <div class="step-panel" id="step-4">
         <div class="step-panel-header">
@@ -589,6 +728,10 @@
           </div>
         </div>
 
+        <!-- COMPONENT: <RecapBlock>
+             Props : formData, videoValid, subtitleFR, subtitleEN
+             Contenu 100% calculé depuis formData — pas d'état local
+             Équivalent de fillRecap() dans le JS : chaque rc-xxx vient directement des props -->
         <!-- Recapitulatif -->
         <div class="recap-block">
           <div class="recap-header">Récapitulatif du dossier</div>
@@ -640,6 +783,10 @@
           </div>
         </div>
 
+        <!-- COMPONENT: <RGPDChecks>
+             Props : checked (boolean[3]), onToggle(index)
+             BEHAVIOR: le bouton Soumettre est désactivé tant que les 3 cases ne sont pas cochées
+             En React : disabled={!checked.every(Boolean)} sur le bouton submit -->
         <!-- RGPD et droits (checkbox bloquante) -->
         <div class="section-title-inline">Conditions obligatoires</div>
         <div class="rgpd-checks">
@@ -680,10 +827,16 @@
             🎬 Soumettre mon film
           </button>
         </div>
-      </div>
+      </div><!-- /fin étape 4 — <Step4Confirm> -->
 
       <!-- ============================================================
            ECRAN DE SUCCES — confirmation + validation YouTube
+           COMPONENT: <SuccessScreen>
+           Props : dossierNum, email, prenom, titre
+           Visible quand submissionState === 'success' (remplace tous les step-panels)
+           BEHAVIOR: showSuccessAfterVerif() lit sessionStorage 'depot_data'
+           En React : lire sessionStorage au montage via useEffect dans ce composant
+           ou passer les données via router state (React Router v6 : location.state)
            ============================================================ -->
       <div class="success-screen" id="success-screen">
 
@@ -696,11 +849,30 @@
           📄 Dossier n° <span id="dossier-num">MAI-2026-00000</span>
         </div>
 
-        <p style="color:var(--mist);font-size:0.82rem;margin-bottom:24px;">
+        <p style="color:var(--mist);font-size:0.82rem;margin-bottom:16px;">
           Email de confirmation envoyé à <strong id="confirm-email" style="color:var(--white-soft)">—</strong>
-          <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;margin-left:8px;color:var(--aurora);background:rgba(78,255,206,0.08);border:1px solid rgba(78,255,206,0.2);border-radius:20px;padding:2px 10px;">✓ Email vérifié (OTP)</span>
         </p>
 
+
+
+        <!-- Upload dual : serveur + YouTube -->
+        <div style="max-width:480px;margin:0 auto 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1rem;">📤</span>
+          <div style="font-size:0.78rem;color:var(--mist);line-height:1.55;">
+            Votre film est uploadé simultanément sur <strong style="color:var(--white-soft);">le serveur du festival</strong> et sur la <strong style="color:var(--white-soft);">chaîne YouTube sécurisée</strong> du festival (avec les sous-titres).
+          </div>
+        </div>
+
+        <!-- COMPONENT: <YouTubeValidation>
+             Props : status ('pending'|'approved'|'rejected-copyright'|'rejected-content'),
+                     dossierNum, email, prenom, titre
+             BEHAVIOR: runYouTubeValidation() — séquence animée de 4 étapes avec setInterval
+             En React : useEffect au montage + clearInterval dans le cleanup
+             Les boutons "Simuler" (ci-dessous) sont MAQUETTE UNIQUEMENT → supprimer en prod
+             3 états d'affichage (conditionnel) :
+             ─ status 'pending'   → #yt-pending visible (barre progression + checklist)
+             ─ status 'approved'  → #yt-approved visible
+             ─ status 'rejected-*'→ #yt-rejected visible (+ #yt-pending pour le badge) -->
         <!-- Validation YouTube — etat en attente -->
         <div id="yt-pending" style="max-width:480px;margin:0 auto 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:16px;overflow:hidden;">
           <div style="background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 20px;display:flex;align-items:center;gap:10px;">
@@ -816,7 +988,7 @@
         <!-- Bouton retour -->
         <a href="index.html" style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 24px;font-size:0.85rem;color:var(--mist);text-decoration:none;margin-top:8px;">← Retour au site</a>
 
-        <!-- [MAQUETTE] Simuler le resultat YouTube -->
+        <!-- [MAQUETTE UNIQUEMENT] Simuler le resultat YouTube — À SUPPRIMER en production React -->
         <div style="margin-top:32px;padding:16px 20px;background:rgba(192,132,252,0.05);border:1px dashed rgba(192,132,252,0.2);border-radius:12px;font-size:0.75rem;color:var(--mist);text-align:left;max-width:480px;margin-left:auto;margin-right:auto;">
           <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lavande);margin-bottom:10px;">⬡ Mode maquette — simuler la réponse YouTube</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -826,21 +998,42 @@
           </div>
         </div>
 
-      </div>
+      </div><!-- /fin success-screen — <SuccessScreen> -->
 
     </div><!-- /form-content -->
   </div><!-- /page-wrap -->
 
   <!-- ============================================================
        DEV NAV — barre de navigation maquette (bas de page)
+       [MAQUETTE UNIQUEMENT] → À SUPPRIMER ENTIÈREMENT en production React
        ============================================================ -->
   <div id="dev-nav">
-    <span class="dn-label">Maquette</span>
-    <a href="index.html" class="dn-btn">🏠 Accueil</a>
+    <div class="dn-header">
+      <span class="dn-icon-main">🧭</span>
+      <span class="dn-title">Maquette</span>
+    </div>
+    <a href="index.html" class="dn-btn">
+      <span class="dn-icon">🏠</span>
+      <span class="dn-lbl">Accueil</span>
+    </a>
     <div class="dn-sep"></div>
-    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
-    <a href="admin-jury.html"  class="dn-btn espace-jury">⚖️ Espace Jury</a>
-  </div>
+    <a href="admin-panel.html" class="dn-btn espace-admin">
+      <span class="dn-icon">🛡️</span>
+      <span class="dn-lbl">Admin</span>
+    </a>
+    <a href="admin-jury.html" class="dn-btn espace-jury">
+      <span class="dn-icon">⚖️</span>
+      <span class="dn-lbl">Jury</span>
+    </a>
+    <a href="cahier-des-charges.html" class="dn-btn">
+      <span class="dn-icon">📄</span>
+      <span class="dn-lbl">CDC</span>
+    </a>
+      <a href="https://dylan-blanc.github.io/UserStory-MarsAI/" class="dn-btn" target="_blank">
+      <span class="dn-icon">📋</span>
+      <span class="dn-lbl">User Stories</span>
+    </a>
+</div>
 
   <!-- ============================================================
        SCRIPT PRINCIPAL — logique du formulaire multi-etapes

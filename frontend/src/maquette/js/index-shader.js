@@ -2,14 +2,24 @@
    FICHIER — index-shader.js
    Shader WebGL pour l'arrière-plan de la section manifeste.
    IIFE auto-exécuté, aucune dépendance externe.
+
+   OPTIMISÉ v2 (GPU Intel UHD) :
+   - Résolution rendu ÷2 (CSS upscale, 4x moins de pixels)
+   - Lignes réduites de 16 à 8 (2x moins de calculs/pixel)
+   - Cadencé à 30fps au lieu de 60fps
    ================================================================ */
 !function(){
   var canvas = document.getElementById('manifeste-shader-canvas');
   var section = canvas && canvas.closest('.manifeste-section');
   if (!canvas || !section) return;
 
+  var RENDER_SCALE = 0.5;  // rendu à 50% de la résolution réelle
+  var TARGET_FPS   = 30;
+  var FRAME_TIME   = 1000 / TARGET_FPS;
+
   var gl = null, programInfo = null, positionBuffer = null;
   var startTime = 0, animId = null, initialized = false;
+  var lastFrameTime = 0;
 
   function initShader() {
     if (initialized) return;
@@ -42,7 +52,7 @@
       'const float offsetSpeed=1.33*overallSpeed;',
       'const float minOffsetSpread=0.6;',
       'const float maxOffsetSpread=2.0;',
-      'const int linesPerGroup=16;',
+      'const int linesPerGroup=8;',   // réduit de 16 à 8
       '#define drawSmoothLine(pos,halfWidth,t) smoothstep(halfWidth,0.0,abs(pos-(t)))',
       '#define drawCrispLine(pos,halfWidth,t) smoothstep(halfWidth+gridSmoothWidth,halfWidth,abs(pos-(t)))',
       '#define drawCircle(pos,radius,coord) smoothstep(radius+gridSmoothWidth,radius,length(coord-(pos)))',
@@ -120,13 +130,24 @@
 
   function resizeCanvas() {
     if (!gl) return;
-    canvas.width = section.offsetWidth;
-    canvas.height = section.offsetHeight;
+    // rendu à résolution réduite (CSS s'occupe de l'upscale via width/height 100%)
+    canvas.width  = Math.round(section.offsetWidth * RENDER_SCALE);
+    canvas.height = Math.round(section.offsetHeight * RENDER_SCALE);
     gl.viewport(0, 0, canvas.width, canvas.height);
   }
 
   function render() {
     if (!initialized || !gl) return;
+
+    // throttle à 30fps — skip les frames trop rapprochées
+    var now = performance.now();
+    var delta = now - lastFrameTime;
+    if (delta < FRAME_TIME) {
+      animId = requestAnimationFrame(render);
+      return;
+    }
+    lastFrameTime = now - (delta % FRAME_TIME);
+
     var t = (Date.now() - startTime) / 1000;
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -142,7 +163,10 @@
 
   function start() {
     if (!initialized) { initShader(); resizeCanvas(); }
-    if (initialized && !animId) { animId = requestAnimationFrame(render); }
+    if (initialized && !animId) {
+      lastFrameTime = performance.now();
+      animId = requestAnimationFrame(render);
+    }
   }
 
   function stop() {

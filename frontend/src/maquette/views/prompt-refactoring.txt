@@ -1,0 +1,47 @@
+Tu es un expert en développement front-end et en structuration de code HTML.
+
+Je vais te fournir une page HTML qui est une maquette.
+Ta mission n'est PAS de convertir en React.
+
+Ta mission est uniquement de réorganiser et documenter le HTML pour qu'il soit parfaitement compréhensible par un modèle IA qui devra ensuite le transformer en composants React.
+
+Instructions :
+
+Analyse toute la structure du HTML.
+
+Réorganise légèrement le code si nécessaire pour améliorer la lisibilité.
+
+Ajoute des commentaires HTML clairs et détaillés pour décrire chaque section de la page.
+
+Par exemple :
+
+Header / Navigation
+
+Hero Section
+
+Section Features
+
+Section Services
+
+Section Testimonials
+
+Footer
+
+Encadre chaque section avec des commentaires visibles comme ceci :
+
+<!-- ===================== -->
+<!-- HEADER / NAVIGATION -->
+<!-- ===================== -->
+
+Pour les parties répétables (cartes, listes, items, boutons, etc.), ajoute des commentaires indiquant que ce sont des éléments réutilisables qui pourraient devenir des composants React.
+
+Exemple :
+
+<!-- Feature Card (élément répétable - futur composant React possible) -->
+
+Garde le HTML intact (ne supprime pas d’éléments importants).
+
+Améliore l'indentation pour que la structure soit très claire.
+
+N'explique rien en dehors du code.
+Retourne uniquement le HTML restructuré avec les commentaires.

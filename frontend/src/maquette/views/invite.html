@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vous êtes invité — marsAI 2026</title>
+  <!-- ===================== -->
+  <!-- FEUILLES DE STYLES    -->
+  <!-- ===================== -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/dev-nav.css">
+  <link rel="stylesheet" href="../css/login.css">
+
+  <!-- ===================== -->
+  <!-- STYLES INLINE PAGE    -->
+  <!-- ===================== -->
+  <style>
+    /* ── Orbes décoratifs ── */
+    .inv-orb {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      filter: blur(80px); opacity: 0.18;
+    }
+    .inv-orb-1 { width: 420px; height: 420px; background: var(--aurora);   top: -100px; left: -100px; }
+    .inv-orb-2 { width: 340px; height: 340px; background: var(--lavande); bottom: -80px; right: -80px; }
+
+    /* ── Festival badge ── */
+    .festival-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(78,255,206,0.06);
+      border: 1px solid rgba(78,255,206,0.18);
+      border-radius: 20px; padding: 5px 14px;
+      font-size: 0.72rem; font-weight: 600; color: var(--aurora);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .festival-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--aurora);
+      box-shadow: 0 0 6px var(--aurora);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    /* ── Role pill ── */
+    .role-display {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 16px; border-radius: 10px;
+      font-size: 0.82rem; font-weight: 700;
+      margin: 12px auto 0; width: fit-content;
+    }
+    .role-display.jury {
+      background: rgba(78,255,206,0.08);
+      border: 1px solid rgba(78,255,206,0.22);
+      color: var(--aurora);
+    }
+    .role-display.modo {
+      background: rgba(192,132,252,0.08);
+      border: 1px solid rgba(192,132,252,0.22);
+      color: var(--lavande);
+    }
+
+    /* ── Bannière email ── */
+    .email-banner {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 11px 14px;
+      margin-bottom: 22px; font-size: 0.82rem; color: var(--mist);
+    }
+    .email-banner strong { color: var(--white-soft); }
+
+    /* ── Password strength ── */
+    .pwd-strength { margin-top: 6px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .pwd-strength-bar { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; width: 0%; }
+
+    /* ── Séparateur ── */
+    .sep { display: flex; align-items: center; gap: 10px; margin: 18px 0; }
+    .sep-line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .sep-txt { font-size: 0.72rem; color: var(--mist); }
+
+    /* ── Bouton Google ── */
+    .btn-google {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 11px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+      color: var(--white-soft); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-google:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+
+    /* ── Succès ── */
+    .success-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, rgba(78,255,206,0.15), rgba(192,132,252,0.15));
+      border: 1.5px solid rgba(78,255,206,0.3);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(78,255,206,0.15);
+      animation: glow 2s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0%,100% { box-shadow: 0 0 30px rgba(78,255,206,0.1); }
+      50%      { box-shadow: 0 0 50px rgba(78,255,206,0.25); }
+    }
+    .progress-wrap { background: rgba(255,255,255,0.06); border-radius: 6px; height: 4px; overflow: hidden; margin-top: 24px; }
+    .progress-fill  { height: 100%; width: 0%; border-radius: 6px; background: linear-gradient(90deg, var(--aurora), var(--lavande)); transition: width 2.6s linear; }
+
+    /* ── Invalide ── */
+    .invalid-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.25);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin: 0 auto 16px;
+    }
+
+    /* ── Transitions carte ── */
+    .card { animation: fadeUp 0.4s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== -->
+<!-- ORBES DÉCORATIFS     -->
+<!-- ===================== -->
+<div class="inv-orb inv-orb-1"></div>
+<div class="inv-orb inv-orb-2"></div>
+
+<div class="page">
+
+  <!-- Logo -->
+  <a href="index.html" class="logo">mars<span>AI</span></a>
+
+  <!-- ===================== -->
+  <!-- CARTE : LIEN INVALIDE -->
+  <!-- ===================== -->
+  <div class="card" id="card-invalid" style="display:none; text-align:center;">
+    <div class="invalid-icon">⚠️</div>
+    <div class="card-title" style="margin-bottom:10px;">Lien invalide</div>
+    <p style="font-size:0.83rem;color:var(--mist);line-height:1.6;margin-bottom:24px;">
+      Ce lien d'invitation est invalide ou a déjà été utilisé.<br>
+      Contactez l'administrateur pour recevoir un nouveau lien.
+    </p>
+    <a href="mailto:contact@marsai.fr" class="btn-submit" style="display:block;text-align:center;text-decoration:none;background:rgba(255,255,255,0.08);color:var(--white-soft);font-family:var(--font-body);font-weight:600;">
+      Contacter l'admin
+    </a>
+    <a href="index.html" class="back-link" style="display:block;margin-top:14px;">← Retour au site</a>
+  </div>
+
+  <!-- ===================== -->
+  <!-- CARTE : FORMULAIRE   -->
+  <!-- ===================== -->
+  <div class="card" id="card-invite" style="max-width:440px;">
+
+    <!-- En-tête -->
+    <div style="text-align:center; margin-bottom:28px;">
+      <div class="festival-badge">
+        <span class="festival-badge-dot"></span>
+        marsAI · Festival 2026 · Marseille
+      </div>
+      <div class="card-icon" id="invite-icon" style="margin:0 auto 14px;">⚖️</div>
+      <div class="card-title">Vous êtes invité</div>
+      <div class="card-subtitle" id="invite-subtitle" style="margin-top:6px;">
+        Rejoignez le jury du premier festival mondial de cinéma IA.
+      </div>
+      <div class="role-display jury" id="role-pill">
+        <span id="role-icon">⚖️</span>
+        <span id="role-label">Membre du Jury</span>
+      </div>
+    </div>
+
+    <!-- Bandeau email -->
+    <div class="email-banner">
+      <span style="font-size:1rem;">✉</span>
+      <span>Invitation pour <strong id="email-display">jury.test@marsai.fr</strong></span>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div class="error-msg" id="error-msg"></div>
+
+    <!-- Formulaire -->
+    <form id="form-invite" onsubmit="handleInvite(event)" novalidate>
+      <!-- Field (élément répétable - futur composant React possible) -->
+      <div class="field">
+        <label>Prénom & Nom</label>
+        <input type="text" id="inv-name" required placeholder="ex : Sophie Martin" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="inv-password" required placeholder="8 caractères minimum" minlength="8"
+          style="letter-spacing:0.08em;" autocomplete="new-password"
+          oninput="updateStrength(this.value)">
+        <div class="pwd-strength"><div class="pwd-strength-bar" id="pwd-bar"></div></div>
+        <div id="pwd-hint" style="font-size:0.7rem;color:var(--mist);margin-top:5px;"></div>
+      </div>
+      <div class="field">
+        <label>Confirmer le mot de passe</label>
+        <input type="password" id="inv-confirm" required placeholder="Retapez votre mot de passe"
+          style="letter-spacing:0.08em;" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn-submit" id="btn-submit"
+        style="background:linear-gradient(135deg, var(--aurora) 0%, var(--lavande) 100%);color:var(--deep-sky);">
+        Rejoindre marsAI →
+      </button>
+    </form>
+
+    <!-- Séparateur -->
+    <div class="sep">
+      <div class="sep-line"></div>
+      <span class="sep-txt">ou</span>
+      <div class="sep-line"></div>
+    </div>
+
+    <!-- Google -->
+    <button class="btn-google" onclick="handleGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+        <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      Continuer avec Google
+    </button>
+
+    <p style="text-align:center;font-size:0.71rem;color:rgba(136,146,176,0.4);margin-top:20px;line-height:1.5;">
+      En rejoignant, vous acceptez les <a href="#" style="color:var(--mist);text-decoration:underline;">conditions d'utilisation</a> de marsAI.
+    </p>
+  </div>
+
+  <!-- ===================== -->
+  <!-- CARTE : SUCCÈS        -->
+  <!-- ===================== -->
+  <div class="card" id="card-success" style="display:none; text-align:center; max-width:440px;">
+    <div class="success-icon">🎬</div>
+    <div class="card-title" style="margin-bottom:8px;">Bienvenue dans l'équipe !</div>
+    <p id="success-name" style="font-size:0.95rem;color:var(--aurora);font-weight:700;margin-bottom:10px;"></p>
+    <p id="success-msg" style="font-size:0.83rem;color:var(--mist);line-height:1.65;margin-bottom:6px;">
+      Votre accès jury marsAI 2026 est activé.<br>
+      Vous allez être redirigé vers votre espace.
+    </p>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progress-bar"></div>
+    </div>
+    <p style="font-size:0.7rem;color:rgba(136,146,176,0.35);margin-top:10px;">Redirection automatique…</p>
+  </div>
+
+  <a href="index.html" class="back-link">← Retour au site marsAI</a>
+
+</div>
+
+<!-- ===================== -->
+<!-- DEV NAV MAQUETTE     -->
+<!-- ===================== -->
+<div id="dev-nav">
+  <div class="dn-header">
+    <span class="dn-icon-main">🧭</span>
+    <span class="dn-title">Maquette</span>
+  </div>
+  <a href="index.html" class="dn-btn">
+    <span class="dn-icon">🏠</span><span class="dn-lbl">Accueil</span>
+  </a>
+  <div class="dn-sep"></div>
+  <a href="admin-panel.html" class="dn-btn espace-admin">
+    <span class="dn-icon">🛡️</span><span class="dn-lbl">Admin</span>
+  </a>
+  <a href="admin-jury.html" class="dn-btn espace-jury">
+    <span class="dn-icon">⚖️</span><span class="dn-lbl">Jury</span>
+  </a>
+  <a href="invite.html?token=INV-TEST-TST&email=jury.test%40marsai.fr&role=jury" class="dn-btn active">
+    <span class="dn-icon">✉</span><span class="dn-lbl">Invite</span>
+  </a>
+</div>
+
+<!-- ===================== -->
+<!-- SCRIPTS              -->
+<!-- ===================== -->
+<script>
+(function () {
+  /* ── Lecture des paramètres URL ── */
+  const p     = new URLSearchParams(window.location.search);
+  const token = p.get('token') || '';
+  const email = p.get('email') || 'jury.test@marsai.fr';
+  const role  = p.get('role')  || 'jury';
+  const isJury = role !== 'moderateur';
+
+  const cardInvite  = document.getElementById('card-invite');
+  const cardInvalid = document.getElementById('card-invalid');
+  const cardSuccess = document.getElementById('card-success');
+
+  /* ── Validation du token ── */
+  const valid = !token || /^INV-[A-Z0-9]{4}-[A-Z0-9]{3}$/.test(token);
+  if (!valid) {
+    cardInvite.style.display  = 'none';
+    cardInvalid.style.display = '';
+    return;
+  }
+
+  /* ── Personnalisation selon le rôle ── */
+  document.getElementById('email-display').textContent = email;
+  document.getElementById('invite-icon').textContent   = isJury ? '⚖️' : '🛡️';
+  document.getElementById('role-icon').textContent     = isJury ? '⚖️' : '🛡️';
+  document.getElementById('role-label').textContent    = isJury ? 'Membre du Jury' : 'Modérateur';
+
+  const rolePill = document.getElementById('role-pill');
+  if (!isJury) {
+    rolePill.classList.replace('jury', 'modo');
+  }
+
+  document.getElementById('invite-subtitle').textContent = isJury
+    ? 'Rejoignez le jury du premier festival mondial de cinéma IA.'
+    : 'Rejoignez l\'équipe de modération du festival marsAI 2026.';
+
+  /* ── Indicateur force du mot de passe ── */
+  window.updateStrength = function (val) {
+    const bar  = document.getElementById('pwd-bar');
+    const hint = document.getElementById('pwd-hint');
+    let score = 0;
+    if (val.length >= 8)  score++;
+    if (val.length >= 12) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+      { w: '0%',   bg: 'transparent', txt: '' },
+      { w: '25%',  bg: 'var(--coral)',  txt: 'Trop court' },
+      { w: '50%',  bg: 'var(--solar)',  txt: 'Moyen' },
+      { w: '75%',  bg: '#60d394',       txt: 'Bon' },
+      { w: '100%', bg: 'var(--aurora)', txt: 'Excellent' },
+    ];
+    const lvl = levels[Math.min(score, 4)];
+    bar.style.width      = lvl.w;
+    bar.style.background = lvl.bg;
+    hint.textContent     = lvl.txt;
+    hint.style.color     = lvl.bg;
+  };
+
+  /* ── Soumission formulaire ── */
+  window.handleInvite = function (e) {
+    e.preventDefault();
+    const name    = document.getElementById('inv-name').value.trim();
+    const pwd     = document.getElementById('inv-password').value;
+    const confirm = document.getElementById('inv-confirm').value;
+    const errEl   = document.getElementById('error-msg');
+
+    if (!name) {
+      showError(errEl, 'Veuillez entrer votre prénom et nom.');
+      return;
+    }
+    if (pwd.length < 8) {
+      showError(errEl, 'Le mot de passe doit contenir au moins 8 caractères.');
+      return;
+    }
+    if (pwd !== confirm) {
+      showError(errEl, 'Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    errEl.style.display = 'none';
+    activate(name);
+  };
+
+  window.handleGoogle = function () {
+    activate('Compte Google');
+  };
+
+  function showError(el, msg) {
+    el.textContent   = msg;
+    el.style.display = 'block';
+    el.style.animation = 'none';
+    requestAnimationFrame(() => { el.style.animation = ''; });
+  }
+
+  function activate(name) {
+    const btn = document.getElementById('btn-submit');
+    btn.textContent = 'Activation…';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      cardInvite.style.display  = 'none';
+      cardSuccess.style.display = '';
+
+      document.getElementById('success-name').textContent =
+        name !== 'Compte Google' ? `Bonjour, ${name.split(' ')[0]} !` : 'Bienvenue !';
+
+      if (!isJury) {
+        document.getElementById('success-msg').innerHTML =
+          'Votre accès modérateur marsAI 2026 est activé.<br>Vous allez être redirigé vers votre espace.';
+      }
+
+      requestAnimationFrame(() => {
+        document.getElementById('progress-bar').style.width = '100%';
+      });
+
+      setTimeout(() => {
+        window.location.href = isJury ? 'admin-jury.html' : 'admin-panel.html';
+      }, 2800);
+    }, 600);
+  }
+})();
+</script>
+</body>
+</html>
