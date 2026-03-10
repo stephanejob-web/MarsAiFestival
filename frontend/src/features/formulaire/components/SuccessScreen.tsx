@@ -76,7 +76,7 @@ const SuccessScreen = ({
                 Votre film a été reçu. Une confirmation a été envoyée à votre adresse validée.
             </p>
 
-            <div className="inline-block bg-white/[0.04] border border-white/10 rounded-xl px-5 py-3 mt-4 mb-3 font-mono text-sm text-aurora">
+            <div className="inline-block bg-white/4 border border-white/10 rounded-xl px-5 py-3 mt-4 mb-3 font-mono text-sm text-aurora">
                 📄 Dossier n° {dossierNum}
             </div>
 
@@ -85,7 +85,7 @@ const SuccessScreen = ({
             </p>
 
             {/* Upload dual info */}
-            <div className="text-left bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3 mb-5">
+            <div className="text-left bg-white/3 border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3 mb-5">
                 <span className="text-base">📤</span>
                 <div className="text-xs text-mist leading-relaxed">
                     Votre film est uploadé simultanément sur{" "}
@@ -97,8 +97,8 @@ const SuccessScreen = ({
 
             {/* YouTube validation — pending */}
             {ytResult === "pending" && (
-                <div className="text-left rounded-2xl border border-white/9 overflow-hidden mb-6 bg-white/[0.03]">
-                    <div className="bg-white/[0.03] border-b border-white/6 px-5 py-3 flex items-center gap-3">
+                <div className="text-left rounded-2xl border border-white/9 overflow-hidden mb-6 bg-white/3">
+                    <div className="bg-white/3 border-b border-white/6 px-5 py-3 flex items-center gap-3">
                         <span className="text-base">▶️</span>
                         <span className="text-[0.75rem] font-bold tracking-wider uppercase text-mist">
                             Validation YouTube API
@@ -176,7 +176,7 @@ const SuccessScreen = ({
             {/* YouTube rejected */}
             {ytResult === "rejected" && (
                 <div className="text-left mb-6">
-                    <div className="rounded-2xl bg-coral/[0.06] border border-coral/25 px-6 py-5 mb-4">
+                    <div className="rounded-2xl bg-coral/6 border border-coral/25 px-6 py-5 mb-4">
                         <div className="flex items-start gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-coral/10 border-[1.5px] border-coral/30 flex items-center justify-center text-xl shrink-0">
                                 ✗
@@ -199,7 +199,7 @@ const SuccessScreen = ({
 
                     {/* Email preview */}
                     <div className="rounded-xl border border-white/8 overflow-hidden">
-                        <div className="bg-white/[0.04] border-b border-white/7 px-5 py-3 flex items-center gap-2.5">
+                        <div className="bg-white/4 border-b border-white/7 px-5 py-3 flex items-center gap-2.5">
                             <span>✉️</span>
                             <span className="text-[0.72rem] font-bold tracking-wider uppercase text-mist">
                                 Email envoyé automatiquement à

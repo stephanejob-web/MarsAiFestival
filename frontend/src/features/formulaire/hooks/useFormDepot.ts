@@ -17,7 +17,7 @@ interface UseFormDepotReturn {
     dossierNum: string;
     setCurrentStep: (step: number) => void;
     goToStep: (step: number) => void;
-    nextStep: () => void;
+    nextStep: () => boolean;
     prevStep: () => void;
     updateField: (field: keyof FormDepotData, value: string | boolean) => void;
     setVideoFile: (file: File | null) => void;
@@ -121,12 +121,14 @@ const useFormDepot = (): UseFormDepotReturn => {
         [maxUnlocked],
     );
 
-    const nextStep = useCallback((): void => {
+    const nextStep = useCallback((): boolean => {
         if (currentStep < 4 && validateStep(currentStep)) {
             const next = currentStep + 1;
             setMaxUnlocked((prev) => Math.max(prev, next));
             setCurrentStep(next);
+            return true;
         }
+        return false;
     }, [currentStep, validateStep]);
 
     const prevStep = useCallback((): void => {
