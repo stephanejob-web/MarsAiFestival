@@ -1,0 +1,565 @@
+/* ================================================================
+   formulaire.css — Styles du formulaire de dépôt de film marsAI.
+   Complète le Tailwind inline : animations, pseudo-éléments,
+   scrollbar, :has() selectors, transitions complexes, responsive.
+   ================================================================ */
+
+
+/* ── SCROLLBAR CUSTOM ── */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+}
+
+
+/* ================================================================
+   KEYFRAMES
+   ================================================================ */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulseSave {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes uzFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+@keyframes uzBounce {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes uzPulseBorder {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(78, 255, 206, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(78, 255, 206, 0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes spinSlow {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ================================================================
+   ANIMATION UTILITIES
+   ================================================================ */
+.form-animate-in {
+    animation: fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-success-ring {
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.form-slide-in {
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.form-slide-in-1 {
+    animation-delay: 0.1s;
+}
+
+.form-slide-in-2 {
+    animation-delay: 0.2s;
+}
+
+.form-slide-in-3 {
+    animation-delay: 0.3s;
+}
+
+
+/* ================================================================
+   HEADER — save dot + back link
+   ================================================================ */
+.save-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4EFFCE;
+    animation: pulseSave 3s ease-in-out infinite;
+}
+
+
+/* ================================================================
+   SIDEBAR — steps nav + rules
+   ================================================================ */
+.step-nav-item {
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.step-nav-item:hover:not(.locked) {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.step-nav-item.active {
+    background: rgba(78, 255, 206, 0.08);
+    border-color: rgba(78, 255, 206, 0.2);
+}
+
+.step-nav-item.done {
+    opacity: 0.7;
+}
+
+.step-nav-item.locked {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* Step circle states — used as additional visual layer */
+.sni-circle-active {
+    box-shadow: 0 0 14px rgba(78, 255, 206, 0.4);
+}
+
+.sni-circle-done {
+    background: rgba(78, 255, 206, 0.15);
+    border: 1px solid rgba(78, 255, 206, 0.3);
+}
+
+
+/* ================================================================
+   UPLOAD ZONE — drag & drop états visuels
+   ================================================================ */
+.uz-cloud-float {
+    animation: uzFloat 3s ease-in-out infinite;
+}
+
+.uz-bounce-icon {
+    animation: uzBounce 0.45s ease-in-out infinite alternate;
+    filter: drop-shadow(0 4px 20px rgba(78, 255, 206, 0.5));
+}
+
+.upload-zone-dragging {
+    border-color: rgba(78, 255, 206, 0.85) !important;
+    background: linear-gradient(170deg, rgba(78, 255, 206, 0.1) 0%, rgba(10, 15, 46, 0) 60%) !important;
+    animation: uzPulseBorder 1s ease-in-out infinite;
+    transform: scale(1.015);
+    box-shadow: 0 0 40px rgba(78, 255, 206, 0.15);
+}
+
+.upload-zone-error {
+    border-color: rgba(255, 107, 107, 0.6) !important;
+    background: rgba(255, 107, 107, 0.05) !important;
+    animation: none;
+}
+
+
+/* ================================================================
+   FILE CARD — carte vidéo après sélection
+   ================================================================ */
+.file-card-thumb canvas {
+    width: 96px;
+    height: 54px;
+    display: block;
+    border-radius: 8px;
+}
+
+/* Progress bar gradient */
+.progress-bar-fill {
+    background: linear-gradient(90deg, #4EFFCE, #C084FC);
+    transition: width 0.3s;
+    border-radius: 3px;
+}
+
+/* Shimmer effect on upload progress */
+.progress-bar-fill.uploading {
+    background-size: 200% 100%;
+    background-image: linear-gradient(90deg, #4EFFCE 0%, #C084FC 50%, #4EFFCE 100%);
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+
+/* ================================================================
+   RADIO CARDS — civilité (M. / Mme)
+   ================================================================ */
+.radio-card {
+    user-select: none;
+}
+
+.radio-card input[type="radio"] {
+    display: none;
+}
+
+.radio-card:has(input:checked) {
+    background: rgba(78, 255, 206, 0.08);
+    border-color: rgba(78, 255, 206, 0.35);
+    color: #4EFFCE;
+}
+
+.radio-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.radio-card:has(input:checked):hover {
+    background: rgba(78, 255, 206, 0.1);
+}
+
+.radio-card-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.radio-card:has(input:checked) .radio-card-dot {
+    border-color: #4EFFCE;
+    background: #4EFFCE;
+    box-shadow: 0 0 0 3px rgba(78, 255, 206, 0.15);
+}
+
+
+/* ================================================================
+   IA CLASSIFICATION CARDS — full / hybrid
+   ================================================================ */
+.ia-class-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ia-class-card {
+    user-select: none;
+}
+
+.ia-class-card input[type="radio"] {
+    display: none;
+}
+
+.ia-class-card:has(input:checked) {
+    background: rgba(78, 255, 206, 0.05);
+    border-color: rgba(78, 255, 206, 0.3);
+}
+
+.ia-class-card:hover:not(:has(input:checked)) {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* ================================================================
+   RGPD CHECKBOXES — conditions obligatoires
+   ================================================================ */
+.rgpd-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rgpd-item {
+    user-select: none;
+}
+
+.rgpd-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Legacy class approach for RGPD box (if needed) */
+.rgpd-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    margin-top: 1px;
+    position: relative;
+    transition: all 0.15s;
+}
+
+.rgpd-checked .rgpd-box {
+    background: #4EFFCE;
+    border-color: #4EFFCE;
+}
+
+.rgpd-checked .rgpd-box::after {
+    content: "\2713";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #0A0F2E;
+}
+
+
+/* ================================================================
+   NEWSLETTER CHECKBOX
+   ================================================================ */
+.newsletter-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    position: relative;
+    transition: all 0.15s;
+}
+
+.newsletter-checked .newsletter-box {
+    background: #4EFFCE;
+    border-color: #4EFFCE;
+}
+
+.newsletter-checked .newsletter-box::after {
+    content: "\2713";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #0A0F2E;
+}
+
+
+/* ================================================================
+   SOCIAL INPUT ICON — positionnement absolu
+   ================================================================ */
+.social-icon-wrap {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.social-input-field {
+    padding-left: 34px !important;
+}
+
+
+/* ================================================================
+   SUBTITLE UPLOAD — zone de dépôt SRT / VTT
+   ================================================================ */
+.subtitle-upload input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+
+/* ================================================================
+   YOUTUBE PROGRESS BAR
+   ================================================================ */
+.yt-bar-fill {
+    background: linear-gradient(90deg, #FF0000, #FF4444);
+    transition: width 0.3s;
+    border-radius: 2px;
+}
+
+
+/* ================================================================
+   FORM INPUTS — focus glow + transitions (complément Tailwind)
+   ================================================================ */
+input,
+select,
+textarea {
+    font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+input::selection,
+textarea::selection {
+    background: rgba(78, 255, 206, 0.25);
+    color: #F0F4FF;
+}
+
+/* Autofill styling (dark theme) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #F0F4FF;
+    -webkit-box-shadow: 0 0 0 40px #0F1535 inset;
+    transition: background-color 5000s ease-in-out 0s;
+    border-color: rgba(78, 255, 206, 0.25);
+}
+
+/* Select dropdown caret color */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%238892B0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+
+/* ================================================================
+   STEP PANEL ICONS — couleurs par étape
+   ================================================================ */
+.si-1 {
+    background: rgba(78, 255, 206, 0.1);
+}
+
+.si-2 {
+    background: rgba(192, 132, 252, 0.1);
+}
+
+.si-3 {
+    background: rgba(245, 230, 66, 0.08);
+}
+
+.si-4 {
+    background: rgba(255, 107, 107, 0.08);
+}
+
+
+/* ================================================================
+   RECAP BLOCK — récapitulatif pré-soumission
+   ================================================================ */
+.recap-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+
+/* ================================================================
+   SUCCESS SCREEN — confirmation post-soumission
+   ================================================================ */
+.success-ring {
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Staggered slide-in for success steps */
+.ss-item {
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.ss-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.ss-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ss-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+
+/* ================================================================
+   BUTTON TRANSITIONS — hover / disabled
+   ================================================================ */
+.btn-next:disabled,
+.btn-submit:disabled,
+button:disabled {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ================================================================
+   RESPONSIVE — mobile < 860px
+   ================================================================ */
+@media (max-width: 860px) {
+    .form-page-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-sidebar-sticky {
+        position: static !important;
+    }
+
+    /* Deux-colonnes → 1 colonne sur mobile */
+    .fields-col2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .social-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Specs badges under upload zone */
+    .uz-specs {
+        flex-direction: column;
+        align-items: center;
+    }
+}
