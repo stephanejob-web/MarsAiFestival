@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { PROJECT_NAME, PROJECT_YEAR, TEAM_MEMBERS } from "../constants/team";
 import type { Lang } from "../constants/i18n";
 
@@ -71,6 +72,33 @@ const Home = (): React.JSX.Element => {
                                 {name}
                             </span>
                         ))}
+                    </div>
+                </div>
+
+                {/* Liens de dev — accès rapide aux pages de travail */}
+                <div className="mt-6 flex flex-col items-center gap-2">
+                    <p className="text-sm text-white/40">
+                        Pages de travail pour les développeurs :
+                    </p>
+                    <div className="flex gap-3">
+                        <Link
+                            to="/formulaire"
+                            className="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium"
+                        >
+                            Formulaire (Valérie)
+                        </Link>
+                        <Link
+                            to="/admin"
+                            className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium"
+                        >
+                            Admin (Dylan)
+                        </Link>
+                        <Link
+                            to="/jury"
+                            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium"
+                        >
+                            Jury (Jean-Denis)
+                        </Link>
                     </div>
                 </div>
 

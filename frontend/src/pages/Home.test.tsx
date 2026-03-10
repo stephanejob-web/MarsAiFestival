@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import Home from "./Home";
 
@@ -11,12 +12,20 @@ vi.mock("react-i18next", () => ({
 
 describe("Home", () => {
     it("affiche le titre hello", () => {
-        render(<Home />);
+        render(
+            <BrowserRouter>
+                <Home />
+            </BrowserRouter>,
+        );
         expect(screen.getByRole("heading", { name: /hello/i })).toBeDefined();
     });
 
     it("affiche tous les membres de l'équipe", () => {
-        render(<Home />);
+        render(
+            <BrowserRouter>
+                <Home />
+            </BrowserRouter>,
+        );
         expect(screen.getByText("Mickael")).toBeDefined();
         expect(screen.getByText("Jean-Denis")).toBeDefined();
         expect(screen.getByText("Stéphane")).toBeDefined();
@@ -26,17 +35,29 @@ describe("Home", () => {
     });
 
     it("affiche le badge du projet", () => {
-        render(<Home />);
+        render(
+            <BrowserRouter>
+                <Home />
+            </BrowserRouter>,
+        );
         expect(screen.getAllByText(/MarsAI Festival/i).length).toBeGreaterThan(0);
     });
 
     it("affiche le contenu dans un main", () => {
-        render(<Home />);
+        render(
+            <BrowserRouter>
+                <Home />
+            </BrowserRouter>,
+        );
         expect(screen.getByRole("main")).toBeDefined();
     });
 
     it("affiche le bouton de changement de langue", () => {
-        render(<Home />);
+        render(
+            <BrowserRouter>
+                <Home />
+            </BrowserRouter>,
+        );
         expect(screen.getByRole("button", { name: /lang/i })).toBeDefined();
     });
 });
