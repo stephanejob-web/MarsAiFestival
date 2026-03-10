@@ -409,7 +409,9 @@ const Step1Profile = ({
                     <div className="w-full text-sm text-coral bg-coral/8 border border-coral/20 rounded-[10px] px-4 py-2.5 flex items-center gap-2">
                         <span>⚠</span>
                         <span>
-                            Veuillez corriger les {Object.keys(errors).length} champ{Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de continuer.
+                            Veuillez corriger les {Object.keys(errors).length} champ
+                            {Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de
+                            continuer.
                         </span>
                     </div>
                 )}
