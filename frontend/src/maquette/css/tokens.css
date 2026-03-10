@@ -11,7 +11,7 @@
 :root {
   --solar:      #F5E642;
   --aurora:     #4EFFCE;
-  --deep-sky:   #0A0F2E;
+  --deep-sky:   #141A42;
   --horizon:    #1A1F4E;
   --surface:    #0F1535;
   --surface-2:  #141B3E;
@@ -26,4 +26,9 @@
   --font-mono:    'JetBrains Mono', monospace;
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── LISIBILITÉ — tailles augmentées (~10 %) ───────────────────── */
+html {
+  font-size: 106%;
 }

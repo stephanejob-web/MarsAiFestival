@@ -1,315 +1,1497 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interface Jury — marsAI 2026</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interface Jury — marsAI 2026</title>
 
-  <!-- Feuilles de style partagées -->
-  <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/reset.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/admin-layout.css">
+    <!-- ===================== -->
+    <!-- FEUILLES DE STYLES    -->
+    <!-- ===================== -->
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/admin-layout.css" />
+    <link rel="stylesheet" href="../css/admin-jury.css" />
+    <link rel="stylesheet" href="../css/dev-nav.css" />
+  </head>
+  <body>
+    <!-- ===================== -->
+    <!-- SIDEBAR JURY         -->
+    <!-- ===================== -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">mars<span class="ai">AI</span></div>
+        <div class="logo-sub">Interface Jury · marsAI 2026</div>
+      </div>
 
-  <!-- Styles spécifiques à l'interface jury -->
-  <link rel="stylesheet" href="../css/admin-jury.css">
+      <div class="jury-identity">
+        <div class="avatar" id="sidebar-avatar">ML</div>
+        <div class="identity-info">
+          <div class="name" id="sidebar-name">Marie Lefebvre</div>
+          <div class="role" id="sidebar-role">Présidente du Jury</div>
+        </div>
+        <div class="online"></div>
+      </div>
 
-  <!-- Barre de navigation maquette -->
-  <link rel="stylesheet" href="../css/dev-nav.css">
-</head>
-<body>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Évaluation</div>
 
-  <!-- ══════════ SIDEBAR ══════════ -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">mars<span class="ai">AI</span></div>
-      <div class="logo-sub">Interface Jury · marsAI 2026</div>
+        <!-- Nav Item (élément répétable - futur composant React possible) -->
+        <div class="nav-item active" onclick="switchView('eval', this)">
+          <span class="icon">🎬</span>
+          Films assignés
+          <span class="nav-count count-pending" id="nav-pending">7</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('eval', this)">
+          <span class="icon">✅</span>
+          Évalués
+          <span class="nav-count count-selected" id="nav-selected">3</span>
+        </div>
+
+        <div class="nav-item" onclick="switchView('discuter', this)">
+          <span class="icon">💬</span>
+          À discuter
+          <span class="nav-count count-discuss" id="nav-discuter-count">0</span>
+        </div>
+
+        <div class="nav-label" style="margin-top: 8px">Sélection</div>
+
+        <div class="nav-item" onclick="switchView('delib', this)">
+          <span class="icon">⚖️</span>
+          Délibération
+          <span class="nav-count count-neutral" id="nav-delib-count">0</span>
+        </div>
+
+        <div class="nav-label" style="margin-top: 8px">Compte</div>
+
+        <div
+          class="nav-item"
+          onclick="window.location.href = 'index.html'"
+          style="color: var(--coral); margin-top: 4px"
+        >
+          <span class="icon">🔒</span>
+          Se déconnecter
+        </div>
+      </nav>
+
+      <!-- ── Sidebar Chat Jury ── -->
+      <div class="sc-wrap" id="sc-wrap">
+        <button class="sc-toggle" id="sc-toggle-btn" onclick="toggleJuryChat()">
+          <span class="sc-icon">💬</span>
+          Chat jury
+          <span class="sc-unread" id="sc-badge">2</span>
+          <span class="sc-arrow" id="sc-arrow">▲</span>
+        </button>
+        <div class="sc-panel" id="sc-panel">
+          <div class="sc-contacts-row" id="sc-contacts-row"></div>
+          <div class="sc-messages" id="sc-messages"></div>
+          <div class="sc-input-wrap">
+            <input
+              class="sc-input"
+              id="sc-input"
+              placeholder="Message au jury…"
+              onkeydown="if (event.key === 'Enter') sendJuryMsg();"
+            />
+            <button class="sc-send" onclick="sendJuryMsg()">↑</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-progress">
+        <div class="prog-label">Ma progression · Films assignés</div>
+        <div class="prog-track">
+          <div class="prog-fill" style="width: 30%"></div>
+        </div>
+        <div class="prog-val">3 / 10 films évalués</div>
+      </div>
+    </aside>
+
+    <!-- Bouton toggle sidebar -->
+    <button
+      class="sidebar-toggle"
+      id="sidebar-toggle"
+      onclick="toggleSidebar()"
+      title="Masquer / Afficher la sidebar"
+    >
+      <span class="sidebar-toggle-icon">‹</span>
+    </button>
+
+    <!-- ===================== -->
+    <!-- ZONE PRINCIPALE      -->
+    <!-- ===================== -->
+    <div class="main">
+      <!-- Barre supérieure -->
+      <div class="topbar">
+        <span class="topbar-title" id="topbar-title">Films à évaluer</span>
+        <div class="topbar-sep"></div>
+        <span class="topbar-info" id="topbar-info"
+          >Films assignés par l'administrateur — évaluation individuelle</span
+        >
+        <div class="topbar-right">
+          <span class="phase-badge phase-1" id="phase-badge"
+            >Phase 1 · Top 50 · 12/12/26</span
+          >
+          <button
+            onclick="window.location.href = 'index.html'"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              background: rgba(255, 107, 107, 0.08);
+              border: 1px solid rgba(255, 107, 107, 0.25);
+              border-radius: 8px;
+              padding: 6px 13px;
+              font-family: var(--font-body);
+              font-size: 0.78rem;
+              font-weight: 600;
+              color: var(--coral);
+              cursor: pointer;
+              transition: all 0.2s;
+              margin-left: 12px;
+            "
+            onmouseover="this.style.background = 'rgba(255,107,107,0.16)'"
+            onmouseout="this.style.background = 'rgba(255,107,107,0.08)'"
+          >
+            🔒 Déconnexion
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- VUE ÉVALUATION       -->
+      <!-- ===================== -->
+      <div class="view" id="view-eval">
+        <!-- Liste des films -->
+        <div class="film-list">
+          <div class="list-header">
+            <div class="list-tabs">
+              <div class="ltab active" onclick="setTab(this, 'À évaluer')">
+                À évaluer (7)
+              </div>
+              <div class="ltab" onclick="setTab(this, 'Évalués')">
+                Évalués (3)
+              </div>
+              <div class="ltab" onclick="setTab(this, 'Tous')">Tous (10)</div>
+            </div>
+          </div>
+          <div class="list-scroll" id="film-list-scroll"></div>
+        </div>
+
+        <!-- Panneau détail -->
+        <div class="detail">
+          <div class="detail-scroll">
+            <!-- Lecteur vidéo (YouTube embed simulé) -->
+            <div class="player-wrap">
+              <div class="player-screen">
+                <video
+                  id="jury-video"
+                  src="../assets/video.mp4"
+                  preload="metadata"
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                  "
+                ></video>
+                <div class="play-center" onclick="togglePlay(this)">▶</div>
+                <div class="player-sub-bar">
+                  "Les machines apprennent à rêver."
+                </div>
+                <div class="yt-badge">YouTube</div>
+              </div>
+              <div class="player-ctrl">
+                <div class="ctrl-progress">
+                  <div class="ctrl-bar">
+                    <div
+                      class="ctrl-bar-fill"
+                      id="pbar"
+                      style="width: 42%"
+                    ></div>
+                  </div>
+                  <span class="ctrl-time" id="ptime">0:25 / 1:00</span>
+                </div>
+                <div class="ctrl-buttons">
+                  <div class="ctrl-left">
+                    <button class="cbtn">⏮</button>
+                    <button class="cbtn play-btn" onclick="togglePlay2(this)">
+                      ▶
+                    </button>
+                    <button class="cbtn">⏭</button>
+                    <button class="cbtn">🔊</button>
+                    <span
+                      style="font-size: 0.75rem; color: var(--mist)"
+                      id="player-film-name"
+                      >Rêves de Silicium</span
+                    >
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center">
+                    <span class="yt-info"
+                      ><span class="yt-check">✓</span> Copyright OK · YouTube
+                      API</span
+                    >
+                    <span class="cc-btn">CC FR</span>
+                    <button class="cbtn">⛶</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- AVIS AUTRES JURÉS    -->
+            <!-- ===================== -->
+            <div class="section-card jury-opinions">
+              <h4>
+                Avis des autres jurés
+                <span
+                  style="
+                    font-weight: 400;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    margin-left: 6px;
+                  "
+                  >Visible par tout le comité</span
+                >
+              </h4>
+              <div class="other-jury-list">
+                <!-- Jury Opinion Item (élément répétable - futur composant React possible) -->
+                <div class="other-jury-item">
+                  <div
+                    class="oj-avatar"
+                    style="
+                      background: rgba(78, 255, 206, 0.15);
+                      color: var(--aurora);
+                    "
+                  >
+                    TR
+                  </div>
+                  <div class="oj-info">
+                    <div class="oj-name">
+                      Thomas Richard
+                      <span class="oj-badge oj-like">❤️ J'aime</span>
+                    </div>
+                    <div class="oj-comment">
+                      "Très belle utilisation de l'IA, le rendu visuel est
+                      saisissant."
+                    </div>
+                  </div>
+                </div>
+                <div class="other-jury-item">
+                  <div
+                    class="oj-avatar"
+                    style="
+                      background: rgba(192, 132, 252, 0.15);
+                      color: var(--lavande);
+                    "
+                  >
+                    SB
+                  </div>
+                  <div class="oj-info">
+                    <div class="oj-name">
+                      Sophie Bernard
+                      <span class="oj-badge oj-discuss">💬 À discuter</span>
+                    </div>
+                    <div class="oj-comment">
+                      "Le scénario est intéressant mais le rythme me semble
+                      inégal sur la fin."
+                    </div>
+                  </div>
+                </div>
+                <div class="other-jury-item">
+                  <div
+                    class="oj-avatar"
+                    style="
+                      background: rgba(245, 230, 66, 0.15);
+                      color: var(--solar);
+                    "
+                  >
+                    PD
+                  </div>
+                  <div class="oj-info">
+                    <div class="oj-name">
+                      Pierre Durand
+                      <span class="oj-badge oj-pending"
+                        >⏳ Pas encore évalué</span
+                      >
+                    </div>
+                    <div
+                      class="oj-comment"
+                      style="font-style: italic; opacity: 0.5"
+                    >
+                      Aucun commentaire
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informations du film -->
+            <div class="film-header">
+              <div>
+                <div class="film-title-main" id="d-title">
+                  Rêves de Silicium
+                </div>
+                <div class="film-author-main" id="d-author">
+                  Léa Fontaine · France · 2026
+                </div>
+                <div class="film-tags">
+                  <span class="ftag ftag-img">Image IA</span>
+                  <span class="ftag ftag-tool" id="d-tools"
+                    >Runway ML · Sora · MusicGen</span
+                  >
+                </div>
+              </div>
+              <div class="film-decision-badge fdb-none" id="d-decision-badge">
+                — En attente
+              </div>
+            </div>
+
+            <!-- Métadonnées -->
+            <div class="meta-row">
+              <div class="meta-cell">
+                <div class="ml">Durée</div>
+                <div class="mv mono" id="d-dur">00:59.8</div>
+              </div>
+              <div class="meta-cell">
+                <div class="ml">Format</div>
+                <div class="mv">MP4 · 1080p</div>
+              </div>
+              <div class="meta-cell">
+                <div class="ml">Sous-titres</div>
+                <div class="mv ok">✓ FR</div>
+              </div>
+              <div class="meta-cell">
+                <div class="ml">Copyright</div>
+                <div class="mv ok">✓ Vérifié</div>
+              </div>
+            </div>
+
+            <!-- Fiche IA — CDC : champs obligatoires scénario/image/post-prod -->
+            <div class="section-card">
+              <h4>Fiche IA — Détails obligatoires</h4>
+              <div class="ia-grid">
+                <div class="ia-cell">
+                  <div class="ia-type">Scénario</div>
+                  <div class="ia-tools" id="d-ia-sc">ChatGPT-4o · Claude</div>
+                </div>
+                <div class="ia-cell">
+                  <div class="ia-type">Image / Vidéo</div>
+                  <div class="ia-tools" id="d-ia-img">
+                    Runway ML Gen-3 · Sora
+                  </div>
+                </div>
+                <div class="ia-cell">
+                  <div class="ia-type">Post-production</div>
+                  <div class="ia-tools" id="d-ia-post">
+                    MusicGen · ElevenLabs · Firefly
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Note de démarche créative -->
+            <div class="section-card">
+              <h4>Note de démarche créative</h4>
+              <p id="d-note">
+                "J'ai travaillé avec Runway ML pour générer des séquences
+                oniriques, puis dirigé les mouvements de caméra image par image.
+                Le son est composé via MusicGen. Ce film explore la porosité
+                entre mémoire humaine et apprentissage machine."
+              </p>
+            </div>
+
+            <!-- Décisions du jury -->
+            <div class="section-card">
+              <h4>Décisions du jury</h4>
+              <div class="votes-list" id="votes-list"></div>
+            </div>
+
+            <!-- Commentaires du jury -->
+            <div class="section-card">
+              <h4>Commentaires du jury</h4>
+              <div class="comments-thread" id="comments-thread">
+                <div class="ct-empty">Aucun commentaire pour ce film.</div>
+              </div>
+            </div>
+          </div>
+          <!-- /detail-scroll -->
+
+          <!-- ===================== -->
+          <!-- PANNEAU DÉCISION     -->
+          <!-- ===================== -->
+          <div class="notation-panel">
+            <div class="decision-main">
+              <button
+                class="dbtn-main dbtn-valide"
+                id="btn-valide"
+                onclick="decide('valide')"
+              >
+                ✓ Valider
+              </button>
+              <button
+                class="dbtn-main dbtn-arevoir"
+                id="btn-arevoir"
+                onclick="openModalARevoir()"
+              >
+                ↩ À revoir
+              </button>
+              <button
+                class="dbtn-main dbtn-refuse"
+                id="btn-refuse"
+                onclick="openModalRefuse()"
+              >
+                ✕ Refuser
+              </button>
+              <button
+                class="dbtn-main dbtn-discuss"
+                id="btn-discuss"
+                onclick="quickAnnotate('discuss', this)"
+              >
+                💬 À discuter
+              </button>
+            </div>
+            <!-- Commentaire -->
+            <div class="notation-bottom">
+              <div class="comment-wrap">
+                <div class="comment-label">
+                  Mon commentaire (visible par tout le jury)
+                </div>
+                <textarea
+                  class="comment-input"
+                  id="comment-input"
+                  placeholder="Ajoutez un commentaire sur ce film…"
+                ></textarea>
+              </div>
+              <button class="btn-publish" onclick="postComment()">
+                💬 Publier
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- /detail -->
+      </div>
+      <!-- /view-eval -->
+
+      <!-- ===================== -->
+      <!-- VUE MES LISTES       -->
+      <!-- ===================== -->
+      <div class="delib-view" id="view-listes" style="display: none">
+        <div class="delib-header">
+          <div>
+            <h2>Mes listes personnelles</h2>
+            <div style="font-size: 0.8rem; color: var(--mist); margin-top: 4px">
+              Classez et annotez les films selon vos impressions — visible
+              uniquement par vous
+            </div>
+          </div>
+          <button class="export-btn" onclick="addListe()">
+            + Nouvelle liste
+          </button>
+        </div>
+        <div class="delib-sub">
+          Vos annotations sont privées · Les décisions formelles restent dans
+          l'onglet "Films assignés"
+        </div>
+
+        <!-- Info visibilité commentaires -->
+        <div
+          style="
+            background: rgba(78, 255, 206, 0.05);
+            border: 1px solid rgba(78, 255, 206, 0.15);
+            border-radius: 10px;
+            padding: 11px 16px;
+            margin-bottom: 20px;
+            font-size: 0.78rem;
+            color: var(--mist);
+            line-height: 1.55;
+          "
+        >
+          💬
+          <strong style="color: var(--aurora)">Commentaires du jury :</strong>
+          vos commentaires publiés dans "Films assignés" sont visibles par tous
+          les membres du jury. Vos annotations dans "Mes listes" restent
+          privées.
+        </div>
+
+        <!-- Listes existantes -->
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+          "
+        >
+          <!-- Liste 1 : J'aime -->
+          <div
+            style="
+              background: var(--surface-2, rgba(255, 255, 255, 0.04));
+              border: 1px solid rgba(78, 255, 206, 0.2);
+              border-radius: 14px;
+              padding: 18px;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+              "
+            >
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span style="font-size: 1.2rem">❤️</span>
+                <div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-weight: 700;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    J'aime
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    3 films
+                  </div>
+                </div>
+              </div>
+              <button
+                onclick="showToast('Liste supprimée', 'ok')"
+                style="
+                  background: none;
+                  border: none;
+                  font-size: 0.75rem;
+                  color: var(--mist);
+                  cursor: pointer;
+                  padding: 4px 8px;
+                  border-radius: 6px;
+                "
+                onmouseover="this.style.color = 'var(--coral)'"
+                onmouseout="this.style.color = 'var(--mist)'"
+              >
+                ✕
+              </button>
+            </div>
+            <div
+              style="display: flex; flex-direction: column; gap: 8px"
+              id="liste-aime"
+            >
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(255, 255, 255, 0.03);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                "
+              >
+                <div>
+                  <div style="font-size: 0.82rem; font-weight: 600">
+                    Rêves de Silicium
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    Léa Fontaine · 2026
+                  </div>
+                </div>
+                <button
+                  onclick="removeFromListe(this)"
+                  style="
+                    background: none;
+                    border: none;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    cursor: pointer;
+                  "
+                  title="Retirer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(255, 255, 255, 0.03);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                "
+              >
+                <div>
+                  <div style="font-size: 0.82rem; font-weight: 600">
+                    Fragments d'Horizon
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    Karim Mansouri · 2026
+                  </div>
+                </div>
+                <button
+                  onclick="removeFromListe(this)"
+                  style="
+                    background: none;
+                    border: none;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    cursor: pointer;
+                  "
+                  title="Retirer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(255, 255, 255, 0.03);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                "
+              >
+                <div>
+                  <div style="font-size: 0.82rem; font-weight: 600">
+                    L'Algorithme du Futur
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    Alex Nguyen · 2026
+                  </div>
+                </div>
+                <button
+                  onclick="removeFromListe(this)"
+                  style="
+                    background: none;
+                    border: none;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    cursor: pointer;
+                  "
+                  title="Retirer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <!-- Annotation rapide -->
+            <div style="margin-top: 12px">
+              <textarea
+                placeholder="Mes notes sur cette liste…"
+                style="
+                  width: 100%;
+                  background: rgba(255, 255, 255, 0.04);
+                  border: 1px solid rgba(255, 255, 255, 0.08);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                  font-family: var(--font-body);
+                  font-size: 0.75rem;
+                  color: var(--white-soft);
+                  resize: none;
+                  outline: none;
+                  min-height: 52px;
+                "
+                onfocus="this.style.borderColor = 'rgba(78,255,206,0.3)'"
+                onblur="this.style.borderColor = 'rgba(255,255,255,0.08)'"
+              >
+Films visuellement très forts, IA bien intégrée sans être ostensible.</textarea
+              >
+            </div>
+          </div>
+
+          <!-- Liste 2 : À discuter -->
+          <div
+            style="
+              background: var(--surface-2, rgba(255, 255, 255, 0.04));
+              border: 1px solid rgba(245, 230, 66, 0.2);
+              border-radius: 14px;
+              padding: 18px;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+              "
+            >
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span style="font-size: 1.2rem">💬</span>
+                <div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-weight: 700;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    À discuter
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    2 films
+                  </div>
+                </div>
+              </div>
+              <button
+                onclick="showToast('Liste supprimée', 'ok')"
+                style="
+                  background: none;
+                  border: none;
+                  font-size: 0.75rem;
+                  color: var(--mist);
+                  cursor: pointer;
+                  padding: 4px 8px;
+                  border-radius: 6px;
+                "
+                onmouseover="this.style.color = 'var(--coral)'"
+                onmouseout="this.style.color = 'var(--mist)'"
+              >
+                ✕
+              </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(255, 255, 255, 0.03);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                "
+              >
+                <div>
+                  <div style="font-size: 0.82rem; font-weight: 600">
+                    Mémoire Vive
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    Sofia Peres · 2026
+                  </div>
+                </div>
+                <button
+                  onclick="removeFromListe(this)"
+                  style="
+                    background: none;
+                    border: none;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    cursor: pointer;
+                  "
+                  title="Retirer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(255, 255, 255, 0.03);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                "
+              >
+                <div>
+                  <div style="font-size: 0.82rem; font-weight: 600">
+                    Neurones Bleus
+                  </div>
+                  <div style="font-size: 0.7rem; color: var(--mist)">
+                    Marie Dupont · 2026
+                  </div>
+                </div>
+                <button
+                  onclick="removeFromListe(this)"
+                  style="
+                    background: none;
+                    border: none;
+                    font-size: 0.72rem;
+                    color: var(--mist);
+                    cursor: pointer;
+                  "
+                  title="Retirer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div style="margin-top: 12px">
+              <textarea
+                placeholder="Mes notes sur cette liste…"
+                style="
+                  width: 100%;
+                  background: rgba(255, 255, 255, 0.04);
+                  border: 1px solid rgba(255, 255, 255, 0.08);
+                  border-radius: 8px;
+                  padding: 8px 10px;
+                  font-family: var(--font-body);
+                  font-size: 0.75rem;
+                  color: var(--white-soft);
+                  resize: none;
+                  outline: none;
+                  min-height: 52px;
+                "
+                onfocus="this.style.borderColor = 'rgba(245,230,66,0.3)'"
+                onblur="this.style.borderColor = 'rgba(255,255,255,0.08)'"
+              >
+Thèmes intéressants mais traitement inégal — à peser lors de la délibération.</textarea
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Ajouter un film rapidement à une liste -->
+        <div
+          style="
+            background: var(--surface-2, rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 18px;
+          "
+        >
+          <h4
+            style="
+              font-family: var(--font-display);
+              font-size: 0.9rem;
+              font-weight: 700;
+              margin-bottom: 12px;
+            "
+          >
+            Ajouter un film à une liste
+          </h4>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <select
+              style="
+                flex: 1;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1.5px solid rgba(255, 255, 255, 0.09);
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-family: var(--font-body);
+                font-size: 0.82rem;
+                color: #000;
+                outline: none;
+                cursor: pointer;
+              "
+            >
+              <option value="">— Choisir un film</option>
+              <option>Rêves de Silicium</option>
+              <option>Fragments d'Horizon</option>
+              <option>Mémoire Vive</option>
+              <option>L'Algorithme du Futur</option>
+              <option>Neurones Bleus</option>
+            </select>
+            <select
+              style="
+                background: rgba(255, 255, 255, 0.04);
+                border: 1.5px solid rgba(255, 255, 255, 0.09);
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-family: var(--font-body);
+                font-size: 0.82rem;
+                color: #000;
+                outline: none;
+                cursor: pointer;
+              "
+            >
+              <option>❤️ J'aime</option>
+              <option>💬 À discuter</option>
+              <option>👎 Je n'aime pas</option>
+            </select>
+            <button
+              onclick="showToast('Film ajouté à la liste', 'ok')"
+              style="
+                padding: 8px 16px;
+                background: rgba(78, 255, 206, 0.1);
+                border: 1px solid rgba(78, 255, 206, 0.3);
+                border-radius: 8px;
+                font-family: var(--font-body);
+                font-size: 0.82rem;
+                font-weight: 600;
+                color: #000;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.15s;
+              "
+              onmouseover="this.style.background = 'rgba(78,255,206,0.18)'"
+              onmouseout="this.style.background = 'rgba(78,255,206,0.1)'"
+            >
+              + Ajouter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- VUE À DISCUTER       -->
+      <!-- ===================== -->
+      <div class="discuss-view" id="view-discuter" style="display: none">
+        <!-- Liste films à discuter (sidebar gauche) -->
+        <div class="discuss-films">
+          <div class="discuss-films-title">💬 Films à discuter</div>
+          <div id="discuss-film-list"></div>
+        </div>
+
+        <!-- Lecteur vidéo + infos film -->
+        <div class="discuss-player">
+          <div class="discuss-player-screen">
+            <video
+              id="discuss-video"
+              src="../assets/video.mp4"
+              controls
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 10px;
+                background: #000;
+                display: block;
+              "
+            ></video>
+          </div>
+          <div class="discuss-film-details" id="discuss-film-details"></div>
+        </div>
+
+        <!-- Chat -->
+        <div class="discuss-chat">
+          <div class="discuss-chat-header">
+            <span>💬 Discussion jury</span>
+            <span class="discuss-online"
+              ><span class="discuss-dot"></span>4 jurés connectés</span
+            >
+          </div>
+          <div class="discuss-messages" id="discuss-messages">
+            <!-- Chat Message (élément répétable - futur composant React possible) -->
+            <div class="chat-msg">
+              <img
+                class="chat-avatar"
+                src="https://i.pravatar.cc/150?img=47"
+                alt="Marie"
+              />
+              <div class="chat-bubble">
+                <div class="chat-name">
+                  Marie L. <span class="chat-time">14:12</span>
+                </div>
+                <div class="chat-text">
+                  J'aime beaucoup l'usage de l'IA dans la scène 3, très subtil.
+                  Mais la fin m'a semblé précipitée.
+                </div>
+              </div>
+            </div>
+            <div class="chat-msg">
+              <img
+                class="chat-avatar"
+                src="https://i.pravatar.cc/150?img=12"
+                alt="Pierre"
+              />
+              <div class="chat-bubble">
+                <div class="chat-name">
+                  Pierre D. <span class="chat-time">14:15</span>
+                </div>
+                <div class="chat-text">
+                  D'accord sur la fin. Par contre le traitement sonore entre
+                  2:30 et 4:00 est vraiment remarquable.
+                </div>
+              </div>
+            </div>
+            <div class="chat-msg chat-msg-me">
+              <div class="chat-bubble chat-bubble-me">
+                <div class="chat-name">
+                  Moi <span class="chat-time">14:18</span>
+                </div>
+                <div class="chat-text">
+                  À revoir pour la sélection finale ? Je penche pour un oui
+                  conditionnel.
+                </div>
+              </div>
+              <img
+                class="chat-avatar"
+                src="https://i.pravatar.cc/150?img=47"
+                alt="Moi"
+                style="opacity: 0.5"
+              />
+            </div>
+            <div class="chat-msg">
+              <img
+                class="chat-avatar"
+                src="https://i.pravatar.cc/150?img=44"
+                alt="Sofia"
+              />
+              <div class="chat-bubble">
+                <div class="chat-name">
+                  Sofia E. <span class="chat-time">14:22</span>
+                </div>
+                <div class="chat-text">
+                  Je suis d'accord, le potentiel est là. On vote ?
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="discuss-input-wrap">
+            <input
+              class="discuss-input"
+              id="discuss-input"
+              type="text"
+              placeholder="Écrire un message au jury…"
+              onkeydown="if (event.key === 'Enter') sendChatMsg();"
+            />
+            <button class="discuss-send" onclick="sendChatMsg()">↑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== -->
+      <!-- VUE DÉLIBÉRATION     -->
+      <!-- ===================== -->
+      <!-- ===================== -->
+      <!-- VUE DÉLIBÉRATION     -->
+      <!-- Phase 2 : vote collectif jury + admin → Top 5 finalistes -->
+      <!-- ===================== -->
+      <div class="delib-view" id="view-delib">
+
+        <!-- En-tête -->
+        <div class="delib-header">
+          <div>
+            <h2>Délibération · Top 5 Finalistes</h2>
+          </div>
+          <button class="export-btn" onclick="showToast('Export CSV en cours...', 'warn')">
+            📤 Exporter palmarès CSV
+          </button>
+        </div>
+        <div class="delib-sub">
+          Phase 2 · Vote collectif jury + admin · 5 finalistes à désigner parmi les 50 sélectionnés
+        </div>
+
+        <!-- Identité juré connecté (maquette : Marie Lefebvre) -->
+        <div class="d2-juror-bar">
+          <div class="d2-mini-avatar vote-avatar va-1" style="width:32px;height:32px;font-size:0.65rem;">ML</div>
+          <div>
+            <div style="font-size:0.82rem;font-weight:700;color:var(--white-soft);">Marie Lefebvre</div>
+            <div style="font-size:0.65rem;color:var(--mist);">Présidente du Jury · connectée</div>
+          </div>
+          <div style="margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--aurora);box-shadow:0 0 6px var(--aurora);"></div>
+        </div>
+
+        <!-- Ma progression de vote -->
+        <div id="delib-progress" style="margin-bottom:14px;"></div>
+
+        <!-- Participation du jury -->
+        <div id="delib-participation" style="margin-bottom:20px;"></div>
+
+        <!-- Corps : liste films + podium live -->
+        <div id="delib-body" class="d2-body-grid"></div>
+
+      </div>
+    </div>
+    <!-- /main -->
+
+    <!-- ===================== -->
+    <!-- MODALES              -->
+    <!-- ===================== -->
+
+    <!-- Modale : À Revoir -->
+    <div
+      class="modal-overlay"
+      id="modal-arevoir"
+      onclick="closeModalOutside(event, 'modal-arevoir')"
+    >
+      <div class="modal-box">
+        <span class="modal-icon">↩</span>
+        <div class="modal-title">Demande de révision</div>
+        <div class="modal-subtitle">
+          Précisez pourquoi ce film mérite une attention particulière. Ce
+          message sera visible par les autres membres du jury.
+        </div>
+        <div class="modal-film-chip" id="arevoir-chip">—</div>
+        <div class="modal-label">Raison</div>
+        <!-- Modal Tag (élément répétable - futur composant React possible) -->
+        <div class="modal-tags" id="arevoir-tags">
+          <button
+            class="mtag"
+            data-key="rights"
+            style="--mt-c: var(--aurora)"
+            onclick="selectModalTag('arevoir', 'rights')"
+          >
+            <span class="mtag-dot" style="background: var(--aurora)"></span>🎵
+            Droits musicaux
+          </button>
+          <button
+            class="mtag"
+            data-key="quality"
+            style="--mt-c: var(--solar)"
+            onclick="selectModalTag('arevoir', 'quality')"
+          >
+            <span class="mtag-dot" style="background: var(--solar)"></span>📋
+            Qualité
+          </button>
+          <button
+            class="mtag"
+            data-key="content"
+            style="--mt-c: var(--coral)"
+            onclick="selectModalTag('arevoir', 'content')"
+          >
+            <span class="mtag-dot" style="background: var(--coral)"></span>⚠️
+            Contenu
+          </button>
+          <button
+            class="mtag"
+            data-key="tech"
+            style="--mt-c: var(--lavande)"
+            onclick="selectModalTag('arevoir', 'tech')"
+          >
+            <span class="mtag-dot" style="background: var(--lavande)"></span>📺
+            YouTube
+          </button>
+          <button
+            class="mtag"
+            data-key="other"
+            style="--mt-c: var(--mist)"
+            onclick="selectModalTag('arevoir', 'other')"
+          >
+            <span class="mtag-dot" style="background: var(--mist)"></span>❓
+            Autre
+          </button>
+        </div>
+        <div class="modal-label" style="margin-top: 12px">Votre message</div>
+        <textarea
+          class="modal-textarea"
+          id="arevoir-message"
+          placeholder="Ex : Le traitement sonore est inhabituel, mérite une seconde écoute attentive. Les premiers plans sont visuellement forts…"
+        ></textarea>
+        <div class="modal-hint" id="arevoir-hint">
+          ⚠ Veuillez écrire un message avant de continuer.
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-btn-cancel"
+            onclick="closeModal('modal-arevoir')"
+          >
+            Annuler
+          </button>
+          <button class="modal-btn-arevoir" onclick="confirmARevoir()">
+            ↩ Marquer à revoir →
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="jury-identity">
-      <div class="avatar">ML</div>
-      <div class="identity-info">
-        <div class="name">Marie Lefebvre</div>
-        <div class="role">Présidente du Jury</div>
+    <!-- Modale : Refus -->
+    <div
+      class="modal-overlay"
+      id="modal-refuse"
+      onclick="closeModalOutside(event, 'modal-refuse')"
+    >
+      <div class="modal-box">
+        <span class="modal-icon">✕</span>
+        <div class="modal-title">Notification de refus</div>
+        <div class="modal-subtitle">
+          Ce message sera envoyé au réalisateur. Vous pouvez le personnaliser
+          avant l'envoi.
+        </div>
+        <div class="modal-film-chip" id="refuse-chip">—</div>
+        <div class="modal-label">Raison</div>
+        <div class="modal-tags" id="refuse-tags">
+          <button
+            class="mtag"
+            data-key="rights"
+            style="--mt-c: var(--aurora)"
+            onclick="selectModalTag('refuse', 'rights')"
+          >
+            <span class="mtag-dot" style="background: var(--aurora)"></span>🎵
+            Droits musicaux
+          </button>
+          <button
+            class="mtag"
+            data-key="quality"
+            style="--mt-c: var(--solar)"
+            onclick="selectModalTag('refuse', 'quality')"
+          >
+            <span class="mtag-dot" style="background: var(--coral)"></span>📋
+            Qualité
+          </button>
+          <button
+            class="mtag"
+            data-key="content"
+            style="--mt-c: var(--coral)"
+            onclick="selectModalTag('refuse', 'content')"
+          >
+            <span class="mtag-dot" style="background: var(--coral)"></span>⚠️
+            Contenu
+          </button>
+          <button
+            class="mtag"
+            data-key="tech"
+            style="--mt-c: var(--lavande)"
+            onclick="selectModalTag('refuse', 'tech')"
+          >
+            <span class="mtag-dot" style="background: var(--lavande)"></span>📺
+            YouTube
+          </button>
+          <button
+            class="mtag"
+            data-key="other"
+            style="--mt-c: var(--mist)"
+            onclick="selectModalTag('refuse', 'other')"
+          >
+            <span class="mtag-dot" style="background: var(--mist)"></span>❓
+            Autre
+          </button>
+        </div>
+        <div class="modal-label" style="margin-top: 12px">
+          Message au réalisateur
+        </div>
+        <textarea
+          class="modal-textarea"
+          id="refuse-message"
+          style="min-height: 140px"
+        ></textarea>
+        <hr class="modal-separator" />
+        <div class="modal-actions">
+          <button class="modal-btn-cancel" onclick="closeModal('modal-refuse')">
+            Annuler
+          </button>
+          <button class="modal-btn-refuse" onclick="confirmRefuse()">
+            ✕ Confirmer le refus →
+          </button>
+        </div>
       </div>
-      <div class="online"></div>
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-label">Évaluation</div>
-
-      <div class="nav-item active" onclick="switchView('eval', this)">
-        <span class="icon">🎬</span>
-        Films assignés
-        <span class="nav-count count-pending" id="nav-pending">7</span>
-      </div>
-
-      <div class="nav-item" onclick="switchView('eval', this)">
-        <span class="icon">✅</span>
-        Évalués
-        <span class="nav-count count-selected" id="nav-selected">3</span>
-      </div>
-
-      <div class="nav-label" style="margin-top:8px;">Sélection</div>
-
-      <div class="nav-item" onclick="switchView('delib', this)">
-        <span class="icon">⚖️</span>
-        Délibération
-        <span class="nav-count count-neutral">10</span>
-      </div>
-
-      <div class="nav-label" style="margin-top:8px;">Compte</div>
-
-      <div class="nav-item" onclick="window.location.href='index.html'" style="color:var(--coral);margin-top:4px;">
-        <span class="icon">🔒</span>
-        Se déconnecter
-      </div>
-    </nav>
-
-    <div class="sidebar-progress">
-      <div class="prog-label">Ma progression · Films assignés</div>
-      <div class="prog-track">
-        <div class="prog-fill" style="width:30%;"></div>
-      </div>
-      <div class="prog-val">3 / 10 films évalués</div>
-    </div>
-  </aside>
-
-  <!-- ══════════ ZONE PRINCIPALE ══════════ -->
-  <div class="main">
-
-    <!-- Barre supérieure -->
-    <div class="topbar">
-      <span class="topbar-title" id="topbar-title">Films à évaluer</span>
-      <div class="topbar-sep"></div>
-      <span class="topbar-info" id="topbar-info">Films assignés par l'administrateur — évaluation individuelle</span>
-      <div class="topbar-right">
-        <span class="phase-badge phase-1" id="phase-badge">Phase 1 · Top 50 · 12/12/26</span>
-        <button onclick="window.location.href='index.html'" style="display:flex;align-items:center;gap:6px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);border-radius:8px;padding:6px 13px;font-family:var(--font-body);font-size:0.78rem;font-weight:600;color:var(--coral);cursor:pointer;transition:all 0.2s;margin-left:12px;" onmouseover="this.style.background='rgba(255,107,107,0.16)'" onmouseout="this.style.background='rgba(255,107,107,0.08)'">
-          🔒 Déconnexion
+    <!-- Popover : Signalement rapide -->
+    <div class="rp-popover" id="report-popover">
+      <div class="rp-popover-title">🚩 Signaler rapidement</div>
+      <div class="rp-chips">
+        <button
+          class="rp-chip"
+          style="--chip-color: var(--aurora)"
+          onclick="quickReport('rights')"
+        >
+          <span class="rp-dot" style="background: var(--aurora)"></span>🎵
+          Droits musicaux
+        </button>
+        <button
+          class="rp-chip"
+          style="--chip-color: var(--solar)"
+          onclick="quickReport('quality')"
+        >
+          <span class="rp-dot" style="background: var(--solar)"></span>📋
+          Qualité
+        </button>
+        <button
+          class="rp-chip"
+          style="--chip-color: var(--coral)"
+          onclick="quickReport('content')"
+        >
+          <span class="rp-dot" style="background: var(--coral)"></span>⚠️
+          Contenu
+        </button>
+        <button
+          class="rp-chip"
+          style="--chip-color: var(--lavande)"
+          onclick="quickReport('tech')"
+        >
+          <span class="rp-dot" style="background: var(--lavande)"></span>📺
+          YouTube
+        </button>
+        <button
+          class="rp-chip"
+          style="--chip-color: var(--mist)"
+          onclick="quickReport('other')"
+        >
+          <span class="rp-dot" style="background: var(--mist)"></span>❓ Autre
         </button>
       </div>
+      <div class="rp-divider"></div>
+      <button
+        class="rp-detail-btn"
+        onclick="
+          closeReportPopover();
+          openModalReport();
+        "
+      >
+        ✎ Détailler le signalement
+      </button>
     </div>
 
-    <!-- ══════ VUE ÉVALUATION ══════ -->
-    <div class="view" id="view-eval">
-
-      <!-- Liste des films -->
-      <div class="film-list">
-        <div class="list-header">
-          <div class="list-tabs">
-            <div class="ltab active" onclick="setTab(this,'À évaluer')">À évaluer (7)</div>
-            <div class="ltab" onclick="setTab(this,'Évalués')">Évalués (3)</div>
-            <div class="ltab" onclick="setTab(this,'Tous')">Tous (10)</div>
-          </div>
+    <!-- Modale : Signalement (Ticket) -->
+    <div
+      class="modal-overlay"
+      id="modal-report"
+      onclick="closeModalOutside(event, 'modal-report')"
+    >
+      <div class="modal-box">
+        <span class="modal-icon">🚩</span>
+        <div class="modal-title">Signaler un problème</div>
+        <div class="modal-subtitle">
+          Ce signalement créera un ticket pour les administrateurs pour
+          vérification technique ou légale.
         </div>
-        <div class="list-scroll" id="film-list-scroll"></div>
-      </div>
 
-      <!-- Panneau détail -->
-      <div class="detail">
-        <div class="detail-scroll">
+        <div class="modal-film-chip" id="report-chip">🎬 Titre du film</div>
 
-          <!-- Lecteur vidéo (YouTube embed simulé) -->
-          <div class="player-wrap">
-            <div class="player-screen">
-              <div class="play-center" onclick="togglePlay(this)">▶</div>
-              <div class="player-sub-bar">"Les machines apprennent à rêver."</div>
-              <div class="yt-badge">YouTube</div>
-            </div>
-            <div class="player-ctrl">
-              <div class="ctrl-progress">
-                <div class="ctrl-bar">
-                  <div class="ctrl-bar-fill" id="pbar" style="width:42%;"></div>
-                </div>
-                <span class="ctrl-time" id="ptime">0:25 / 1:00</span>
-              </div>
-              <div class="ctrl-buttons">
-                <div class="ctrl-left">
-                  <button class="cbtn">⏮</button>
-                  <button class="cbtn play-btn" onclick="togglePlay2(this)">▶</button>
-                  <button class="cbtn">⏭</button>
-                  <button class="cbtn">🔊</button>
-                  <span style="font-size:0.75rem;color:var(--mist);" id="player-film-name">Rêves de Silicium</span>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                  <span class="yt-info"><span class="yt-check">✓</span> Copyright OK · YouTube API</span>
-                  <span class="cc-btn">CC FR</span>
-                  <button class="cbtn">⛶</button>
-                </div>
-              </div>
-            </div>
+        <div class="modal-label">Type de problème</div>
+        <input type="hidden" id="report-type" value="rights" />
+        <div class="report-select" id="report-select">
+          <div class="report-select-trigger" onclick="toggleReportSelect()">
+            <span
+              class="rsel-dot"
+              id="rsel-dot"
+              style="background: var(--aurora)"
+            ></span>
+            <span class="rsel-label" id="rsel-label">🎵 Droits musicaux</span>
+            <svg
+              class="rsel-arrow"
+              viewBox="0 0 10 6"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L5 5L9 1"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
-
-          <!-- Informations du film -->
-          <div class="film-header">
-            <div>
-              <div class="film-title-main" id="d-title">Rêves de Silicium</div>
-              <div class="film-author-main" id="d-author">Léa Fontaine · France · 2026</div>
-              <div class="film-tags">
-                <span class="ftag ftag-img">Image IA</span>
-                <span class="ftag ftag-tool" id="d-tools">Runway ML · Sora · MusicGen</span>
-              </div>
+          <div class="rsel-options">
+            <div
+              class="rsel-option selected"
+              data-value="rights"
+              data-color="var(--aurora)"
+              onclick="selectReportType(this)"
+            >
+              <span class="rsel-dot" style="background: var(--aurora)"></span>🎵
+              Droits musicaux
             </div>
-            <div class="film-decision-badge fdb-none" id="d-decision-badge">— En attente</div>
-          </div>
-
-          <!-- Métadonnées -->
-          <div class="meta-row">
-            <div class="meta-cell">
-              <div class="ml">Durée</div>
-              <div class="mv mono" id="d-dur">00:59.8</div>
+            <div
+              class="rsel-option"
+              data-value="quality"
+              data-color="var(--solar)"
+              onclick="selectReportType(this)"
+            >
+              <span class="rsel-dot" style="background: var(--solar)"></span>📋
+              Lisibilité / Qualité
             </div>
-            <div class="meta-cell">
-              <div class="ml">Format</div>
-              <div class="mv">MP4 · 1080p</div>
+            <div
+              class="rsel-option"
+              data-value="content"
+              data-color="var(--coral)"
+              onclick="selectReportType(this)"
+            >
+              <span class="rsel-dot" style="background: var(--coral)"></span>🔞
+              Contenu inapproprié
             </div>
-            <div class="meta-cell">
-              <div class="ml">Sous-titres</div>
-              <div class="mv ok">✓ FR</div>
+            <div
+              class="rsel-option"
+              data-value="tech"
+              data-color="var(--lavande)"
+              onclick="selectReportType(this)"
+            >
+              <span class="rsel-dot" style="background: var(--lavande)"></span>▶
+              YouTube / Technique
             </div>
-            <div class="meta-cell">
-              <div class="ml">Copyright</div>
-              <div class="mv ok">✓ Vérifié</div>
+            <div
+              class="rsel-option"
+              data-value="other"
+              data-color="var(--mist)"
+              onclick="selectReportType(this)"
+            >
+              <span class="rsel-dot" style="background: var(--mist)"></span>❓
+              Autre
             </div>
-          </div>
-
-          <!-- Fiche IA — CDC : champs obligatoires scénario/image/post-prod -->
-          <div class="section-card">
-            <h4>Fiche IA — Détails obligatoires</h4>
-            <div class="ia-grid">
-              <div class="ia-cell">
-                <div class="ia-type">Scénario</div>
-                <div class="ia-tools" id="d-ia-sc">ChatGPT-4o · Claude</div>
-              </div>
-              <div class="ia-cell">
-                <div class="ia-type">Image / Vidéo</div>
-                <div class="ia-tools" id="d-ia-img">Runway ML Gen-3 · Sora</div>
-              </div>
-              <div class="ia-cell">
-                <div class="ia-type">Post-production</div>
-                <div class="ia-tools" id="d-ia-post">MusicGen · ElevenLabs · Firefly</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Note de démarche créative -->
-          <div class="section-card">
-            <h4>Note de démarche créative</h4>
-            <p id="d-note">"J'ai travaillé avec Runway ML pour générer des séquences oniriques, puis dirigé les mouvements de caméra image par image. Le son est composé via MusicGen. Ce film explore la porosité entre mémoire humaine et apprentissage machine."</p>
-          </div>
-
-          <!-- Décisions du jury -->
-          <div class="section-card">
-            <h4>Décisions du jury</h4>
-            <div class="votes-list" id="votes-list"></div>
-          </div>
-
-          <!-- Commentaires du jury -->
-          <div class="section-card">
-            <h4>Commentaires du jury</h4>
-            <div class="comments-thread" id="comments-thread">
-              <div class="ct-empty">Aucun commentaire pour ce film.</div>
-            </div>
-          </div>
-
-        </div><!-- /detail-scroll -->
-
-        <!-- ══ PANNEAU DÉCISION — Validé / À revoir / Refusé ══ -->
-        <div class="notation-panel">
-          <!-- 3 boutons de décision -->
-          <div class="decision-main">
-            <button class="dbtn-main dbtn-valide"  id="btn-valide"  onclick="decide('valide')">✓ Valider</button>
-            <button class="dbtn-main dbtn-arevoir" id="btn-arevoir" onclick="openModalARevoir()">↩ À revoir</button>
-            <button class="dbtn-main dbtn-refuse"  id="btn-refuse"  onclick="openModalRefuse()">✕ Refuser</button>
-          </div>
-          <!-- Commentaire -->
-          <div class="notation-bottom">
-            <div class="comment-wrap">
-              <div class="comment-label">Mon commentaire (visible par tout le jury)</div>
-              <textarea class="comment-input" id="comment-input" placeholder="Ajoutez un commentaire sur ce film…"></textarea>
-            </div>
-            <button class="btn-publish" onclick="postComment()">💬 Publier</button>
           </div>
         </div>
 
-      </div><!-- /detail -->
-    </div><!-- /view-eval -->
+        <div class="modal-label">Description détaillée</div>
+        <textarea
+          id="report-message"
+          class="modal-textarea"
+          placeholder="Précisez le problème rencontré..."
+          style="min-height: 100px"
+        ></textarea>
 
-    <!-- ══════ VUE DÉLIBÉRATION ══════ -->
-    <div class="delib-view" id="view-delib">
-      <div class="delib-header">
-        <div>
-          <h2>Délibération finale</h2>
+        <div class="modal-actions">
+          <button class="modal-btn-cancel" onclick="closeModal('modal-report')">
+            Annuler
+          </button>
+          <button
+            class="modal-btn-arevoir"
+            onclick="confirmReport()"
+            style="flex: 2"
+          >
+            Envoyer le signalement
+          </button>
         </div>
-        <button class="export-btn" onclick="showToast('Export CSV en cours...','warn')">
-          📤 Exporter palmarès CSV
-        </button>
-      </div>
-      <div class="delib-sub">Décisions du jury · 4 membres · Films assignés par l'administrateur</div>
-
-      <!-- 2 phases de sélection -->
-      <div class="phase-tabs">
-        <div class="ptab active" onclick="setPhaseTab(this,1)">Phase 1 · Présélection Top 50 · 12/12/26</div>
-        <div class="ptab ptab-2" onclick="setPhaseTab(this,2)">Phase 2 · Finale Top 5 · Date à confirmer</div>
-      </div>
-
-      <table class="delib-table" id="delib-table"></table>
-    </div>
-
-  </div><!-- /main -->
-
-  <!-- ══ MODALE : À REVOIR ══ -->
-  <div class="modal-overlay" id="modal-arevoir" onclick="closeModalOutside(event,'modal-arevoir')">
-    <div class="modal-box">
-      <span class="modal-icon">↩</span>
-      <div class="modal-title">Demande de révision</div>
-      <div class="modal-subtitle">
-        Précisez pourquoi ce film mérite une attention particulière. Ce message sera visible par les autres membres du jury.
-      </div>
-      <div class="modal-film-chip" id="arevoir-chip">—</div>
-      <div class="modal-label">Votre message</div>
-      <textarea class="modal-textarea" id="arevoir-message"
-        placeholder="Ex : Le traitement sonore est inhabituel, mérite une seconde écoute attentive. Les premiers plans sont visuellement forts…"></textarea>
-      <div class="modal-hint" id="arevoir-hint">⚠ Veuillez écrire un message avant de continuer.</div>
-      <div class="modal-actions">
-        <button class="modal-btn-cancel" onclick="closeModal('modal-arevoir')">Annuler</button>
-        <button class="modal-btn-arevoir" onclick="confirmARevoir()">↩ Marquer à revoir →</button>
       </div>
     </div>
-  </div>
 
-  <!-- ══ MODALE : REFUS ══ -->
-  <div class="modal-overlay" id="modal-refuse" onclick="closeModalOutside(event,'modal-refuse')">
-    <div class="modal-box">
-      <span class="modal-icon">✕</span>
-      <div class="modal-title">Notification de refus</div>
-      <div class="modal-subtitle">
-        Ce message sera envoyé au réalisateur. Vous pouvez le personnaliser avant l'envoi.
+    <div class="toast" id="toast"></div>
+
+    <!-- ===================== -->
+    <!-- SCRIPTS              -->
+    <!-- ===================== -->
+    <script src="../js/admin-jury.js"></script>
+
+    <!-- ===================== -->
+    <!-- DEV NAV MAQUETTE     -->
+    <!-- ===================== -->
+    <div id="dev-nav">
+      <div class="dn-header">
+        <span class="dn-icon-main">🧭</span>
+        <span class="dn-title">Maquette</span>
       </div>
-      <div class="modal-film-chip" id="refuse-chip">—</div>
-      <div class="modal-label">Message au réalisateur</div>
-      <textarea class="modal-textarea" id="refuse-message" style="min-height:180px;"></textarea>
-      <hr class="modal-separator">
-      <div class="modal-actions">
-        <button class="modal-btn-cancel" onclick="closeModal('modal-refuse')">Annuler</button>
-        <button class="modal-btn-refuse" onclick="confirmRefuse()">✕ Confirmer le refus →</button>
-      </div>
+      <a href="index.html" class="dn-btn">
+        <span class="dn-icon">🏠</span>
+        <span class="dn-lbl">Accueil</span>
+      </a>
+      <div class="dn-sep"></div>
+      <a href="admin-panel.html" class="dn-btn espace-admin">
+        <span class="dn-icon">🛡️</span>
+        <span class="dn-lbl">Admin</span>
+      </a>
+      <a href="admin-jury.html" class="dn-btn espace-jury active">
+        <span class="dn-icon">⚖️</span>
+        <span class="dn-lbl">Jury</span>
+      </a>
+      <a href="cahier-des-charges.html" class="dn-btn">
+        <span class="dn-icon">📄</span>
+        <span class="dn-lbl">CDC</span>
+      </a>
+      <a
+        href="https://dylan-blanc.github.io/UserStory-MarsAI/"
+        class="dn-btn"
+        target="_blank"
+      >
+        <span class="dn-icon">📋</span>
+        <span class="dn-lbl">User Stories</span>
+      </a>
     </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <!-- Script principal de l'interface jury -->
-  <script src="../js/admin-jury.js"></script>
-
-  <!-- Barre de navigation maquette (dev) -->
-  <div id="dev-nav">
-    <span class="dn-label">Maquette</span>
-    <a href="index.html" class="dn-btn">🏠 Accueil</a>
-    <div class="dn-sep"></div>
-    <a href="admin-panel.html" class="dn-btn espace-admin">🛡️ Espace Admin</a>
-    <a href="admin-jury.html"  class="dn-btn espace-jury active">⚖️ Espace Jury</a>
-  </div>
-</body>
+    <script>
+      (function () {
+        var nav = document.getElementById("dev-nav");
+        if (!nav) return;
+        nav.addEventListener(
+          "touchstart",
+          function (e) {
+            if (e.target.closest("a")) return;
+            e.preventDefault();
+            nav.classList.toggle("open");
+          },
+          { passive: false },
+        );
+        document.addEventListener(
+          "touchstart",
+          function (e) {
+            if (!nav.contains(e.target)) nav.classList.remove("open");
+          },
+          { passive: true },
+        );
+      })();
+    </script>
+  </body>
 </html>

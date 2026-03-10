@@ -1,22 +1,31 @@
 /* ================================================================
    FICHIER — index-sphere.js
-   Sphère 3D Three.js avec bloom, particules et explosion au clic.
+   Sphère 3D Three.js avec particules et explosion au clic.
    ES module — communique via window._restartSphereAnim.
    Dépendances : Three.js (importmap), GSAP (global).
+
+   OPTIMISÉ v3 (GPU Intel UHD 620) :
+   - Bloom SUPPRIMÉ (5-8 passes GPU en moins)
+   - Rendu direct renderer.render() (1 seule passe)
+   - pixelRatio plafonné à 1
+   - Throttle 30fps
+   - Géométrie allégée (detail 6)
+   - Lumière violette → verte (uniforme)
+   - Émissivité renforcée pour compenser l'absence de bloom
    ================================================================ */
   import * as THREE from 'three';
-  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
   const config = {
     colors: {
       bg: 0x0A0F2E,       // deep-sky to match marsAI theme
       primary: 0x4EFFCE,   // aurora
-      secondary: 0xC084FC, // lavande
+      secondary: 0x4EFFCE, // même couleur que primary (violet supprimé)
       wireframe: 0x1A1F4E  // horizon
     }
   };
+
+  const TARGET_FPS = 30;
+  const FRAME_TIME = 1000 / TARGET_FPS;
 
   const canvas = document.querySelector('#webgl-canvas');
   if (!canvas) throw new Error('Canvas not found');
@@ -31,27 +40,26 @@
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: false,
-    powerPreference: "high-performance",
+    powerPreference: "low-power",  // préférer économie d'énergie
     alpha: false
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(1);  // plafonné à 1 (pas de hi-DPI — gros gain GPU)
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
 
   const mainGroup = new THREE.Group();
   scene.add(mainGroup);
 
-  // Core sphere
-  const geometryCore = new THREE.IcosahedronGeometry(2, 10);
-  const materialCore = new THREE.MeshPhysicalMaterial({
-    color: 0x000000,
-    metalness: 0.9,
-    roughness: 0.1,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.1,
+  // Core sphere — detail 6 au lieu de 10 (~2.5K vertices au lieu de ~10K)
+  const geometryCore = new THREE.IcosahedronGeometry(2, 6);
+  // MeshStandardMaterial — émissivité renforcée (compense l'absence de bloom)
+  const materialCore = new THREE.MeshStandardMaterial({
+    color: 0x050510,
+    metalness: 0.85,
+    roughness: 0.15,
     emissive: config.colors.primary,
-    emissiveIntensity: 0.05
+    emissiveIntensity: 0.15
   });
   const sphereCore = new THREE.Mesh(geometryCore, materialCore);
   mainGroup.add(sphereCore);
@@ -62,7 +70,7 @@
     color: config.colors.primary,
     wireframe: true,
     transparent: true,
-    opacity: 0.15,
+    opacity: 0.25,   // plus visible sans bloom
     side: THREE.DoubleSide
   });
   const sphereWire = new THREE.Mesh(geometryWire, materialWire);
@@ -86,8 +94,8 @@
   const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
   scene.add(particlesMesh);
 
-  // Explosion system
-  const explosionCount = 5000;
+  // Explosion system — 2000 au lieu de 5000
+  const explosionCount = 2000;
   const explosionGeo = new THREE.BufferGeometry();
   const initialPos = new Float32Array(explosionCount * 3);
   const targetPos = new Float32Array(explosionCount * 3);
@@ -117,7 +125,7 @@
 
   explosionGeo.setAttribute('position', new THREE.BufferAttribute(currentPos, 3));
   const explosionMaterial = new THREE.PointsMaterial({
-    size: 0.04,
+    size: 0.05,  // légèrement plus gros pour compenser la réduction de quantité
     color: config.colors.primary,
     transparent: true,
     opacity: 0,
@@ -128,26 +136,16 @@
   explosionSystem.visible = false;
   mainGroup.add(explosionSystem);
 
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.1));
-  const light1 = new THREE.PointLight(config.colors.primary, 400);
+  // Lighting — 2 lumières vertes identiques (violet supprimé)
+  scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+  const light1 = new THREE.PointLight(config.colors.primary, 150);
   light1.position.set(4, 2, 4);
   scene.add(light1);
-  const light2 = new THREE.PointLight(config.colors.secondary, 400);
+  const light2 = new THREE.PointLight(config.colors.secondary, 150);
   light2.position.set(-4, -2, 2);
   scene.add(light2);
 
-  // Post-processing
-  const renderScene = new RenderPass(scene, camera);
-  const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85
-  );
-  bloomPass.strength = 1.2;
-  bloomPass.radius = 0.5;
-  bloomPass.threshold = 0.1;
-  const composer = new EffectComposer(renderer);
-  composer.addPass(renderScene);
-  composer.addPass(bloomPass);
+  // PAS de post-processing — rendu direct (1 passe au lieu de 6-8)
 
   // Interaction state
   let mouseX = 0, mouseY = 0;
@@ -244,7 +242,7 @@
             sphereWire.visible = true;
             gsap.to(explosionMaterial, { opacity: 0, duration: 0.3 });
             gsap.to([sphereCore.material, sphereWire.material], { opacity: 1, duration: 0.5 });
-            sphereWire.material.opacity = 0.15;
+            sphereWire.material.opacity = 0.25;
             explosionSystem.visible = false;
             isAnimating = false;
           }
@@ -274,10 +272,12 @@
     }
   }, { passive: true });
 
-  // Animation loop
+  // Animation loop — throttle à 30fps
   const clock = new THREE.Clock();
   let sphereVisible = true;
   let animFrameId = null;
+  let lastFrameTime = 0;
+
   function animate() {
     // Skip render when sphere is invisible (GPU perf)
     const canvasOpacity = parseFloat(canvas.style.opacity);
@@ -288,6 +288,11 @@
     }
     animFrameId = requestAnimationFrame(animate);
     if (!sphereVisible) { clock.start(); sphereVisible = true; }
+
+    // Throttle à 30fps — skip les frames intermédiaires
+    const now = performance.now();
+    if (now - lastFrameTime < FRAME_TIME) return;
+    lastFrameTime = now - ((now - lastFrameTime) % FRAME_TIME);
 
     const elapsedTime = clock.getElapsedTime();
     targetX = mouseX * 0.001;
@@ -311,7 +316,7 @@
     particlesMesh.rotation.y = elapsedTime * 0.05;
     particlesMesh.rotation.x = -mouseY * 0.0002;
 
-    composer.render();
+    renderer.render(scene, camera);
   }
 
   // Resize
@@ -319,7 +324,6 @@
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
   });
 
   // Expose a restart function so the scroll handler can resume the loop
@@ -329,6 +333,7 @@
 
   // Init with entrance animation
   window.addEventListener('load', () => {
+    lastFrameTime = performance.now();
     animate();
     gsap.from(sphereCore.scale, { x: 0, y: 0, z: 0, duration: 1.5, ease: "elastic.out(1, 0.7)" });
     gsap.from(sphereWire.scale, { x: 0, y: 0, z: 0, duration: 1.5, ease: "elastic.out(1, 0.7)", delay: 0.1 });
