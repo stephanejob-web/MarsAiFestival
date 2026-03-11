@@ -1854,9 +1854,7 @@ const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
                     >
                         <span aria-hidden="true">▶</span> Regarder
                     </button>
-                    <button className="flex items-center gap-2 bg-white/15 text-white font-semibold text-sm px-6 py-2.5 rounded hover:bg-white/25 transition-colors backdrop-blur-sm border border-white/15">
-                        + Ma liste
-                    </button>
+
                 </div>
             </div>
         </div>
