@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import heroVideo from "../../../assets/hero-marsai.mp4";
 import useCountdown from "../hooks/useCountdown";
 
 interface HeroTag {
@@ -67,9 +68,8 @@ const HeroSection = (): React.JSX.Element => {
                 playsInline
                 preload="auto"
                 aria-hidden="true"
-                poster="/assets/hero-poster.jpg"
             >
-                <source src="/assets/hero-marsai.mp4" type="video/mp4" />
+                <source src={heroVideo} type="video/mp4" />
             </video>
 
             {/* Aurora orbs */}
