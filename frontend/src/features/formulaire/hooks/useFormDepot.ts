@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import type { FormDepotData, FormDepotErrors, SubmissionState } from "../types";
 import { INITIAL_FORM_DATA, VIDEO_MIN_DURATION, VIDEO_MAX_DURATION } from "../constants";
+import { apiFetchForm } from "../../../services/api";
 
 interface UseFormDepotReturn {
     currentStep: number;
@@ -159,18 +160,29 @@ const useFormDepot = (): UseFormDepotReturn => {
         setUploadProgress(0);
     }, []);
 
-    const submitForm = useCallback((): void => {
+    const submitForm = useCallback(async (): Promise<void> => {
         if (!rgpdChecked.every(Boolean)) return;
         if (!validateStep(4)) return;
 
         setSubmissionState("submitting");
-        const num = "MAI-2026-" + String(Math.floor(Math.random() * 90000) + 10000);
-        setDossierNum(num);
 
-        setTimeout(() => {
+        const data = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            data.append(key, String(value));
+        });
+        if (videoFile) data.append("video", videoFile);
+        if (subtitleFR) data.append("subtitleFR", subtitleFR);
+        if (subtitleEN) data.append("subtitleEN", subtitleEN);
+
+        try {
+            const result = await apiFetchForm<{ dossierNum: string }>("/api/films", data);
+            setDossierNum(result.dossierNum);
             setSubmissionState("verifying");
-        }, 1500);
-    }, [rgpdChecked, validateStep]);
+        } catch (err) {
+            console.error("Erreur soumission:", err);
+            setSubmissionState("idle");
+        }
+    }, [rgpdChecked, validateStep, formData, videoFile, subtitleFR, subtitleEN]);
 
     const verifyOtp = useCallback((code: string): boolean => {
         return code === "123456";

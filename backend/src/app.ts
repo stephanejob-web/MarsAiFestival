@@ -8,6 +8,8 @@ app.use(express.json());
 
 // Routes
 import homeRouter from "./routes/home.routes";
+import filmRouter from "./routes/film.routes";
 app.use("/", homeRouter);
+app.use("/api/films", filmRouter);
 
 export default app;
