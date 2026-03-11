@@ -179,6 +179,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             setDossierNum(result.dossierNum);
             setSubmissionState("verifying");
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.error("Erreur soumission:", err);
             setSubmissionState("idle");
         }
