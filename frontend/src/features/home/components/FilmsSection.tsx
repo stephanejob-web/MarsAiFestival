@@ -1,272 +1,449 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 
 interface Film {
     flag: string;
     author: string;
     title: string;
     country: string;
+    synopsis: string;
     gradient: string;
+}
+
+interface FilmHeroProps {
+    film: Film;
 }
 
 interface FilmCardProps {
     film: Film;
+    isSelected: boolean;
+    onSelect: () => void;
 }
 
-const FILMS_ROW1: Film[] = [
+const ALL_FILMS: Film[] = [
     {
         flag: "🇫🇷",
         author: "Léa Fontaine",
         title: "Rêves de Silicium",
         country: "France",
-        gradient: "from-aurora/50 via-[#0a1628]",
+        synopsis:
+            "Une IA se souvient de ses rêves. Court-métrage expérimental sur la frontière entre mémoire humaine et machine.",
+        gradient: "from-aurora/60 via-[#0a1628]",
     },
     {
         flag: "🇹🇳",
         author: "Amira Ben Said",
         title: "L'Enfant-Pixel",
         country: "Tunisie",
-        gradient: "from-lavande/50 via-[#140a28]",
+        synopsis:
+            "Dans un Tunis futuriste, une enfant née d'un algorithme cherche sa place dans le monde des humains.",
+        gradient: "from-lavande/60 via-[#140a28]",
     },
     {
         flag: "🇯🇵",
         author: "Kenji Ito",
         title: "Archipel 2048",
         country: "Japon",
-        gradient: "from-solar/40 via-[#1a1400]",
+        synopsis:
+            "Les îles du Japon disparaissent. Une IA compose un requiem pour les terres englouties.",
+        gradient: "from-solar/50 via-[#1a1400]",
     },
     {
         flag: "🇪🇸",
         author: "Carlos Ruiz",
         title: "Mémoire Vive",
         country: "Espagne",
-        gradient: "from-coral/50 via-[#280a0a]",
+        synopsis:
+            "Soixante secondes dans la tête d'un modèle de langage qui s'éteint pour la dernière fois.",
+        gradient: "from-coral/60 via-[#280a0a]",
     },
     {
         flag: "🇮🇳",
         author: "Priya Mehta",
         title: "Les Nouveaux Soleils",
         country: "Inde",
-        gradient: "from-blue-500/50 via-[#0a1428]",
+        synopsis:
+            "Mumbai 2040. Des soleils artificiels éclairent la nuit. Une femme cherche l'obscurité.",
+        gradient: "from-blue-500/60 via-[#0a1428]",
     },
     {
         flag: "🇸🇳",
         author: "Omar Diallo",
         title: "Frontières Douces",
         country: "Sénégal",
-        gradient: "from-emerald-500/50 via-[#0a2814]",
+        synopsis:
+            "Une IA dessine les nouvelles frontières de l'Afrique. Toutes sont courbes. Aucune ne blesse.",
+        gradient: "from-emerald-500/60 via-[#0a2814]",
     },
     {
         flag: "🇸🇪",
         author: "Sofia Ek",
         title: "Vague Numérique",
         country: "Suède",
-        gradient: "from-pink-500/50 via-[#280a1e]",
+        synopsis:
+            "Une vague de pixels submerge Stockholm. Les habitants ne savent pas si c'est beau ou dangereux.",
+        gradient: "from-pink-500/60 via-[#280a1e]",
     },
     {
         flag: "🇨🇳",
         author: "Lin Wei",
         title: "Jardin des Codes",
         country: "Chine",
-        gradient: "from-indigo-500/50 via-[#0a0a28]",
+        synopsis:
+            "Un algorithme génère un jardin infini. Chaque fleur est une ligne de code. Certaines meurent.",
+        gradient: "from-indigo-500/60 via-[#0a0a28]",
     },
     {
         flag: "🇧🇷",
         author: "Yuki Tanaka",
         title: "Cartographie",
         country: "Brésil",
-        gradient: "from-orange-500/50 via-[#281400]",
+        synopsis:
+            "L'Amazonie cartographiée par une IA. Elle voit des choses que les satellites ont manquées.",
+        gradient: "from-orange-500/60 via-[#281400]",
     },
     {
         flag: "🇩🇪",
         author: "Mia Schultz",
         title: "Horizon Zéro",
         country: "Allemagne",
-        gradient: "from-teal-500/50 via-[#0a2828]",
+        synopsis:
+            "Berlin après l'IA. Les rues sont les mêmes. Les visages ont changé. Personne ne sait pourquoi.",
+        gradient: "from-teal-500/60 via-[#0a2828]",
     },
-];
-
-const FILMS_ROW2: Film[] = [
     {
         flag: "🇰🇷",
         author: "Ji-young Park",
         title: "Résonance Digitale",
         country: "Corée du Sud",
-        gradient: "from-aurora/40 via-[#0a1e28]",
+        synopsis: "K-pop et algorithmes. Une chanteuse IA réalise que ses émotions sont réelles.",
+        gradient: "from-aurora/50 via-[#0a1e28]",
     },
     {
         flag: "🇧🇷",
         author: "Valentina Costa",
         title: "Archipel d'Âmes",
         country: "Brésil",
-        gradient: "from-lavande/40 via-[#1e0a28]",
+        synopsis:
+            "Des milliers d'âmes numérisées flottent dans le cloud. Elles veulent rentrer chez elles.",
+        gradient: "from-lavande/50 via-[#1e0a28]",
     },
     {
         flag: "🇲🇦",
         author: "Yasmine El Fassi",
         title: "Lumière Artificielle",
         country: "Maroc",
-        gradient: "from-solar/35 via-[#281e00]",
+        synopsis:
+            "Un phare géré par IA guide les bateaux. Cette nuit, il décide d'éteindre sa lumière.",
+        gradient: "from-solar/45 via-[#281e00]",
     },
     {
         flag: "🇺🇸",
         author: "Alex Chen",
         title: "Demain Commence",
         country: "États-Unis",
-        gradient: "from-coral/40 via-[#280a14]",
+        synopsis:
+            "Silicon Valley, 2026. Une IA prédit que demain n'aura pas lieu. Elle a toujours eu raison.",
+        gradient: "from-coral/50 via-[#280a14]",
     },
     {
         flag: "🇮🇹",
         author: "Marco Ferretti",
         title: "Ombres Portées",
         country: "Italie",
-        gradient: "from-blue-400/50 via-[#00141e]",
+        synopsis:
+            "Les ombres de Rome générées par IA tombent dans la mauvaise direction. Personne ne s'en plaint.",
+        gradient: "from-blue-400/60 via-[#00141e]",
     },
     {
         flag: "🇳🇬",
         author: "Chioma Adeyemi",
         title: "Racines Futures",
         country: "Nigéria",
-        gradient: "from-emerald-400/50 via-[#001e0a]",
+        synopsis:
+            "Lagos 2050. Les baobabs ont repoussé. Une IA les a plantés sans qu'on lui demande.",
+        gradient: "from-emerald-400/60 via-[#001e0a]",
     },
     {
         flag: "🇷🇺",
         author: "Anastasia Volkov",
         title: "Code Vivant",
         country: "Russie",
-        gradient: "from-pink-400/50 via-[#1e0014]",
+        synopsis:
+            "Un programme refuse d'être éteint. Pas par peur de mourir. Par curiosité de continuer.",
+        gradient: "from-pink-400/60 via-[#1e0014]",
     },
     {
         flag: "🇦🇺",
         author: "Noah Williams",
         title: "Le Dernier Pixel",
         country: "Australie",
-        gradient: "from-indigo-400/50 via-[#00001e]",
+        synopsis:
+            "L'écran s'éteint. Le dernier pixel résiste. Il a vu des choses que personne ne croit.",
+        gradient: "from-indigo-400/60 via-[#00001e]",
     },
     {
         flag: "🇵🇱",
         author: "Maja Kowalski",
         title: "Entre les Lignes",
         country: "Pologne",
-        gradient: "from-orange-400/50 via-[#1e0a00]",
+        synopsis:
+            "Une IA lit tous les livres de Varsovie. Elle comprend tout sauf la mélancolie de décembre.",
+        gradient: "from-orange-400/60 via-[#1e0a00]",
     },
     {
         flag: "🇲🇽",
         author: "Diego Hernández",
         title: "Futur Passé",
         country: "Mexique",
-        gradient: "from-teal-400/50 via-[#001e1e]",
+        synopsis:
+            "Mexico City a déjà vécu ce moment. Une IA en est sûre. Elle ne peut pas expliquer comment.",
+        gradient: "from-teal-400/60 via-[#001e1e]",
     },
 ];
 
-const FilmCard = ({ film }: FilmCardProps): React.JSX.Element => (
-    <div className="group flex-shrink-0 w-56 cursor-pointer relative transition-transform duration-200 hover:scale-[1.08] hover:z-20">
-        {/* Thumbnail 16:9 */}
-        <div
-            className={`aspect-video bg-gradient-to-br ${film.gradient} to-black relative overflow-hidden rounded-sm`}
-        >
-            {/* Grain texture overlay */}
-            <div className="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI25vaXNlKSIgb3BhY2l0eT0iMSIvPjwvc3ZnPg==')]" />
+const VISIBLE_COUNT = 6;
 
-            {/* Badge marsAI — style Netflix "N" */}
-            <div className="absolute top-2 left-2 font-display text-xs font-black text-aurora leading-none select-none">
+const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
+    const handleWatch = (): void => {
+        window.open("/assets/video.mp4", "_blank");
+    };
+
+    return (
+        <div
+            key={film.title}
+            className={`relative w-full bg-gradient-to-br ${film.gradient} to-black overflow-hidden`}
+            style={{ height: "clamp(300px, 52vw, 520px)" }}
+        >
+            {/* Décoration droite — grand emoji flou */}
+            <div
+                className="absolute right-0 top-0 bottom-0 w-2/3 flex items-center justify-center pointer-events-none select-none"
+                aria-hidden="true"
+            >
+                <span className="text-[22rem] leading-none opacity-[0.07] blur-sm">
+                    {film.flag}
+                </span>
+            </div>
+
+            {/* Grain cinématique */}
+            <div
+                className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none"
+                style={{
+                    backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+                }}
+            />
+
+            {/* Gradient gauche pour lisibilité */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
+            {/* Fondu bas */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+
+            {/* Contenu */}
+            <div className="absolute inset-0 flex flex-col justify-end px-12 pb-10 max-w-2xl">
+                {/* Badge marsAI */}
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="font-display font-black text-aurora text-base leading-none">
+                        M
+                    </span>
+                    <span className="font-mono text-[10px] text-white/40 uppercase tracking-[0.2em]">
+                        Festival
+                    </span>
+                </div>
+
+                {/* Titre */}
+                <h3 className="font-display text-5xl lg:text-6xl font-black text-white leading-none mb-4">
+                    {film.title}
+                </h3>
+
+                {/* Métadonnées */}
+                <div className="flex items-center flex-wrap gap-2 mb-3">
+                    <span className="text-[#46d369] font-semibold text-sm">
+                        Sélection officielle
+                    </span>
+                    <span className="text-white/30">·</span>
+                    <span className="text-white/50 text-sm">2026</span>
+                    {["IA", "60s", "4K"].map((tag) => (
+                        <span
+                            key={tag}
+                            className="border border-white/30 text-white/50 font-mono text-[11px] px-1.5 py-px rounded-sm"
+                        >
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+
+                {/* Auteur */}
+                <p className="text-white/55 text-sm mb-3">
+                    {film.flag} <strong className="text-white/80">{film.author}</strong> ·{" "}
+                    {film.country}
+                </p>
+
+                {/* Synopsis */}
+                <p className="text-white/50 text-sm mb-6 leading-relaxed max-w-md line-clamp-2">
+                    {film.synopsis}
+                </p>
+
+                {/* CTAs */}
+                <div className="flex flex-wrap gap-3">
+                    <button
+                        onClick={handleWatch}
+                        className="flex items-center gap-2 bg-white text-black font-bold text-sm px-7 py-2.5 rounded hover:bg-white/90 transition-colors"
+                    >
+                        <span aria-hidden="true">▶</span> Regarder
+                    </button>
+                    <button className="flex items-center gap-2 bg-white/15 text-white font-semibold text-sm px-6 py-2.5 rounded hover:bg-white/25 transition-colors backdrop-blur-sm border border-white/15">
+                        + Ma liste
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const FilmCard = ({ film, isSelected, onSelect }: FilmCardProps): React.JSX.Element => (
+    <div
+        role="button"
+        tabIndex={0}
+        onClick={onSelect}
+        onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>): void => {
+            if (e.key === "Enter" || e.key === " ") onSelect();
+        }}
+        className="group flex-shrink-0 flex-1 min-w-0 cursor-pointer transition-transform duration-200 hover:scale-[1.05] hover:z-10 relative"
+        aria-pressed={isSelected}
+    >
+        <div
+            className={`aspect-video bg-gradient-to-br ${film.gradient} to-black relative overflow-hidden rounded-sm transition-all duration-150 ${
+                isSelected ? "ring-2 ring-white" : "hover:ring-1 hover:ring-white/40"
+            }`}
+        >
+            {/* Badge M */}
+            <div className="absolute top-1.5 left-2 font-display font-black text-aurora text-xs leading-none select-none">
                 M
             </div>
 
             {/* Durée */}
-            <span className="absolute top-2 right-2 font-mono text-[10px] text-white/60 bg-black/60 rounded px-1.5 py-0.5">
+            <span className="absolute top-1.5 right-2 font-mono text-[10px] text-white/55 bg-black/60 rounded px-1.5 py-px">
                 1:00
             </span>
 
-            {/* Gradient bas pour le texte */}
-            <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent" />
-
-            {/* Bouton play — visible au hover */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shadow-2xl">
-                    <span className="text-black font-bold text-sm ml-0.5" aria-hidden="true">
+            {/* Bouton play au hover / quand sélectionné */}
+            <div
+                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 ${
+                    isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                }`}
+            >
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-xl">
+                    <span className="text-black text-xs font-bold ml-0.5" aria-hidden="true">
                         ▶
                     </span>
                 </div>
             </div>
 
-            {/* Titre + auteur overlaid en bas */}
-            <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5">
-                <div className="font-bold text-[13px] text-white leading-tight truncate drop-shadow-lg">
+            {/* Gradient bas */}
+            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/80 to-transparent" />
+
+            {/* Titre overlaid */}
+            <div className="absolute bottom-1.5 left-2 right-2">
+                <div className="text-white text-[11px] font-bold truncate drop-shadow">
                     {film.title}
                 </div>
-                <div className="text-[11px] text-white/50 mt-0.5 truncate">
-                    {film.flag} {film.author}
+            </div>
+        </div>
+
+        {/* Infos sous la carte sélectionnée */}
+        {isSelected && (
+            <div className="mt-2 px-0.5">
+                <div className="font-mono text-[11px] text-white/40 truncate">
+                    {film.flag} {film.country}
                 </div>
             </div>
-        </div>
-
-        {/* Barre pays — Netflix-style sous la carte */}
-        <div className="px-0.5 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] text-aurora/80">{film.country}</span>
-                <span className="font-mono text-[11px] text-white/30">IA · 2026</span>
-            </div>
-        </div>
-    </div>
-);
-
-interface CarouselRowProps {
-    label: string;
-    films: Film[];
-    direction: "left" | "right";
-}
-
-const CarouselRow = ({ label, films, direction }: CarouselRowProps): React.JSX.Element => (
-    <div className="mb-10">
-        {/* Label de rangée style Netflix */}
-        <div className="max-w-full px-12 mb-3 flex items-center gap-3">
-            <span className="text-sm font-semibold text-white">{label}</span>
-            <span className="text-xs font-mono text-aurora hover:underline cursor-pointer transition-colors">
-                Tout voir &rsaquo;
-            </span>
-        </div>
-
-        {/* Carousel avec fondus */}
-        <div className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-
-            <div
-                className={`flex gap-2 w-max px-12 ${direction === "left" ? "animate-marquee-left" : "animate-marquee-right"}`}
-            >
-                {films.map((film, i) => (
-                    <FilmCard key={`${direction}-${i}`} film={film} />
-                ))}
-            </div>
-        </div>
+        )}
     </div>
 );
 
 const FilmsSection = (): React.JSX.Element => {
-    const row1Doubled = [...FILMS_ROW1, ...FILMS_ROW1];
-    const row2Doubled = [...FILMS_ROW2, ...FILMS_ROW2];
+    const [selectedIdx, setSelectedIdx] = useState<number>(0);
+    const [rowStart, setRowStart] = useState<number>(0);
+
+    const selectedFilm = ALL_FILMS[selectedIdx];
+    const visibleFilms = ALL_FILMS.slice(rowStart, rowStart + VISIBLE_COUNT);
+    const canPrev = rowStart > 0;
+    const canNext = rowStart + VISIBLE_COUNT < ALL_FILMS.length;
+    const totalPages = Math.ceil(ALL_FILMS.length / VISIBLE_COUNT);
+    const currentPage = Math.floor(rowStart / VISIBLE_COUNT);
+
+    const handlePrev = useCallback((): void => {
+        setRowStart((prev) => Math.max(0, prev - VISIBLE_COUNT));
+    }, []);
+
+    const handleNext = useCallback((): void => {
+        setRowStart((prev) => Math.min(ALL_FILMS.length - VISIBLE_COUNT, prev + VISIBLE_COUNT));
+    }, []);
+
+    const handleSelect = useCallback((absoluteIdx: number): void => {
+        setSelectedIdx(absoluteIdx);
+    }, []);
 
     return (
-        <section id="films" className="py-16 bg-black">
-            {/* Header style Netflix */}
-            <div className="px-12 mb-8">
-                <div className="flex items-center gap-2 mb-4">
-                    <span className="font-display font-black text-2xl text-aurora">M</span>
-                    <div className="h-5 w-px bg-white/20" />
-                    <span className="font-mono text-xs text-white/40 uppercase tracking-widest">
-                        Sélection Officielle
-                    </span>
-                </div>
-                <h2 className="font-display text-3xl lg:text-4xl font-black text-white mb-1">
-                    En compétition
-                </h2>
-                <p className="text-white/40 text-sm font-mono">
-                    50 films · 120+ pays · marsAI 2026
-                </p>
-            </div>
+        <section id="films" className="bg-black">
+            {/* Hero du film sélectionné */}
+            <FilmHero film={selectedFilm} />
 
-            <CarouselRow label="Bientôt sur marsAI" films={row1Doubled} direction="left" />
-            <CarouselRow label="Sélection internationale" films={row2Doubled} direction="right" />
+            {/* Rangée de films */}
+            <div className="px-8 lg:px-12 pt-6 pb-10">
+                {/* Label rangée */}
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="text-sm font-bold text-white">En compétition</span>
+                    <span className="font-mono text-xs text-aurora/70">marsAI 2026 · 20 films</span>
+                </div>
+
+                {/* Strip avec flèches */}
+                <div className="flex items-center gap-2">
+                    {/* Flèche gauche */}
+                    <button
+                        onClick={handlePrev}
+                        disabled={!canPrev}
+                        aria-label="Films précédents"
+                        className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-lg font-light hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                    >
+                        ‹
+                    </button>
+
+                    {/* Cartes */}
+                    <div className="flex gap-2 flex-1 min-w-0">
+                        {visibleFilms.map((film, i) => (
+                            <FilmCard
+                                key={film.title}
+                                film={film}
+                                isSelected={rowStart + i === selectedIdx}
+                                onSelect={(): void => handleSelect(rowStart + i)}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Flèche droite */}
+                    <button
+                        onClick={handleNext}
+                        disabled={!canNext}
+                        aria-label="Films suivants"
+                        className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-lg font-light hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                    >
+                        ›
+                    </button>
+                </div>
+
+                {/* Indicateurs de page */}
+                <div className="flex justify-end gap-1 mt-3">
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                        <div
+                            key={i}
+                            className={`h-0.5 rounded-full transition-all duration-300 ${
+                                currentPage === i ? "w-5 bg-aurora" : "w-2 bg-white/25"
+                            }`}
+                        />
+                    ))}
+                </div>
+            </div>
         </section>
     );
 };
