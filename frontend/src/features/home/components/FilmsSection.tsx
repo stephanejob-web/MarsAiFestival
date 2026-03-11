@@ -1932,7 +1932,6 @@ const FilmsSection = (): React.JSX.Element => {
 
     const selectedFilm = ALL_FILMS[selectedIdx];
     const currentVideoSrc = selectedIdx % 2 === 0 ? videoAsset : videoPlayback;
-    const visibleFilms = ALL_FILMS.slice(rowStart, rowStart + VISIBLE_COUNT);
     const canPrev = rowStart > 0;
     const canNext = rowStart + VISIBLE_COUNT < ALL_FILMS.length;
     const totalPages = Math.ceil(ALL_FILMS.length / VISIBLE_COUNT);
@@ -1956,45 +1955,86 @@ const FilmsSection = (): React.JSX.Element => {
             <FilmHero film={selectedFilm} videoSrc={currentVideoSrc} />
 
             {/* Rangée de films */}
-            <div className="px-8 lg:px-12 pt-6 pb-10">
-                <div className="flex items-center gap-3 mb-4">
+            <div className="pt-6 pb-10">
+                {/* Label */}
+                <div className="flex items-center gap-3 mb-4 px-12">
                     <span className="text-sm font-bold text-white">En compétition</span>
                     <span className="font-mono text-xs text-aurora/70">marsAI 2026 · 20 films</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Carousel */}
+                <div className="relative group/row">
+                    {/* Bouton gauche — Netflix style */}
                     <button
                         onClick={handlePrev}
                         disabled={!canPrev}
                         aria-label="Films précédents"
-                        className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-lg font-light hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                        className="absolute left-0 top-0 bottom-0 z-20 w-14 flex items-center justify-center bg-gradient-to-r from-black/90 via-black/50 to-transparent opacity-0 group-hover/row:opacity-100 disabled:!opacity-0 transition-opacity duration-200 focus-visible:outline-none"
                     >
-                        ‹
+                        <svg
+                            viewBox="0 0 24 24"
+                            className="w-9 h-9 text-white drop-shadow-lg"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
                     </button>
 
-                    <div className="flex gap-2 flex-1 min-w-0">
-                        {visibleFilms.map((film, i) => (
-                            <FilmCard
-                                key={film.title}
-                                film={film}
-                                filmIdx={rowStart + i}
-                                isSelected={rowStart + i === selectedIdx}
-                                onSelect={(): void => handleSelect(rowStart + i)}
-                            />
-                        ))}
+                    {/* Piste sliding — overflow-hidden clipping */}
+                    <div className="overflow-hidden px-12">
+                        <div
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{
+                                width: `${(ALL_FILMS.length / VISIBLE_COUNT) * 100}%`,
+                                transform: `translateX(-${(rowStart / ALL_FILMS.length) * 100}%)`,
+                            }}
+                        >
+                            {ALL_FILMS.map((film, i) => (
+                                <div
+                                    key={film.title}
+                                    className="flex-shrink-0 px-1"
+                                    style={{ width: `${100 / ALL_FILMS.length}%` }}
+                                >
+                                    <FilmCard
+                                        film={film}
+                                        filmIdx={i}
+                                        isSelected={i === selectedIdx}
+                                        onSelect={(): void => handleSelect(i)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
+                    {/* Bouton droit — Netflix style */}
                     <button
                         onClick={handleNext}
                         disabled={!canNext}
                         aria-label="Films suivants"
-                        className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-lg font-light hover:bg-white/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                        className="absolute right-0 top-0 bottom-0 z-20 w-14 flex items-center justify-center bg-gradient-to-l from-black/90 via-black/50 to-transparent opacity-0 group-hover/row:opacity-100 disabled:!opacity-0 transition-opacity duration-200 focus-visible:outline-none"
                     >
-                        ›
+                        <svg
+                            viewBox="0 0 24 24"
+                            className="w-9 h-9 text-white drop-shadow-lg"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                     </button>
                 </div>
 
-                <div className="flex justify-end gap-1 mt-3">
+                {/* Indicateurs de page */}
+                <div className="flex justify-end gap-1 mt-3 px-12">
                     {Array.from({ length: totalPages }).map((_, i) => (
                         <div
                             key={i}
