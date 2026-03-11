@@ -1854,7 +1854,6 @@ const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
                     >
                         <span aria-hidden="true">▶</span> Regarder
                     </button>
-
                 </div>
             </div>
         </div>

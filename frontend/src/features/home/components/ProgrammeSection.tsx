@@ -202,7 +202,10 @@ const ProgrammeSection = (): React.JSX.Element => {
                 {/* Timeline */}
                 <div className="relative">
                     {/* Ligne verticale */}
-                    <div className="absolute left-[72px] top-0 bottom-0 w-px bg-white/8" aria-hidden="true" />
+                    <div
+                        className="absolute left-[72px] top-0 bottom-0 w-px bg-white/8"
+                        aria-hidden="true"
+                    />
 
                     <div className="flex flex-col gap-1">
                         {day.events.map((event, i) => (
