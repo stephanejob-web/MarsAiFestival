@@ -1,4 +1,5 @@
 import React from "react";
+import visageImg from "../../../assets/visage-couleur.jpg";
 
 const TOOLS: string[] = [
     "Sora",
@@ -11,8 +12,20 @@ const TOOLS: string[] = [
 ];
 
 const ManifesteSection = (): React.JSX.Element => (
-    <section className="py-24 px-6 bg-surface/30">
-        <div className="max-w-6xl mx-auto">
+    <section className="relative py-24 px-6 bg-surface/30 overflow-hidden">
+        {/* Image de fond */}
+        <img
+            src={visageImg}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center opacity-20"
+        />
+        {/* Dégradé gauche pour lisibilité du texte à droite */}
+        <div
+            className="absolute inset-0 bg-gradient-to-r from-surface/80 via-surface/40 to-transparent pointer-events-none"
+            aria-hidden="true"
+        />
+        <div className="relative max-w-6xl mx-auto">
             <div className="max-w-2xl ml-auto">
                 <p className="text-xl text-mist mb-4">
                     1895. Le cinéma naît. Une caméra, une pellicule.
