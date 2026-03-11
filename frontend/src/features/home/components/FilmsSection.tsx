@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import videoAsset from "../../../assets/video.mp4";
+import videoPlayback from "../../../assets/videoplayback.mp4";
 
 interface Film {
     flag: string;
@@ -12,6 +13,7 @@ interface Film {
 
 interface FilmHeroProps {
     film: Film;
+    videoSrc: string;
 }
 
 interface FilmCardProps {
@@ -1626,16 +1628,16 @@ const ALL_FILMS: Film[] = [
 
 const VISIBLE_COUNT = 6;
 
-const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
+const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect((): void => {
         videoRef.current?.load();
         videoRef.current?.play().catch((): void => {});
-    }, [film.title]);
+    }, [videoSrc]);
 
     const handleWatch = (): void => {
-        window.open(videoAsset, "_blank");
+        window.open(videoSrc, "_blank");
     };
 
     return (
@@ -1643,7 +1645,7 @@ const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
             className="relative w-full overflow-hidden"
             style={{ height: "clamp(300px, 52vw, 520px)" }}
         >
-            {/* Vidéo de fond */}
+            {/* Vidéo de fond — sans effet */}
             <video
                 ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -1653,21 +1655,14 @@ const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
                 playsInline
                 aria-hidden="true"
             >
-                <source src={videoAsset} type="video/mp4" />
+                <source src={videoSrc} type="video/mp4" />
             </video>
 
-            {/* Teinte couleur selon le film sélectionné */}
-            <div
-                className={`absolute inset-0 bg-gradient-to-br ${film.gradient} to-black/80 mix-blend-multiply`}
-            />
-
-            {/* Gradient lisibilité gauche */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/65 to-transparent" />
-            {/* Fondu bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black to-transparent" />
+            {/* Fondu bas uniquement pour lisibilité du texte */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
             {/* Contenu */}
-            <div className="absolute inset-0 flex flex-col justify-end px-12 pb-10 max-w-2xl">
+            <div className="absolute inset-0 flex flex-col justify-end px-12 pb-10 max-w-2xl [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
                 <div className="flex items-center gap-2 mb-4">
                     <span className="font-display font-black text-aurora text-base leading-none">
                         M
@@ -1790,6 +1785,7 @@ const FilmsSection = (): React.JSX.Element => {
     const [rowStart, setRowStart] = useState<number>(0);
 
     const selectedFilm = ALL_FILMS[selectedIdx];
+    const currentVideoSrc = selectedIdx % 2 === 0 ? videoAsset : videoPlayback;
     const visibleFilms = ALL_FILMS.slice(rowStart, rowStart + VISIBLE_COUNT);
     const canPrev = rowStart > 0;
     const canNext = rowStart + VISIBLE_COUNT < ALL_FILMS.length;
@@ -1811,7 +1807,7 @@ const FilmsSection = (): React.JSX.Element => {
     return (
         <section id="films" className="bg-black">
             {/* Hero vidéo du film sélectionné */}
-            <FilmHero film={selectedFilm} />
+            <FilmHero film={selectedFilm} videoSrc={currentVideoSrc} />
 
             {/* Rangée de films */}
             <div className="px-8 lg:px-12 pt-6 pb-10">
