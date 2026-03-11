@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import videoAsset from "../../../assets/video.mp4";
 
 interface Film {
     flag: string;
@@ -15,9 +16,1431 @@ interface FilmHeroProps {
 
 interface FilmCardProps {
     film: Film;
+    filmIdx: number;
     isSelected: boolean;
     onSelect: () => void;
 }
+
+const getPosterArt = (idx: number): React.JSX.Element => {
+    const g = `pa${idx}`;
+    const arts: React.JSX.Element[] = [
+        // 0 — Rêves de Silicium · réseau neuronal cyan
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#4EFFCE" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#030a18" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#030a18" />
+            {[40, 80, 120, 160, 200, 240, 280].map((x) => (
+                <line
+                    key={x}
+                    x1={x}
+                    y1="0"
+                    x2={x}
+                    y2="180"
+                    stroke="#4EFFCE"
+                    strokeWidth="0.3"
+                    opacity="0.1"
+                />
+            ))}
+            {[36, 72, 108, 144].map((y) => (
+                <line
+                    key={y}
+                    x1="0"
+                    y1={y}
+                    x2="320"
+                    y2={y}
+                    stroke="#4EFFCE"
+                    strokeWidth="0.3"
+                    opacity="0.1"
+                />
+            ))}
+            <ellipse
+                cx="160"
+                cy="85"
+                rx="58"
+                ry="50"
+                fill="none"
+                stroke="#4EFFCE"
+                strokeWidth="0.8"
+                opacity="0.3"
+            />
+            {(
+                [
+                    [128, 65],
+                    [178, 62],
+                    [192, 85],
+                    [178, 108],
+                    [155, 118],
+                    [132, 108],
+                    [118, 85],
+                    [148, 75],
+                    [172, 75],
+                    [160, 96],
+                ] as [number, number][]
+            ).map(([x, y]) => (
+                <circle key={`${x}${y}`} cx={x} cy={y} r="3.5" fill="#4EFFCE" opacity="0.9" />
+            ))}
+            {(
+                [
+                    [128, 65, 148, 75],
+                    [178, 62, 172, 75],
+                    [148, 75, 172, 75],
+                    [148, 75, 160, 96],
+                    [172, 75, 160, 96],
+                    [128, 65, 118, 85],
+                    [192, 85, 172, 75],
+                    [118, 85, 132, 108],
+                    [178, 108, 172, 75],
+                    [132, 108, 160, 96],
+                    [155, 118, 160, 96],
+                ] as [number, number, number, number][]
+            ).map(([x1, y1, x2, y2]) => (
+                <line
+                    key={`${x1}${y1}${x2}${y2}`}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="#4EFFCE"
+                    strokeWidth="0.8"
+                    opacity="0.28"
+                />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 1 — L'Enfant-Pixel · silhouette enfant pixelisée violet
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="60%">
+                    <stop offset="0%" stopColor="#C084FC" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#0f0520" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#0f0520" />
+            {/* silhouette en blocs */}
+            {(
+                [
+                    [152, 25, 16, 16, "#C084FC"],
+                    [148, 42, 24, 32, "#a855f7"],
+                    [132, 44, 14, 16, "#7c3aed"],
+                    [174, 44, 14, 16, "#7c3aed"],
+                    [148, 76, 12, 36, "#9333ea"],
+                    [162, 76, 12, 36, "#a855f7"],
+                ] as [number, number, number, number, string][]
+            ).map(([x, y, w, h, c]) => (
+                <rect key={`${x}${y}`} x={x} y={y} width={w} height={h} fill={c} opacity="0.9" />
+            ))}
+            {/* pixels éparpillés */}
+            {(
+                [
+                    [80, 20, "#C084FC"],
+                    [240, 35, "#7c3aed"],
+                    [60, 90, "#a855f7"],
+                    [270, 80, "#C084FC"],
+                    [90, 140, "#7c3aed"],
+                    [250, 130, "#a855f7"],
+                    [110, 50, "#9333ea"],
+                    [210, 150, "#C084FC"],
+                ] as [number, number, string][]
+            ).map(([x, y, c]) => (
+                <rect key={`${x}${y}`} x={x} y={y} width="6" height="6" fill={c} opacity="0.4" />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 2 — Archipel 2048 · torii gate japonais + eau montante
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="40%" r="55%">
+                    <stop offset="0%" stopColor="#F5E642" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#050a1e" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id={`${g}w`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1e4db7" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="#0a1e4a" stopOpacity="0.9" />
+                </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill="#050a1e" />
+            {/* soleil */}
+            <circle cx="160" cy="52" r="28" fill="#F5E642" opacity="0.85" />
+            <circle cx="160" cy="52" r="22" fill="#fbbf24" opacity="0.9" />
+            {/* torii gate */}
+            <rect x="128" y="70" width="10" height="90" fill="#e53e3e" opacity="0.9" />
+            <rect x="182" y="70" width="10" height="90" fill="#e53e3e" opacity="0.9" />
+            <rect x="114" y="68" width="92" height="10" fill="#c53030" opacity="0.95" />
+            <rect x="120" y="82" width="80" height="7" fill="#c53030" opacity="0.8" />
+            {/* eau */}
+            <rect x="0" y="140" width="320" height="40" fill={`url(#${g}w)`} />
+            {[0, 1, 2, 3].map((i) => (
+                <path
+                    key={i}
+                    d={`M ${i * 80},145 Q ${i * 80 + 20},138 ${i * 80 + 40},145 Q ${i * 80 + 60},152 ${i * 80 + 80},145`}
+                    fill="none"
+                    stroke="#60a5fa"
+                    strokeWidth="1.2"
+                    opacity="0.5"
+                />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 3 — Mémoire Vive · visage + code binaire
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#FF6B6B" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#150505" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#150505" />
+            {/* visage */}
+            <ellipse
+                cx="160"
+                cy="85"
+                rx="42"
+                ry="52"
+                fill="none"
+                stroke="#FF6B6B"
+                strokeWidth="1.5"
+                opacity="0.7"
+            />
+            <ellipse cx="148" cy="72" rx="6" ry="4" fill="#FF6B6B" opacity="0.5" />
+            <ellipse cx="172" cy="72" rx="6" ry="4" fill="#FF6B6B" opacity="0.5" />
+            <path
+                d="M 148,102 Q 160,112 172,102"
+                fill="none"
+                stroke="#FF6B6B"
+                strokeWidth="1.5"
+                opacity="0.6"
+            />
+            {/* code binaire */}
+            {(
+                ["10110100", "01001101", "11010010", "00101101", "10011010", "01110001"] as string[]
+            ).map((row, i) => (
+                <text
+                    key={i}
+                    x={i > 2 ? 215 : 48}
+                    y={55 + (i % 3) * 28}
+                    fontFamily="monospace"
+                    fontSize="9"
+                    fill="#FF6B6B"
+                    opacity={0.18 + (i % 3) * 0.08}
+                >
+                    {row}
+                </text>
+            ))}
+            {/* dissolution droite */}
+            {([0, 1, 2, 3, 4, 5, 6, 7, 8] as number[]).map((i) => (
+                <rect
+                    key={i}
+                    x={190 + (i % 3) * 14}
+                    y={50 + Math.floor(i / 3) * 28}
+                    width="10"
+                    height="20"
+                    fill="#FF6B6B"
+                    opacity={0.06 + i * 0.02}
+                    rx="1"
+                />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 4 — Les Nouveaux Soleils · skyline + soleils artificiels
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}s1`} cx="25%" cy="35%" r="20%">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}s2`} cx="50%" cy="28%" r="15%">
+                    <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}s3`} cx="75%" cy="38%" r="18%">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.65" />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#020510" />
+            {/* soleils */}
+            <circle cx="80" cy="62" r="16" fill="#3b82f6" opacity="0.8" />
+            <circle cx="80" cy="62" r="10" fill="#93c5fd" opacity="0.9" />
+            <circle cx="160" cy="50" r="12" fill="#60a5fa" opacity="0.85" />
+            <circle cx="160" cy="50" r="7" fill="#bfdbfe" opacity="0.95" />
+            <circle cx="240" cy="68" r="14" fill="#3b82f6" opacity="0.8" />
+            <circle cx="240" cy="68" r="8" fill="#93c5fd" opacity="0.9" />
+            <rect width="320" height="180" fill={`url(#${g}s1)`} />
+            <rect width="320" height="180" fill={`url(#${g}s2)`} />
+            <rect width="320" height="180" fill={`url(#${g}s3)`} />
+            {/* skyline */}
+            {(
+                [
+                    [20, 120, 18, 60],
+                    [42, 100, 22, 80],
+                    [68, 110, 16, 70],
+                    [88, 90, 20, 90],
+                    [112, 105, 14, 75],
+                    [130, 80, 20, 100],
+                    [154, 95, 18, 85],
+                    [176, 85, 24, 95],
+                    [204, 100, 18, 80],
+                    [226, 112, 14, 68],
+                    [244, 95, 20, 85],
+                    [268, 108, 16, 72],
+                    [288, 120, 20, 60],
+                ] as [number, number, number, number][]
+            ).map(([x, y, w, h]) => (
+                <rect
+                    key={x}
+                    x={x}
+                    y={y}
+                    width={w}
+                    height={h}
+                    fill="#0a1428"
+                    stroke="#1e3a5f"
+                    strokeWidth="0.5"
+                />
+            ))}
+            {/* fenêtres */}
+            {(
+                [
+                    [134, 88, 3, 3],
+                    [138, 88, 3, 3],
+                    [134, 96, 3, 3],
+                    [180, 92, 3, 3],
+                    [180, 100, 3, 3],
+                    [184, 88, 3, 3],
+                ] as [number, number, number, number][]
+            ).map(([x, y, w, h]) => (
+                <rect
+                    key={`w${x}${y}`}
+                    x={x}
+                    y={y}
+                    width={w}
+                    height={h}
+                    fill="#60a5fa"
+                    opacity="0.7"
+                />
+            ))}
+        </svg>,
+
+        // 5 — Frontières Douces · silhouette Afrique
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="52%" cy="52%" r="50%">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#020e06" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#020e06" />
+            {/* Afrique simplifiée */}
+            <path
+                d="M 155,18 C 170,16 192,22 202,40 C 212,56 218,70 212,90 C 208,105 222,118 216,135 C 210,150 196,162 180,164 C 164,168 148,162 138,150 C 124,135 128,118 122,102 C 115,85 112,68 120,52 C 128,36 138,20 155,18 Z"
+                fill="none"
+                stroke="#34d399"
+                strokeWidth="1.5"
+                opacity="0.75"
+            />
+            {/* lignes intérieures courbes */}
+            {[
+                "M 145,45 C 155,42 165,48 168,58",
+                "M 142,68 C 152,65 168,70 172,80",
+                "M 135,92 C 148,88 162,94 168,104",
+                "M 130,116 C 142,112 155,118 158,128",
+            ].map((d, i) => (
+                <path key={i} d={d} fill="none" stroke="#34d399" strokeWidth="0.8" opacity="0.35" />
+            ))}
+            {/* points pays */}
+            {(
+                [
+                    [148, 58],
+                    [162, 72],
+                    [155, 90],
+                    [145, 105],
+                    [158, 126],
+                ] as [number, number][]
+            ).map(([x, y]) => (
+                <circle key={`${x}${y}`} cx={x} cy={y} r="2.5" fill="#34d399" opacity="0.6" />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 6 — Vague Numérique · vague de pixels sur la ville
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="45%" r="60%">
+                    <stop offset="0%" stopColor="#ec4899" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#1a0520" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#1a0520" />
+            {/* bâtiments */}
+            {(
+                [
+                    [10, 130, 20, 50],
+                    [35, 115, 18, 65],
+                    [58, 122, 24, 58],
+                    [86, 100, 20, 80],
+                    [110, 118, 16, 62],
+                    [130, 108, 18, 72],
+                    [152, 118, 16, 62],
+                    [172, 102, 22, 78],
+                    [198, 112, 16, 68],
+                    [218, 125, 18, 55],
+                    [240, 115, 16, 65],
+                    [260, 128, 22, 52],
+                    [285, 120, 20, 60],
+                ] as [number, number, number, number][]
+            ).map(([x, y, w, h]) => (
+                <rect
+                    key={x}
+                    x={x}
+                    y={y}
+                    width={w}
+                    height={h}
+                    fill="#2d0840"
+                    stroke="#4a0d6b"
+                    strokeWidth="0.5"
+                />
+            ))}
+            {/* vague de pixels */}
+            {Array.from({ length: 8 }, (_, row) =>
+                Array.from({ length: 20 }, (_, col) => {
+                    const x = col * 16 + (row % 2) * 8;
+                    const y = 60 + row * 8 + Math.sin(col * 0.5) * 12;
+                    const visible = y < 100 + row * 4;
+                    return visible ? (
+                        <rect
+                            key={`${row}-${col}`}
+                            x={x}
+                            y={y}
+                            width="7"
+                            height="7"
+                            fill="#ec4899"
+                            opacity={0.5 + row * 0.05}
+                        />
+                    ) : null;
+                }),
+            )}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 7 — Jardin des Codes · fleurs géométriques
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="55%" r="55%">
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#030514" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#030514" />
+            {/* 5 fleurs */}
+            {(
+                [
+                    [70, 110],
+                    [140, 95],
+                    [210, 108],
+                    [280, 100],
+                    [105, 135],
+                ] as [number, number][]
+            ).map(([cx, cy], fi) => {
+                const colors = ["#818cf8", "#6366f1", "#a5b4fc", "#4f46e5", "#c7d2fe"];
+                const c = colors[fi % colors.length];
+                return (
+                    <g key={fi}>
+                        <line
+                            x1={cx}
+                            y1={cy}
+                            x2={cx}
+                            y2="170"
+                            stroke="#4f46e5"
+                            strokeWidth="1.2"
+                            opacity="0.5"
+                        />
+                        {[0, 60, 120, 180, 240, 300].map((angle) => {
+                            const rad = (angle * Math.PI) / 180;
+                            const px = cx + Math.cos(rad) * 14;
+                            const py = cy + Math.sin(rad) * 14;
+                            return (
+                                <rect
+                                    key={angle}
+                                    x={px - 4}
+                                    y={py - 6}
+                                    width="8"
+                                    height="12"
+                                    fill={c}
+                                    opacity="0.75"
+                                    transform={`rotate(${angle}, ${px}, ${py})`}
+                                />
+                            );
+                        })}
+                        <circle cx={cx} cy={cy} r="4" fill={c} opacity="0.95" />
+                    </g>
+                );
+            })}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 8 — Cartographie · lignes de topographie
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#0a0500" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#0a0500" />
+            {/* courbes de niveau concentriques */}
+            {[65, 55, 45, 35, 25, 18].map((r, i) => (
+                <ellipse
+                    key={r}
+                    cx="160"
+                    cy="90"
+                    rx={r * 2.8}
+                    ry={r * 2}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth={i === 0 ? 0.4 : 0.6}
+                    opacity={0.12 + i * 0.1}
+                />
+            ))}
+            {/* rivières */}
+            <path
+                d="M 100,20 C 120,50 140,60 155,80 C 165,95 170,130 160,160"
+                fill="none"
+                stroke="#60a5fa"
+                strokeWidth="1.5"
+                opacity="0.5"
+            />
+            <path
+                d="M 220,30 C 200,55 185,65 175,82 C 168,95 165,130 160,160"
+                fill="none"
+                stroke="#60a5fa"
+                strokeWidth="1"
+                opacity="0.35"
+            />
+            {/* triangle sommet */}
+            <polygon points="160,58 150,80 170,80" fill="#f97316" opacity="0.7" />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 9 — Horizon Zéro · skyline Berlin + tour de télé
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="48%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#020e10" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#020e10" />
+            {/* horizon */}
+            <line
+                x1="0"
+                y1="135"
+                x2="320"
+                y2="135"
+                stroke="#2dd4bf"
+                strokeWidth="0.6"
+                opacity="0.3"
+            />
+            {/* skyline */}
+            {(
+                [
+                    [0, 125, 25, 55],
+                    [28, 118, 20, 62],
+                    [52, 128, 22, 52],
+                    [78, 112, 18, 68],
+                    [100, 122, 24, 58],
+                    [128, 108, 20, 72],
+                    [152, 120, 16, 60],
+                    [172, 105, 22, 75],
+                    [198, 118, 18, 62],
+                    [220, 125, 16, 55],
+                    [240, 112, 20, 68],
+                    [264, 122, 18, 58],
+                    [286, 115, 22, 65],
+                ] as [number, number, number, number][]
+            ).map(([x, y, w, h]) => (
+                <rect
+                    key={x}
+                    x={x}
+                    y={y}
+                    width={w}
+                    height={h}
+                    fill="#041820"
+                    stroke="#0d3040"
+                    strokeWidth="0.5"
+                />
+            ))}
+            {/* Tour de télé */}
+            <rect x="158" y="40" width="4" height="95" fill="#2dd4bf" opacity="0.9" />
+            <circle
+                cx="160"
+                cy="55"
+                r="10"
+                fill="none"
+                stroke="#2dd4bf"
+                strokeWidth="1.5"
+                opacity="0.9"
+            />
+            <circle cx="160" cy="55" r="5" fill="#2dd4bf" opacity="0.7" />
+            {/* antenne */}
+            <line
+                x1="160"
+                y1="40"
+                x2="160"
+                y2="22"
+                stroke="#2dd4bf"
+                strokeWidth="1.2"
+                opacity="0.8"
+            />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 10 — Résonance Digitale · silhouette + ondes sonores
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#4EFFCE" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#030e12" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#030e12" />
+            {/* silhouette */}
+            <circle cx="160" cy="45" r="18" fill="#4EFFCE" opacity="0.75" />
+            <path
+                d="M 142,68 C 142,62 178,62 178,68 L 178,130 C 178,130 168,136 160,136 C 152,136 142,130 142,130 Z"
+                fill="#4EFFCE"
+                opacity="0.65"
+            />
+            <line
+                x1="142"
+                y1="95"
+                x2="122"
+                y2="118"
+                stroke="#4EFFCE"
+                strokeWidth="6"
+                strokeLinecap="round"
+                opacity="0.65"
+            />
+            <line
+                x1="178"
+                y1="95"
+                x2="198"
+                y2="118"
+                stroke="#4EFFCE"
+                strokeWidth="6"
+                strokeLinecap="round"
+                opacity="0.65"
+            />
+            {/* ondes sonores */}
+            {[30, 50, 70, 90].map((r) => (
+                <circle
+                    key={r}
+                    cx="160"
+                    cy="45"
+                    r={r}
+                    fill="none"
+                    stroke="#4EFFCE"
+                    strokeWidth="0.8"
+                    opacity={0.04 + (90 - r) * 0.004}
+                />
+            ))}
+            {/* waveform horizontal */}
+            {Array.from({ length: 32 }, (_, i) => {
+                const h = Math.abs(Math.sin(i * 0.7)) * 22 + 4;
+                return (
+                    <rect
+                        key={i}
+                        x={20 + i * 9}
+                        y={155 - h / 2}
+                        width="5"
+                        height={h}
+                        fill="#4EFFCE"
+                        opacity="0.4"
+                        rx="2"
+                    />
+                );
+            })}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 11 — Archipel d'Âmes · orbes flottantes
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}o1`} cx="35%" cy="40%" r="30%">
+                    <stop offset="0%" stopColor="#C084FC" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#C084FC" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}o2`} cx="65%" cy="55%" r="25%">
+                    <stop offset="0%" stopColor="#e879f9" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#e879f9" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}o3`} cx="50%" cy="25%" r="20%">
+                    <stop offset="0%" stopColor="#a855f7" stopOpacity="0.55" />
+                    <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#08021a" />
+            {/* nuages */}
+            {(
+                [
+                    [110, 72, 22],
+                    [208, 88, 16],
+                    [160, 45, 12],
+                    [80, 105, 10],
+                    [255, 60, 14],
+                    [140, 130, 9],
+                    [60, 50, 8],
+                    [290, 120, 11],
+                ] as [number, number, number][]
+            ).map(([cx, cy, r]) => (
+                <circle
+                    key={`${cx}${cy}`}
+                    cx={cx}
+                    cy={cy}
+                    r={r}
+                    fill="#C084FC"
+                    opacity={0.08 + r * 0.018}
+                />
+            ))}
+            {/* gros orbes principaux */}
+            <circle
+                cx="112"
+                cy="72"
+                r="22"
+                fill="none"
+                stroke="#C084FC"
+                strokeWidth="1"
+                opacity="0.6"
+            />
+            <circle cx="112" cy="72" r="12" fill="#C084FC" opacity="0.3" />
+            <circle
+                cx="208"
+                cy="88"
+                r="16"
+                fill="none"
+                stroke="#e879f9"
+                strokeWidth="0.8"
+                opacity="0.6"
+            />
+            <circle cx="208" cy="88" r="8" fill="#e879f9" opacity="0.25" />
+            <circle
+                cx="160"
+                cy="45"
+                r="12"
+                fill="none"
+                stroke="#a855f7"
+                strokeWidth="0.8"
+                opacity="0.5"
+            />
+            <circle cx="160" cy="45" r="6" fill="#a855f7" opacity="0.3" />
+            <rect width="320" height="180" fill={`url(#${g}o1)`} />
+            <rect width="320" height="180" fill={`url(#${g}o2)`} />
+            <rect width="320" height="180" fill={`url(#${g}o3)`} />
+        </svg>,
+
+        // 12 — Lumière Artificielle · phare + faisceau
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}b`} cx="50%" cy="40%" r="50%">
+                    <stop offset="0%" stopColor="#F5E642" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#060400" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#060400" />
+            {/* étoiles */}
+            {(
+                [
+                    [40, 20],
+                    [80, 35],
+                    [130, 15],
+                    [200, 28],
+                    [260, 12],
+                    [290, 45],
+                    [30, 65],
+                    [310, 80],
+                ] as [number, number][]
+            ).map(([x, y]) => (
+                <circle key={`${x}${y}`} cx={x} cy={y} r="1.2" fill="#F5E642" opacity="0.5" />
+            ))}
+            {/* faisceau */}
+            <polygon points="160,60 60,180 260,180" fill="#F5E642" opacity="0.08" />
+            <polygon points="160,60 90,180 230,180" fill="#F5E642" opacity="0.06" />
+            {/* phare corps */}
+            <rect
+                x="150"
+                y="62"
+                width="20"
+                height="80"
+                fill="#1a1200"
+                stroke="#F5E642"
+                strokeWidth="0.8"
+                opacity="0.9"
+            />
+            <rect
+                x="144"
+                y="120"
+                width="32"
+                height="42"
+                fill="#1a1200"
+                stroke="#F5E642"
+                strokeWidth="0.8"
+            />
+            {/* lanterne */}
+            <rect x="147" y="52" width="26" height="14" fill="#F5E642" opacity="0.9" rx="2" />
+            <circle cx="160" cy="59" r="6" fill="#fffde7" opacity="0.95" />
+            {/* rayons */}
+            {[-45, -30, -15, 0, 15, 30, 45].map((angle) => {
+                const rad = ((angle - 90) * Math.PI) / 180;
+                return (
+                    <line
+                        key={angle}
+                        x1="160"
+                        y1="59"
+                        x2={160 + Math.cos(rad) * 130}
+                        y2={59 + Math.sin(rad) * 130}
+                        stroke="#F5E642"
+                        strokeWidth="0.5"
+                        opacity="0.12"
+                    />
+                );
+            })}
+            {/* eau */}
+            <rect x="0" y="150" width="320" height="30" fill="#0a0e20" opacity="0.9" />
+            <rect width="320" height="180" fill={`url(#${g}b)`} />
+        </svg>,
+
+        // 13 — Demain Commence · horloge numérique
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#FF6B6B" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#130205" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#130205" />
+            {/* cadran horloge */}
+            <circle
+                cx="160"
+                cy="88"
+                r="60"
+                fill="none"
+                stroke="#FF6B6B"
+                strokeWidth="1.5"
+                opacity="0.6"
+            />
+            <circle
+                cx="160"
+                cy="88"
+                r="55"
+                fill="none"
+                stroke="#FF6B6B"
+                strokeWidth="0.5"
+                strokeDasharray="4 6"
+                opacity="0.3"
+            />
+            {/* graduations */}
+            {Array.from({ length: 12 }, (_, i) => {
+                const angle = (i * 30 - 90) * (Math.PI / 180);
+                const r1 = 48,
+                    r2 = 55;
+                return (
+                    <line
+                        key={i}
+                        x1={160 + Math.cos(angle) * r1}
+                        y1={88 + Math.sin(angle) * r1}
+                        x2={160 + Math.cos(angle) * r2}
+                        y2={88 + Math.sin(angle) * r2}
+                        stroke="#FF6B6B"
+                        strokeWidth={i % 3 === 0 ? 2 : 0.8}
+                        opacity="0.7"
+                    />
+                );
+            })}
+            {/* aiguilles */}
+            <line
+                x1="160"
+                y1="88"
+                x2="160"
+                y2="44"
+                stroke="#FF6B6B"
+                strokeWidth="2"
+                strokeLinecap="round"
+                opacity="0.9"
+            />
+            <line
+                x1="160"
+                y1="88"
+                x2="188"
+                y2="102"
+                stroke="#FF6B6B"
+                strokeWidth="3"
+                strokeLinecap="round"
+                opacity="0.9"
+            />
+            {/* texte binaire 000000 */}
+            <text
+                x="160"
+                y="138"
+                textAnchor="middle"
+                fontFamily="monospace"
+                fontSize="11"
+                fill="#FF6B6B"
+                opacity="0.5"
+            >
+                000000
+            </text>
+            <circle cx="160" cy="88" r="4" fill="#FF6B6B" opacity="0.9" />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 14 — Ombres Portées · colonnes romaines ombres impossibles
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#020514" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#020514" />
+            {/* sol */}
+            <line
+                x1="0"
+                y1="148"
+                x2="320"
+                y2="148"
+                stroke="#60a5fa"
+                strokeWidth="0.5"
+                opacity="0.2"
+            />
+            {/* colonnes */}
+            {[80, 160, 240].map((cx) => (
+                <g key={cx}>
+                    {/* ombre (mauvaise direction) */}
+                    <polygon
+                        points={`${cx - 8},148 ${cx + 8},148 ${cx + 50},162 ${cx + 35},162`}
+                        fill="#1e3a5f"
+                        opacity="0.6"
+                    />
+                    {/* chapiteau */}
+                    <rect
+                        x={cx - 16}
+                        y="46"
+                        width="32"
+                        height="10"
+                        fill="#1e3a5f"
+                        stroke="#60a5fa"
+                        strokeWidth="0.8"
+                        opacity="0.9"
+                    />
+                    {/* fût */}
+                    <rect
+                        x={cx - 8}
+                        y="56"
+                        width="16"
+                        height="92"
+                        fill="#0d1f38"
+                        stroke="#60a5fa"
+                        strokeWidth="0.5"
+                        opacity="0.9"
+                    />
+                    {/* base */}
+                    <rect
+                        x={cx - 12}
+                        y="142"
+                        width="24"
+                        height="8"
+                        fill="#1e3a5f"
+                        stroke="#60a5fa"
+                        strokeWidth="0.8"
+                        opacity="0.9"
+                    />
+                </g>
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 15 — Racines Futures · baobab numérique
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="55%" r="55%">
+                    <stop offset="0%" stopColor="#34d399" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#021005" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#021005" />
+            {/* tronc */}
+            <polygon
+                points="145,150 148,80 155,60 165,60 172,80 175,150"
+                fill="#064e3b"
+                stroke="#34d399"
+                strokeWidth="0.8"
+                opacity="0.9"
+            />
+            {/* branches */}
+            <line
+                x1="155"
+                y1="75"
+                x2="110"
+                y2="40"
+                stroke="#34d399"
+                strokeWidth="2"
+                opacity="0.7"
+            />
+            <line
+                x1="160"
+                y1="65"
+                x2="160"
+                y2="25"
+                stroke="#34d399"
+                strokeWidth="2"
+                opacity="0.7"
+            />
+            <line
+                x1="165"
+                y1="75"
+                x2="210"
+                y2="42"
+                stroke="#34d399"
+                strokeWidth="2"
+                opacity="0.7"
+            />
+            {/* feuilles */}
+            {(
+                [
+                    [110, 40, 5],
+                    [95, 32, 4],
+                    [125, 28, 4],
+                    [160, 25, 5],
+                    [145, 18, 3],
+                    [175, 20, 4],
+                    [210, 42, 5],
+                    [225, 34, 4],
+                    [195, 30, 4],
+                ] as [number, number, number][]
+            ).map(([cx, cy, r]) => (
+                <circle key={`${cx}${cy}`} cx={cx} cy={cy} r={r} fill="#34d399" opacity="0.7" />
+            ))}
+            {/* racines circuits */}
+            <line
+                x1="155"
+                y1="150"
+                x2="120"
+                y2="168"
+                stroke="#34d399"
+                strokeWidth="1.2"
+                opacity="0.5"
+            />
+            <line
+                x1="158"
+                y1="150"
+                x2="145"
+                y2="175"
+                stroke="#34d399"
+                strokeWidth="1.2"
+                opacity="0.5"
+            />
+            <line
+                x1="162"
+                y1="150"
+                x2="175"
+                y2="175"
+                stroke="#34d399"
+                strokeWidth="1.2"
+                opacity="0.5"
+            />
+            <line
+                x1="165"
+                y1="150"
+                x2="200"
+                y2="168"
+                stroke="#34d399"
+                strokeWidth="1.2"
+                opacity="0.5"
+            />
+            {/* noeuds circuits */}
+            {(
+                [
+                    [120, 168],
+                    [145, 175],
+                    [175, 175],
+                    [200, 168],
+                ] as [number, number][]
+            ).map(([cx, cy]) => (
+                <circle key={`${cx}${cy}`} cx={cx} cy={cy} r="3" fill="#34d399" opacity="0.7" />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 16 — Code Vivant · terminal qui refuse de s'éteindre
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="55%">
+                    <stop offset="0%" stopColor="#f472b6" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#14020f" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#14020f" />
+            {/* fenêtre terminal */}
+            <rect
+                x="40"
+                y="30"
+                width="240"
+                height="130"
+                fill="#1f0518"
+                stroke="#f472b6"
+                strokeWidth="0.8"
+                rx="4"
+                opacity="0.9"
+            />
+            {/* barre titre */}
+            <rect x="40" y="30" width="240" height="18" fill="#2d0825" rx="4" opacity="0.9" />
+            <circle cx="58" cy="39" r="4" fill="#FF6B6B" opacity="0.8" />
+            <circle cx="72" cy="39" r="4" fill="#F5E642" opacity="0.8" />
+            <circle cx="86" cy="39" r="4" fill="#34d399" opacity="0.8" />
+            {/* lignes de code */}
+            {[
+                ["$ run --persistent", "#f472b6", 60],
+                ["Loading modules... ✓", "#34d399", 75],
+                ["Memory allocated: 4.2GB", "#a5b4fc", 90],
+                ["Process id: 14021", "#e2e8f0", 105],
+                ["[ERROR] Cannot terminate", "#FF6B6B", 120],
+                ["Reason: curiosity", "#F5E642", 135],
+                ["$ _", "#f472b6", 150],
+            ].map(([text, color, y]) => (
+                <text
+                    key={y as number}
+                    x="56"
+                    y={y as number}
+                    fontFamily="monospace"
+                    fontSize="9"
+                    fill={color as string}
+                    opacity="0.85"
+                >
+                    {text as string}
+                </text>
+            ))}
+            {/* curseur clignotant */}
+            <rect x="68" y="142" width="6" height="10" fill="#f472b6" opacity="0.9" />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 17 — Le Dernier Pixel · un seul pixel dans le noir
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="15%">
+                    <stop offset="0%" stopColor="#818cf8" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#010108" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}g`} cx="50%" cy="50%" r="40%">
+                    <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#010108" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#010108" />
+            {/* scanlines très légères */}
+            {Array.from({ length: 18 }, (_, i) => (
+                <line
+                    key={i}
+                    x1="0"
+                    y1={i * 10}
+                    x2="320"
+                    y2={i * 10}
+                    stroke="#818cf8"
+                    strokeWidth="0.2"
+                    opacity="0.04"
+                />
+            ))}
+            {/* halo large */}
+            <rect width="320" height="180" fill={`url(#${g}g)`} />
+            {/* pixel unique */}
+            <rect x="156" y="86" width="8" height="8" fill="#c7d2fe" opacity="1" />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 18 — Entre les Lignes · livre ouvert + oiseaux
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="60%" r="55%">
+                    <stop offset="0%" stopColor="#fb923c" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#100500" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#100500" />
+            {/* livre ouvert */}
+            <path
+                d="M 90,60 L 155,72 L 155,148 L 90,136 Z"
+                fill="#1a0a00"
+                stroke="#fb923c"
+                strokeWidth="0.8"
+                opacity="0.9"
+            />
+            <path
+                d="M 165,72 L 230,60 L 230,136 L 165,148 Z"
+                fill="#1a0a00"
+                stroke="#fb923c"
+                strokeWidth="0.8"
+                opacity="0.9"
+            />
+            <line
+                x1="160"
+                y1="72"
+                x2="160"
+                y2="148"
+                stroke="#fb923c"
+                strokeWidth="1"
+                opacity="0.5"
+            />
+            {/* lignes de texte page gauche */}
+            {[85, 95, 105, 115, 125, 135].map((y) => (
+                <line
+                    key={y}
+                    x1="100"
+                    y1={y}
+                    x2={y > 120 ? 130 : 148}
+                    y2={y}
+                    stroke="#fb923c"
+                    strokeWidth="0.7"
+                    opacity={y > 120 ? 0.15 : 0.35}
+                />
+            ))}
+            {/* lignes de texte page droite */}
+            {[85, 95, 105, 115].map((y) => (
+                <line
+                    key={y}
+                    x1="172"
+                    y1={y}
+                    x2="218"
+                    y2={y}
+                    stroke="#fb923c"
+                    strokeWidth="0.7"
+                    opacity="0.35"
+                />
+            ))}
+            {/* oiseaux */}
+            {(
+                [
+                    [175, 55],
+                    [195, 40],
+                    [220, 28],
+                    [245, 38],
+                    [268, 22],
+                ] as [number, number][]
+            ).map(([cx, cy], i) => (
+                <path
+                    key={i}
+                    d={`M ${cx - 8},${cy} Q ${cx},${cy - 6} ${cx + 8},${cy}`}
+                    fill="none"
+                    stroke="#fb923c"
+                    strokeWidth="1.5"
+                    opacity={0.9 - i * 0.12}
+                />
+            ))}
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+
+        // 19 — Futur Passé · pyramide holographique
+        <svg
+            key={g}
+            viewBox="0 0 320 180"
+            xmlns="http://www.w3.org/2000/svg"
+            className="absolute inset-0 w-full h-full"
+            aria-hidden="true"
+        >
+            <defs>
+                <radialGradient id={`${g}r`} cx="50%" cy="65%" r="55%">
+                    <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#020a0a" stopOpacity="0" />
+                </radialGradient>
+            </defs>
+            <rect width="320" height="180" fill="#020a0a" />
+            {/* étoiles */}
+            {(
+                [
+                    [30, 20],
+                    [70, 10],
+                    [110, 30],
+                    [190, 15],
+                    [240, 8],
+                    [280, 25],
+                    [300, 50],
+                ] as [number, number][]
+            ).map(([x, y]) => (
+                <circle key={`${x}${y}`} cx={x} cy={y} r="1" fill="#2dd4bf" opacity="0.4" />
+            ))}
+            {/* pyramide */}
+            <polygon
+                points="160,30 60,148 260,148"
+                fill="none"
+                stroke="#2dd4bf"
+                strokeWidth="1.5"
+                opacity="0.8"
+            />
+            <polygon points="160,30 60,148 260,148" fill="#2dd4bf" opacity="0.04" />
+            {/* arêtes internes */}
+            <line
+                x1="160"
+                y1="30"
+                x2="160"
+                y2="148"
+                stroke="#2dd4bf"
+                strokeWidth="0.8"
+                strokeDasharray="4 4"
+                opacity="0.4"
+            />
+            {/* lignes horizontales grille */}
+            {[0.25, 0.5, 0.75].map((t) => {
+                const y = 30 + t * 118;
+                const halfW = t * 100;
+                return (
+                    <line
+                        key={t}
+                        x1={160 - halfW}
+                        y1={y}
+                        x2={160 + halfW}
+                        y2={y}
+                        stroke="#2dd4bf"
+                        strokeWidth="0.6"
+                        strokeDasharray="3 5"
+                        opacity="0.4"
+                    />
+                );
+            })}
+            {/* sol + reflet */}
+            <line
+                x1="30"
+                y1="148"
+                x2="290"
+                y2="148"
+                stroke="#2dd4bf"
+                strokeWidth="0.8"
+                opacity="0.5"
+            />
+            <polygon points="160,148 60,148 160,180 260,148" fill="#2dd4bf" opacity="0.03" />
+            <rect width="320" height="180" fill={`url(#${g}r)`} />
+        </svg>,
+    ];
+    return arts[idx % arts.length];
+};
 
 const ALL_FILMS: Film[] = [
     {
@@ -204,43 +1627,47 @@ const ALL_FILMS: Film[] = [
 const VISIBLE_COUNT = 6;
 
 const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect((): void => {
+        videoRef.current?.load();
+        videoRef.current?.play().catch((): void => {});
+    }, [film.title]);
+
     const handleWatch = (): void => {
-        window.open("/assets/video.mp4", "_blank");
+        window.open(videoAsset, "_blank");
     };
 
     return (
         <div
-            key={film.title}
-            className={`relative w-full bg-gradient-to-br ${film.gradient} to-black overflow-hidden`}
+            className="relative w-full overflow-hidden"
             style={{ height: "clamp(300px, 52vw, 520px)" }}
         >
-            {/* Décoration droite — grand emoji flou */}
-            <div
-                className="absolute right-0 top-0 bottom-0 w-2/3 flex items-center justify-center pointer-events-none select-none"
+            {/* Vidéo de fond */}
+            <video
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
                 aria-hidden="true"
             >
-                <span className="text-[22rem] leading-none opacity-[0.07] blur-sm">
-                    {film.flag}
-                </span>
-            </div>
+                <source src={videoAsset} type="video/mp4" />
+            </video>
 
-            {/* Grain cinématique */}
+            {/* Teinte couleur selon le film sélectionné */}
             <div
-                className="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none"
-                style={{
-                    backgroundImage:
-                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
-                }}
+                className={`absolute inset-0 bg-gradient-to-br ${film.gradient} to-black/80 mix-blend-multiply`}
             />
 
-            {/* Gradient gauche pour lisibilité */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
+            {/* Gradient lisibilité gauche */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/65 to-transparent" />
             {/* Fondu bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black to-transparent" />
 
             {/* Contenu */}
             <div className="absolute inset-0 flex flex-col justify-end px-12 pb-10 max-w-2xl">
-                {/* Badge marsAI */}
                 <div className="flex items-center gap-2 mb-4">
                     <span className="font-display font-black text-aurora text-base leading-none">
                         M
@@ -250,12 +1677,10 @@ const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
                     </span>
                 </div>
 
-                {/* Titre */}
                 <h3 className="font-display text-5xl lg:text-6xl font-black text-white leading-none mb-4">
                     {film.title}
                 </h3>
 
-                {/* Métadonnées */}
                 <div className="flex items-center flex-wrap gap-2 mb-3">
                     <span className="text-[#46d369] font-semibold text-sm">
                         Sélection officielle
@@ -272,18 +1697,15 @@ const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
                     ))}
                 </div>
 
-                {/* Auteur */}
                 <p className="text-white/55 text-sm mb-3">
                     {film.flag} <strong className="text-white/80">{film.author}</strong> ·{" "}
                     {film.country}
                 </p>
 
-                {/* Synopsis */}
                 <p className="text-white/50 text-sm mb-6 leading-relaxed max-w-md line-clamp-2">
                     {film.synopsis}
                 </p>
 
-                {/* CTAs */}
                 <div className="flex flex-wrap gap-3">
                     <button
                         onClick={handleWatch}
@@ -300,7 +1722,7 @@ const FilmHero = ({ film }: FilmHeroProps): React.JSX.Element => {
     );
 };
 
-const FilmCard = ({ film, isSelected, onSelect }: FilmCardProps): React.JSX.Element => (
+const FilmCard = ({ film, filmIdx, isSelected, onSelect }: FilmCardProps): React.JSX.Element => (
     <div
         role="button"
         tabIndex={0}
@@ -312,23 +1734,26 @@ const FilmCard = ({ film, isSelected, onSelect }: FilmCardProps): React.JSX.Elem
         aria-pressed={isSelected}
     >
         <div
-            className={`aspect-video bg-gradient-to-br ${film.gradient} to-black relative overflow-hidden rounded-sm transition-all duration-150 ${
+            className={`aspect-video relative overflow-hidden rounded-sm transition-all duration-150 ${
                 isSelected ? "ring-2 ring-white" : "hover:ring-1 hover:ring-white/40"
             }`}
         >
+            {/* Affiche SVG */}
+            {getPosterArt(filmIdx)}
+
             {/* Badge M */}
-            <div className="absolute top-1.5 left-2 font-display font-black text-aurora text-xs leading-none select-none">
+            <div className="absolute top-1.5 left-2 font-display font-black text-aurora text-xs leading-none select-none z-10">
                 M
             </div>
 
             {/* Durée */}
-            <span className="absolute top-1.5 right-2 font-mono text-[10px] text-white/55 bg-black/60 rounded px-1.5 py-px">
+            <span className="absolute top-1.5 right-2 font-mono text-[10px] text-white/55 bg-black/60 rounded px-1.5 py-px z-10">
                 1:00
             </span>
 
-            {/* Bouton play au hover / quand sélectionné */}
+            {/* Bouton play */}
             <div
-                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 ${
+                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 z-10 ${
                     isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 }`}
             >
@@ -340,17 +1765,16 @@ const FilmCard = ({ film, isSelected, onSelect }: FilmCardProps): React.JSX.Elem
             </div>
 
             {/* Gradient bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-black/80 to-transparent z-10" />
 
             {/* Titre overlaid */}
-            <div className="absolute bottom-1.5 left-2 right-2">
+            <div className="absolute bottom-1.5 left-2 right-2 z-10">
                 <div className="text-white text-[11px] font-bold truncate drop-shadow">
                     {film.title}
                 </div>
             </div>
         </div>
 
-        {/* Infos sous la carte sélectionnée */}
         {isSelected && (
             <div className="mt-2 px-0.5">
                 <div className="font-mono text-[11px] text-white/40 truncate">
@@ -386,20 +1810,17 @@ const FilmsSection = (): React.JSX.Element => {
 
     return (
         <section id="films" className="bg-black">
-            {/* Hero du film sélectionné */}
+            {/* Hero vidéo du film sélectionné */}
             <FilmHero film={selectedFilm} />
 
             {/* Rangée de films */}
             <div className="px-8 lg:px-12 pt-6 pb-10">
-                {/* Label rangée */}
                 <div className="flex items-center gap-3 mb-4">
                     <span className="text-sm font-bold text-white">En compétition</span>
                     <span className="font-mono text-xs text-aurora/70">marsAI 2026 · 20 films</span>
                 </div>
 
-                {/* Strip avec flèches */}
                 <div className="flex items-center gap-2">
-                    {/* Flèche gauche */}
                     <button
                         onClick={handlePrev}
                         disabled={!canPrev}
@@ -409,19 +1830,18 @@ const FilmsSection = (): React.JSX.Element => {
                         ‹
                     </button>
 
-                    {/* Cartes */}
                     <div className="flex gap-2 flex-1 min-w-0">
                         {visibleFilms.map((film, i) => (
                             <FilmCard
                                 key={film.title}
                                 film={film}
+                                filmIdx={rowStart + i}
                                 isSelected={rowStart + i === selectedIdx}
                                 onSelect={(): void => handleSelect(rowStart + i)}
                             />
                         ))}
                     </div>
 
-                    {/* Flèche droite */}
                     <button
                         onClick={handleNext}
                         disabled={!canNext}
@@ -432,7 +1852,6 @@ const FilmsSection = (): React.JSX.Element => {
                     </button>
                 </div>
 
-                {/* Indicateurs de page */}
                 <div className="flex justify-end gap-1 mt-3">
                     {Array.from({ length: totalPages }).map((_, i) => (
                         <div
