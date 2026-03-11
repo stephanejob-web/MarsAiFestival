@@ -120,7 +120,7 @@ const getPosterArt = (idx: number): React.JSX.Element => {
             <rect width="320" height="180" fill={`url(#${g}r)`} />
         </svg>,
 
-        // 1 — L'Enfant-Pixel · silhouette enfant pixelisée violet
+        // 1 — Code Fantôme · Brad Pitt + Tom Cruise face à face
         <svg
             key={g}
             viewBox="0 0 320 180"
@@ -129,41 +129,187 @@ const getPosterArt = (idx: number): React.JSX.Element => {
             aria-hidden="true"
         >
             <defs>
-                <radialGradient id={`${g}r`} cx="50%" cy="50%" r="60%">
-                    <stop offset="0%" stopColor="#C084FC" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#0f0520" stopOpacity="0" />
+                <radialGradient id={`${g}c`} cx="50%" cy="52%" r="45%">
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.55" />
+                    <stop offset="60%" stopColor="#f97316" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#080208" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}l`} cx="25%" cy="50%" r="38%">
+                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id={`${g}bl`} cx="75%" cy="50%" r="38%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
                 </radialGradient>
             </defs>
-            <rect width="320" height="180" fill="#0f0520" />
-            {/* silhouette en blocs */}
-            {(
-                [
-                    [152, 25, 16, 16, "#C084FC"],
-                    [148, 42, 24, 32, "#a855f7"],
-                    [132, 44, 14, 16, "#7c3aed"],
-                    [174, 44, 14, 16, "#7c3aed"],
-                    [148, 76, 12, 36, "#9333ea"],
-                    [162, 76, 12, 36, "#a855f7"],
-                ] as [number, number, number, number, string][]
-            ).map(([x, y, w, h, c]) => (
-                <rect key={`${x}${y}`} x={x} y={y} width={w} height={h} fill={c} opacity="0.9" />
-            ))}
-            {/* pixels éparpillés */}
-            {(
-                [
-                    [80, 20, "#C084FC"],
-                    [240, 35, "#7c3aed"],
-                    [60, 90, "#a855f7"],
-                    [270, 80, "#C084FC"],
-                    [90, 140, "#7c3aed"],
-                    [250, 130, "#a855f7"],
-                    [110, 50, "#9333ea"],
-                    [210, 150, "#C084FC"],
-                ] as [number, number, string][]
-            ).map(([x, y, c]) => (
-                <rect key={`${x}${y}`} x={x} y={y} width="6" height="6" fill={c} opacity="0.4" />
-            ))}
-            <rect width="320" height="180" fill={`url(#${g}r)`} />
+            <rect width="320" height="180" fill="#060108" />
+            {/* éclairages latéraux */}
+            <rect width="320" height="180" fill={`url(#${g}l)`} />
+            <rect width="320" height="180" fill={`url(#${g}bl)`} />
+            {/* Sol */}
+            <rect x="0" y="168" width="320" height="12" fill="#0a0010" opacity="0.9" />
+            <line
+                x1="0"
+                y1="168"
+                x2="320"
+                y2="168"
+                stroke="#f97316"
+                strokeWidth="0.4"
+                opacity="0.25"
+            />
+            {/* Silhouette gauche — Brad Pitt */}
+            <circle cx="88" cy="42" r="13" fill="#110500" />
+            <circle
+                cx="88"
+                cy="42"
+                r="13"
+                fill="none"
+                stroke="#f97316"
+                strokeWidth="1"
+                opacity="0.55"
+            />
+            <rect x="85" y="54" width="6" height="9" fill="#110500" />
+            <polygon points="65,63 111,63 117,76 59,76" fill="#110500" />
+            <line
+                x1="65"
+                y1="63"
+                x2="111"
+                y2="63"
+                stroke="#f97316"
+                strokeWidth="0.8"
+                opacity="0.4"
+            />
+            <polygon points="70,76 110,76 106,130 74,130" fill="#110500" />
+            <line
+                x1="110"
+                y1="84"
+                x2="140"
+                y2="100"
+                stroke="#110500"
+                strokeWidth="12"
+                strokeLinecap="round"
+            />
+            <line
+                x1="110"
+                y1="84"
+                x2="140"
+                y2="100"
+                stroke="#f97316"
+                strokeWidth="0.7"
+                strokeLinecap="round"
+                opacity="0.35"
+            />
+            <line
+                x1="70"
+                y1="84"
+                x2="48"
+                y2="108"
+                stroke="#110500"
+                strokeWidth="12"
+                strokeLinecap="round"
+            />
+            <polygon points="74,130 90,130 87,168 71,168" fill="#110500" />
+            <polygon points="92,130 106,130 109,168 95,168" fill="#110500" />
+            <path
+                d="M 76,63 C 68,76 66,100 70,130"
+                fill="none"
+                stroke="#fbbf24"
+                strokeWidth="1.5"
+                opacity="0.28"
+            />
+            {/* Silhouette droite — Tom Cruise */}
+            <circle cx="232" cy="40" r="12" fill="#00040e" />
+            <circle
+                cx="232"
+                cy="40"
+                r="12"
+                fill="none"
+                stroke="#60a5fa"
+                strokeWidth="1"
+                opacity="0.55"
+            />
+            <rect x="229" y="51" width="6" height="9" fill="#00040e" />
+            <polygon points="210,60 254,60 260,73 204,73" fill="#00040e" />
+            <line
+                x1="210"
+                y1="60"
+                x2="254"
+                y2="60"
+                stroke="#60a5fa"
+                strokeWidth="0.8"
+                opacity="0.4"
+            />
+            <polygon points="214,73 250,73 246,126 218,126" fill="#00040e" />
+            <line
+                x1="214"
+                y1="82"
+                x2="182"
+                y2="100"
+                stroke="#00040e"
+                strokeWidth="12"
+                strokeLinecap="round"
+            />
+            <line
+                x1="214"
+                y1="82"
+                x2="182"
+                y2="100"
+                stroke="#60a5fa"
+                strokeWidth="0.7"
+                strokeLinecap="round"
+                opacity="0.35"
+            />
+            <line
+                x1="250"
+                y1="82"
+                x2="272"
+                y2="106"
+                stroke="#00040e"
+                strokeWidth="12"
+                strokeLinecap="round"
+            />
+            <polygon points="218,126 233,126 230,168 215,168" fill="#00040e" />
+            <polygon points="235,126 246,126 249,168 236,168" fill="#00040e" />
+            <path
+                d="M 244,60 C 252,73 254,98 250,126"
+                fill="none"
+                stroke="#93c5fd"
+                strokeWidth="1.5"
+                opacity="0.28"
+            />
+            {/* Orbe IA central */}
+            <circle cx="160" cy="86" r="22" fill="#fbbf24" opacity="0.06" />
+            <circle cx="160" cy="86" r="14" fill="#fbbf24" opacity="0.08" />
+            <circle cx="160" cy="86" r="7" fill="#fffde7" opacity="0.55" />
+            <circle cx="160" cy="86" r="3" fill="white" opacity="0.9" />
+            <line
+                x1="148"
+                y1="86"
+                x2="140"
+                y2="100"
+                stroke="#fbbf24"
+                strokeWidth="0.8"
+                opacity="0.45"
+            />
+            <line
+                x1="172"
+                y1="86"
+                x2="182"
+                y2="100"
+                stroke="#fbbf24"
+                strokeWidth="0.8"
+                opacity="0.45"
+            />
+            <polygon
+                points="160,64 177,74 177,98 160,108 143,98 143,74"
+                fill="none"
+                stroke="#fbbf24"
+                strokeWidth="0.6"
+                opacity="0.3"
+            />
+            {/* Glow central */}
+            <rect width="320" height="180" fill={`url(#${g}c)`} />
         </svg>,
 
         // 2 — Archipel 2048 · torii gate japonais + eau montante
@@ -1455,13 +1601,13 @@ const ALL_FILMS: Film[] = [
         gradient: "from-aurora/60 via-[#0a1628]",
     },
     {
-        flag: "🇹🇳",
-        author: "Amira Ben Said",
-        title: "L'Enfant-Pixel",
-        country: "Tunisie",
+        flag: "🇺🇸",
+        author: "Brad Pitt · Tom Cruise",
+        title: "Code Fantôme",
+        country: "États-Unis",
         synopsis:
-            "Dans un Tunis futuriste, une enfant née d'un algorithme cherche sa place dans le monde des humains.",
-        gradient: "from-lavande/60 via-[#140a28]",
+            "Deux agents qui ne se font pas confiance. Une IA qui les connaît mieux qu'eux-mêmes. 60 secondes pour décider.",
+        gradient: "from-orange-600/60 via-[#1a0800]",
     },
     {
         flag: "🇯🇵",
