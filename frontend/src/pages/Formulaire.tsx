@@ -8,9 +8,20 @@ import Step2Film from "../features/formulaire/components/Step2Film";
 import Step3AI from "../features/formulaire/components/Step3AI";
 import Step4Confirm from "../features/formulaire/components/Step4Confirm";
 import SuccessScreen from "../features/formulaire/components/SuccessScreen";
+import VerificationEmail from "../features/formulaire/components/VerificationEmail";
 
 const Formulaire = (): React.JSX.Element => {
     const form = useFormDepot();
+
+    if (form.submissionState === "verifying") {
+        return (
+            <VerificationEmail
+                email={form.formData.email}
+                onVerify={form.verifyOtp}
+                onConfirm={form.confirmVerification}
+            />
+        );
+    }
 
     if (form.submissionState === "success") {
         return (
