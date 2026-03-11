@@ -116,7 +116,7 @@ const Step2Film = ({
     };
 
     const charCounterClass = (length: number, max: number): string => {
-        const base = "font-mono text-xs text-right -mt-1";
+        const base = "font-mono text-[0.68rem] text-right -mt-1";
         if (length >= max) return `${base} text-coral`;
         if (length > max * 0.9) return `${base} text-solar`;
         return `${base} text-mist`;
@@ -131,7 +131,7 @@ const Step2Film = ({
     return (
         <div className="form-animate-in">
             {/* Header */}
-            <div className="flex items-center gap-3.5 mb-7 pb-5 border-b border-white/5">
+            <div className="flex items-center gap-3.5 mb-7 pb-5 border-b border-white/6">
                 <div className="w-11 h-11 rounded-xl bg-lavande/10 flex items-center justify-center text-xl shrink-0">
                     🎬
                 </div>
@@ -144,9 +144,9 @@ const Step2Film = ({
             </div>
 
             {/* Titres et langue */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Titre original <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
                     <input
@@ -164,8 +164,8 @@ const Step2Film = ({
                     {renderError("titre")}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Titre traduit en anglais{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -184,8 +184,8 @@ const Step2Film = ({
                     {renderError("titreEn")}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Langue parlée du film{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -205,8 +205,8 @@ const Step2Film = ({
                     {renderError("langue")}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Tags thématiques{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
                             (max 5, séparés par des virgules)
@@ -221,16 +221,16 @@ const Step2Film = ({
                         maxLength={150}
                         className={inputClass("tags")}
                     />
-                    <div className="text-xs text-mist/70">
+                    <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
                         En lien avec le thème &quot;Futurs souhaitables&quot;
                     </div>
                 </div>
             </div>
 
             {/* Synopsis */}
-            <div className="grid gap-4 mt-4">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+            <div className="grid gap-4.5 mt-1">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Synopsis en français{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -251,8 +251,8 @@ const Step2Film = ({
                     {renderError("synopsis")}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Synopsis en anglais{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -278,8 +278,8 @@ const Step2Film = ({
             </div>
 
             {/* Fichier vidéo */}
-            <hr className="border-white/5 my-6" />
-            <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
+            <hr className="border-white/6 my-6" />
+            <div className="text-[0.68rem] font-bold uppercase tracking-widest text-mist mb-4 mt-1">
                 Fichier vidéo
             </div>
 
@@ -291,11 +291,11 @@ const Step2Film = ({
             {renderError("video")}
 
             {/* Note d'intention */}
-            <hr className="border-white/5 my-6" />
+            <hr className="border-white/6 my-6" />
 
-            <div className="grid gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+            <div className="grid gap-4.5">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Note d&apos;intention{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -318,14 +318,14 @@ const Step2Film = ({
                     >
                         {formData.intention.length} / {INTENTION_MAX_LENGTH}
                     </div>
-                    <div className="text-xs text-mist/70">
+                    <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
                         Cette note est lue par le jury lors de la présélection
                     </div>
                     {renderError("intention")}
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
+                <div className="flex flex-col gap-1.75">
+                    <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
                         Outils utilisés et méthodes de création{" "}
                         <span className="text-coral text-[0.65rem]">● requis</span>
                     </label>
@@ -341,7 +341,7 @@ const Step2Film = ({
                     <div className={charCounterClass(formData.outils.length, OUTILS_MAX_LENGTH)}>
                         {formData.outils.length} / {OUTILS_MAX_LENGTH}
                     </div>
-                    <div className="text-xs text-mist/70">
+                    <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
                         Cette note est lue par le jury lors de la présélection
                     </div>
                     {renderError("outils")}
@@ -349,7 +349,7 @@ const Step2Film = ({
             </div>
 
             {/* Boutons navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/5">
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/6">
                 <button
                     type="button"
                     onClick={onPrev}

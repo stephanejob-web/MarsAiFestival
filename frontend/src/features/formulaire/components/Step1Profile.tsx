@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FormDepotData, FormDepotErrors, SelectOption } from "../types";
 import { COUNTRIES, DISCOVERY_OPTIONS } from "../constants";
 import { getInputClass } from "./formUtils";
@@ -8,7 +8,7 @@ interface Step1ProfileProps {
     formData: FormDepotData;
     errors: FormDepotErrors;
     onChange: (field: keyof FormDepotData, value: string | boolean) => void;
-    onNext: () => void;
+    onNext: () => boolean;
     validateAge: (dob: string) => boolean;
 }
 
@@ -19,10 +19,26 @@ const Step1Profile = ({
     onNext,
     validateAge,
 }: Step1ProfileProps): React.JSX.Element => {
+    const [showValidationHint, setShowValidationHint] = useState(false);
+
     const handleInput = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
     ): void => {
         onChange(e.target.name as keyof FormDepotData, e.target.value);
+        setShowValidationHint(false);
+    };
+
+    const handleNextClick = (): void => {
+        const success = onNext();
+        if (!success) {
+            setShowValidationHint(true);
+            requestAnimationFrame(() => {
+                const firstError = document.querySelector('[class*="text-coral"]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            });
+        }
     };
 
     const handleDobBlur = (e: React.FocusEvent<HTMLInputElement>): void => {
@@ -388,15 +404,27 @@ const Step1Profile = ({
             </div>
 
             {/* Boutons navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/5">
-                <div />
-                <button
-                    type="button"
-                    onClick={onNext}
-                    className="bg-aurora border-none rounded-[10px] px-8 py-3 font-display text-sm font-extrabold text-deep-sky cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)] flex items-center gap-2"
-                >
-                    Étape suivante — Le Film →
-                </button>
+            <div className="flex flex-col items-end gap-3 mt-8 pt-6 border-t border-white/5">
+                {showValidationHint && Object.keys(errors).length > 0 && (
+                    <div className="w-full text-sm text-coral bg-coral/8 border border-coral/20 rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+                        <span>⚠</span>
+                        <span>
+                            Veuillez corriger les {Object.keys(errors).length} champ
+                            {Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de
+                            continuer.
+                        </span>
+                    </div>
+                )}
+                <div className="flex items-center justify-between w-full">
+                    <div />
+                    <button
+                        type="button"
+                        onClick={handleNextClick}
+                        className="bg-aurora border-none rounded-[10px] px-8 py-3 font-display text-sm font-extrabold text-deep-sky cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)] flex items-center gap-2"
+                    >
+                        Étape suivante — Le Film →
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -42,11 +42,11 @@ const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.
             case "active":
                 return `${base} bg-aurora/8 border-aurora/20 cursor-pointer`;
             case "done":
-                return `${base} border-transparent opacity-70 cursor-pointer`;
+                return `${base} border-white/10 bg-white/[0.03] opacity-80 cursor-pointer hover:border-aurora/15 hover:bg-aurora/[0.03]`;
             case "pending":
-                return `${base} border-transparent cursor-pointer`;
+                return `${base} border-white/10 bg-white/[0.03] cursor-pointer hover:border-white/15`;
             default:
-                return `${base} border-transparent opacity-35 cursor-not-allowed`;
+                return `${base} border-white/8 bg-white/[0.02] opacity-45 cursor-not-allowed`;
         }
     };
 
