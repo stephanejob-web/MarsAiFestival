@@ -27,6 +27,8 @@ interface UseFormDepotReturn {
     setSubtitleEN: (file: File | null) => void;
     toggleRgpd: (index: number) => void;
     submitForm: () => void;
+    verifyOtp: (code: string) => boolean;
+    confirmVerification: () => void;
     validateAge: (dob: string) => boolean;
     validateStep: (step: number) => boolean;
     videoDurationStatus: (seconds: number) => "ok" | "warn" | "err";
@@ -166,9 +168,17 @@ const useFormDepot = (): UseFormDepotReturn => {
         setDossierNum(num);
 
         setTimeout(() => {
-            setSubmissionState("success");
+            setSubmissionState("verifying");
         }, 1500);
     }, [rgpdChecked, validateStep]);
+
+    const verifyOtp = useCallback((code: string): boolean => {
+        return code === "123456";
+    }, []);
+
+    const confirmVerification = useCallback((): void => {
+        setSubmissionState("success");
+    }, []);
 
     return {
         currentStep,
@@ -195,6 +205,8 @@ const useFormDepot = (): UseFormDepotReturn => {
         setSubtitleEN,
         toggleRgpd,
         submitForm,
+        verifyOtp,
+        confirmVerification,
         validateAge,
         validateStep,
         videoDurationStatus,

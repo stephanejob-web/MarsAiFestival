@@ -364,7 +364,7 @@ const isActive = true;
 <div style={{ padding: "16px", backgroundColor: "#fff" }}>...</div>
 
 // ❌ Pas de valeurs en dur pour les couleurs ou espacements
-<div className="p-[16px] bg-[#ffffff]">...</div>
+<div className="p-4 bg-[#ffffff]">...</div>
 ```
 
 ---
