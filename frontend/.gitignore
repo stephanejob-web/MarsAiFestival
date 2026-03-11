@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Large video assets
-src/assets/*.mp4
+# src/assets/*.mp4
