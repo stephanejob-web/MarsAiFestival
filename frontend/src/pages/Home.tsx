@@ -4,6 +4,7 @@ import ConceptSection from "../features/home/components/ConceptSection";
 import ManifesteSection from "../features/home/components/ManifesteSection";
 import AboutSection from "../features/home/components/AboutSection";
 import HowSection from "../features/home/components/HowSection";
+import ProgrammeSection from "../features/home/components/ProgrammeSection";
 import FilmsSection from "../features/home/components/FilmsSection";
 import GalaSection from "../features/home/components/GalaSection";
 import HomeFooter from "../features/home/components/HomeFooter";
@@ -26,6 +27,8 @@ const Home = (): React.JSX.Element => (
         <AboutSection />
         <Divider />
         <HowSection />
+        <Divider />
+        <ProgrammeSection />
         <Divider />
         <FilmsSection />
         <Divider />
