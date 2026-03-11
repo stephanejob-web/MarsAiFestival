@@ -12,10 +12,10 @@ const App = (): React.JSX.Element => {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
-                    <Route path="formulaire" element={<Formulaire />} />
                     <Route path="jury" element={<Jury />} />
                     <Route path="admin" element={<AdminPanel />} />
                 </Route>
+                <Route path="formulaire" element={<Formulaire />} />
             </Routes>
         </BrowserRouter>
     );
