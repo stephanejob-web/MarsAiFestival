@@ -23,7 +23,6 @@ const VerificationEmail = ({
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const startResendTimer = useCallback((): void => {
-        setResendTimer(RESEND_DELAY);
         if (timerRef.current) clearInterval(timerRef.current);
         timerRef.current = setInterval(() => {
             setResendTimer((prev) => {
@@ -133,6 +132,7 @@ const VerificationEmail = ({
 
     const handleResend = (): void => {
         if (resendTimer > 0) return;
+        setResendTimer(RESEND_DELAY);
         startResendTimer();
         setDigits(["", "", "", "", "", ""]);
         setError(false);
