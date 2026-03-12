@@ -1,21 +1,30 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
 interface VerificationEmailProps {
-    email: string;
-    onVerify: (code: string) => boolean;
-    onConfirm: () => void;
+    defaultEmail: string;
+    onSendOtp: (email: string) => Promise<void>;
+    onVerify: (email: string, code: string) => Promise<boolean>;
+    onConfirm: () => Promise<void>;
 }
 
 const DIGIT_IDS = [0, 1, 2, 3, 4, 5] as const;
 const RESEND_DELAY = 30;
 
 const VerificationEmail = ({
-    email,
+    defaultEmail,
+    onSendOtp,
     onVerify,
     onConfirm,
 }: VerificationEmailProps): React.JSX.Element => {
+    /* ── Phase : "email" | "code" ── */
+    const [phase, setPhase] = useState<"email" | "code">("email");
+    const [email, setEmail] = useState(defaultEmail);
+    const [emailError, setEmailError] = useState("");
+    const [sending, setSending] = useState(false);
+
+    /* ── Phase code ── */
     const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
-    const [error, setError] = useState(false);
+    const [codeError, setCodeError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [shake, setShake] = useState(false);
     const [resendTimer, setResendTimer] = useState(RESEND_DELAY);
@@ -36,13 +45,33 @@ const VerificationEmail = ({
     }, []);
 
     useEffect(() => {
-        startResendTimer();
-        setTimeout(() => inputRefs.current[0]?.focus(), 80);
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [startResendTimer]);
+    }, []);
 
+    /* ── Phase 1 : envoi email ── */
+    const handleSendCode = async (): Promise<void> => {
+        const trimmed = email.trim();
+        if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+            setEmailError("Adresse email invalide");
+            return;
+        }
+        setEmailError("");
+        setSending(true);
+        try {
+            await onSendOtp(trimmed);
+            setPhase("code");
+            startResendTimer();
+            setTimeout(() => inputRefs.current[0]?.focus(), 80);
+        } catch {
+            setEmailError("Impossible d'envoyer le code. Vérifiez votre email.");
+        } finally {
+            setSending(false);
+        }
+    };
+
+    /* ── Phase 2 : saisie code ── */
     const code = digits.join("");
     const isComplete = code.length === 6;
 
@@ -62,10 +91,8 @@ const VerificationEmail = ({
             next[index] = char;
             return next;
         });
-        setError(false);
-        if (index < 5) {
-            inputRefs.current[index + 1]?.focus();
-        }
+        setCodeError(false);
+        if (index < 5) inputRefs.current[index + 1]?.focus();
     };
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -85,15 +112,11 @@ const VerificationEmail = ({
                 });
                 inputRefs.current[index - 1]?.focus();
             }
-            setError(false);
+            setCodeError(false);
             return;
         }
-        if (e.key === "ArrowLeft" && index > 0) {
-            inputRefs.current[index - 1]?.focus();
-        }
-        if (e.key === "ArrowRight" && index < 5) {
-            inputRefs.current[index + 1]?.focus();
-        }
+        if (e.key === "ArrowLeft" && index > 0) inputRefs.current[index - 1]?.focus();
+        if (e.key === "ArrowRight" && index < 5) inputRefs.current[index + 1]?.focus();
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>): void => {
@@ -105,38 +128,48 @@ const VerificationEmail = ({
             newDigits[i] = ch;
         });
         setDigits(newDigits);
-        setError(false);
-        const focusIdx = Math.min(text.length, 5);
-        inputRefs.current[focusIdx]?.focus();
+        setCodeError(false);
+        inputRefs.current[Math.min(text.length, 5)]?.focus();
     };
 
-    const handleVerify = (): void => {
+    const [uploadError, setUploadError] = useState("");
+
+    const handleVerify = async (): Promise<void> => {
         if (!isComplete || loading) return;
         setLoading(true);
-
-        setTimeout(() => {
-            setLoading(false);
-            if (onVerify(code)) {
-                onConfirm();
-            } else {
-                setShake(true);
-                setError(true);
-                setTimeout(() => {
-                    setShake(false);
-                    setDigits(["", "", "", "", "", ""]);
-                    inputRefs.current[0]?.focus();
-                }, 500);
+        setUploadError("");
+        const ok = await onVerify(email.trim(), code);
+        if (ok) {
+            try {
+                await onConfirm();
+            } catch {
+                setUploadError("Erreur lors de l'envoi du film. Réessayez.");
+                setLoading(false);
             }
-        }, 1100);
+        } else {
+            setLoading(false);
+            setShake(true);
+            setCodeError(true);
+            setTimeout(() => {
+                setShake(false);
+                setDigits(["", "", "", "", "", ""]);
+                inputRefs.current[0]?.focus();
+            }, 500);
+        }
     };
 
-    const handleResend = (): void => {
+    const handleResend = async (): Promise<void> => {
         if (resendTimer > 0) return;
-        setResendTimer(RESEND_DELAY);
-        startResendTimer();
-        setDigits(["", "", "", "", "", ""]);
-        setError(false);
-        inputRefs.current[0]?.focus();
+        try {
+            await onSendOtp(email.trim());
+            setResendTimer(RESEND_DELAY);
+            startResendTimer();
+            setDigits(["", "", "", "", "", ""]);
+            setCodeError(false);
+            inputRefs.current[0]?.focus();
+        } catch {
+            /* silently ignore */
+        }
     };
 
     return (
@@ -217,126 +250,205 @@ const VerificationEmail = ({
                             <div className="verification-step-circle done">✓</div>
                             <span className="verification-step-label dim">Formulaire</span>
                         </div>
-                        <div className="verification-step-connector done" />
+                        <div
+                            className={`verification-step-connector${phase === "code" ? " done" : ""}`}
+                        />
                         <div className="verification-step-item">
-                            <div className="verification-step-circle active">2</div>
-                            <span className="verification-step-label active-label">
+                            <div
+                                className={`verification-step-circle${phase === "email" ? " active" : " done"}`}
+                            >
+                                {phase === "code" ? "✓" : "2"}
+                            </div>
+                            <span
+                                className={`verification-step-label${phase === "email" ? " active-label" : " dim"}`}
+                            >
+                                Email
+                            </span>
+                        </div>
+                        <div
+                            className={`verification-step-connector${phase === "code" ? " done" : ""}`}
+                        />
+                        <div className="verification-step-item">
+                            <div
+                                className={`verification-step-circle${phase === "code" ? " active" : " pending"}`}
+                            >
+                                3
+                            </div>
+                            <span
+                                className={`verification-step-label${phase === "code" ? " active-label" : " dim"}`}
+                            >
                                 Vérification
                             </span>
                         </div>
-                        <div className="verification-step-connector" />
-                        <div className="verification-step-item">
-                            <div className="verification-step-circle pending">3</div>
-                            <span className="verification-step-label dim">Confirmation</span>
-                        </div>
                     </div>
 
-                    {/* Titre */}
-                    <h2 className="verification-title">Code de vérification</h2>
-                    <p className="verification-subtitle">
-                        Un code à 6 chiffres a été envoyé à votre adresse email.
-                    </p>
+                    {phase === "email" ? (
+                        <>
+                            <h2 className="verification-title">Confirmez votre email</h2>
+                            <p className="verification-subtitle">
+                                Nous allons envoyer un code de vérification à votre adresse email.
+                            </p>
 
-                    {/* Email display */}
-                    <div className="verification-email-display">
-                        <div className="verification-email-left">
-                            <div className="verification-email-dot" />
-                            <span className="verification-email-addr">{email}</span>
-                        </div>
-                    </div>
-
-                    {/* OTP label */}
-                    <label className="verification-otp-label">Code de vérification</label>
-
-                    {/* OTP digits */}
-                    <div className="verification-otp-wrap">
-                        {DIGIT_IDS.map((i) => (
-                            <React.Fragment key={i}>
-                                {i === 3 && <span className="verification-otp-sep">—</span>}
-                                <input
-                                    ref={(el) => {
-                                        inputRefs.current[i] = el;
-                                    }}
-                                    type="text"
-                                    inputMode="numeric"
-                                    maxLength={1}
-                                    value={digits[i]}
-                                    onChange={(e) => handleDigitChange(i, e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(i, e)}
-                                    onPaste={i === 0 ? handlePaste : undefined}
-                                    className={`verification-otp-digit${digits[i] ? " filled" : ""}${error ? " error-state" : ""}${shake ? " shake" : ""}`}
-                                    autoComplete="one-time-code"
-                                />
-                            </React.Fragment>
-                        ))}
-                    </div>
-
-                    {/* Error message */}
-                    <div className={`verification-otp-error${error ? " show" : ""}`}>
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                            <circle cx="6.5" cy="6.5" r="6" stroke="#FF6B6B" strokeWidth="1.2" />
-                            <line
-                                x1="6.5"
-                                y1="3.5"
-                                x2="6.5"
-                                y2="7.5"
-                                stroke="#FF6B6B"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
+                            <label className="verification-otp-label" htmlFor="otp-email">
+                                Adresse email
+                            </label>
+                            <input
+                                id="otp-email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    setEmailError("");
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") void handleSendCode();
+                                }}
+                                className={`w-full rounded-xl border px-4 py-3 text-sm font-mono bg-white/5 text-white-soft outline-none transition-all mb-1 ${
+                                    emailError
+                                        ? "border-red-400/60 focus:border-red-400"
+                                        : "border-white/15 focus:border-aurora/60"
+                                }`}
+                                placeholder="vous@domaine.com"
+                                autoComplete="email"
                             />
-                            <circle cx="6.5" cy="9.5" r="0.7" fill="#FF6B6B" />
-                        </svg>
-                        Code incorrect. Réessayez.
-                    </div>
+                            {emailError && (
+                                <p className="text-xs text-red-400 mb-3">{emailError}</p>
+                            )}
 
-                    {/* Verify button */}
-                    <button
-                        type="button"
-                        className={`verification-btn-main${loading ? " loading" : ""}`}
-                        disabled={!isComplete || loading}
-                        onClick={handleVerify}
-                    >
-                        Vérifier
-                    </button>
-
-                    {/* Resend section */}
-                    <div className="verification-resend">
-                        <span className="verification-resend-left">Pas reçu le code ?</span>
-                        <div className="verification-resend-right">
                             <button
                                 type="button"
-                                className="verification-btn-resend"
-                                disabled={resendTimer > 0}
-                                onClick={handleResend}
+                                className={`verification-btn-main mt-4${sending ? " loading" : ""}`}
+                                disabled={sending || !email.trim()}
+                                onClick={() => void handleSendCode()}
                             >
-                                Renvoyer
+                                {sending ? "Envoi en cours…" : "Recevoir le code"}
                             </button>
-                            {resendTimer > 0 && (
-                                <span className="verification-resend-timer">
-                                    0:{String(resendTimer).padStart(2, "0")}
-                                </span>
-                            )}
-                        </div>
-                    </div>
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="verification-title">Code de vérification</h2>
+                            <p className="verification-subtitle">
+                                Un code à 6 chiffres a été envoyé à votre adresse email.
+                            </p>
 
-                    {/* Demo hint */}
-                    <div className="verification-demo-hint">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <circle cx="7" cy="7" r="6" stroke="#F5E642" strokeWidth="1.2" />
-                            <line
-                                x1="7"
-                                y1="5"
-                                x2="7"
-                                y2="9"
-                                stroke="#F5E642"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                            />
-                            <circle cx="7" cy="3.5" r="0.7" fill="#F5E642" />
-                        </svg>
-                        Maquette — tapez <span className="verification-demo-code">1 2 3 4 5 6</span>{" "}
-                        pour valider
-                    </div>
+                            <div className="verification-email-display">
+                                <div className="verification-email-left">
+                                    <div className="verification-email-dot" />
+                                    <span className="verification-email-addr">{email}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="text-xs text-aurora/70 hover:text-aurora underline"
+                                    onClick={() => setPhase("email")}
+                                >
+                                    Modifier
+                                </button>
+                            </div>
+
+                            <label className="verification-otp-label">Code de vérification</label>
+
+                            <div className="verification-otp-wrap">
+                                {DIGIT_IDS.map((i) => (
+                                    <React.Fragment key={i}>
+                                        {i === 3 && <span className="verification-otp-sep">—</span>}
+                                        <input
+                                            ref={(el) => {
+                                                inputRefs.current[i] = el;
+                                            }}
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength={1}
+                                            value={digits[i]}
+                                            onChange={(e) => handleDigitChange(i, e.target.value)}
+                                            onKeyDown={(e) => handleKeyDown(i, e)}
+                                            onPaste={i === 0 ? handlePaste : undefined}
+                                            className={`verification-otp-digit${digits[i] ? " filled" : ""}${codeError ? " error-state" : ""}${shake ? " shake" : ""}`}
+                                            autoComplete="one-time-code"
+                                        />
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            <div className={`verification-otp-error${codeError ? " show" : ""}`}>
+                                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                    <circle
+                                        cx="6.5"
+                                        cy="6.5"
+                                        r="6"
+                                        stroke="#FF6B6B"
+                                        strokeWidth="1.2"
+                                    />
+                                    <line
+                                        x1="6.5"
+                                        y1="3.5"
+                                        x2="6.5"
+                                        y2="7.5"
+                                        stroke="#FF6B6B"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                    />
+                                    <circle cx="6.5" cy="9.5" r="0.7" fill="#FF6B6B" />
+                                </svg>
+                                Code incorrect. Réessayez.
+                            </div>
+
+                            {uploadError && (
+                                <p className="text-xs text-red-400 mb-3">{uploadError}</p>
+                            )}
+
+                            <button
+                                type="button"
+                                className={`verification-btn-main${loading ? " loading" : ""}`}
+                                disabled={!isComplete || loading}
+                                onClick={() => void handleVerify()}
+                            >
+                                {loading ? "Envoi du film…" : "Vérifier et soumettre"}
+                            </button>
+
+                            <div className="verification-resend">
+                                <span className="verification-resend-left">Pas reçu le code ?</span>
+                                <div className="verification-resend-right">
+                                    <button
+                                        type="button"
+                                        className="verification-btn-resend"
+                                        disabled={resendTimer > 0}
+                                        onClick={() => void handleResend()}
+                                    >
+                                        Renvoyer
+                                    </button>
+                                    {resendTimer > 0 && (
+                                        <span className="verification-resend-timer">
+                                            0:{String(resendTimer).padStart(2, "0")}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="verification-demo-hint">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <circle
+                                        cx="7"
+                                        cy="7"
+                                        r="6"
+                                        stroke="#F5E642"
+                                        strokeWidth="1.2"
+                                    />
+                                    <line
+                                        x1="7"
+                                        y1="5"
+                                        x2="7"
+                                        y2="9"
+                                        stroke="#F5E642"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                    />
+                                    <circle cx="7" cy="3.5" r="0.7" fill="#F5E642" />
+                                </svg>
+                                Le code expire dans{" "}
+                                <span className="verification-demo-code">5 minutes</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </main>
         </div>

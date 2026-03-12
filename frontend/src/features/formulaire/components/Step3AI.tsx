@@ -6,7 +6,7 @@ import { FormFieldError } from "./formHelpers";
 interface SubtitleUploadProps {
     lang: "fr" | "en";
     file: File | null;
-    required: boolean;
+    required?: boolean;
     onFileSelect: (file: File) => void;
     error?: string;
 }
@@ -296,14 +296,12 @@ const Step3AI = ({
             <SubtitleUpload
                 lang="fr"
                 file={subtitleFR}
-                required
                 onFileSelect={onSubtitleFR}
                 error={errors.subtitleFR}
             />
             <SubtitleUpload
                 lang="en"
                 file={subtitleEN}
-                required
                 onFileSelect={onSubtitleEN}
                 error={errors.subtitleEN}
             />
