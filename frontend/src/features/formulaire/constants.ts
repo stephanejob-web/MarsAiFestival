@@ -54,7 +54,7 @@ export const DISCOVERY_OPTIONS: SelectOption[] = [
 ];
 
 export const VIDEO_MIN_DURATION = 0;
-export const VIDEO_MAX_DURATION = 130;
+export const VIDEO_MAX_DURATION = 150;
 export const VIDEO_ACCEPTED_TYPES = ["video/mp4", "video/quicktime"];
 export const VIDEO_ACCEPTED_EXTENSIONS = ["mp4", "mov"];
 export const SUBTITLE_ACCEPTED = ".srt,.vtt";
@@ -64,39 +64,43 @@ export const SYNOPSIS_MAX_LENGTH = 300;
 export const INTENTION_MAX_LENGTH = 1000;
 export const OUTILS_MAX_LENGTH = 1000;
 
+const isDev = import.meta.env.MODE === "development";
+
 export const INITIAL_FORM_DATA: FormDepotData = {
     civilite: "M",
-    prenom: "",
-    nom: "",
-    dob: "",
-    metier: "",
-    email: "",
-    tel: "",
-    mobile: "",
-    rue: "",
-    cp: "",
-    ville: "",
-    pays: "",
+    prenom: isDev ? "Jean" : "",
+    nom: isDev ? "Dupont" : "",
+    dob: isDev ? "1990-06-15" : "",
+    metier: isDev ? "Réalisateur" : "",
+    email: isDev ? "pgeoV.2@gmail.com" : "",
+    tel: isDev ? "0491000000" : "",
+    mobile: isDev ? "0612345678" : "",
+    rue: isDev ? "10 rue de la Paix" : "",
+    cp: isDev ? "13001" : "",
+    ville: isDev ? "Marseille" : "",
+    pays: isDev ? "FR" : "",
     youtube: "",
     instagram: "",
     linkedin: "",
     facebook: "",
     xtwitter: "",
-    discovery: "",
+    discovery: isDev ? "rs" : "",
     newsletter: false,
-    titre: "",
-    titreEn: "",
-    langue: "",
-    tags: "",
-    synopsis: "",
-    synopsisEn: "",
-    intention: "",
-    outils: "",
+    titre: isDev ? "Test Film" : "",
+    titreEn: isDev ? "Test Film EN" : "",
+    langue: isDev ? "fr" : "",
+    tags: isDev ? "test, ia, futur" : "",
+    synopsis: isDev ? "Un film de test pour vérifier le bon fonctionnement du formulaire." : "",
+    synopsisEn: isDev ? "A test film to verify the submission form works correctly." : "",
+    intention: isDev
+        ? "Ce film explore les futurs souhaitables à travers une expérience visuelle générée par IA."
+        : "",
+    outils: isDev ? "Stable Diffusion, ElevenLabs, Adobe Premiere" : "",
     iaClass: "full",
-    iaImg: "",
-    iaSon: "",
-    iaScenario: "",
-    iaPost: "",
+    iaImg: isDev ? "Stable Diffusion XL" : "",
+    iaSon: isDev ? "ElevenLabs" : "",
+    iaScenario: isDev ? "ChatGPT" : "",
+    iaPost: isDev ? "Topaz Video AI" : "",
 };
 
 export const RGPD_ITEMS = [

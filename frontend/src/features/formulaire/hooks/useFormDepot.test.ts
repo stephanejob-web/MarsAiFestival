@@ -94,8 +94,8 @@ describe("useFormDepot", () => {
 
         expect(result.current.videoDurationStatus(60)).toBe("ok");
         expect(result.current.videoDurationStatus(1)).toBe("ok");
-        expect(result.current.videoDurationStatus(130)).toBe("ok");
-        expect(result.current.videoDurationStatus(131)).toBe("err");
+        expect(result.current.videoDurationStatus(150)).toBe("ok");
+        expect(result.current.videoDurationStatus(151)).toBe("err");
         expect(result.current.videoDurationStatus(200)).toBe("err");
     });
 
