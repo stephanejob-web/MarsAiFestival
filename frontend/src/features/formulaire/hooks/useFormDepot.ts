@@ -203,21 +203,27 @@ const useFormDepot = (): UseFormDepotReturn => {
         }
     }, []);
 
-    const confirmVerification = useCallback(async (email: string): Promise<void> => {
-        const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            data.append(key, String(value));
-        });
-        if (videoFile) data.append("video", videoFile);
-        if (subtitleFR) data.append("subtitleFR", subtitleFR);
-        if (subtitleEN) data.append("subtitleEN", subtitleEN);
+    const confirmVerification = useCallback(
+        async (email: string): Promise<void> => {
+            const data = new FormData();
+            Object.entries(formData).forEach(([key, value]) => {
+                data.append(key, String(value));
+            });
+            if (videoFile) data.append("video", videoFile);
+            if (subtitleFR) data.append("subtitleFR", subtitleFR);
+            if (subtitleEN) data.append("subtitleEN", subtitleEN);
 
-        const result = await apiFetchForm<{ dossierNum: string; youtubeWarning?: string }>("/api/films", data);
-        setOtpEmail(email);
-        setDossierNum(result.dossierNum);
-        if (result.youtubeWarning) setYoutubeWarning(result.youtubeWarning);
-        setSubmissionState("success");
-    }, [formData, videoFile, subtitleFR, subtitleEN]);
+            const result = await apiFetchForm<{ dossierNum: string; youtubeWarning?: string }>(
+                "/api/films",
+                data,
+            );
+            setOtpEmail(email);
+            setDossierNum(result.dossierNum);
+            if (result.youtubeWarning) setYoutubeWarning(result.youtubeWarning);
+            setSubmissionState("success");
+        },
+        [formData, videoFile, subtitleFR, subtitleEN],
+    );
 
     return {
         currentStep,

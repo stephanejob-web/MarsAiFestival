@@ -504,7 +504,8 @@ const VerificationEmail = ({
                                         />
                                         <circle cx="7" cy="9.5" r="0.7" fill="#FF6B6B" />
                                     </svg>
-                                    Code expiré — cliquez sur &quot;Renvoyer&quot; pour en obtenir un nouveau
+                                    Code expiré — cliquez sur &quot;Renvoyer&quot; pour en obtenir
+                                    un nouveau
                                 </div>
                             )}
                         </>
