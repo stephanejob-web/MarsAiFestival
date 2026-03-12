@@ -14,6 +14,7 @@ interface SuccessScreenProps {
     email: string;
     prenom: string;
     titre: string;
+    youtubeWarning?: string;
 }
 
 const SuccessScreen = ({
@@ -21,6 +22,7 @@ const SuccessScreen = ({
     email,
     prenom,
     titre,
+    youtubeWarning,
 }: SuccessScreenProps): React.JSX.Element => {
     const [ytResult, setYtResult] = useState<YTResult>("pending");
     const [ytPct, setYtPct] = useState<number>(0);
@@ -83,6 +85,14 @@ const SuccessScreen = ({
             <p className="text-xs text-mist mb-5">
                 Email de confirmation envoyé à <strong className="text-white-soft">{email}</strong>
             </p>
+
+            {/* Avertissement YouTube si upload échoué */}
+            {youtubeWarning && (
+                <div className="text-left bg-solar/5 border border-solar/25 rounded-xl px-4 py-3 flex items-start gap-3 mb-4">
+                    <span className="text-base shrink-0">⚠️</span>
+                    <p className="text-xs text-solar leading-relaxed">{youtubeWarning}</p>
+                </div>
+            )}
 
             {/* Upload dual info */}
             <div className="text-left bg-white/3 border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3 mb-5">

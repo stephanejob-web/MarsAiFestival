@@ -30,9 +30,10 @@ const Formulaire = (): React.JSX.Element => {
                 <FormHeader />
                 <SuccessScreen
                     dossierNum={form.dossierNum}
-                    email={form.formData.email}
+                    email={form.otpEmail || form.formData.email}
                     prenom={form.formData.prenom}
                     titre={form.formData.titre}
+                    youtubeWarning={form.youtubeWarning || undefined}
                 />
             </div>
         );
@@ -72,6 +73,7 @@ const Formulaire = (): React.JSX.Element => {
                             onVideoSelect={(file) => form.setVideoFile(file)}
                             onVideoReset={form.resetVideo}
                             setUploadProgress={form.setUploadProgress}
+                            setVideoDuration={form.setVideoDuration}
                             setVideoValid={form.setVideoValid}
                             onPrev={form.prevStep}
                             onNext={form.nextStep}
@@ -95,6 +97,8 @@ const Formulaire = (): React.JSX.Element => {
                     {form.currentStep === 4 && (
                         <Step4Confirm
                             formData={form.formData}
+                            videoFile={form.videoFile}
+                            videoDuration={form.videoDuration}
                             videoValid={form.videoValid}
                             subtitleFR={form.subtitleFR}
                             subtitleEN={form.subtitleEN}

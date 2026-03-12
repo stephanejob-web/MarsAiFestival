@@ -4,6 +4,8 @@ import { RGPD_ITEMS, COUNTRIES } from "../constants";
 
 interface Step4ConfirmProps {
     formData: FormDepotData;
+    videoFile: File | null;
+    videoDuration: number | null;
     videoValid: boolean;
     subtitleFR: File | null;
     subtitleEN: File | null;
@@ -21,8 +23,22 @@ interface RecapRow {
     ok?: boolean;
 }
 
+const formatDob = (dob: string): string => {
+    if (!dob) return "—";
+    const [y, m, d] = dob.split("-");
+    return `${d}/${m}/${y}`;
+};
+
+const formatDuration = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return m > 0 ? `${m} min ${s.toString().padStart(2, "0")} s` : `${s} s`;
+};
+
 const Step4Confirm = ({
     formData,
+    videoFile,
+    videoDuration,
     videoValid,
     subtitleFR,
     subtitleEN,
@@ -36,9 +52,15 @@ const Step4Confirm = ({
 
     const countryLabel = COUNTRIES.find((c) => c.value === formData.pays)?.label ?? formData.pays;
 
+    const videoLabel = videoFile
+        ? videoDuration !== null
+            ? `${formatDuration(videoDuration)} · ${videoFile.name}`
+            : videoFile.name
+        : "—";
+
     const recapRows: RecapRow[] = [
         { key: "Réalisateur", value: `${formData.prenom} ${formData.nom}`.trim() || "—" },
-        { key: "Date de naissance", value: formData.dob || "—" },
+        { key: "Date de naissance", value: formatDob(formData.dob) },
         { key: "Email", value: formData.email || "—", mono: true },
         { key: "Mobile", value: formData.mobile || "—", mono: true },
         {
@@ -47,7 +69,7 @@ const Step4Confirm = ({
         },
         { key: "Titre du film (FR)", value: formData.titre || "—" },
         { key: "Titre (EN)", value: formData.titreEn || "—" },
-        { key: "Durée", value: videoValid ? "≈ 60 s ✓" : "—", ok: videoValid },
+        { key: "Fichier vidéo", value: videoLabel, ok: videoValid },
         {
             key: "Type de production",
             value:
