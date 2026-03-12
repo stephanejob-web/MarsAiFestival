@@ -1,6 +1,7 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { FormDepotData } from "../types";
-import { RGPD_ITEMS, COUNTRIES } from "../constants";
+import { COUNTRIES } from "../constants";
 
 interface Step4ConfirmProps {
     formData: FormDepotData;
@@ -48,9 +49,10 @@ const Step4Confirm = ({
     onPrev,
     onSubmit,
 }: Step4ConfirmProps): React.JSX.Element => {
+    const { t } = useTranslation();
     const allRgpdChecked = rgpdChecked.every(Boolean);
 
-    const countryLabel = COUNTRIES.find((c) => c.value === formData.pays)?.label ?? formData.pays;
+    const countryLabel = t(`form.countries.${formData.pays}`, COUNTRIES.find((c) => c.value === formData.pays)?.label ?? formData.pays);
 
     const videoLabel = videoFile
         ? videoDuration !== null
@@ -58,28 +60,34 @@ const Step4Confirm = ({
             : videoFile.name
         : "—";
 
+    const rgpdItems = [
+        { title: t("form.rgpd.0.title"), description: t("form.rgpd.0.desc") },
+        { title: t("form.rgpd.1.title"), description: t("form.rgpd.1.desc") },
+        { title: t("form.rgpd.2.title"), description: t("form.rgpd.2.desc") },
+    ];
+
     const recapRows: RecapRow[] = [
-        { key: "Réalisateur", value: `${formData.prenom} ${formData.nom}`.trim() || "—" },
-        { key: "Date de naissance", value: formatDob(formData.dob) },
-        { key: "Email", value: formData.email || "—", mono: true },
-        { key: "Mobile", value: formData.mobile || "—", mono: true },
+        { key: t("form.step4.recapDirector"), value: `${formData.prenom} ${formData.nom}`.trim() || "—" },
+        { key: t("form.step4.recapDob"), value: formatDob(formData.dob) },
+        { key: t("form.step4.recapEmail"), value: formData.email || "—", mono: true },
+        { key: t("form.step4.recapMobile"), value: formData.mobile || "—", mono: true },
         {
-            key: "Ville / Pays",
+            key: t("form.step4.recapCityCountry"),
             value: [formData.ville, countryLabel].filter(Boolean).join(", ") || "—",
         },
-        { key: "Titre du film (FR)", value: formData.titre || "—" },
-        { key: "Titre (EN)", value: formData.titreEn || "—" },
-        { key: "Fichier vidéo", value: videoLabel, ok: videoValid },
+        { key: t("form.step4.recapTitleFR"), value: formData.titre || "—" },
+        { key: t("form.step4.recapTitleEN"), value: formData.titreEn || "—" },
+        { key: t("form.step4.recapVideo"), value: videoLabel, ok: videoValid },
         {
-            key: "Type de production",
+            key: t("form.step4.recapProdType"),
             value:
                 formData.iaClass === "full"
-                    ? "Génération intégrale (100% IA)"
-                    : "Production hybride (IA + Humain)",
+                    ? t("form.step4.prodFull")
+                    : t("form.step4.prodHybrid"),
         },
-        { key: "Outils IA image", value: formData.iaImg || "—" },
+        { key: t("form.step4.recapAiTools"), value: formData.iaImg || "—" },
         {
-            key: "Sous-titres",
+            key: t("form.step4.recapSubtitles"),
             value: [subtitleFR ? "FR ✓" : "FR ✗", subtitleEN ? "EN ✓" : "EN ✗"].join(" · "),
         },
     ];
@@ -92,9 +100,9 @@ const Step4Confirm = ({
                     ✅
                 </div>
                 <div>
-                    <h2 className="font-display text-xl font-extrabold">Confirmation & Droits</h2>
+                    <h2 className="font-display text-xl font-extrabold">{t("form.step4.title")}</h2>
                     <p className="text-sm text-mist mt-0.5">
-                        Vérifiez votre dossier, acceptez les conditions et soumettez
+                        {t("form.step4.subtitle")}
                     </p>
                 </div>
             </div>
@@ -103,7 +111,7 @@ const Step4Confirm = ({
             <div className="rounded-xl border border-white/8 overflow-hidden mb-6">
                 <div className="bg-white/[0.03] border-b border-white/6 px-5 py-3">
                     <span className="font-display text-sm font-bold text-white-soft">
-                        Récapitulatif du dossier
+                        {t("form.step4.recapTitle")}
                     </span>
                 </div>
                 <div className="divide-y divide-white/5">
@@ -127,11 +135,11 @@ const Step4Confirm = ({
 
             {/* RGPD */}
             <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
-                Conditions obligatoires
+                {t("form.step4.conditionsTitle")}
             </div>
 
             <div className="grid gap-3 mb-4 rgpd-checks">
-                {RGPD_ITEMS.map((item, index) => (
+                {rgpdItems.map((item, index) => (
                     <button
                         key={index}
                         type="button"
@@ -165,7 +173,7 @@ const Step4Confirm = ({
                         <div className="flex-1">
                             <div className="font-display font-bold text-sm text-white-soft mb-1">
                                 {item.title}{" "}
-                                <span className="text-coral text-[0.65rem]">● obligatoire</span>
+                                <span className="text-coral text-[0.65rem]">{t("form.step4.mandatory")}</span>
                             </div>
                             <div className="text-xs text-mist leading-relaxed">
                                 {item.description}
@@ -177,7 +185,7 @@ const Step4Confirm = ({
 
             {!allRgpdChecked && (
                 <div className="text-xs text-solar/80 mb-4">
-                    Vous devez accepter toutes les conditions pour soumettre votre film.
+                    {t("form.step4.mustAccept")}
                 </div>
             )}
 
@@ -188,7 +196,7 @@ const Step4Confirm = ({
                     onClick={onPrev}
                     className="bg-white/5 border border-white/10 rounded-[10px] px-6 py-3 text-sm font-semibold text-mist cursor-pointer transition-all hover:text-white-soft hover:border-white/20 font-body"
                 >
-                    ← Retour
+                    {t("form.prev")}
                 </button>
                 <button
                     type="button"
@@ -202,10 +210,10 @@ const Step4Confirm = ({
                 >
                     {submissionState === "submitting" ? (
                         <>
-                            <span className="animate-spin">⏳</span> Envoi en cours…
+                            <span className="animate-spin">⏳</span> {t("form.step4.submitting")}
                         </>
                     ) : (
-                        "🎬 Soumettre mon film"
+                        t("form.step4.submit")
                     )}
                 </button>
             </div>

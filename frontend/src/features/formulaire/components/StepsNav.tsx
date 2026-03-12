@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { StepDefinition } from "../types";
 import { STEPS } from "../constants";
 
@@ -9,6 +10,8 @@ interface StepsNavProps {
 }
 
 const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.JSX.Element => {
+    const { t } = useTranslation();
+
     const getItemState = (stepNum: number): "done" | "active" | "pending" | "locked" => {
         if (stepNum < currentStep) return "done";
         if (stepNum === currentStep) return "active";
@@ -72,9 +75,9 @@ const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.
                             <div
                                 className={`text-sm font-semibold ${state === "active" ? "text-aurora" : "text-white-soft"}`}
                             >
-                                {step.title}
+                                {t(`form.steps.${step.number}.title`)}
                             </div>
-                            <div className="text-xs text-mist mt-0.5">{step.sub}</div>
+                            <div className="text-xs text-mist mt-0.5">{t(`form.steps.${step.number}.sub`)}</div>
                         </div>
                     </div>
                 );

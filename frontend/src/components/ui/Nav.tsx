@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-interface NavLink {
-    label: string;
-    href: string;
-}
-
-const NAV_LINKS: NavLink[] = [
-    { label: "Le Festival", href: "#home" },
-    { label: "Programme", href: "#programme" },
-    { label: "Films", href: "#films" },
-    { label: "Palmarès", href: "#palmares" },
-    { label: "Jury", href: "#jury" },
-];
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 const Nav = (): React.JSX.Element => {
     const [scrolled, setScrolled] = useState<boolean>(false);
     const location = useLocation();
     const isHome = location.pathname === "/";
+    const { t } = useTranslation();
+
+    const currentLang = i18n.language === "fr" ? "fr" : "en";
+
+    const NAV_LINKS = [
+        { label: t("nav.links.festival"), href: "#home" },
+        { label: t("nav.links.programme"), href: "#programme" },
+        { label: t("nav.links.films"), href: "#films" },
+        { label: t("nav.links.palmares"), href: "#palmares" },
+        { label: t("nav.links.jury"), href: "#jury" },
+    ];
 
     useEffect((): (() => void) => {
         const onScroll = (): void => setScrolled(window.scrollY > 20);
@@ -29,6 +29,11 @@ const Nav = (): React.JSX.Element => {
         if (!isHome) return;
         const el = document.querySelector(href);
         el?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const toggleLang = (): void => {
+        const next = currentLang === "fr" ? "en" : "fr";
+        i18n.changeLanguage(next);
     };
 
     return (
@@ -68,12 +73,21 @@ const Nav = (): React.JSX.Element => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                    {/* Language switcher */}
+                    <button
+                        onClick={toggleLang}
+                        className="font-mono text-xs text-white/50 hover:text-aurora transition-colors border border-white/10 hover:border-aurora/30 rounded px-2 py-1"
+                        aria-label={`Switch language to ${t("nav.langSwitch")}`}
+                    >
+                        {t("nav.langSwitch")}
+                    </button>
+
                     {/* CTA principal */}
                     <Link
                         to="/formulaire"
                         className="text-sm px-4 py-2 bg-aurora text-deep-sky font-bold rounded-lg hover:bg-aurora/90 transition-colors"
                     >
-                        Déposer un film
+                        {t("nav.cta")}
                     </Link>
 
                     {/* Liens dev — visibles uniquement en développement */}

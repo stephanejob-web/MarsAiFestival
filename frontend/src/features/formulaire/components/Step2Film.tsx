@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import type { FormDepotData, FormDepotErrors, DurationStatus } from "../types";
 import {
     LANGUAGES,
@@ -44,6 +45,9 @@ const Step2Film = ({
     onPrev,
     onNext,
 }: Step2FilmProps): React.JSX.Element => {
+    const { t } = useTranslation();
+    const languageOptions = LANGUAGES.map((l) => ({ ...l, label: t(`form.languages.${l.value}`, l.label) }));
+
     const [durationSec, setDurationSec] = useState<number | null>(null);
     const [durationStatus, setDurationStatus] = useState<DurationStatus | null>(null);
     const [showValidationHint, setShowValidationHint] = useState(false);
@@ -151,9 +155,9 @@ const Step2Film = ({
                     🎬
                 </div>
                 <div>
-                    <h2 className="font-display text-xl font-extrabold">Le Film</h2>
+                    <h2 className="font-display text-xl font-extrabold">{t("form.step2.title")}</h2>
                     <p className="text-sm text-mist mt-0.5">
-                        Titre, synopsis, fichier vidéo et note d&apos;intention
+                        {t("form.step2.subtitle")}
                     </p>
                 </div>
             </div>
@@ -162,14 +166,14 @@ const Step2Film = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Titre original <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.titreFR")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
                         name="titre"
                         value={formData.titre}
                         onChange={handleInput}
-                        placeholder="Titre en français"
+                        placeholder={t("form.step2.titreFRPlaceholder")}
                         maxLength={TITLE_MAX_LENGTH}
                         className={inputClass("titre")}
                     />
@@ -181,15 +185,15 @@ const Step2Film = ({
 
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Titre traduit en anglais{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.titreEN")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
                         name="titreEn"
                         value={formData.titreEn}
                         onChange={handleInput}
-                        placeholder="English title"
+                        placeholder={t("form.step2.titreENPlaceholder")}
                         maxLength={TITLE_MAX_LENGTH}
                         className={inputClass("titreEn")}
                     />
@@ -201,8 +205,8 @@ const Step2Film = ({
 
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Langue parlée du film{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.langue")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <select
                         name="langue"
@@ -210,8 +214,8 @@ const Step2Film = ({
                         onChange={handleInput}
                         className={`${inputClass("langue")} cursor-pointer [&>option]:bg-horizon`}
                     >
-                        <option value="">— Sélectionnez —</option>
-                        {LANGUAGES.map((lang) => (
+                        <option value="">{t("form.selectPlaceholder")}</option>
+                        {languageOptions.map((lang) => (
                             <option key={lang.value} value={lang.value}>
                                 {lang.label}
                             </option>
@@ -222,9 +226,9 @@ const Step2Film = ({
 
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Tags thématiques{" "}
+                        {t("form.step2.tags")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (max 5, séparés par des virgules)
+                            {t("form.step2.tagsHint")}
                         </span>
                     </label>
                     <input
@@ -232,12 +236,12 @@ const Step2Film = ({
                         name="tags"
                         value={formData.tags}
                         onChange={handleInput}
-                        placeholder="ex : espoir, nature, technologie, solidarité…"
+                        placeholder={t("form.step2.tagsPlaceholder")}
                         maxLength={150}
                         className={inputClass("tags")}
                     />
                     <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
-                        En lien avec le thème &quot;Futurs souhaitables&quot;
+                        {t("form.step2.tagsTheme")}
                     </div>
                 </div>
             </div>
@@ -246,15 +250,15 @@ const Step2Film = ({
             <div className="grid gap-4.5 mt-1">
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Synopsis en français{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.synopsisFR")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <textarea
                         name="synopsis"
                         value={formData.synopsis}
                         onChange={handleInput}
                         rows={4}
-                        placeholder="Décrivez brièvement votre film en 2-3 phrases…"
+                        placeholder={t("form.step2.synopsisFRPlaceholder")}
                         maxLength={SYNOPSIS_MAX_LENGTH}
                         className={`${inputClass("synopsis")} resize-y leading-relaxed`}
                     />
@@ -268,15 +272,15 @@ const Step2Film = ({
 
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Synopsis en anglais{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.synopsisEN")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <textarea
                         name="synopsisEn"
                         value={formData.synopsisEn}
                         onChange={handleInput}
                         rows={4}
-                        placeholder="Briefly describe your film in 2-3 sentences…"
+                        placeholder={t("form.step2.synopsisENPlaceholder")}
                         maxLength={SYNOPSIS_MAX_LENGTH}
                         className={`${inputClass("synopsisEn")} resize-y leading-relaxed`}
                     />
@@ -295,7 +299,7 @@ const Step2Film = ({
             {/* Fichier vidéo */}
             <hr className="border-white/6 my-6" />
             <div className="text-[0.68rem] font-bold uppercase tracking-widest text-mist mb-4 mt-1">
-                Fichier vidéo
+                {t("form.step2.videoSection")}
             </div>
 
             <UploadZone visible={!videoFile} onFileSelect={handleVideoSelect} />
@@ -311,17 +315,15 @@ const Step2Film = ({
             <div className="grid gap-4.5">
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Note d&apos;intention{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.intention")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <textarea
                         name="intention"
                         value={formData.intention}
                         onChange={handleInput}
                         rows={5}
-                        placeholder={
-                            "Comment votre film s\u2019inscrit-il dans le thème \u00AB Imaginez des futurs souhaitables \u00BB ? Décrivez votre démarche artistique et votre rapport à l\u2019IA\u2026"
-                        }
+                        placeholder={t("form.step2.intentionPlaceholder")}
                         maxLength={INTENTION_MAX_LENGTH}
                         className={`${inputClass("intention")} resize-y leading-relaxed`}
                     />
@@ -334,22 +336,22 @@ const Step2Film = ({
                         {formData.intention.length} / {INTENTION_MAX_LENGTH}
                     </div>
                     <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
-                        Cette note est lue par le jury lors de la présélection
+                        {t("form.step2.intentionHint")}
                     </div>
                     {renderError("intention")}
                 </div>
 
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        Outils utilisés et méthodes de création{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step2.outils")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <textarea
                         name="outils"
                         value={formData.outils}
                         onChange={handleInput}
                         rows={5}
-                        placeholder="Décrivez les outils (IA, logiciels, techniques) et les méthodes de création employées pour réaliser ce film…"
+                        placeholder={t("form.step2.outilsPlaceholder")}
                         maxLength={OUTILS_MAX_LENGTH}
                         className={`${inputClass("outils")} resize-y leading-relaxed`}
                     />
@@ -357,7 +359,7 @@ const Step2Film = ({
                         {formData.outils.length} / {OUTILS_MAX_LENGTH}
                     </div>
                     <div className="text-[0.72rem] text-mist/70 -mt-0.5 leading-normal">
-                        Cette note est lue par le jury lors de la présélection
+                        {t("form.step2.outilsHint")}
                     </div>
                     {renderError("outils")}
                 </div>
@@ -368,11 +370,7 @@ const Step2Film = ({
                 {showValidationHint && Object.keys(errors).length > 0 && (
                     <div className="w-full text-sm text-coral bg-coral/8 border border-coral/20 rounded-[10px] px-4 py-2.5 flex items-center gap-2">
                         <span>⚠</span>
-                        <span>
-                            Veuillez corriger les {Object.keys(errors).length} champ
-                            {Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de
-                            continuer.
-                        </span>
+                        <span>{t("form.validation.errorsHint")}</span>
                     </div>
                 )}
                 <div className="flex items-center justify-between w-full">
@@ -381,7 +379,7 @@ const Step2Film = ({
                         onClick={onPrev}
                         className="bg-white/5 border border-white/10 rounded-[10px] px-6 py-3 text-sm font-semibold text-mist cursor-pointer transition-all hover:text-white-soft hover:border-white/20 font-body"
                     >
-                        ← Retour
+                        {t("form.prev")}
                     </button>
                     <button
                         type="button"
@@ -393,7 +391,7 @@ const Step2Film = ({
                                 : "bg-aurora border-none text-deep-sky cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)]"
                         }`}
                     >
-                        Étape suivante — Fiche IA →
+                        {t("form.step2.cta")}
                     </button>
                 </div>
             </div>

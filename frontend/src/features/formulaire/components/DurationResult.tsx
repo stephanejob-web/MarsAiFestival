@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { DurationStatus } from "../types";
 
 interface DurationResultProps {
@@ -7,6 +8,8 @@ interface DurationResultProps {
 }
 
 const DurationResult = ({ durationSec, status }: DurationResultProps): React.JSX.Element | null => {
+    const { t } = useTranslation();
+
     if (durationSec === null || status === null) return null;
 
     const minutes = Math.floor(durationSec / 60);
@@ -19,19 +22,19 @@ const DurationResult = ({ durationSec, status }: DurationResultProps): React.JSX
             bg: "bg-aurora/7 border-aurora/20",
             icon: "✓",
             valueColor: "text-aurora",
-            label: "Durée valide — 60 secondes pile ✓",
+            label: t("form.duration.ok"),
         },
         warn: {
             bg: "bg-solar/5 border-solar/20",
             icon: "⚠",
             valueColor: "text-solar",
-            label: "Film trop court — durée exacte requise : 60 secondes",
+            label: t("form.duration.warn"),
         },
         err: {
             bg: "bg-coral/7 border-coral/20",
             icon: "✗",
             valueColor: "text-coral",
-            label: "Film trop long — durée exacte requise : 60 secondes",
+            label: t("form.duration.err"),
         },
     };
 
