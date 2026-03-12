@@ -16,7 +16,8 @@ const Formulaire = (): React.JSX.Element => {
     if (form.submissionState === "verifying") {
         return (
             <VerificationEmail
-                email={form.formData.email}
+                defaultEmail={form.formData.email}
+                onSendOtp={form.sendOtp}
                 onVerify={form.verifyOtp}
                 onConfirm={form.confirmVerification}
             />
