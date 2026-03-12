@@ -8,7 +8,7 @@ interface Step4ConfirmProps {
     subtitleFR: File | null;
     subtitleEN: File | null;
     rgpdChecked: boolean[];
-    submissionState: "idle" | "submitting" | "success";
+    submissionState: "idle" | "submitting" | "verifying" | "success";
     onToggleRgpd: (index: number) => void;
     onPrev: () => void;
     onSubmit: () => void;
