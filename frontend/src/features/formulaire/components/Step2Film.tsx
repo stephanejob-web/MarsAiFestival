@@ -6,6 +6,8 @@ import {
     SYNOPSIS_MAX_LENGTH,
     INTENTION_MAX_LENGTH,
     OUTILS_MAX_LENGTH,
+    VIDEO_MIN_DURATION,
+    VIDEO_MAX_DURATION,
 } from "../constants";
 import UploadZone from "./UploadZone";
 import FileCard from "./FileCard";
@@ -54,12 +56,9 @@ const Step2Film = ({
             const handleMetadata = (): void => {
                 const dur = video.duration;
                 setDurationSec(dur);
-                if (dur >= 58 && dur <= 62) {
+                if (dur <= VIDEO_MAX_DURATION && dur >= VIDEO_MIN_DURATION) {
                     setDurationStatus("ok");
                     setVideoValid(true);
-                } else if (dur < 58) {
-                    setDurationStatus("warn");
-                    setVideoValid(false);
                 } else {
                     setDurationStatus("err");
                     setVideoValid(false);
@@ -360,7 +359,12 @@ const Step2Film = ({
                 <button
                     type="button"
                     onClick={onNext}
-                    className="bg-aurora border-none rounded-[10px] px-8 py-3 font-display text-sm font-extrabold text-deep-sky cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)] flex items-center gap-2"
+                    disabled={durationStatus === "err"}
+                    className={`rounded-[10px] px-8 py-3 font-display text-sm font-extrabold transition-all flex items-center gap-2 ${
+                        durationStatus === "err"
+                            ? "bg-white/5 text-mist/50 border border-white/8 cursor-not-allowed"
+                            : "bg-aurora border-none text-deep-sky cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)]"
+                    }`}
                 >
                     Étape suivante — Fiche IA →
                 </button>
