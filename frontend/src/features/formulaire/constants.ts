@@ -53,7 +53,7 @@ export const DISCOVERY_OPTIONS: SelectOption[] = [
     { value: "autre", label: "Autre" },
 ];
 
-export const VIDEO_MIN_DURATION = 0;
+export const VIDEO_MIN_DURATION = 1;
 export const VIDEO_MAX_DURATION = 150;
 export const VIDEO_ACCEPTED_TYPES = ["video/mp4", "video/quicktime"];
 export const VIDEO_ACCEPTED_EXTENSIONS = ["mp4", "mov"];
