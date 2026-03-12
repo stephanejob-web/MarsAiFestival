@@ -16,7 +16,10 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         await sendOtpEmail(email, code);
         res.json({ message: "Code envoyé par email." });
     } catch (err) {
-        res.status(500).json({ message: "Erreur envoi email.", error: err instanceof Error ? err.message : String(err) });
+        res.status(500).json({
+            message: "Erreur envoi email.",
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };
 

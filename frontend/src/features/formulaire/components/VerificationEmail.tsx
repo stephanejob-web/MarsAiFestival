@@ -124,7 +124,9 @@ const VerificationEmail = ({
         const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
         if (!text) return;
         const newDigits = [...digits];
-        text.split("").forEach((ch, i) => { newDigits[i] = ch; });
+        text.split("").forEach((ch, i) => {
+            newDigits[i] = ch;
+        });
         setDigits(newDigits);
         setCodeError(false);
         inputRefs.current[Math.min(text.length, 5)]?.focus();
@@ -248,19 +250,33 @@ const VerificationEmail = ({
                             <div className="verification-step-circle done">✓</div>
                             <span className="verification-step-label dim">Formulaire</span>
                         </div>
-                        <div className={`verification-step-connector${phase === "code" ? " done" : ""}`} />
+                        <div
+                            className={`verification-step-connector${phase === "code" ? " done" : ""}`}
+                        />
                         <div className="verification-step-item">
-                            <div className={`verification-step-circle${phase === "email" ? " active" : " done"}`}>
+                            <div
+                                className={`verification-step-circle${phase === "email" ? " active" : " done"}`}
+                            >
                                 {phase === "code" ? "✓" : "2"}
                             </div>
-                            <span className={`verification-step-label${phase === "email" ? " active-label" : " dim"}`}>
+                            <span
+                                className={`verification-step-label${phase === "email" ? " active-label" : " dim"}`}
+                            >
                                 Email
                             </span>
                         </div>
-                        <div className={`verification-step-connector${phase === "code" ? " done" : ""}`} />
+                        <div
+                            className={`verification-step-connector${phase === "code" ? " done" : ""}`}
+                        />
                         <div className="verification-step-item">
-                            <div className={`verification-step-circle${phase === "code" ? " active" : " pending"}`}>3</div>
-                            <span className={`verification-step-label${phase === "code" ? " active-label" : " dim"}`}>
+                            <div
+                                className={`verification-step-circle${phase === "code" ? " active" : " pending"}`}
+                            >
+                                3
+                            </div>
+                            <span
+                                className={`verification-step-label${phase === "code" ? " active-label" : " dim"}`}
+                            >
                                 Vérification
                             </span>
                         </div>
@@ -284,7 +300,9 @@ const VerificationEmail = ({
                                     setEmail(e.target.value);
                                     setEmailError("");
                                 }}
-                                onKeyDown={(e) => { if (e.key === "Enter") void handleSendCode(); }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") void handleSendCode();
+                                }}
                                 className={`w-full rounded-xl border px-4 py-3 text-sm font-mono bg-white/5 text-white-soft outline-none transition-all mb-1 ${
                                     emailError
                                         ? "border-red-400/60 focus:border-red-400"
@@ -334,7 +352,9 @@ const VerificationEmail = ({
                                     <React.Fragment key={i}>
                                         {i === 3 && <span className="verification-otp-sep">—</span>}
                                         <input
-                                            ref={(el) => { inputRefs.current[i] = el; }}
+                                            ref={(el) => {
+                                                inputRefs.current[i] = el;
+                                            }}
                                             type="text"
                                             inputMode="numeric"
                                             maxLength={1}
@@ -351,8 +371,22 @@ const VerificationEmail = ({
 
                             <div className={`verification-otp-error${codeError ? " show" : ""}`}>
                                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                                    <circle cx="6.5" cy="6.5" r="6" stroke="#FF6B6B" strokeWidth="1.2" />
-                                    <line x1="6.5" y1="3.5" x2="6.5" y2="7.5" stroke="#FF6B6B" strokeWidth="1.5" strokeLinecap="round" />
+                                    <circle
+                                        cx="6.5"
+                                        cy="6.5"
+                                        r="6"
+                                        stroke="#FF6B6B"
+                                        strokeWidth="1.2"
+                                    />
+                                    <line
+                                        x1="6.5"
+                                        y1="3.5"
+                                        x2="6.5"
+                                        y2="7.5"
+                                        stroke="#FF6B6B"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                    />
                                     <circle cx="6.5" cy="9.5" r="0.7" fill="#FF6B6B" />
                                 </svg>
                                 Code incorrect. Réessayez.
@@ -392,11 +426,26 @@ const VerificationEmail = ({
 
                             <div className="verification-demo-hint">
                                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                    <circle cx="7" cy="7" r="6" stroke="#F5E642" strokeWidth="1.2" />
-                                    <line x1="7" y1="5" x2="7" y2="9" stroke="#F5E642" strokeWidth="1.5" strokeLinecap="round" />
+                                    <circle
+                                        cx="7"
+                                        cy="7"
+                                        r="6"
+                                        stroke="#F5E642"
+                                        strokeWidth="1.2"
+                                    />
+                                    <line
+                                        x1="7"
+                                        y1="5"
+                                        x2="7"
+                                        y2="9"
+                                        stroke="#F5E642"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                    />
                                     <circle cx="7" cy="3.5" r="0.7" fill="#F5E642" />
                                 </svg>
-                                Le code expire dans <span className="verification-demo-code">5 minutes</span>
+                                Le code expire dans{" "}
+                                <span className="verification-demo-code">5 minutes</span>
                             </div>
                         </>
                     )}

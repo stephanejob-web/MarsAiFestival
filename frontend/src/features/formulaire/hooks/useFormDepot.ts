@@ -165,7 +165,9 @@ const useFormDepot = (): UseFormDepotReturn => {
         // eslint-disable-next-line no-console
         console.log("📋 Formulaire soumis :", {
             ...formData,
-            video: videoFile ? { name: videoFile.name, size: videoFile.size, type: videoFile.type } : null,
+            video: videoFile
+                ? { name: videoFile.name, size: videoFile.size, type: videoFile.type }
+                : null,
             subtitleFR: subtitleFR ? { name: subtitleFR.name, size: subtitleFR.size } : null,
             subtitleEN: subtitleEN ? { name: subtitleEN.name, size: subtitleEN.size } : null,
         });
