@@ -24,9 +24,10 @@ interface Step2FilmProps {
     onVideoSelect: (file: File) => void;
     onVideoReset: () => void;
     setUploadProgress: (progress: number) => void;
+    setVideoDuration: (duration: number | null) => void;
     setVideoValid: (valid: boolean) => void;
     onPrev: () => void;
-    onNext: () => void;
+    onNext: () => boolean;
 }
 
 const Step2Film = ({
@@ -38,12 +39,14 @@ const Step2Film = ({
     onVideoSelect,
     onVideoReset,
     setUploadProgress,
+    setVideoDuration,
     setVideoValid,
     onPrev,
     onNext,
 }: Step2FilmProps): React.JSX.Element => {
     const [durationSec, setDurationSec] = useState<number | null>(null);
     const [durationStatus, setDurationStatus] = useState<DurationStatus | null>(null);
+    const [showValidationHint, setShowValidationHint] = useState(false);
     const uploadIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const checkDuration = useCallback(
@@ -56,6 +59,7 @@ const Step2Film = ({
             const handleMetadata = (): void => {
                 const dur = video.duration;
                 setDurationSec(dur);
+                setVideoDuration(dur);
                 if (dur <= VIDEO_MAX_DURATION && dur >= VIDEO_MIN_DURATION) {
                     setDurationStatus("ok");
                     setVideoValid(true);
@@ -69,7 +73,7 @@ const Step2Film = ({
             video.addEventListener("loadedmetadata", handleMetadata);
             video.load();
         },
-        [setVideoValid],
+        [setVideoValid, setVideoDuration],
     );
 
     const handleVideoSelect = useCallback(
@@ -108,10 +112,22 @@ const Step2Film = ({
         setDurationStatus(null);
     };
 
+    const handleNextClick = (): void => {
+        const success = onNext();
+        if (!success) {
+            setShowValidationHint(true);
+            requestAnimationFrame(() => {
+                const firstError = document.querySelector('[class*="text-coral"]');
+                if (firstError) firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            });
+        }
+    };
+
     const handleInput = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
     ): void => {
         onChange(e.target.name as keyof FormDepotData, e.target.value);
+        setShowValidationHint(false);
     };
 
     const charCounterClass = (length: number, max: number): string => {
@@ -333,7 +349,7 @@ const Step2Film = ({
                         value={formData.outils}
                         onChange={handleInput}
                         rows={5}
-                        placeholder="Décrivez les outils (logiciels, langages, frameworks, etc.) et les méthodes de création employées pour ce dépôt..."
+                        placeholder="Décrivez les outils (IA, logiciels, techniques) et les méthodes de création employées pour réaliser ce film…"
                         maxLength={OUTILS_MAX_LENGTH}
                         className={`${inputClass("outils")} resize-y leading-relaxed`}
                     />
@@ -348,26 +364,38 @@ const Step2Film = ({
             </div>
 
             {/* Boutons navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/6">
-                <button
-                    type="button"
-                    onClick={onPrev}
-                    className="bg-white/5 border border-white/10 rounded-[10px] px-6 py-3 text-sm font-semibold text-mist cursor-pointer transition-all hover:text-white-soft hover:border-white/20 font-body"
-                >
-                    ← Retour
-                </button>
-                <button
-                    type="button"
-                    onClick={onNext}
-                    disabled={durationStatus === "err"}
-                    className={`rounded-[10px] px-8 py-3 font-display text-sm font-extrabold transition-all flex items-center gap-2 ${
-                        durationStatus === "err"
-                            ? "bg-white/5 text-mist/50 border border-white/8 cursor-not-allowed"
-                            : "bg-aurora border-none text-deep-sky cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)]"
-                    }`}
-                >
-                    Étape suivante — Fiche IA →
-                </button>
+            <div className="flex flex-col items-end gap-3 mt-8 pt-6 border-t border-white/6">
+                {showValidationHint && Object.keys(errors).length > 0 && (
+                    <div className="w-full text-sm text-coral bg-coral/8 border border-coral/20 rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+                        <span>⚠</span>
+                        <span>
+                            Veuillez corriger les {Object.keys(errors).length} champ
+                            {Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de
+                            continuer.
+                        </span>
+                    </div>
+                )}
+                <div className="flex items-center justify-between w-full">
+                    <button
+                        type="button"
+                        onClick={onPrev}
+                        className="bg-white/5 border border-white/10 rounded-[10px] px-6 py-3 text-sm font-semibold text-mist cursor-pointer transition-all hover:text-white-soft hover:border-white/20 font-body"
+                    >
+                        ← Retour
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleNextClick}
+                        disabled={durationStatus === "err"}
+                        className={`rounded-[10px] px-8 py-3 font-display text-sm font-extrabold transition-all flex items-center gap-2 ${
+                            durationStatus === "err"
+                                ? "bg-white/5 text-mist/50 border border-white/8 cursor-not-allowed"
+                                : "bg-aurora border-none text-deep-sky cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)]"
+                        }`}
+                    >
+                        Étape suivante — Fiche IA →
+                    </button>
+                </div>
             </div>
         </div>
     );

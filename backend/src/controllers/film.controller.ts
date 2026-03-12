@@ -21,8 +21,8 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
         ),
     );
 
+    // ── Étape 1 : Upload S3 (critique — bloquant) ─────────────────────────────
     try {
-        // Upload S3 (vidéo + sous-titres)
         for (const field of ["video", "subtitleFR", "subtitleEN"]) {
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
@@ -31,33 +31,61 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
                 urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
             }
         }
+    } catch (err) {
+        // S3 échoue → dépôt impossible
+        res.status(500).json({
+            success: false,
+            message: "Échec de l'enregistrement du fichier. Vérifiez votre connexion et réessayez.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+        return;
+    }
 
-        // Upload YouTube en mode privé
-        const videoArr = files?.["video"];
-        if (videoArr && videoArr.length > 0) {
-            const video = videoArr[0];
-            const titre = (req.body as Record<string, string>).titre ?? dossierNum;
-            const synopsis = (req.body as Record<string, string>).synopsis ?? "";
-            const description = `Dossier : ${dossierNum}\n\n${synopsis}`;
+    // ── Étape 2 : Upload YouTube (non bloquant) ────────────────────────────────
+    let youtubeWarning: string | undefined;
+    const videoArr = files?.["video"];
+    if (videoArr && videoArr.length > 0) {
+        const video = videoArr[0];
+        const body = req.body as Record<string, string>;
+        const titre = body.titre ?? dossierNum;
+        const prenom = body.prenom ?? "";
+        const nom = body.nom ?? "";
+        const pays = body.pays ?? "";
+        const synopsis = body.synopsis ?? "";
+
+        // Titre YouTube : "[marsAI 2026] MAI-2026-XXXXX — Titre du film (Prénom Nom)"
+        const ytTitle = `[marsAI 2026] ${dossierNum} — ${titre}${prenom || nom ? ` (${[prenom, nom].filter(Boolean).join(" ")})` : ""}`;
+
+        const description = [
+            `Dossier : ${dossierNum}`,
+            titre ? `Titre : ${titre}` : "",
+            prenom || nom ? `Réalisateur : ${[prenom, nom].filter(Boolean).join(" ")}` : "",
+            pays ? `Pays : ${pays}` : "",
+            synopsis ? `\nSynopsis :\n${synopsis}` : "",
+        ]
+            .filter(Boolean)
+            .join("\n");
+        try {
             urls["youtube"] = await uploadVideoToYoutube(
                 video.buffer,
-                titre,
+                ytTitle,
                 description,
                 video.mimetype,
             );
+        } catch (err) {
+            // YouTube échoue → on log, le dépôt est quand même validé (S3 OK)
+            // eslint-disable-next-line no-console
+            console.error("⚠️ Échec upload YouTube (dossier validé) :", dossierNum, err);
+            youtubeWarning =
+                "La mise en ligne YouTube est temporairement indisponible — votre film est bien enregistré sur nos serveurs.";
         }
-
-        res.status(201).json({
-            success: true,
-            dossierNum,
-            message: "Dépôt reçu avec succès",
-            files: urls,
-        });
-    } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: "Erreur lors de l'upload",
-            error: err instanceof Error ? err.message : String(err),
-        });
     }
+
+    res.status(201).json({
+        success: true,
+        dossierNum,
+        message: "Dépôt reçu avec succès",
+        files: urls,
+        ...(youtubeWarning && { youtubeWarning }),
+    });
 };

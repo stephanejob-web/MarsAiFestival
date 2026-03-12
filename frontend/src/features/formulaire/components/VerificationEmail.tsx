@@ -4,11 +4,12 @@ interface VerificationEmailProps {
     defaultEmail: string;
     onSendOtp: (email: string) => Promise<void>;
     onVerify: (email: string, code: string) => Promise<boolean>;
-    onConfirm: () => Promise<void>;
+    onConfirm: (email: string) => Promise<void>;
 }
 
 const DIGIT_IDS = [0, 1, 2, 3, 4, 5] as const;
 const RESEND_DELAY = 30;
+const OTP_EXPIRE_SECONDS = 300; // 5 minutes
 
 const VerificationEmail = ({
     defaultEmail,
@@ -28,8 +29,30 @@ const VerificationEmail = ({
     const [loading, setLoading] = useState(false);
     const [shake, setShake] = useState(false);
     const [resendTimer, setResendTimer] = useState(RESEND_DELAY);
+    const [expireTimer, setExpireTimer] = useState(OTP_EXPIRE_SECONDS);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const expireRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const formatExpire = (seconds: number): string => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    };
+
+    const startExpireTimer = useCallback((): void => {
+        if (expireRef.current) clearInterval(expireRef.current);
+        setExpireTimer(OTP_EXPIRE_SECONDS);
+        expireRef.current = setInterval(() => {
+            setExpireTimer((prev) => {
+                if (prev <= 1) {
+                    if (expireRef.current) clearInterval(expireRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    }, []);
 
     const startResendTimer = useCallback((): void => {
         if (timerRef.current) clearInterval(timerRef.current);
@@ -47,6 +70,7 @@ const VerificationEmail = ({
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (expireRef.current) clearInterval(expireRef.current);
         };
     }, []);
 
@@ -63,6 +87,7 @@ const VerificationEmail = ({
             await onSendOtp(trimmed);
             setPhase("code");
             startResendTimer();
+            startExpireTimer();
             setTimeout(() => inputRefs.current[0]?.focus(), 80);
         } catch {
             setEmailError("Impossible d'envoyer le code. Vérifiez votre email.");
@@ -141,7 +166,7 @@ const VerificationEmail = ({
         const ok = await onVerify(email.trim(), code);
         if (ok) {
             try {
-                await onConfirm();
+                await onConfirm(email.trim());
             } catch {
                 setUploadError("Erreur lors de l'envoi du film. Réessayez.");
                 setLoading(false);
@@ -164,6 +189,7 @@ const VerificationEmail = ({
             await onSendOtp(email.trim());
             setResendTimer(RESEND_DELAY);
             startResendTimer();
+            startExpireTimer();
             setDigits(["", "", "", "", "", ""]);
             setCodeError(false);
             inputRefs.current[0]?.focus();
@@ -399,7 +425,7 @@ const VerificationEmail = ({
                             <button
                                 type="button"
                                 className={`verification-btn-main${loading ? " loading" : ""}`}
-                                disabled={!isComplete || loading}
+                                disabled={!isComplete || loading || expireTimer === 0}
                                 onClick={() => void handleVerify()}
                             >
                                 {loading ? "Envoi du film…" : "Vérifier et soumettre"}
@@ -424,29 +450,63 @@ const VerificationEmail = ({
                                 </div>
                             </div>
 
-                            <div className="verification-demo-hint">
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                    <circle
-                                        cx="7"
-                                        cy="7"
-                                        r="6"
-                                        stroke="#F5E642"
-                                        strokeWidth="1.2"
-                                    />
-                                    <line
-                                        x1="7"
-                                        y1="5"
-                                        x2="7"
-                                        y2="9"
-                                        stroke="#F5E642"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                    />
-                                    <circle cx="7" cy="3.5" r="0.7" fill="#F5E642" />
-                                </svg>
-                                Le code expire dans{" "}
-                                <span className="verification-demo-code">5 minutes</span>
-                            </div>
+                            {expireTimer > 0 ? (
+                                <div className="verification-demo-hint">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <circle
+                                            cx="7"
+                                            cy="7"
+                                            r="6"
+                                            stroke={expireTimer <= 60 ? "#FF6B6B" : "#F5E642"}
+                                            strokeWidth="1.2"
+                                        />
+                                        <line
+                                            x1="7"
+                                            y1="5"
+                                            x2="7"
+                                            y2="9"
+                                            stroke={expireTimer <= 60 ? "#FF6B6B" : "#F5E642"}
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                        />
+                                        <circle
+                                            cx="7"
+                                            cy="3.5"
+                                            r="0.7"
+                                            fill={expireTimer <= 60 ? "#FF6B6B" : "#F5E642"}
+                                        />
+                                    </svg>
+                                    <span>Code valide pendant</span>
+                                    <span
+                                        className={`verification-demo-code font-mono ${expireTimer <= 60 ? "text-coral" : ""}`}
+                                    >
+                                        {formatExpire(expireTimer)}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="verification-demo-hint text-coral">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <circle
+                                            cx="7"
+                                            cy="7"
+                                            r="6"
+                                            stroke="#FF6B6B"
+                                            strokeWidth="1.2"
+                                        />
+                                        <line
+                                            x1="7"
+                                            y1="3.5"
+                                            x2="7"
+                                            y2="7.5"
+                                            stroke="#FF6B6B"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                        />
+                                        <circle cx="7" cy="9.5" r="0.7" fill="#FF6B6B" />
+                                    </svg>
+                                    Code expiré — cliquez sur &quot;Renvoyer&quot; pour en obtenir un nouveau
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
