@@ -1,6 +1,7 @@
+
 import { Router } from "express";
 import multer from "multer";
-import { submitFilm } from "../controllers/film.controller";
+import { submitFilm, listFilms, showFilm } from "../controllers/film.controller";
 
 const router = Router();
 const upload = multer({
@@ -8,6 +9,8 @@ const upload = multer({
     limits: { fileSize: 500 * 1024 * 1024 }, // 500 Mo max
 });
 
+router.get("/", listFilms);
+router.get("/:id", showFilm);
 router.post(
     "/",
     upload.fields([
