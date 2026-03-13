@@ -2,14 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import visageImg from "../../../assets/visage-couleur.jpg";
 
-const TOOLS: string[] = [
-    "Sora",
-    "Runway",
-    "Kling",
-    "Pika",
-    "Stable Video",
-    "ComfyUI",
-];
+const TOOLS: string[] = ["Sora", "Runway", "Kling", "Pika", "Stable Video", "ComfyUI"];
 
 const ManifesteSection = (): React.JSX.Element => {
     const { t } = useTranslation();

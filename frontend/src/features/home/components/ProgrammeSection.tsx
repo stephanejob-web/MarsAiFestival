@@ -35,7 +35,17 @@ const TYPE_DOT: Record<EventType, string> = {
 };
 
 const DAY_EVENT_TYPES: EventType[][] = [
-    ["default", "opening", "masterclass", "pause", "projection", "masterclass", "projection", "default", "gala"],
+    [
+        "default",
+        "opening",
+        "masterclass",
+        "pause",
+        "projection",
+        "masterclass",
+        "projection",
+        "default",
+        "gala",
+    ],
     ["projection", "masterclass", "pause", "projection", "default", "opening", "gala", "gala"],
 ];
 
@@ -60,7 +70,10 @@ const ProgrammeSection = (): React.JSX.Element => {
     const buildDays = (): Day[] =>
         [0, 1].map((di) => {
             const eventKeys = Object.keys(
-                (t(`programme.days.${di}.events`, { returnObjects: true }) as Record<string, unknown>)
+                t(`programme.days.${di}.events`, { returnObjects: true }) as Record<
+                    string,
+                    unknown
+                >,
             );
             const events: Event[] = eventKeys.map((ek) => {
                 const evData = t(`programme.days.${di}.events.${ek}`, {

@@ -52,7 +52,10 @@ const Step4Confirm = ({
     const { t } = useTranslation();
     const allRgpdChecked = rgpdChecked.every(Boolean);
 
-    const countryLabel = t(`form.countries.${formData.pays}`, COUNTRIES.find((c) => c.value === formData.pays)?.label ?? formData.pays);
+    const countryLabel = t(
+        `form.countries.${formData.pays}`,
+        COUNTRIES.find((c) => c.value === formData.pays)?.label ?? formData.pays,
+    );
 
     const videoLabel = videoFile
         ? videoDuration !== null
@@ -67,7 +70,10 @@ const Step4Confirm = ({
     ];
 
     const recapRows: RecapRow[] = [
-        { key: t("form.step4.recapDirector"), value: `${formData.prenom} ${formData.nom}`.trim() || "—" },
+        {
+            key: t("form.step4.recapDirector"),
+            value: `${formData.prenom} ${formData.nom}`.trim() || "—",
+        },
         { key: t("form.step4.recapDob"), value: formatDob(formData.dob) },
         { key: t("form.step4.recapEmail"), value: formData.email || "—", mono: true },
         { key: t("form.step4.recapMobile"), value: formData.mobile || "—", mono: true },
@@ -81,9 +87,7 @@ const Step4Confirm = ({
         {
             key: t("form.step4.recapProdType"),
             value:
-                formData.iaClass === "full"
-                    ? t("form.step4.prodFull")
-                    : t("form.step4.prodHybrid"),
+                formData.iaClass === "full" ? t("form.step4.prodFull") : t("form.step4.prodHybrid"),
         },
         { key: t("form.step4.recapAiTools"), value: formData.iaImg || "—" },
         {
@@ -101,9 +105,7 @@ const Step4Confirm = ({
                 </div>
                 <div>
                     <h2 className="font-display text-xl font-extrabold">{t("form.step4.title")}</h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        {t("form.step4.subtitle")}
-                    </p>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step4.subtitle")}</p>
                 </div>
             </div>
 
@@ -173,7 +175,9 @@ const Step4Confirm = ({
                         <div className="flex-1">
                             <div className="font-display font-bold text-sm text-white-soft mb-1">
                                 {item.title}{" "}
-                                <span className="text-coral text-[0.65rem]">{t("form.step4.mandatory")}</span>
+                                <span className="text-coral text-[0.65rem]">
+                                    {t("form.step4.mandatory")}
+                                </span>
                             </div>
                             <div className="text-xs text-mist leading-relaxed">
                                 {item.description}
@@ -184,9 +188,7 @@ const Step4Confirm = ({
             </div>
 
             {!allRgpdChecked && (
-                <div className="text-xs text-solar/80 mb-4">
-                    {t("form.step4.mustAccept")}
-                </div>
+                <div className="text-xs text-solar/80 mb-4">{t("form.step4.mustAccept")}</div>
             )}
 
             {/* Boutons navigation */}

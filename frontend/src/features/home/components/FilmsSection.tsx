@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import videoAsset from "../../../assets/video.mp4";
 import videoPlayback from "../../../assets/videoplayback.mp4";
@@ -1798,17 +1798,17 @@ const FilmsSection = (): React.JSX.Element => {
     const totalPages = Math.ceil(ALL_FILMS.length / VISIBLE_COUNT);
     const currentPage = Math.floor(rowStart / VISIBLE_COUNT);
 
-    const handlePrev = useCallback((): void => {
+    const handlePrev = (): void => {
         setRowStart((prev) => Math.max(0, prev - VISIBLE_COUNT));
-    }, []);
+    };
 
-    const handleNext = useCallback((): void => {
+    const handleNext = (): void => {
         setRowStart((prev) => Math.min(ALL_FILMS.length - VISIBLE_COUNT, prev + VISIBLE_COUNT));
-    }, []);
+    };
 
-    const handleSelect = useCallback((absoluteIdx: number): void => {
+    const handleSelect = (absoluteIdx: number): void => {
         setSelectedIdx(absoluteIdx);
-    }, []);
+    };
 
     return (
         <section id="films" className="bg-black">

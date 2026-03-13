@@ -48,7 +48,9 @@ const SubtitleUpload = ({
                 <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-white-soft">
                         {isFr ? t("form.step3.subtitleFR") : t("form.step3.subtitleEN")}{" "}
-                        {required && <span className="text-coral text-[0.65rem]">{t("form.required")}</span>}
+                        {required && (
+                            <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        )}
                     </div>
                     <div className="text-xs text-mist mt-0.5 truncate">
                         {file ? file.name : t("form.step3.subtitleFormats")}
@@ -139,12 +141,8 @@ const Step3AI = ({
                     🤖
                 </div>
                 <div>
-                    <h2 className="font-display text-xl font-extrabold">
-                        {t("form.step3.title")}
-                    </h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        {t("form.step3.subtitle")}
-                    </p>
+                    <h2 className="font-display text-xl font-extrabold">{t("form.step3.title")}</h2>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step3.subtitle")}</p>
                 </div>
             </div>
 

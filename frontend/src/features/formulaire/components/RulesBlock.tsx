@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 
 const RulesBlock = (): React.JSX.Element => {
     const { t } = useTranslation();
-    const rulesData = t("form.rules.items", { returnObjects: true }) as Record<string, { label: string; value: string }>;
+    const rulesData = t("form.rules.items", { returnObjects: true }) as Record<
+        string,
+        { label: string; value: string }
+    >;
     const rules = Object.values(rulesData);
 
     return (

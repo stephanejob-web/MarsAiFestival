@@ -25,9 +25,7 @@ const FormSidebar = ({
                 <h1 className="font-display text-2xl font-extrabold tracking-tight leading-tight mb-2.5">
                     {t("form.sidebar.title")}
                 </h1>
-                <p className="text-sm text-mist leading-relaxed">
-                    {t("form.sidebar.theme")}
-                </p>
+                <p className="text-sm text-mist leading-relaxed">{t("form.sidebar.theme")}</p>
             </div>
 
             <StepsNav currentStep={currentStep} maxUnlocked={maxUnlocked} onGoStep={onGoStep} />

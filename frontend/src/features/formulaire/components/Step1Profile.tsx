@@ -23,8 +23,14 @@ const Step1Profile = ({
     const { t } = useTranslation();
     const [showValidationHint, setShowValidationHint] = useState(false);
 
-    const countryOptions = COUNTRIES.map((c) => ({ ...c, label: t(`form.countries.${c.value}`, c.label) }));
-    const discoveryOptions = DISCOVERY_OPTIONS.map((o) => ({ ...o, label: t(`form.discovery.${o.value}`, o.label) }));
+    const countryOptions = COUNTRIES.map((c) => ({
+        ...c,
+        label: t(`form.countries.${c.value}`, c.label),
+    }));
+    const discoveryOptions = DISCOVERY_OPTIONS.map((o) => ({
+        ...o,
+        label: t(`form.discovery.${o.value}`, o.label),
+    }));
 
     const handleInput = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -99,16 +105,15 @@ const Step1Profile = ({
                 </div>
                 <div>
                     <h2 className="font-display text-xl font-extrabold">{t("form.step1.title")}</h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        {t("form.step1.subtitle")}
-                    </p>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step1.subtitle")}</p>
                 </div>
             </div>
 
             {/* Civilité */}
             <div className="mb-5">
                 <label className="text-xs font-bold uppercase tracking-wide text-mist flex items-center gap-1.5 mb-2">
-                    {t("form.step1.civilite")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                    {t("form.step1.civilite")}{" "}
+                    <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                 </label>
                 <div className="flex gap-2.5">
                     <label className="radio-card flex items-center gap-2 px-4 py-2.5 bg-white/4 border-[1.5px] border-white/10 rounded-[10px] cursor-pointer text-sm text-mist transition-all select-none">
@@ -141,7 +146,8 @@ const Step1Profile = ({
                 {/* Prénom */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.prenom")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.prenom")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -158,7 +164,8 @@ const Step1Profile = ({
                 {/* Nom */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.nom")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.nom")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -188,16 +195,15 @@ const Step1Profile = ({
                         autoComplete="bday"
                         className={inputClass("dob")}
                     />
-                    <div className="text-xs text-mist/70">
-                        {t("form.step1.dobHint")}
-                    </div>
+                    <div className="text-xs text-mist/70">{t("form.step1.dobHint")}</div>
                     {renderError("dob")}
                 </div>
 
                 {/* Métier */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.metier")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.metier")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -214,7 +220,8 @@ const Step1Profile = ({
                 {/* Email — span 2 colonnes */}
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.email")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.email")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="email"
@@ -225,9 +232,7 @@ const Step1Profile = ({
                         autoComplete="email"
                         className={inputClass("email")}
                     />
-                    <div className="text-xs text-mist/70">
-                        {t("form.step1.emailHint")}
-                    </div>
+                    <div className="text-xs text-mist/70">{t("form.step1.emailHint")}</div>
                     {renderError("email")}
                 </div>
 
@@ -253,7 +258,8 @@ const Step1Profile = ({
                 {/* Mobile */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.mobile")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.mobile")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="tel"
@@ -277,7 +283,8 @@ const Step1Profile = ({
             <div className="grid gap-4 mb-3">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.rue")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.rue")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -295,7 +302,8 @@ const Step1Profile = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.cp")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.cp")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -311,7 +319,8 @@ const Step1Profile = ({
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.ville")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.ville")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -326,7 +335,8 @@ const Step1Profile = ({
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step1.pays")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step1.pays")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     {renderSelect("pays", t("form.step1.countryPlaceholder"), countryOptions)}
                     {renderError("pays")}

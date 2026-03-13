@@ -46,7 +46,10 @@ const Step2Film = ({
     onNext,
 }: Step2FilmProps): React.JSX.Element => {
     const { t } = useTranslation();
-    const languageOptions = LANGUAGES.map((l) => ({ ...l, label: t(`form.languages.${l.value}`, l.label) }));
+    const languageOptions = LANGUAGES.map((l) => ({
+        ...l,
+        label: t(`form.languages.${l.value}`, l.label),
+    }));
 
     const [durationSec, setDurationSec] = useState<number | null>(null);
     const [durationStatus, setDurationStatus] = useState<DurationStatus | null>(null);
@@ -156,9 +159,7 @@ const Step2Film = ({
                 </div>
                 <div>
                     <h2 className="font-display text-xl font-extrabold">{t("form.step2.title")}</h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        {t("form.step2.subtitle")}
-                    </p>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step2.subtitle")}</p>
                 </div>
             </div>
 
@@ -166,7 +167,8 @@ const Step2Film = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
                 <div className="flex flex-col gap-1.75">
                     <label className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-mist">
-                        {t("form.step2.titreFR")} <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        {t("form.step2.titreFR")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"

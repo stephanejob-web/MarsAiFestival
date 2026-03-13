@@ -77,7 +77,9 @@ const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.
                             >
                                 {t(`form.steps.${step.number}.title`)}
                             </div>
-                            <div className="text-xs text-mist mt-0.5">{t(`form.steps.${step.number}.sub`)}</div>
+                            <div className="text-xs text-mist mt-0.5">
+                                {t(`form.steps.${step.number}.sub`)}
+                            </div>
                         </div>
                     </div>
                 );

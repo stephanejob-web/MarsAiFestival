@@ -146,7 +146,9 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                         </svg>
                         {t("form.upload.drag")}
                     </div>
-                    <div className="text-sm text-mist mb-3.5 tracking-wide">{t("form.upload.or")}</div>
+                    <div className="text-sm text-mist mb-3.5 tracking-wide">
+                        {t("form.upload.or")}
+                    </div>
                     <div className="text-sm text-aurora font-semibold underline mb-7">
                         {t("form.upload.browse")}
                     </div>
@@ -170,9 +172,7 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                     <div className="text-lg font-bold font-display text-aurora mb-2">
                         {t("form.upload.dropping")}
                     </div>
-                    <div className="text-sm text-aurora/70">
-                        {t("form.upload.droppingHint")}
-                    </div>
+                    <div className="text-sm text-aurora/70">{t("form.upload.droppingHint")}</div>
                 </>
             )}
 

@@ -40,7 +40,11 @@ const HomeFooter = (): React.JSX.Element => {
             title: t("footer.columns.contact.title"),
             links: [
                 { label: "contact@marsai.fr", href: "mailto:contact@marsai.fr" },
-                { label: "Instagram", href: "https://instagram.com/marsaifestival", external: true },
+                {
+                    label: "Instagram",
+                    href: "https://instagram.com/marsaifestival",
+                    external: true,
+                },
                 {
                     label: "LinkedIn",
                     href: "https://linkedin.com/company/marsai-festival",
@@ -63,7 +67,9 @@ const HomeFooter = (): React.JSX.Element => {
                         <div className="font-display text-2xl font-black mb-3">
                             mars<span className="text-aurora">AI</span>
                         </div>
-                        <p className="text-xs text-mist leading-relaxed">{t("footer.description")}</p>
+                        <p className="text-xs text-mist leading-relaxed">
+                            {t("footer.description")}
+                        </p>
                     </div>
 
                     {/* Columns */}
@@ -87,7 +93,9 @@ const HomeFooter = (): React.JSX.Element => {
                                                 href={link.href}
                                                 target={link.external ? "_blank" : undefined}
                                                 rel={
-                                                    link.external ? "noopener noreferrer" : undefined
+                                                    link.external
+                                                        ? "noopener noreferrer"
+                                                        : undefined
                                                 }
                                                 className="text-sm text-mist hover:text-aurora transition-colors"
                                             >

@@ -67,7 +67,7 @@ const SuccessScreen = ({
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -77,9 +77,7 @@ const SuccessScreen = ({
                 🎬
             </div>
             <h2 className="font-display text-3xl font-extrabold mb-2">{t("form.success.title")}</h2>
-            <p className="text-sm text-mist mb-0">
-                {t("form.success.desc")}
-            </p>
+            <p className="text-sm text-mist mb-0">{t("form.success.desc")}</p>
 
             <div className="inline-block bg-white/4 border border-white/10 rounded-xl px-5 py-3 mt-4 mb-3 font-mono text-sm text-aurora">
                 {t("form.success.dossierLabel")} {dossierNum}
@@ -238,7 +236,9 @@ const SuccessScreen = ({
                             <p className="mt-3">
                                 Cordialement,
                                 <br />
-                                <strong className="text-white-soft">{t("form.success.emailTeam")}</strong>
+                                <strong className="text-white-soft">
+                                    {t("form.success.emailTeam")}
+                                </strong>
                                 <br />
                                 <span className="text-xs opacity-60">
                                     {t("form.success.emailPartners")}
