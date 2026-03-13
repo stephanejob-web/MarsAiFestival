@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import type { StepDefinition } from "../types";
 import { STEPS } from "../constants";
 
@@ -9,6 +10,8 @@ interface StepsNavProps {
 }
 
 const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.JSX.Element => {
+    const { t } = useTranslation();
+
     const getItemState = (stepNum: number): "done" | "active" | "pending" | "locked" => {
         if (stepNum < currentStep) return "done";
         if (stepNum === currentStep) return "active";
@@ -42,11 +45,11 @@ const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.
             case "active":
                 return `${base} bg-aurora/8 border-aurora/20 cursor-pointer`;
             case "done":
-                return `${base} border-transparent opacity-70 cursor-pointer`;
+                return `${base} border-white/10 bg-white/[0.03] opacity-80 cursor-pointer hover:border-aurora/15 hover:bg-aurora/[0.03]`;
             case "pending":
-                return `${base} border-transparent cursor-pointer`;
+                return `${base} border-white/10 bg-white/[0.03] cursor-pointer hover:border-white/15`;
             default:
-                return `${base} border-transparent opacity-35 cursor-not-allowed`;
+                return `${base} border-white/8 bg-white/[0.02] opacity-45 cursor-not-allowed`;
         }
     };
 
@@ -72,9 +75,11 @@ const StepsNav = ({ currentStep, maxUnlocked, onGoStep }: StepsNavProps): React.
                             <div
                                 className={`text-sm font-semibold ${state === "active" ? "text-aurora" : "text-white-soft"}`}
                             >
-                                {step.title}
+                                {t(`form.steps.${step.number}.title`)}
                             </div>
-                            <div className="text-xs text-mist mt-0.5">{step.sub}</div>
+                            <div className="text-xs text-mist mt-0.5">
+                                {t(`form.steps.${step.number}.sub`)}
+                            </div>
                         </div>
                     </div>
                 );

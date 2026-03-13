@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import type { FormDepotData, FormDepotErrors } from "../types";
 import { getInputClass } from "./formUtils";
 import { FormFieldError } from "./formHelpers";
@@ -6,7 +7,7 @@ import { FormFieldError } from "./formHelpers";
 interface SubtitleUploadProps {
     lang: "fr" | "en";
     file: File | null;
-    required: boolean;
+    required?: boolean;
     onFileSelect: (file: File) => void;
     error?: string;
 }
@@ -18,6 +19,7 @@ const SubtitleUpload = ({
     onFileSelect,
     error,
 }: SubtitleUploadProps): React.JSX.Element => {
+    const { t } = useTranslation();
     const inputRef = useRef<HTMLInputElement>(null);
     const isFr = lang === "fr";
 
@@ -45,11 +47,13 @@ const SubtitleUpload = ({
                 <span className="text-xl shrink-0">{isFr ? "💬" : "🌐"}</span>
                 <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-white-soft">
-                        Sous-titres {isFr ? "Français" : "Anglais"}{" "}
-                        {required && <span className="text-coral text-[0.65rem]">● requis</span>}
+                        {isFr ? t("form.step3.subtitleFR") : t("form.step3.subtitleEN")}{" "}
+                        {required && (
+                            <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
+                        )}
                     </div>
                     <div className="text-xs text-mist mt-0.5 truncate">
-                        {file ? file.name : "Formats SRT ou VTT"}
+                        {file ? file.name : t("form.step3.subtitleFormats")}
                     </div>
                 </div>
                 <span
@@ -59,7 +63,7 @@ const SubtitleUpload = ({
                             : "bg-white/5 text-mist border border-white/10"
                     }`}
                 >
-                    {file ? "✓ Ajouté" : "+ Ajouter"}
+                    {file ? t("form.step3.subtitleAdded") : t("form.step3.subtitleAdd")}
                 </span>
             </button>
             {error && <div className="text-xs text-coral mt-1.5">{error}</div>}
@@ -90,6 +94,8 @@ const Step3AI = ({
     onPrev,
     onNext,
 }: Step3AIProps): React.JSX.Element => {
+    const { t } = useTranslation();
+
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
         onChange(e.target.name as keyof FormDepotData, e.target.value);
     };
@@ -113,18 +119,16 @@ const Step3AI = ({
     }> = [
         {
             value: "full",
-            title: "Génération intégrale",
-            description:
-                "Le film a été entièrement généré par IA, sans éléments filmés, dessinés ou enregistrés par un humain. Textes, images, sons et montage sont tous issus d'outils IA.",
-            badge: "100% IA",
+            title: t("form.step3.full.title"),
+            description: t("form.step3.full.desc"),
+            badge: t("form.step3.full.badge"),
             badgeClass: "bg-lavande/10 text-lavande border-lavande/20",
         },
         {
             value: "hybrid",
-            title: "Production hybride",
-            description:
-                "Le film combine des éléments humains (tournage, dessin, voix, musique composée) et des outils IA utilisés en post-production ou en complément créatif.",
-            badge: "Hybride IA + Humain",
+            title: t("form.step3.hybrid.title"),
+            description: t("form.step3.hybrid.desc"),
+            badge: t("form.step3.hybrid.badge"),
             badgeClass: "bg-aurora/10 text-aurora border-aurora/20",
         },
     ];
@@ -137,20 +141,16 @@ const Step3AI = ({
                     🤖
                 </div>
                 <div>
-                    <h2 className="font-display text-xl font-extrabold">
-                        Déclaration d&apos;Usage de l&apos;IA
-                    </h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        Type de production, outils utilisés et sous-titres
-                    </p>
+                    <h2 className="font-display text-xl font-extrabold">{t("form.step3.title")}</h2>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step3.subtitle")}</p>
                 </div>
             </div>
 
             {/* Classification IA */}
             <div className="mb-6">
                 <label className="text-xs font-bold uppercase tracking-wide text-mist block mb-3">
-                    Type de production IA{" "}
-                    <span className="text-coral text-[0.65rem]">● requis</span>
+                    {t("form.step3.iaClassLabel")}{" "}
+                    <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                 </label>
                 <div className="grid gap-3 ia-class-cards">
                     {classCards.map((card) => (
@@ -202,22 +202,22 @@ const Step3AI = ({
 
             <hr className="border-white/5 my-6" />
             <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
-                Outils utilisés
+                {t("form.step3.toolsSection")}
             </div>
 
             {/* Outils IA */}
             <div className="grid gap-4">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Outils IA — images ou vidéo{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step3.iaImg")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
                         name="iaImg"
                         value={formData.iaImg}
                         onChange={handleInput}
-                        placeholder="ex : Runway ML, Sora, Midjourney…"
+                        placeholder={t("form.step3.iaImgPlaceholder")}
                         className={inputClass("iaImg")}
                     />
                     {renderError("iaImg")}
@@ -225,9 +225,9 @@ const Step3AI = ({
 
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Outils IA — son & musique{" "}
+                        {t("form.step3.iaSon")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </label>
                     <input
@@ -235,16 +235,16 @@ const Step3AI = ({
                         name="iaSon"
                         value={formData.iaSon}
                         onChange={handleInput}
-                        placeholder="ex : Suno AI, ElevenLabs, MusicGen…"
+                        placeholder={t("form.step3.iaSonPlaceholder")}
                         className={inputClass("iaSon")}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Outils IA — scénario & écriture{" "}
+                        {t("form.step3.iaScenario")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </label>
                     <input
@@ -252,16 +252,16 @@ const Step3AI = ({
                         name="iaScenario"
                         value={formData.iaScenario}
                         onChange={handleInput}
-                        placeholder="ex : ChatGPT, Claude, Mistral…"
+                        placeholder={t("form.step3.iaScenarioPlaceholder")}
                         className={inputClass("iaScenario")}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Outils IA — post-production{" "}
+                        {t("form.step3.iaPost")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </label>
                     <input
@@ -269,7 +269,7 @@ const Step3AI = ({
                         name="iaPost"
                         value={formData.iaPost}
                         onChange={handleInput}
-                        placeholder="ex : Topaz Video AI, CapCut AI…"
+                        placeholder={t("form.step3.iaPostPlaceholder")}
                         className={inputClass("iaPost")}
                     />
                 </div>
@@ -277,7 +277,7 @@ const Step3AI = ({
 
             <hr className="border-white/5 my-6" />
             <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
-                Sous-titres
+                {t("form.step3.subtitlesSection")}
             </div>
 
             {/* Avertissement */}
@@ -285,25 +285,21 @@ const Step3AI = ({
                 <span className="text-lg shrink-0">⚠️</span>
                 <div className="text-xs text-mist leading-relaxed">
                     <strong className="text-solar block mb-0.5">
-                        Ne pas incruster les sous-titres dans la vidéo
+                        {t("form.step3.subtitleWarning")}
                     </strong>
-                    Fournissez-les en fichier séparé (SRT ou VTT). Le festival les applique
-                    dynamiquement sur la plateforme de diffusion, permettant au spectateur de les
-                    activer ou désactiver.
+                    {t("form.step3.subtitleWarningDesc")}
                 </div>
             </div>
 
             <SubtitleUpload
                 lang="fr"
                 file={subtitleFR}
-                required
                 onFileSelect={onSubtitleFR}
                 error={errors.subtitleFR}
             />
             <SubtitleUpload
                 lang="en"
                 file={subtitleEN}
-                required
                 onFileSelect={onSubtitleEN}
                 error={errors.subtitleEN}
             />
@@ -315,14 +311,14 @@ const Step3AI = ({
                     onClick={onPrev}
                     className="bg-white/5 border border-white/10 rounded-[10px] px-6 py-3 text-sm font-semibold text-mist cursor-pointer transition-all hover:text-white-soft hover:border-white/20 font-body"
                 >
-                    ← Retour
+                    {t("form.prev")}
                 </button>
                 <button
                     type="button"
                     onClick={onNext}
                     className="bg-aurora border-none rounded-[10px] px-8 py-3 font-display text-sm font-extrabold text-deep-sky cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)] flex items-center gap-2"
                 >
-                    Étape suivante — Confirmation →
+                    {t("form.step3.cta")}
                 </button>
             </div>
         </div>

@@ -8,9 +8,21 @@ import Step2Film from "../features/formulaire/components/Step2Film";
 import Step3AI from "../features/formulaire/components/Step3AI";
 import Step4Confirm from "../features/formulaire/components/Step4Confirm";
 import SuccessScreen from "../features/formulaire/components/SuccessScreen";
+import VerificationEmail from "../features/formulaire/components/VerificationEmail";
 
 const Formulaire = (): React.JSX.Element => {
     const form = useFormDepot();
+
+    if (form.submissionState === "verifying") {
+        return (
+            <VerificationEmail
+                defaultEmail={form.formData.email}
+                onSendOtp={form.sendOtp}
+                onVerify={form.verifyOtp}
+                onConfirm={form.confirmVerification}
+            />
+        );
+    }
 
     if (form.submissionState === "success") {
         return (
@@ -18,9 +30,10 @@ const Formulaire = (): React.JSX.Element => {
                 <FormHeader />
                 <SuccessScreen
                     dossierNum={form.dossierNum}
-                    email={form.formData.email}
+                    email={form.otpEmail || form.formData.email}
                     prenom={form.formData.prenom}
                     titre={form.formData.titre}
+                    youtubeWarning={form.youtubeWarning || undefined}
                 />
             </div>
         );
@@ -60,6 +73,7 @@ const Formulaire = (): React.JSX.Element => {
                             onVideoSelect={(file) => form.setVideoFile(file)}
                             onVideoReset={form.resetVideo}
                             setUploadProgress={form.setUploadProgress}
+                            setVideoDuration={form.setVideoDuration}
                             setVideoValid={form.setVideoValid}
                             onPrev={form.prevStep}
                             onNext={form.nextStep}
@@ -83,6 +97,8 @@ const Formulaire = (): React.JSX.Element => {
                     {form.currentStep === 4 && (
                         <Step4Confirm
                             formData={form.formData}
+                            videoFile={form.videoFile}
+                            videoDuration={form.videoDuration}
                             videoValid={form.videoValid}
                             subtitleFR={form.subtitleFR}
                             subtitleEN={form.subtitleEN}

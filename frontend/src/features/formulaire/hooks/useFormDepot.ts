@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import type { FormDepotData, FormDepotErrors, SubmissionState } from "../types";
 import { INITIAL_FORM_DATA, VIDEO_MIN_DURATION, VIDEO_MAX_DURATION } from "../constants";
+import { apiFetchForm, apiFetch } from "../../../services/api";
 
 interface UseFormDepotReturn {
     currentStep: number;
@@ -8,6 +9,7 @@ interface UseFormDepotReturn {
     formData: FormDepotData;
     errors: FormDepotErrors;
     videoFile: File | null;
+    videoDuration: number | null;
     videoValid: boolean;
     uploadProgress: number;
     subtitleFR: File | null;
@@ -15,18 +17,25 @@ interface UseFormDepotReturn {
     rgpdChecked: boolean[];
     submissionState: SubmissionState;
     dossierNum: string;
+    otpEmail: string;
+    youtubeWarning: string;
+
     setCurrentStep: (step: number) => void;
     goToStep: (step: number) => void;
-    nextStep: () => void;
+    nextStep: () => boolean;
     prevStep: () => void;
     updateField: (field: keyof FormDepotData, value: string | boolean) => void;
     setVideoFile: (file: File | null) => void;
+    setVideoDuration: (duration: number | null) => void;
     setVideoValid: (valid: boolean) => void;
     setUploadProgress: (progress: number) => void;
     setSubtitleFR: (file: File | null) => void;
     setSubtitleEN: (file: File | null) => void;
     toggleRgpd: (index: number) => void;
     submitForm: () => void;
+    sendOtp: (email: string) => Promise<void>;
+    verifyOtp: (email: string, code: string) => Promise<boolean>;
+    confirmVerification: (email: string) => Promise<void>;
     validateAge: (dob: string) => boolean;
     validateStep: (step: number) => boolean;
     videoDurationStatus: (seconds: number) => "ok" | "warn" | "err";
@@ -39,6 +48,7 @@ const useFormDepot = (): UseFormDepotReturn => {
     const [formData, setFormData] = useState<FormDepotData>(INITIAL_FORM_DATA);
     const [errors, setErrors] = useState<FormDepotErrors>({});
     const [videoFile, setVideoFile] = useState<File | null>(null);
+    const [videoDuration, setVideoDuration] = useState<number | null>(null);
     const [videoValid, setVideoValid] = useState<boolean>(false);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [subtitleFR, setSubtitleFR] = useState<File | null>(null);
@@ -46,6 +56,8 @@ const useFormDepot = (): UseFormDepotReturn => {
     const [rgpdChecked, setRgpdChecked] = useState<boolean[]>([false, false, false]);
     const [submissionState, setSubmissionState] = useState<SubmissionState>("idle");
     const [dossierNum, setDossierNum] = useState<string>("");
+    const [otpEmail, setOtpEmail] = useState<string>("");
+    const [youtubeWarning, setYoutubeWarning] = useState<string>("");
 
     const updateField = useCallback((field: keyof FormDepotData, value: string | boolean): void => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -102,8 +114,6 @@ const useFormDepot = (): UseFormDepotReturn => {
 
             if (step === 3) {
                 if (!formData.iaImg.trim()) newErrors.iaImg = "Champ requis";
-                if (!subtitleFR) newErrors.subtitleFR = "Sous-titres français requis";
-                if (!subtitleEN) newErrors.subtitleEN = "Sous-titres anglais requis";
             }
 
             setErrors(newErrors);
@@ -121,12 +131,14 @@ const useFormDepot = (): UseFormDepotReturn => {
         [maxUnlocked],
     );
 
-    const nextStep = useCallback((): void => {
+    const nextStep = useCallback((): boolean => {
         if (currentStep < 4 && validateStep(currentStep)) {
             const next = currentStep + 1;
             setMaxUnlocked((prev) => Math.max(prev, next));
             setCurrentStep(next);
+            return true;
         }
+        return false;
     }, [currentStep, validateStep]);
 
     const prevStep = useCallback((): void => {
@@ -151,22 +163,67 @@ const useFormDepot = (): UseFormDepotReturn => {
 
     const resetVideo = useCallback((): void => {
         setVideoFile(null);
+        setVideoDuration(null);
         setVideoValid(false);
         setUploadProgress(0);
     }, []);
 
     const submitForm = useCallback((): void => {
         if (!rgpdChecked.every(Boolean)) return;
-        if (!validateStep(4)) return;
 
-        setSubmissionState("submitting");
-        const num = "MAI-2026-" + String(Math.floor(Math.random() * 90000) + 10000);
-        setDossierNum(num);
+        // eslint-disable-next-line no-console
+        console.log("📋 Formulaire soumis :", {
+            ...formData,
+            video: videoFile
+                ? { name: videoFile.name, size: videoFile.size, type: videoFile.type }
+                : null,
+            subtitleFR: subtitleFR ? { name: subtitleFR.name, size: subtitleFR.size } : null,
+            subtitleEN: subtitleEN ? { name: subtitleEN.name, size: subtitleEN.size } : null,
+        });
 
-        setTimeout(() => {
+        setSubmissionState("verifying");
+    }, [rgpdChecked, formData, videoFile, subtitleFR, subtitleEN]);
+
+    const sendOtp = useCallback(async (email: string): Promise<void> => {
+        await apiFetch("/api/otp/send", {
+            method: "POST",
+            body: JSON.stringify({ email }),
+        });
+    }, []);
+
+    const verifyOtp = useCallback(async (email: string, code: string): Promise<boolean> => {
+        try {
+            await apiFetch("/api/otp/verify", {
+                method: "POST",
+                body: JSON.stringify({ email, code }),
+            });
+            return true;
+        } catch {
+            return false;
+        }
+    }, []);
+
+    const confirmVerification = useCallback(
+        async (email: string): Promise<void> => {
+            const data = new FormData();
+            Object.entries(formData).forEach(([key, value]) => {
+                data.append(key, String(value));
+            });
+            if (videoFile) data.append("video", videoFile);
+            if (subtitleFR) data.append("subtitleFR", subtitleFR);
+            if (subtitleEN) data.append("subtitleEN", subtitleEN);
+
+            const result = await apiFetchForm<{ dossierNum: string; youtubeWarning?: string }>(
+                "/api/films",
+                data,
+            );
+            setOtpEmail(email);
+            setDossierNum(result.dossierNum);
+            if (result.youtubeWarning) setYoutubeWarning(result.youtubeWarning);
             setSubmissionState("success");
-        }, 1500);
-    }, [rgpdChecked, validateStep]);
+        },
+        [formData, videoFile, subtitleFR, subtitleEN],
+    );
 
     return {
         currentStep,
@@ -174,6 +231,7 @@ const useFormDepot = (): UseFormDepotReturn => {
         formData,
         errors,
         videoFile,
+        videoDuration,
         videoValid,
         uploadProgress,
         subtitleFR,
@@ -181,18 +239,24 @@ const useFormDepot = (): UseFormDepotReturn => {
         rgpdChecked,
         submissionState,
         dossierNum,
+        otpEmail,
+        youtubeWarning,
         setCurrentStep,
         goToStep,
         nextStep,
         prevStep,
         updateField,
         setVideoFile,
+        setVideoDuration,
         setVideoValid,
         setUploadProgress,
         setSubtitleFR,
         setSubtitleEN,
         toggleRgpd,
         submitForm,
+        sendOtp,
+        verifyOtp,
+        confirmVerification,
         validateAge,
         validateStep,
         videoDurationStatus,

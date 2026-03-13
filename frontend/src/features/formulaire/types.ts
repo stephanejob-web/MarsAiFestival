@@ -42,7 +42,7 @@ export interface FormDepotErrors {
     [key: string]: string;
 }
 
-export type SubmissionState = "idle" | "submitting" | "success";
+export type SubmissionState = "idle" | "submitting" | "verifying" | "success";
 
 export type DragState = "idle" | "dragging" | "error";
 

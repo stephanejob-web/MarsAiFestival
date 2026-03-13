@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import StepsNav from "./StepsNav";
 import RulesBlock from "./RulesBlock";
 
@@ -13,18 +14,18 @@ const FormSidebar = ({
     maxUnlocked,
     onGoStep,
 }: FormSidebarProps): React.JSX.Element => {
+    const { t } = useTranslation();
+
     return (
         <aside className="form-sidebar-sticky sticky top-[88px]">
             <div className="mb-8">
                 <div className="text-xs font-bold uppercase tracking-[0.12em] text-aurora mb-2">
-                    Dépôt de film
+                    {t("form.sidebar.overline")}
                 </div>
                 <h1 className="font-display text-2xl font-extrabold tracking-tight leading-tight mb-2.5">
-                    Candidature marsAI 2026
+                    {t("form.sidebar.title")}
                 </h1>
-                <p className="text-sm text-mist leading-relaxed">
-                    Thème : &quot;Imaginez des futurs souhaitables&quot;
-                </p>
+                <p className="text-sm text-mist leading-relaxed">{t("form.sidebar.theme")}</p>
             </div>
 
             <StepsNav currentStep={currentStep} maxUnlocked={maxUnlocked} onGoStep={onGoStep} />

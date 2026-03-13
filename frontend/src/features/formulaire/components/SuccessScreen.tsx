@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface YTStep {
     id: string;
@@ -14,6 +15,7 @@ interface SuccessScreenProps {
     email: string;
     prenom: string;
     titre: string;
+    youtubeWarning?: string;
 }
 
 const SuccessScreen = ({
@@ -21,28 +23,30 @@ const SuccessScreen = ({
     email,
     prenom,
     titre,
+    youtubeWarning,
 }: SuccessScreenProps): React.JSX.Element => {
+    const { t } = useTranslation();
     const [ytResult, setYtResult] = useState<YTResult>("pending");
     const [ytPct, setYtPct] = useState<number>(0);
-    const [ytStepLabel, setYtStepLabel] = useState<string>(
-        "Upload sur la chaîne YouTube sécurisée…",
-    );
+    const [ytStepLabel, setYtStepLabel] = useState<string>("");
     const [ytSteps, setYtSteps] = useState<YTStep[]>([
-        { id: "upload", label: "Upload vidéo", done: false },
-        { id: "copyright", label: "Vérification copyright Content ID", done: false },
-        { id: "policy", label: "Analyse contenu (politique YouTube)", done: false },
-        { id: "confirm", label: "Confirmation et indexation", done: false },
+        { id: "upload", label: t("form.success.ytStepUpload"), done: false },
+        { id: "copyright", label: t("form.success.ytStepCopyright"), done: false },
+        { id: "policy", label: t("form.success.ytStepPolicy"), done: false },
+        { id: "confirm", label: t("form.success.ytStepConfirm"), done: false },
     ]);
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
         const labels = [
-            "Upload sur la chaîne YouTube sécurisée…",
-            "Vérification Copyright Content ID…",
-            "Analyse du contenu (politique YouTube)…",
-            "Confirmation et indexation…",
+            t("form.success.ytLabel0"),
+            t("form.success.ytLabel1"),
+            t("form.success.ytLabel2"),
+            t("form.success.ytLabel3"),
         ];
+
+        setYtStepLabel(labels[0] ?? "");
 
         let step = 0;
         intervalRef.current = setInterval(() => {
@@ -51,7 +55,7 @@ const SuccessScreen = ({
                 if (intervalRef.current) clearInterval(intervalRef.current);
                 setYtPct(100);
                 setYtSteps((prev) => prev.map((s) => ({ ...s, done: true })));
-                setYtStepLabel("Terminé !");
+                setYtStepLabel(t("form.success.ytDone"));
                 setYtResult("approved");
                 return;
             }
@@ -63,6 +67,7 @@ const SuccessScreen = ({
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -71,40 +76,43 @@ const SuccessScreen = ({
             <div className="w-20 h-20 rounded-full bg-aurora/10 border-2 border-aurora/25 flex items-center justify-center text-4xl mx-auto mb-5 animate-[popIn_0.5s_ease]">
                 🎬
             </div>
-            <h2 className="font-display text-3xl font-extrabold mb-2">Dossier enregistré !</h2>
-            <p className="text-sm text-mist mb-0">
-                Votre film a été reçu. Une confirmation a été envoyée à votre adresse validée.
-            </p>
+            <h2 className="font-display text-3xl font-extrabold mb-2">{t("form.success.title")}</h2>
+            <p className="text-sm text-mist mb-0">{t("form.success.desc")}</p>
 
-            <div className="inline-block bg-white/[0.04] border border-white/10 rounded-xl px-5 py-3 mt-4 mb-3 font-mono text-sm text-aurora">
-                📄 Dossier n° {dossierNum}
+            <div className="inline-block bg-white/4 border border-white/10 rounded-xl px-5 py-3 mt-4 mb-3 font-mono text-sm text-aurora">
+                {t("form.success.dossierLabel")} {dossierNum}
             </div>
 
             <p className="text-xs text-mist mb-5">
-                Email de confirmation envoyé à <strong className="text-white-soft">{email}</strong>
+                {t("form.success.emailSentTo")} <strong className="text-white-soft">{email}</strong>
             </p>
 
+            {/* Avertissement YouTube si upload échoué */}
+            {youtubeWarning && (
+                <div className="text-left bg-solar/5 border border-solar/25 rounded-xl px-4 py-3 flex items-start gap-3 mb-4">
+                    <span className="text-base shrink-0">⚠️</span>
+                    <p className="text-xs text-solar leading-relaxed">{youtubeWarning}</p>
+                </div>
+            )}
+
             {/* Upload dual info */}
-            <div className="text-left bg-white/[0.03] border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3 mb-5">
+            <div className="text-left bg-white/3 border border-white/8 rounded-xl px-4 py-3 flex items-center gap-3 mb-5">
                 <span className="text-base">📤</span>
                 <div className="text-xs text-mist leading-relaxed">
-                    Votre film est uploadé simultanément sur{" "}
-                    <strong className="text-white-soft">le serveur du festival</strong> et sur la{" "}
-                    <strong className="text-white-soft">chaîne YouTube sécurisée</strong> du
-                    festival (avec les sous-titres).
+                    {t("form.success.dualUpload")}
                 </div>
             </div>
 
             {/* YouTube validation — pending */}
             {ytResult === "pending" && (
-                <div className="text-left rounded-2xl border border-white/9 overflow-hidden mb-6 bg-white/[0.03]">
-                    <div className="bg-white/[0.03] border-b border-white/6 px-5 py-3 flex items-center gap-3">
+                <div className="text-left rounded-2xl border border-white/9 overflow-hidden mb-6 bg-white/3">
+                    <div className="bg-white/3 border-b border-white/6 px-5 py-3 flex items-center gap-3">
                         <span className="text-base">▶️</span>
                         <span className="text-[0.75rem] font-bold tracking-wider uppercase text-mist">
-                            Validation YouTube API
+                            {t("form.success.ytTitle")}
                         </span>
                         <span className="ml-auto text-[0.65rem] font-bold px-2.5 py-1 rounded-full bg-solar/10 border border-solar/25 text-solar">
-                            ⏳ En cours…
+                            {t("form.success.ytPending")}
                         </span>
                     </div>
                     <div className="p-5">
@@ -152,22 +160,22 @@ const SuccessScreen = ({
                         </div>
                         <div>
                             <div className="font-bold text-aurora text-sm">
-                                Film validé par YouTube
+                                {t("form.success.ytApproved")}
                             </div>
                             <div className="text-xs text-mist mt-0.5">
-                                Aucune violation détectée — votre film est en compétition
+                                {t("form.success.ytApprovedDesc")}
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2 text-xs text-mist">
-                            <span>⏳</span> Présélection jury — résultats sous 1 mois
+                            <span>⏳</span> {t("form.success.ytJury")}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-mist">
-                            <span>📢</span> Les 50 finalistes annoncés à J+90
+                            <span>📢</span> {t("form.success.ytFinalists")}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-mist">
-                            <span>🏆</span> Cérémonie à Marseille · Mars.AI Night
+                            <span>🏆</span> {t("form.success.ytCeremony")}
                         </div>
                     </div>
                 </div>
@@ -176,40 +184,37 @@ const SuccessScreen = ({
             {/* YouTube rejected */}
             {ytResult === "rejected" && (
                 <div className="text-left mb-6">
-                    <div className="rounded-2xl bg-coral/[0.06] border border-coral/25 px-6 py-5 mb-4">
+                    <div className="rounded-2xl bg-coral/6 border border-coral/25 px-6 py-5 mb-4">
                         <div className="flex items-start gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-coral/10 border-[1.5px] border-coral/30 flex items-center justify-center text-xl shrink-0">
                                 ✗
                             </div>
                             <div>
                                 <div className="font-bold text-coral text-sm">
-                                    Film rejeté par YouTube
+                                    {t("form.success.ytRejected")}
                                 </div>
                                 <div className="text-xs text-mist mt-0.5">
-                                    Violation de la politique de contenu détectée
+                                    {t("form.success.ytRejectedDesc")}
                                 </div>
                             </div>
                         </div>
                         <div className="text-xs text-mist leading-relaxed border-t border-coral/12 pt-3.5">
-                            Votre film n&apos;a pas pu être publié car YouTube a détecté un contenu
-                            non conforme à sa politique (contenu inapproprié, violation de droits
-                            d&apos;auteur, etc.).
+                            {t("form.success.ytRejectedText")}
                         </div>
                     </div>
 
                     {/* Email preview */}
                     <div className="rounded-xl border border-white/8 overflow-hidden">
-                        <div className="bg-white/[0.04] border-b border-white/7 px-5 py-3 flex items-center gap-2.5">
+                        <div className="bg-white/4 border-b border-white/7 px-5 py-3 flex items-center gap-2.5">
                             <span>✉️</span>
                             <span className="text-[0.72rem] font-bold tracking-wider uppercase text-mist">
-                                Email envoyé automatiquement à
+                                {t("form.success.emailAutoTitle")}
                             </span>
                             <span className="font-mono text-xs text-aurora">{email}</span>
                         </div>
                         <div className="px-5 py-5 text-sm text-mist leading-relaxed">
                             <div className="font-bold text-white-soft mb-3 text-sm">
-                                Objet : [marsAI 2026] Votre film nécessite une nouvelle soumission —
-                                Dossier {dossierNum}
+                                {t("form.success.emailSubject")} {dossierNum}
                             </div>
                             <p>
                                 Bonjour <strong className="text-white-soft">{prenom}</strong>,
@@ -231,10 +236,12 @@ const SuccessScreen = ({
                             <p className="mt-3">
                                 Cordialement,
                                 <br />
-                                <strong className="text-white-soft">L&apos;équipe marsAI</strong>
+                                <strong className="text-white-soft">
+                                    {t("form.success.emailTeam")}
+                                </strong>
                                 <br />
                                 <span className="text-xs opacity-60">
-                                    La Plateforme × Mobile Film Festival
+                                    {t("form.success.emailPartners")}
                                 </span>
                             </p>
                         </div>
@@ -247,7 +254,7 @@ const SuccessScreen = ({
                 to="/"
                 className="inline-block bg-white/6 border border-white/12 rounded-[10px] px-6 py-3 text-sm text-mist no-underline mt-2 hover:text-white-soft hover:border-white/20 transition-all"
             >
-                ← Retour au site
+                {t("form.success.backHome")}
             </Link>
         </div>
     );
