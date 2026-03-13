@@ -108,7 +108,10 @@ const RegisterForm = ({
                             htmlFor="reg-firstName"
                             className="mb-1.5 block text-[0.76rem] font-semibold uppercase tracking-[0.04em] text-mist"
                         >
-                            Prénom <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
+                            Prénom{" "}
+                            <span className="text-coral text-[0.65rem] normal-case font-normal">
+                                *
+                            </span>
                         </label>
                         <input
                             id="reg-firstName"
@@ -126,7 +129,10 @@ const RegisterForm = ({
                             htmlFor="reg-lastName"
                             className="mb-1.5 block text-[0.76rem] font-semibold uppercase tracking-[0.04em] text-mist"
                         >
-                            Nom <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
+                            Nom{" "}
+                            <span className="text-coral text-[0.65rem] normal-case font-normal">
+                                *
+                            </span>
                         </label>
                         <input
                             id="reg-lastName"
@@ -146,7 +152,8 @@ const RegisterForm = ({
                         htmlFor="reg-email"
                         className="mb-1.5 block text-[0.76rem] font-semibold uppercase tracking-[0.04em] text-mist"
                     >
-                        Adresse e-mail <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
+                        Adresse e-mail{" "}
+                        <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
                     </label>
                     <input
                         id="reg-email"
@@ -166,7 +173,8 @@ const RegisterForm = ({
                         htmlFor="reg-password"
                         className="mb-1.5 block text-[0.76rem] font-semibold uppercase tracking-[0.04em] text-mist"
                     >
-                        Mot de passe <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
+                        Mot de passe{" "}
+                        <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
                     </label>
                     <input
                         id="reg-password"
@@ -187,7 +195,8 @@ const RegisterForm = ({
                         htmlFor="reg-password-confirm"
                         className="mb-1.5 block text-[0.76rem] font-semibold uppercase tracking-[0.04em] text-mist"
                     >
-                        Confirmer le mot de passe <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
+                        Confirmer le mot de passe{" "}
+                        <span className="text-coral text-[0.65rem] normal-case font-normal">*</span>
                     </label>
                     <input
                         id="reg-password-confirm"

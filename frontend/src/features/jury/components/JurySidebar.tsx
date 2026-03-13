@@ -178,8 +178,11 @@ const JurySidebar = ({
                     <span className="mr-1.5">💬</span>
                     <span>Chat jury</span>
                     <span className="ml-1.5 flex items-center gap-1 text-[0.65rem] text-mist/70">
-                        <span className={`h-[5px] w-[5px] rounded-full ${chat.isConnected ? "bg-aurora" : "bg-coral"}`} />
-                        {chat.onlineCount > 0 && `${chat.onlineCount} connecté${chat.onlineCount > 1 ? "s" : ""}`}
+                        <span
+                            className={`h-[5px] w-[5px] rounded-full ${chat.isConnected ? "bg-aurora" : "bg-coral"}`}
+                        />
+                        {chat.onlineCount > 0 &&
+                            `${chat.onlineCount} connecté${chat.onlineCount > 1 ? "s" : ""}`}
                     </span>
                     {chat.unreadCount > 0 && (
                         <span className="ml-1 rounded-full bg-coral/15 px-1.5 font-mono text-[0.62rem] font-semibold text-coral">
@@ -204,7 +207,11 @@ const JurySidebar = ({
                                                     src={u.profilPicture}
                                                     alt={u.initials}
                                                     className="h-[24px] w-[24px] rounded-full object-cover ring-2 ring-[rgba(12,18,48,0.95)]"
-                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                                    onError={(e) => {
+                                                        (
+                                                            e.target as HTMLImageElement
+                                                        ).style.display = "none";
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-gradient-to-br from-aurora/70 to-lavande/70 text-[0.55rem] font-bold text-deep-sky ring-2 ring-[rgba(12,18,48,0.95)]">
@@ -222,7 +229,9 @@ const JurySidebar = ({
                         )}
                         <div
                             className="flex h-[180px] flex-col gap-2.5 overflow-y-auto pr-0.5"
-                            ref={(el) => { if (el) el.scrollTop = el.scrollHeight; }}
+                            ref={(el) => {
+                                if (el) el.scrollTop = el.scrollHeight;
+                            }}
                         >
                             {chat.messages.length === 0 ? (
                                 <div className="flex h-full items-center justify-center text-[0.7rem] text-mist/50">
@@ -231,7 +240,10 @@ const JurySidebar = ({
                             ) : (
                                 chat.messages.map((msg) => {
                                     const isMe = msg.senderId === chat.mySocketId;
-                                    const time = new Date(msg.timestamp).toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" });
+                                    const time = new Date(msg.timestamp).toLocaleTimeString("fr", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    });
                                     return (
                                         <div
                                             key={msg.id}
@@ -243,7 +255,11 @@ const JurySidebar = ({
                                                     src={msg.profilPicture}
                                                     alt={msg.initials}
                                                     className="h-[22px] w-[22px] flex-shrink-0 rounded-full object-cover"
-                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                                    onError={(e) => {
+                                                        (
+                                                            e.target as HTMLImageElement
+                                                        ).style.display = "none";
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora/60 to-lavande/60 text-[0.55rem] font-bold text-deep-sky">
@@ -251,12 +267,22 @@ const JurySidebar = ({
                                                 </div>
                                             )}
                                             {/* Bulle */}
-                                            <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
-                                                <div className={`flex items-baseline gap-1 ${isMe ? "flex-row-reverse" : ""}`}>
-                                                    <span className="text-[0.6rem] font-semibold text-white-soft/70">{msg.initials}</span>
-                                                    <span className="text-[0.55rem] text-mist/40">{time}</span>
+                                            <div
+                                                className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}
+                                            >
+                                                <div
+                                                    className={`flex items-baseline gap-1 ${isMe ? "flex-row-reverse" : ""}`}
+                                                >
+                                                    <span className="text-[0.6rem] font-semibold text-white-soft/70">
+                                                        {msg.initials}
+                                                    </span>
+                                                    <span className="text-[0.55rem] text-mist/40">
+                                                        {time}
+                                                    </span>
                                                 </div>
-                                                <div className={`rounded-xl px-2 py-1.5 text-[0.7rem] leading-snug ${isMe ? "rounded-br-sm bg-aurora/15 text-aurora" : "rounded-bl-sm bg-white/6 text-white-soft/85"}`}>
+                                                <div
+                                                    className={`rounded-xl px-2 py-1.5 text-[0.7rem] leading-snug ${isMe ? "rounded-br-sm bg-aurora/15 text-aurora" : "rounded-bl-sm bg-white/6 text-white-soft/85"}`}
+                                                >
                                                     {msg.text}
                                                 </div>
                                             </div>
@@ -270,7 +296,9 @@ const JurySidebar = ({
                                 type="text"
                                 value={chat.inputValue}
                                 onChange={(e) => chat.setInputValue(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") chat.sendMessage(); }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") chat.sendMessage();
+                                }}
                                 placeholder="Écrire un message…"
                                 className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[0.75rem] text-white-soft outline-none placeholder:text-mist/40"
                             />

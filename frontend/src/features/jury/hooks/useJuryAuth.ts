@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import type {
-    ActiveTab,
-    FeedbackMessage,
-    LoginFormState,
-    RegisterFormState,
-} from "../types";
+import type { ActiveTab, FeedbackMessage, LoginFormState, RegisterFormState } from "../types";
 
 const API = import.meta.env.VITE_API_URL as string;
 
@@ -84,7 +79,10 @@ const useJuryAuth = (): UseJuryAuthReturn => {
     const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         if (!loginForm.email.trim() || !loginForm.password.trim()) {
-            setFeedback({ type: "error", message: "Merci de renseigner votre e-mail et votre mot de passe." });
+            setFeedback({
+                type: "error",
+                message: "Merci de renseigner votre e-mail et votre mot de passe.",
+            });
             return;
         }
         setIsLoading(true);
@@ -94,7 +92,12 @@ const useJuryAuth = (): UseJuryAuthReturn => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: loginForm.email, password: loginForm.password }),
             });
-            const data = (await res.json()) as { success: boolean; message?: string; token?: string; user?: { role: string } };
+            const data = (await res.json()) as {
+                success: boolean;
+                message?: string;
+                token?: string;
+                user?: { role: string };
+            };
             if (!data.success || !data.token) {
                 setFeedback({ type: "error", message: data.message ?? "Identifiants incorrects." });
                 return;
@@ -119,7 +122,10 @@ const useJuryAuth = (): UseJuryAuthReturn => {
             return;
         }
         if (registerForm.password.length < 8) {
-            setFeedback({ type: "error", message: "Le mot de passe doit contenir au moins 8 caractères." });
+            setFeedback({
+                type: "error",
+                message: "Le mot de passe doit contenir au moins 8 caractères.",
+            });
             return;
         }
         setIsLoading(true);
@@ -135,9 +141,17 @@ const useJuryAuth = (): UseJuryAuthReturn => {
                 method: "POST",
                 body: formData,
             });
-            const data = (await res.json()) as { success: boolean; message?: string; token?: string; user?: { role: string } };
+            const data = (await res.json()) as {
+                success: boolean;
+                message?: string;
+                token?: string;
+                user?: { role: string };
+            };
             if (!data.success || !data.token) {
-                setFeedback({ type: "error", message: data.message ?? "Erreur lors de la création du compte." });
+                setFeedback({
+                    type: "error",
+                    message: data.message ?? "Erreur lors de la création du compte.",
+                });
                 return;
             }
             localStorage.setItem("jury_token", data.token);
@@ -157,9 +171,17 @@ const useJuryAuth = (): UseJuryAuthReturn => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ credential }),
             });
-            const data = (await res.json()) as { success: boolean; message?: string; token?: string; user?: { role: string } };
+            const data = (await res.json()) as {
+                success: boolean;
+                message?: string;
+                token?: string;
+                user?: { role: string };
+            };
             if (!data.success || !data.token) {
-                setFeedback({ type: "error", message: data.message ?? "Échec de l'authentification Google." });
+                setFeedback({
+                    type: "error",
+                    message: data.message ?? "Échec de l'authentification Google.",
+                });
                 return;
             }
             localStorage.setItem("jury_token", data.token);
@@ -172,7 +194,10 @@ const useJuryAuth = (): UseJuryAuthReturn => {
     };
 
     const handleForgotPassword = (): void => {
-        setFeedback({ type: "success", message: "Un e-mail de réinitialisation vous sera envoyé." });
+        setFeedback({
+            type: "success",
+            message: "Un e-mail de réinitialisation vous sera envoyé.",
+        });
     };
 
     return {

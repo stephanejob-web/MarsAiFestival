@@ -76,7 +76,9 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
             setOnlineCount(users.length);
         });
 
-        return () => { socket.disconnect(); };
+        return () => {
+            socket.disconnect();
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -97,7 +99,17 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
         setInputValue("");
     };
 
-    return { messages, connectedUsers, inputValue, unreadCount, isConnected, onlineCount, mySocketId, setInputValue, sendMessage };
+    return {
+        messages,
+        connectedUsers,
+        inputValue,
+        unreadCount,
+        isConnected,
+        onlineCount,
+        mySocketId,
+        setInputValue,
+        sendMessage,
+    };
 };
 
 export default useJuryChat;
