@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface Award {
     icon: string;
@@ -16,69 +17,53 @@ interface JuryMember {
     featured?: boolean;
 }
 
-const AWARDS: Award[] = [
-    {
-        icon: "⚖️",
-        name: "Prix du Jury",
-        desc: "Coup de cœur artistique du jury international.",
-        colorClass: "border-aurora/30 hover:border-aurora/50",
-    },
-    {
-        icon: "🌍",
-        name: "Prix du Public",
-        desc: "Vote ouvert en ligne pendant le festival.",
-        colorClass: "border-lavande/30 hover:border-lavande/50",
-    },
-    {
-        icon: "🤖",
-        name: "Prix Innovation IA",
-        desc: "Usage le plus créatif de l'intelligence artificielle.",
-        colorClass: "border-solar/30 hover:border-solar/50",
-    },
+const AWARD_ICONS = ["⚖️", "🌍", "🤖"];
+const AWARD_COLORS = [
+    "border-aurora/30 hover:border-aurora/50",
+    "border-lavande/30 hover:border-lavande/50",
+    "border-solar/30 hover:border-solar/50",
 ];
 
-const JURY: JuryMember[] = [
-    {
-        name: "Marie Lefebvre",
-        role: "Réalisatrice",
-        badge: "Présidente du Jury",
-        quote: "Figure incontournable du cinéma d'auteur, trois fois primée au Festival de Cannes. Elle préside le jury marsAI 2026 avec l'ambition d'élever la création IA au rang d'art majeur.",
-        avatar: "https://i.pravatar.cc/400?img=47",
-        featured: true,
-    },
-    {
-        name: "Pierre Dubois",
-        role: "Directeur artistique",
-        badge: "Membre du Jury",
-        avatar: "https://i.pravatar.cc/400?img=12",
-    },
-    {
-        name: "Kenji Ito",
-        role: "Artiste numérique",
-        badge: "Membre du Jury",
-        avatar: "https://i.pravatar.cc/400?img=68",
-    },
-    {
-        name: "Sofia Eriksson",
-        role: "Critique de cinéma",
-        badge: "Membre du Jury",
-        avatar: "https://i.pravatar.cc/400?img=44",
-    },
-    {
-        name: "Amara Touré",
-        role: "Productrice",
-        badge: "Membre du Jury",
-        avatar: "https://i.pravatar.cc/400?img=32",
-    },
-    {
-        name: "Carlos Ruiz",
-        role: "Chef opérateur",
-        badge: "Membre du Jury",
-        avatar: "https://i.pravatar.cc/400?img=18",
-    },
+const JURY_AVATARS = [
+    "https://i.pravatar.cc/400?img=47",
+    "https://i.pravatar.cc/400?img=12",
+    "https://i.pravatar.cc/400?img=68",
+    "https://i.pravatar.cc/400?img=44",
+    "https://i.pravatar.cc/400?img=32",
+    "https://i.pravatar.cc/400?img=18",
 ];
 
 const GalaSection = (): React.JSX.Element => {
+    const { t } = useTranslation();
+
+    const awardsData = t("gala.awards", { returnObjects: true }) as Record<
+        string,
+        { name: string; desc: string }
+    >;
+    const AWARDS: Award[] = Object.keys(awardsData).map((k) => ({
+        icon: AWARD_ICONS[Number(k)],
+        name: awardsData[k].name,
+        desc: awardsData[k].desc,
+        colorClass: AWARD_COLORS[Number(k)],
+    }));
+
+    const juryData = t("gala.jury", { returnObjects: true }) as Record<
+        string,
+        { name: string; role: string; badge: string; quote?: string }
+    >;
+    const JURY: JuryMember[] = Object.keys(juryData).map((k, i) => ({
+        name: juryData[k].name,
+        role: juryData[k].role,
+        badge: juryData[k].badge,
+        quote: juryData[k].quote,
+        avatar: JURY_AVATARS[i],
+        featured: i === 0,
+    }));
+
+    const title2Full = t("gala.title2");
+    const title2Highlight = t("gala.title2_highlight");
+    const [t2Before, t2After] = title2Full.split(title2Highlight);
+
     const featured = JURY.find((j) => j.featured);
     const members = JURY.filter((j) => !j.featured);
 
@@ -99,17 +84,16 @@ const GalaSection = (): React.JSX.Element => {
                                 className="w-2 h-2 rounded-full bg-aurora inline-block"
                                 aria-hidden="true"
                             />
-                            Mars.AI Night · Marseille 2026
+                            {t("gala.overline")}
                         </div>
                         <h2 className="font-display text-4xl lg:text-5xl font-black text-white-soft mb-4">
-                            La nuit où le cinéma bascule
+                            {t("gala.title1")}
                             <br />
-                            dans l'<span className="text-coral">ère IA</span>.
+                            {t2Before}
+                            <span className="text-coral">{title2Highlight}</span>
+                            {t2After}
                         </h2>
-                        <p className="text-mist max-w-xl mx-auto">
-                            Dimanche soir, Marseille s'illumine. Gala de clôture aux Friches Belle
-                            de Mai : prix, DJ set génératif et créateurs sur scène.
-                        </p>
+                        <p className="text-mist max-w-xl mx-auto">{t("gala.subtitle")}</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -121,17 +105,14 @@ const GalaSection = (): React.JSX.Element => {
                             />
                             <div className="relative">
                                 <div className="font-mono text-xs text-solar uppercase tracking-widest mb-2">
-                                    Prix Principal
+                                    {t("gala.grandPrix.overline")}
                                 </div>
                                 <div className="font-display text-4xl font-black text-white mb-3">
-                                    Grand Prix
+                                    {t("gala.grandPrix.title")}
                                 </div>
-                                <p className="text-mist mb-4">
-                                    Meilleur film toutes catégories — décerné par le jury
-                                    international.
-                                </p>
+                                <p className="text-mist mb-4">{t("gala.grandPrix.desc")}</p>
                                 <div className="font-mono text-xs text-solar/70">
-                                    Bourse de création · Remise lors du Gala
+                                    {t("gala.grandPrix.note")}
                                 </div>
                             </div>
                         </div>
@@ -163,15 +144,12 @@ const GalaSection = (): React.JSX.Element => {
                     {/* Header */}
                     <div className="text-center mb-14">
                         <div className="font-mono text-xs text-aurora tracking-widest uppercase mb-3">
-                            Jury International · marsAI 2026
+                            {t("gala.juryOverline")}
                         </div>
                         <h2 className="font-display text-4xl lg:text-5xl font-black text-white-soft mb-4">
-                            Le Jury
+                            {t("gala.juryTitle")}
                         </h2>
-                        <p className="text-mist max-w-xl mx-auto">
-                            Des créateurs, artistes et personnalités du cinéma venus du monde entier
-                            pour évaluer les œuvres en compétition.
-                        </p>
+                        <p className="text-mist max-w-xl mx-auto">{t("gala.jurySubtitle")}</p>
                     </div>
 
                     {/* Présidente — carte featured */}
