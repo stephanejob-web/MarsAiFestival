@@ -119,7 +119,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             setErrors(newErrors);
             return Object.keys(newErrors).length === 0;
         },
-        [formData, videoFile, subtitleFR, subtitleEN, validateAge],
+        [formData, videoFile, validateAge],
     );
 
     const goToStep = useCallback(
