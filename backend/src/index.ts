@@ -36,28 +36,34 @@ io.on("connection", (socket: import("socket.io").Socket) => {
     socket.emit("chat:history", messages);
 
     // Jury member joins with their profile
-    socket.on("chat:join", (user: { author: string; initials: string; profilPicture: string | null }) => {
-        connectedUsers.set(socket.id, { socketId: socket.id, ...user });
-        io.emit("chat:online", Array.from(connectedUsers.values()));
-    });
+    socket.on(
+        "chat:join",
+        (user: { author: string; initials: string; profilPicture: string | null }) => {
+            connectedUsers.set(socket.id, { socketId: socket.id, ...user });
+            io.emit("chat:online", Array.from(connectedUsers.values()));
+        },
+    );
 
-    socket.on("chat:send", (msg: { author: string; initials: string; profilPicture: string | null; text: string }) => {
-        if (!msg.text?.trim()) return;
+    socket.on(
+        "chat:send",
+        (msg: { author: string; initials: string; profilPicture: string | null; text: string }) => {
+            if (!msg.text?.trim()) return;
 
-        const message: ChatMessage = {
-            id: `${Date.now()}-${Math.random()}`,
-            author: msg.author,
-            initials: msg.initials,
-            profilPicture: msg.profilPicture ?? null,
-            text: msg.text.trim(),
-            timestamp: Date.now(),
-            senderId: socket.id,
-        };
+            const message: ChatMessage = {
+                id: `${Date.now()}-${Math.random()}`,
+                author: msg.author,
+                initials: msg.initials,
+                profilPicture: msg.profilPicture ?? null,
+                text: msg.text.trim(),
+                timestamp: Date.now(),
+                senderId: socket.id,
+            };
 
-        messages.push(message);
-        if (messages.length > MAX_HISTORY) messages.shift();
-        io.emit("chat:message", message);
-    });
+            messages.push(message);
+            if (messages.length > MAX_HISTORY) messages.shift();
+            io.emit("chat:message", message);
+        },
+    );
 
     socket.on("disconnect", () => {
         connectedUsers.delete(socket.id);

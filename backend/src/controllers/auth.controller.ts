@@ -14,7 +14,14 @@ const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-const makeToken = (jury: { id: number; email: string; first_name: string; last_name: string; role: string; profil_picture?: string | null }): string =>
+const makeToken = (jury: {
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+    profil_picture?: string | null;
+}): string =>
     jwt.sign(
         {
             id: jury.id,
@@ -39,7 +46,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         return;
     }
     if (password.length < 8) {
-        res.status(400).json({ success: false, message: "Le mot de passe doit contenir au moins 8 caractères." });
+        res.status(400).json({
+            success: false,
+            message: "Le mot de passe doit contenir au moins 8 caractères.",
+        });
         return;
     }
     if (!avatarFile) {
@@ -71,10 +81,21 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         res.status(201).json({
             success: true,
             token: makeToken(jury),
-            user: { id: jury.id, email: jury.email, firstName: jury.first_name, lastName: jury.last_name, role: jury.role, profilPicture },
+            user: {
+                id: jury.id,
+                email: jury.email,
+                firstName: jury.first_name,
+                lastName: jury.last_name,
+                role: jury.role,
+                profilPicture,
+            },
         });
     } catch (err) {
-        res.status(500).json({ success: false, message: "Erreur lors de la création du compte.", error: err instanceof Error ? err.message : String(err) });
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la création du compte.",
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };
 
@@ -102,7 +123,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.json({
         success: true,
         token: makeToken(jury),
-        user: { id: jury.id, email: jury.email, firstName: jury.first_name, lastName: jury.last_name, role: jury.role },
+        user: {
+            id: jury.id,
+            email: jury.email,
+            firstName: jury.first_name,
+            lastName: jury.last_name,
+            role: jury.role,
+        },
     });
 };
 
@@ -115,12 +142,18 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
         return;
     }
     if (!GOOGLE_CLIENT_ID) {
-        res.status(500).json({ success: false, message: "Google OAuth non configuré côté serveur." });
+        res.status(500).json({
+            success: false,
+            message: "Google OAuth non configuré côté serveur.",
+        });
         return;
     }
 
     try {
-        const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: GOOGLE_CLIENT_ID,
+        });
         const payload = ticket.getPayload();
         if (!payload?.sub || !payload.email) {
             res.status(400).json({ success: false, message: "Token Google invalide." });
@@ -139,9 +172,19 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
             success: true,
             isNew,
             token: makeToken(jury),
-            user: { id: jury.id, email: jury.email, firstName: jury.first_name, lastName: jury.last_name, role: jury.role },
+            user: {
+                id: jury.id,
+                email: jury.email,
+                firstName: jury.first_name,
+                lastName: jury.last_name,
+                role: jury.role,
+            },
         });
     } catch (err) {
-        res.status(401).json({ success: false, message: "Échec de la vérification Google.", error: err instanceof Error ? err.message : String(err) });
+        res.status(401).json({
+            success: false,
+            message: "Échec de la vérification Google.",
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };

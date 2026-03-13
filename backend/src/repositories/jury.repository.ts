@@ -43,7 +43,13 @@ export const insertJury = async (data: JuryInsert): Promise<JuryRow> => {
     const [result] = await pool.execute<ResultSetHeader>(
         `INSERT INTO jury (first_name, last_name, email, password_hash, role, profil_picture)
          VALUES (?, ?, ?, ?, 'jury', ?)`,
-        [data.first_name, data.last_name, data.email, data.password_hash, data.profil_picture ?? null],
+        [
+            data.first_name,
+            data.last_name,
+            data.email,
+            data.password_hash,
+            data.profil_picture ?? null,
+        ],
     );
     const [rows] = await pool.execute<JuryRow[]>(
         `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
