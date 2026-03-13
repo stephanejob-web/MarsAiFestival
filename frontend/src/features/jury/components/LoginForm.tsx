@@ -1,47 +1,29 @@
 import React from "react";
+import { GoogleLogin } from "@react-oauth/google";
 
-import type { LoginFormState, UserRole } from "../types";
+import type { LoginFormState } from "../types";
 
 interface LoginFormProps {
-    role: UserRole;
     loginForm: LoginFormState;
-    onRoleChange: (role: UserRole) => void;
+    isLoading: boolean;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    onGoogleLogin: () => void;
+    onGoogleAuth: (credential: string) => void;
     onForgotPassword: () => void;
     onSwitchToRegister: () => void;
 }
 
 const LoginForm = ({
-    role,
     loginForm,
-    onRoleChange,
+    isLoading,
     onInputChange,
     onSubmit,
-    onGoogleLogin,
+    onGoogleAuth,
     onForgotPassword,
     onSwitchToRegister,
 }: LoginFormProps): React.JSX.Element => {
     return (
         <>
-            <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
-                <button
-                    type="button"
-                    onClick={() => onRoleChange("jury")}
-                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all hover:text-white-soft ${role === "jury" ? "border border-aurora/30 bg-aurora/10 !text-aurora" : "text-mist"}`}
-                >
-                    Jury
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onRoleChange("admin")}
-                    className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all hover:text-white-soft ${role === "admin" ? "border border-aurora/30 bg-aurora/10 !text-aurora" : "text-mist"}`}
-                >
-                    Admin
-                </button>
-            </div>
-
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col">
                     <label
@@ -85,9 +67,10 @@ const LoginForm = ({
 
                 <button
                     type="submit"
-                    className="w-full rounded-xl bg-aurora py-3 px-4 font-display text-sm font-extrabold tracking-[0.02em] text-deep-sky transition-all hover:-translate-y-0.5 hover:opacity-90"
+                    disabled={isLoading}
+                    className="w-full rounded-xl bg-aurora py-3 px-4 font-display text-sm font-extrabold tracking-[0.02em] text-deep-sky transition-all hover:-translate-y-0.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
                 >
-                    Se connecter
+                    {isLoading ? "Connexion…" : "Se connecter"}
                 </button>
             </form>
 
@@ -97,13 +80,18 @@ const LoginForm = ({
                 <div className="h-px flex-1 bg-white/10" />
             </div>
 
-            <button
-                type="button"
-                onClick={onGoogleLogin}
-                className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white-soft transition-colors hover:bg-white/10"
-            >
-                S&apos;identifier avec Google
-            </button>
+            <div className="mt-4 flex justify-center">
+                <GoogleLogin
+                    onSuccess={(response) => {
+                        if (response.credential) onGoogleAuth(response.credential);
+                    }}
+                    onError={() => undefined}
+                    theme="filled_black"
+                    shape="rectangular"
+                    text="signin_with"
+                    width="320"
+                />
+            </div>
 
             <div className="mt-3 text-center">
                 <button
@@ -111,17 +99,17 @@ const LoginForm = ({
                     onClick={onForgotPassword}
                     className="text-xs underline text-mist transition-colors hover:text-white-soft"
                 >
-                    Mot de passe oublie ?
+                    Mot de passe oublié ?
                 </button>
             </div>
 
-            <div className="mt-3 text-center">
+            <div className="mt-2 text-center">
                 <button
                     type="button"
                     onClick={onSwitchToRegister}
                     className="text-xs underline text-mist transition-colors hover:text-white-soft"
                 >
-                    Pas encore de compte ? Creer un compte
+                    Pas encore de compte ? Créer un compte
                 </button>
             </div>
         </>
