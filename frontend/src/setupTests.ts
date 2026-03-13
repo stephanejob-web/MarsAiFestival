@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
+import "./i18n";
 
 window.HTMLMediaElement.prototype.load = vi.fn();
 window.HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);

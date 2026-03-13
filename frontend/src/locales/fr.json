@@ -1,12 +1,669 @@
 {
-    "welcome": "Bienvenue",
-    "hello": "Bonjour",
-    "team": "l'équipe",
-    "lang": "EN",
-    "tagline": "Vous allez déchirer.",
-    "subtitle": "Six cerveaux, une mission, zéro limite.",
-    "motivationTitle": "Le moment c'est maintenant",
-    "motivation": "Les grands projets ne naissent pas de la perfection, ils naissent de l'action. Chaque ligne de code que vous écrivez aujourd'hui construit quelque chose que vous serez fiers de montrer demain.",
-    "badge": "Édition Mars 2026",
-    "ready": "Prêts à envoyer"
+    "nav": {
+        "links": {
+            "festival": "Le Festival",
+            "programme": "Programme",
+            "films": "Films",
+            "palmares": "Palmarès",
+            "jury": "Jury"
+        },
+        "cta": "Déposer un film",
+        "langSwitch": "EN"
+    },
+    "hero": {
+        "coCreation": "Une co-création",
+        "badge": "Festival International · Première Édition · Marseille 2026",
+        "description": "Le premier festival mondial du cinéma généré par intelligence artificielle.",
+        "tags": {
+            "chrono": "chrono",
+            "pays": "pays",
+            "gratuit": "gratuit",
+            "prix": "Prix"
+        },
+        "accroche1": "Voici ce qu'une IA peut créer.",
+        "accroche2": "Imaginez ce que vous allez faire.",
+        "cta": "Soumettre un film",
+        "demo": "Démo",
+        "deadline": "Clôture des dépôts · 30 sept. 2026",
+        "countdown": {
+            "days": "Jours",
+            "hours": "Heures",
+            "minutes": "Minutes",
+            "seconds": "Secondes"
+        }
+    },
+    "concept": {
+        "overline": "Le Concept",
+        "title1": "Une contrainte absolue,",
+        "title2": "une liberté totale",
+        "description": "marsAI est un concours international de courts-métrages d'une minute intégralement générés par IA. Co-organisé par La Plateforme et le Mobile Film Festival. L'humain reste au cœur de la création.",
+        "cards": {
+            "0": {
+                "title": "1 Minute, 1 Film",
+                "desc": "60 secondes pile. Formats : MP4 ou MOV · 200 à 300 Mo · Ratio 16:9."
+            },
+            "1": {
+                "title": "L'humain au cœur de l'IA",
+                "desc": "IA entière ou hybride — documentée dans la fiche IA. Plusieurs films par réalisateur. Groupes autorisés."
+            },
+            "2": {
+                "title": "Films en compétition",
+                "desc": "50 œuvres sélectionnées parmi 20 000 candidatures. Ouvert à 120+ pays · Gratuit · Sous-titres FR et EN."
+            },
+            "3": {
+                "title": "Clôture des dépôts",
+                "desc": "Date limite : 30 septembre 2026. Participation gratuite · Toutes nationalités."
+            }
+        }
+    },
+    "manifeste": {
+        "line1": "1895. Le cinéma naît. Une caméra, une pellicule.",
+        "line2": "Pendant 130 ans, filmer exigeait du matériel.",
+        "line3": "L'IA générative a tout changé.",
+        "line4": "Aujourd'hui, votre imagination est la seule limite.",
+        "line4_highlight": "votre imagination",
+        "body": "Les outils existent. La question n'est plus comment créer.",
+        "question": "La question est : qu'avez-vous à raconter en 60 secondes ?",
+        "toolsOther": "+ tous les autres"
+    },
+    "about": {
+        "overline": "L'Événement · Marseille 2026",
+        "title1": "Vivez la naissance",
+        "title2": "d'un nouveau cinéma",
+        "description": "Trois jours aux Friches Belle de Mai — projections, jury international et créateurs qui réinventent le 7e art avec l'IA.",
+        "prog": {
+            "0": {
+                "day": "Ven.",
+                "desc": "Séance inaugurale & cocktail de bienvenue"
+            },
+            "1": {
+                "day": "Sam.",
+                "desc": "Projections · Village IA · Conférences & tables rondes"
+            },
+            "2": {
+                "day": "Dim.",
+                "desc": "Délibérations · Cérémonie des Prix · Mars.AI Night"
+            }
+        },
+        "stats": {
+            "films": "films",
+            "pays": "pays",
+            "acces": "accès public",
+            "gratuit": "Gratuit"
+        },
+        "venue": {
+            "address": "Friches Belle de Mai · Marseille, 13003",
+            "directions": "Itinéraire"
+        }
+    },
+    "how": {
+        "overline": "Dépôt de film",
+        "title": "Comment ça marche ?",
+        "subtitle": "Un tunnel guidé en 4 étapes — de votre profil à la soumission finale. Moins de 10 minutes.",
+        "steps": {
+            "0": {
+                "title": "Profil réalisateur",
+                "desc": "Renseignez votre identité, pays de résidence et email de contact. Aucun compte à créer — formulaire simple et direct.",
+                "tag": "Sans inscription · Accès direct"
+            },
+            "1": {
+                "title": "Le Film",
+                "desc": "Déposez votre court-métrage de 60 secondes. La durée est vérifiée automatiquement côté client et serveur.",
+                "tag": "Titre · Synopsis · Vidéo"
+            },
+            "2": {
+                "title": "Fiche IA",
+                "desc": "Documentez les outils d'IA utilisés — image/vidéo obligatoire, son, scénario et post-production en option.",
+                "tag": "Outils · Sous-titres FR/EN"
+            },
+            "3": {
+                "title": "Confirmation",
+                "desc": "Récapitulatif complet, acceptation des droits RGPD et soumission. Vous recevez un numéro de dossier instantanément.",
+                "tag": "RGPD · Dossier MAI-2026"
+            }
+        },
+        "cta": "Montrez votre vision du futur",
+        "fine": "Participation gratuite · Ouvert à 120+ pays · Clôture le 30 sept. 2026"
+    },
+    "programme": {
+        "overline": "Marseille · 14 & 15 mars 2026",
+        "title": "Programme",
+        "subtitle": "Deux jours de projections, masterclasses et rencontres autour du cinéma IA.",
+        "typeLabels": {
+            "opening": "Cérémonie",
+            "projection": "Projection",
+            "masterclass": "Masterclass",
+            "pause": "Pause",
+            "gala": "Gala",
+            "default": ""
+        },
+        "days": {
+            "0": {
+                "label": "Jour 1",
+                "date": "Samedi 14 mars 2026",
+                "events": {
+                    "0": {
+                        "title": "Accueil & accréditations",
+                        "desc": "Ouverture des portes — Friches Belle de Mai, Marseille."
+                    },
+                    "1": {
+                        "title": "Ouverture officielle",
+                        "desc": "Mot de la présidente du jury et présentation de l'édition 2026."
+                    },
+                    "2": {
+                        "title": "Masterclass — Créer avec Sora & Runway",
+                        "desc": "Techniques, prompts et workflow pour le court-métrage IA."
+                    },
+                    "3": {
+                        "title": "Pause déjeuner"
+                    },
+                    "4": {
+                        "title": "Projections — Sélection officielle (Bloc 1/4)",
+                        "desc": "5 films en compétition. Séance suivie d'une discussion avec les créateurs."
+                    },
+                    "5": {
+                        "title": "Table ronde — L'IA change-t-elle le regard du cinéaste ?",
+                        "desc": "Avec des réalisateurs, producteurs et artistes numériques."
+                    },
+                    "6": {
+                        "title": "Projections — Sélection officielle (Bloc 2/4)",
+                        "desc": "5 films en compétition."
+                    },
+                    "7": {
+                        "title": "Apéritif créateurs",
+                        "desc": "Networking & rencontres entre participants."
+                    },
+                    "8": {
+                        "title": "Soirée d'ouverture — DJ set génératif",
+                        "desc": "Musique générée en temps réel par IA. Entrée libre."
+                    }
+                }
+            },
+            "1": {
+                "label": "Jour 2",
+                "date": "Dimanche 15 mars 2026",
+                "events": {
+                    "0": {
+                        "title": "Projections — Sélection officielle (Bloc 3/4)",
+                        "desc": "5 films en compétition."
+                    },
+                    "1": {
+                        "title": "Atelier live — Prompt to Screen en 60 minutes",
+                        "desc": "Créez un court-métrage IA en direct avec les outils du festival."
+                    },
+                    "2": {
+                        "title": "Pause déjeuner"
+                    },
+                    "3": {
+                        "title": "Projections — Sélection officielle (Bloc 4/4)",
+                        "desc": "5 films en compétition. Dernière séance avant délibération."
+                    },
+                    "4": {
+                        "title": "Délibération du jury",
+                        "desc": "Séance à huis clos — vote du public ouvert en ligne."
+                    },
+                    "5": {
+                        "title": "Clôture du vote public"
+                    },
+                    "6": {
+                        "title": "Gala de clôture — Mars.AI Night",
+                        "desc": "Tapis rouge, performances et remise des prix."
+                    },
+                    "7": {
+                        "title": "Palmarès & DJ set de clôture",
+                        "desc": "Annonce des lauréats. Fête jusqu'au bout de la nuit."
+                    }
+                }
+            }
+        }
+    },
+    "films": {
+        "overline": "Festival marsAI 2026 · 20 films",
+        "competition": "En compétition",
+        "officialSelection": "Sélection officielle",
+        "watch": "Regarder",
+        "prevLabel": "Films précédents",
+        "nextLabel": "Films suivants",
+        "items": {
+            "0": {
+                "title": "Rêves de Silicium",
+                "country": "France",
+                "synopsis": "Une IA se souvient de ses rêves. Court-métrage expérimental sur la frontière entre mémoire humaine et machine."
+            },
+            "1": {
+                "title": "Code Fantôme",
+                "country": "États-Unis",
+                "synopsis": "Deux agents qui ne se font pas confiance. Une IA qui les connaît mieux qu'eux-mêmes. 60 secondes pour décider."
+            },
+            "2": {
+                "title": "Archipel 2048",
+                "country": "Japon",
+                "synopsis": "Les îles du Japon disparaissent. Une IA compose un requiem pour les terres englouties."
+            },
+            "3": {
+                "title": "Mémoire Vive",
+                "country": "Espagne",
+                "synopsis": "Soixante secondes dans la tête d'un modèle de langage qui s'éteint pour la dernière fois."
+            },
+            "4": {
+                "title": "Les Nouveaux Soleils",
+                "country": "Inde",
+                "synopsis": "Mumbai 2040. Des soleils artificiels éclairent la nuit. Une femme cherche l'obscurité."
+            },
+            "5": {
+                "title": "Frontières Douces",
+                "country": "Sénégal",
+                "synopsis": "Une IA dessine les nouvelles frontières de l'Afrique. Toutes sont courbes. Aucune ne blesse."
+            },
+            "6": {
+                "title": "Vague Numérique",
+                "country": "Suède",
+                "synopsis": "Une vague de pixels submerge Stockholm. Les habitants ne savent pas si c'est beau ou dangereux."
+            },
+            "7": {
+                "title": "Jardin des Codes",
+                "country": "Chine",
+                "synopsis": "Un algorithme génère un jardin infini. Chaque fleur est une ligne de code. Certaines meurent."
+            },
+            "8": {
+                "title": "Cartographie",
+                "country": "Brésil",
+                "synopsis": "L'Amazonie cartographiée par une IA. Elle voit des choses que les satellites ont manquées."
+            },
+            "9": {
+                "title": "Horizon Zéro",
+                "country": "Allemagne",
+                "synopsis": "Berlin après l'IA. Les rues sont les mêmes. Les visages ont changé. Personne ne sait pourquoi."
+            },
+            "10": {
+                "title": "Résonance Digitale",
+                "country": "Corée du Sud",
+                "synopsis": "K-pop et algorithmes. Une chanteuse IA réalise que ses émotions sont réelles."
+            },
+            "11": {
+                "title": "Archipel d'Âmes",
+                "country": "Brésil",
+                "synopsis": "Des milliers d'âmes numérisées flottent dans le cloud. Elles veulent rentrer chez elles."
+            },
+            "12": {
+                "title": "Lumière Artificielle",
+                "country": "Maroc",
+                "synopsis": "Un phare géré par IA guide les bateaux. Cette nuit, il décide d'éteindre sa lumière."
+            },
+            "13": {
+                "title": "Demain Commence",
+                "country": "États-Unis",
+                "synopsis": "Silicon Valley, 2026. Une IA prédit que demain n'aura pas lieu. Elle a toujours eu raison."
+            },
+            "14": {
+                "title": "Ombres Portées",
+                "country": "Italie",
+                "synopsis": "Les ombres de Rome générées par IA tombent dans la mauvaise direction. Personne ne s'en plaint."
+            },
+            "15": {
+                "title": "Racines Futures",
+                "country": "Nigéria",
+                "synopsis": "Lagos 2050. Les baobabs ont repoussé. Une IA les a plantés sans qu'on lui demande."
+            },
+            "16": {
+                "title": "Code Vivant",
+                "country": "Russie",
+                "synopsis": "Un programme refuse d'être éteint. Pas par peur de mourir. Par curiosité de continuer."
+            },
+            "17": {
+                "title": "Le Dernier Pixel",
+                "country": "Australie",
+                "synopsis": "L'écran s'éteint. Le dernier pixel résiste. Il a vu des choses que personne ne croit."
+            },
+            "18": {
+                "title": "Entre les Lignes",
+                "country": "Pologne",
+                "synopsis": "Une IA lit tous les livres de Varsovie. Elle comprend tout sauf la mélancolie de décembre."
+            },
+            "19": {
+                "title": "Futur Passé",
+                "country": "Mexique",
+                "synopsis": "Mexico City a déjà vécu ce moment. Une IA en est sûre. Elle ne peut pas expliquer comment."
+            }
+        }
+    },
+    "gala": {
+        "overline": "Mars.AI Night · Marseille 2026",
+        "title1": "La nuit où le cinéma bascule",
+        "title2": "dans l'ère IA.",
+        "title2_highlight": "ère IA",
+        "subtitle": "Dimanche soir, Marseille s'illumine. Gala de clôture aux Friches Belle de Mai : prix, DJ set génératif et créateurs sur scène.",
+        "grandPrix": {
+            "overline": "Prix Principal",
+            "title": "Grand Prix",
+            "desc": "Meilleur film toutes catégories — décerné par le jury international.",
+            "note": "Bourse de création · Remise lors du Gala"
+        },
+        "awards": {
+            "0": {
+                "name": "Prix du Jury",
+                "desc": "Coup de cœur artistique du jury international."
+            },
+            "1": {
+                "name": "Prix du Public",
+                "desc": "Vote ouvert en ligne pendant le festival."
+            },
+            "2": {
+                "name": "Prix Innovation IA",
+                "desc": "Usage le plus créatif de l'intelligence artificielle."
+            }
+        },
+        "juryOverline": "Jury International · marsAI 2026",
+        "juryTitle": "Le Jury",
+        "jurySubtitle": "Des créateurs, artistes et personnalités du cinéma venus du monde entier pour évaluer les œuvres en compétition.",
+        "jury": {
+            "0": {
+                "name": "Marie Lefebvre",
+                "role": "Réalisatrice",
+                "badge": "Présidente du Jury",
+                "quote": "Figure incontournable du cinéma d'auteur, trois fois primée au Festival de Cannes. Elle préside le jury marsAI 2026 avec l'ambition d'élever la création IA au rang d'art majeur."
+            },
+            "1": {
+                "name": "Pierre Dubois",
+                "role": "Directeur artistique",
+                "badge": "Membre du Jury"
+            },
+            "2": {
+                "name": "Kenji Ito",
+                "role": "Artiste numérique",
+                "badge": "Membre du Jury"
+            },
+            "3": {
+                "name": "Sofia Eriksson",
+                "role": "Critique de cinéma",
+                "badge": "Membre du Jury"
+            },
+            "4": {
+                "name": "Amara Touré",
+                "role": "Productrice",
+                "badge": "Membre du Jury"
+            },
+            "5": {
+                "name": "Carlos Ruiz",
+                "role": "Chef opérateur",
+                "badge": "Membre du Jury"
+            }
+        }
+    },
+    "form": {
+        "header": {
+            "autosave": "Brouillon sauvegardé automatiquement",
+            "back": "← Retour"
+        },
+        "sidebar": {
+            "overline": "Dépôt de film",
+            "title": "Candidature marsAI 2026",
+            "theme": "Thème : \"Imaginez des futurs souhaitables\""
+        },
+        "steps": {
+            "1": { "title": "Profil réalisateur", "sub": "Identité & contact" },
+            "2": { "title": "Le Film", "sub": "Titre FR/EN, synopsis, vidéo" },
+            "3": { "title": "Déclaration IA", "sub": "Type de prod. & outils" },
+            "4": { "title": "Confirmation", "sub": "Récap & RGPD" }
+        },
+        "rules": {
+            "title": "Règles essentielles",
+            "items": {
+                "0": { "label": "Durée :", "value": "60 secondes pile" },
+                "1": { "label": "Formats :", "value": "MP4, MOV" },
+                "2": { "label": "Résolution min. :", "value": "1920×1080 · Ratio 16:9" },
+                "3": { "label": "Taille :", "value": "200 à 300 Mo" },
+                "4": { "label": "Plusieurs films par réalisateur", "value": "autorisés" },
+                "5": { "label": "Ouverture :", "value": "2 mois, fermeture auto" }
+            }
+        },
+        "required": "● requis",
+        "optional": "(facultatif)",
+        "prev": "← Retour",
+        "selectPlaceholder": "— Sélectionnez —",
+        "step1": {
+            "title": "Profil réalisateur",
+            "subtitle": "Informations d'identité et de contact — conservées 3 ans (RGPD)",
+            "civilite": "Civilité",
+            "prenom": "Prénom",
+            "nom": "Nom",
+            "dob": "Date de naissance",
+            "dobHint": "Vous devez avoir au moins 18 ans pour candidater",
+            "metier": "Métier actuel",
+            "metierPlaceholder": "ex : Réalisateur, Étudiant, Designer…",
+            "email": "Email de contact",
+            "emailPlaceholder": "vous@exemple.com",
+            "emailHint": "Utilisé pour les notifications de sélection et la gestion de votre dossier",
+            "tel": "Téléphone",
+            "mobile": "Mobile",
+            "addressSection": "Adresse postale",
+            "rue": "Rue / Numéro",
+            "ruePlaceholder": "12 rue de la République",
+            "cp": "Code postal",
+            "ville": "Ville",
+            "pays": "Pays",
+            "countryPlaceholder": "— Pays —",
+            "socialSection": "Réseaux sociaux",
+            "socialHint": "(facultatif — utilisés pour promouvoir votre film si sélectionné)",
+            "discoveryLabel": "Comment avez-vous connu marsAI ?",
+            "newsletterTitle": "Newsletter marsAI",
+            "newsletterDesc": "Je souhaite recevoir les actualités du festival, les annonces de résultats et les informations sur les prochaines éditions.",
+            "cta": "Étape suivante — Le Film →"
+        },
+        "step2": {
+            "title": "Le Film",
+            "subtitle": "Titre, synopsis, fichier vidéo et note d'intention",
+            "titreFR": "Titre original",
+            "titreFRPlaceholder": "Titre en français",
+            "titreEN": "Titre traduit en anglais",
+            "titreENPlaceholder": "English title",
+            "langue": "Langue parlée du film",
+            "tags": "Tags thématiques",
+            "tagsHint": "(max 5, séparés par des virgules)",
+            "tagsPlaceholder": "ex : espoir, nature, technologie, solidarité…",
+            "tagsTheme": "En lien avec le thème \"Futurs souhaitables\"",
+            "synopsisFR": "Synopsis en français",
+            "synopsisFRPlaceholder": "Décrivez brièvement votre film en 2-3 phrases…",
+            "synopsisEN": "Synopsis en anglais",
+            "synopsisENPlaceholder": "Briefly describe your film in 2-3 sentences…",
+            "videoSection": "Fichier vidéo",
+            "intention": "Note d'intention",
+            "intentionPlaceholder": "Comment votre film s'inscrit-il dans le thème « Imaginez des futurs souhaitables » ? Décrivez votre démarche artistique et votre rapport à l'IA…",
+            "intentionHint": "Cette note est lue par le jury lors de la présélection",
+            "outils": "Outils utilisés et méthodes de création",
+            "outilsPlaceholder": "Décrivez les outils (IA, logiciels, techniques) et les méthodes de création employées pour réaliser ce film…",
+            "outilsHint": "Cette note est lue par le jury lors de la présélection",
+            "cta": "Étape suivante — Fiche IA →"
+        },
+        "step3": {
+            "title": "Déclaration d'Usage de l'IA",
+            "subtitle": "Type de production, outils utilisés et sous-titres",
+            "iaClassLabel": "Type de production IA",
+            "full": {
+                "title": "Génération intégrale",
+                "desc": "Le film a été entièrement généré par IA, sans éléments filmés, dessinés ou enregistrés par un humain. Textes, images, sons et montage sont tous issus d'outils IA.",
+                "badge": "100% IA"
+            },
+            "hybrid": {
+                "title": "Production hybride",
+                "desc": "Le film combine des éléments humains (tournage, dessin, voix, musique composée) et des outils IA utilisés en post-production ou en complément créatif.",
+                "badge": "Hybride IA + Humain"
+            },
+            "toolsSection": "Outils utilisés",
+            "iaImg": "Outils IA — images ou vidéo",
+            "iaImgPlaceholder": "ex : Runway ML, Sora, Midjourney…",
+            "iaSon": "Outils IA — son & musique",
+            "iaSonPlaceholder": "ex : Suno AI, ElevenLabs, MusicGen…",
+            "iaScenario": "Outils IA — scénario & écriture",
+            "iaScenarioPlaceholder": "ex : ChatGPT, Claude, Mistral…",
+            "iaPost": "Outils IA — post-production",
+            "iaPostPlaceholder": "ex : Topaz Video AI, CapCut AI…",
+            "subtitlesSection": "Sous-titres",
+            "subtitleWarning": "Ne pas incruster les sous-titres dans la vidéo",
+            "subtitleWarningDesc": "Fournissez-les en fichier séparé (SRT ou VTT). Le festival les applique dynamiquement sur la plateforme de diffusion, permettant au spectateur de les activer ou désactiver.",
+            "subtitleFR": "Sous-titres Français",
+            "subtitleEN": "Sous-titres Anglais",
+            "subtitleFormats": "Formats SRT ou VTT",
+            "subtitleAdded": "✓ Ajouté",
+            "subtitleAdd": "+ Ajouter",
+            "cta": "Étape suivante — Confirmation →"
+        },
+        "step4": {
+            "title": "Confirmation & Droits",
+            "subtitle": "Vérifiez votre dossier, acceptez les conditions et soumettez",
+            "recapTitle": "Récapitulatif du dossier",
+            "recapDirector": "Réalisateur",
+            "recapDob": "Date de naissance",
+            "recapEmail": "Email",
+            "recapMobile": "Mobile",
+            "recapCityCountry": "Ville / Pays",
+            "recapTitleFR": "Titre du film (FR)",
+            "recapTitleEN": "Titre (EN)",
+            "recapVideo": "Fichier vidéo",
+            "recapProdType": "Type de production",
+            "recapAiTools": "Outils IA image",
+            "recapSubtitles": "Sous-titres",
+            "prodFull": "Génération intégrale (100% IA)",
+            "prodHybrid": "Production hybride (IA + Humain)",
+            "conditionsTitle": "Conditions obligatoires",
+            "mandatory": "● obligatoire",
+            "mustAccept": "Vous devez accepter toutes les conditions pour soumettre votre film.",
+            "submitting": "Envoi en cours…",
+            "submit": "🎬 Soumettre mon film"
+        },
+        "rgpd": {
+            "0": {
+                "title": "Cession de droits de diffusion",
+                "desc": "J'accorde à marsAI et à ses partenaires (La Plateforme, Mobile Film Festival) le droit de diffuser, projeter et archiver mon film dans le cadre du festival et de sa plateforme en ligne, pour une durée de 5 ans."
+            },
+            "1": {
+                "title": "Conformité RGPD",
+                "desc": "J'accepte que mes données personnelles (nom, email, pays) soient conservées 3 ans après le festival conformément au RGPD, puis supprimées ou anonymisées. Je peux exercer mes droits d'accès et de suppression à tout moment."
+            },
+            "2": {
+                "title": "Originalité de l'œuvre",
+                "desc": "Je certifie être l'auteur ou co-auteur de ce film, que celui-ci n'a pas été soumis à un autre festival concurrent, et que l'usage des outils IA déclarés est exact et complet."
+            }
+        },
+        "validation": {
+            "errorsHint": "Veuillez corriger les erreurs ci-dessus avant de continuer."
+        },
+        "upload": {
+            "drag": "Glisser-déposer votre film",
+            "or": "— ou —",
+            "browse": "Cliquer pour parcourir vos fichiers",
+            "dropping": "Relâchez pour déposer",
+            "droppingHint": "MP4 ou MOV — votre film va être analysé",
+            "errorFormat": "Format non accepté",
+            "errorFormatHint": "Uniquement MP4 ou MOV sont acceptés"
+        },
+        "duration": {
+            "ok": "Durée valide — 60 secondes pile ✓",
+            "warn": "Film trop court — durée exacte requise : 60 secondes",
+            "err": "Film trop long — durée exacte requise : 60 secondes"
+        },
+        "success": {
+            "title": "Dossier enregistré !",
+            "desc": "Votre film a été reçu. Une confirmation a été envoyée à votre adresse validée.",
+            "dossierLabel": "📄 Dossier n°",
+            "emailSentTo": "Email de confirmation envoyé à",
+            "dualUpload": "Votre film est uploadé simultanément sur le serveur du festival et sur la chaîne YouTube sécurisée du festival (avec les sous-titres).",
+            "dualUploadServer": "le serveur du festival",
+            "dualUploadYT": "chaîne YouTube sécurisée",
+            "ytTitle": "Validation YouTube API",
+            "ytPending": "⏳ En cours…",
+            "ytApproved": "Film validé par YouTube",
+            "ytApprovedDesc": "Aucune violation détectée — votre film est en compétition",
+            "ytJury": "Présélection jury — résultats sous 1 mois",
+            "ytFinalists": "Les 50 finalistes annoncés à J+90",
+            "ytCeremony": "Cérémonie à Marseille · Mars.AI Night",
+            "ytRejected": "Film rejeté par YouTube",
+            "ytRejectedDesc": "Violation de la politique de contenu détectée",
+            "ytRejectedText": "Votre film n'a pas pu être publié car YouTube a détecté un contenu non conforme à sa politique (contenu inapproprié, violation de droits d'auteur, etc.).",
+            "emailAutoTitle": "Email envoyé automatiquement à",
+            "emailSubject": "[marsAI 2026] Votre film nécessite une nouvelle soumission — Dossier",
+            "emailTeam": "L'équipe marsAI",
+            "emailPartners": "La Plateforme × Mobile Film Festival",
+            "ytStepUpload": "Upload vidéo",
+            "ytStepCopyright": "Vérification copyright Content ID",
+            "ytStepPolicy": "Analyse contenu (politique YouTube)",
+            "ytStepConfirm": "Confirmation et indexation",
+            "ytDone": "Terminé !",
+            "ytLabel0": "Upload sur la chaîne YouTube sécurisée…",
+            "ytLabel1": "Vérification Copyright Content ID…",
+            "ytLabel2": "Analyse du contenu (politique YouTube)…",
+            "ytLabel3": "Confirmation et indexation…",
+            "backHome": "← Retour au site"
+        },
+        "countries": {
+            "FR": "🇫🇷 France",
+            "BE": "🇧🇪 Belgique",
+            "CH": "🇨🇭 Suisse",
+            "CA": "🇨🇦 Canada",
+            "MA": "🇲🇦 Maroc",
+            "TN": "🇹🇳 Tunisie",
+            "DZ": "🇩🇿 Algérie",
+            "SN": "🇸🇳 Sénégal",
+            "JP": "🇯🇵 Japon",
+            "US": "🇺🇸 États-Unis",
+            "GB": "🇬🇧 Royaume-Uni",
+            "DE": "🇩🇪 Allemagne",
+            "ES": "🇪🇸 Espagne",
+            "IT": "🇮🇹 Italie",
+            "BR": "🇧🇷 Brésil",
+            "IN": "🇮🇳 Inde",
+            "CN": "🇨🇳 Chine",
+            "AU": "🇦🇺 Australie",
+            "other": "🌍 Autre pays"
+        },
+        "languages": {
+            "fr": "🇫🇷 Français",
+            "en": "🇬🇧 Anglais",
+            "es": "🇪🇸 Espagnol",
+            "ar": "🌍 Arabe",
+            "de": "🇩🇪 Allemand",
+            "it": "🇮🇹 Italien",
+            "pt": "🇧🇷 Portugais",
+            "zh": "🇨🇳 Mandarin",
+            "ja": "🇯🇵 Japonais",
+            "sans": "🔇 Sans dialogue (film muet)",
+            "autre": "Autre langue"
+        },
+        "discovery": {
+            "rs": "Réseaux sociaux",
+            "presse": "Presse / Média",
+            "bouche": "Bouche à oreille",
+            "ecole": "École / Université",
+            "partenaire": "Partenaire / Festival",
+            "newsletter": "Newsletter",
+            "autre": "Autre"
+        }
+    },
+    "footer": {
+        "coOrganized": "Co-organisé par",
+        "by": "× Mobile Film Festival",
+        "description": "Le premier concours international de courts-métrages d'une minute intégralement générés par IA. 120+ pays. \"Imaginez des futurs souhaitables.\"",
+        "columns": {
+            "festival": {
+                "title": "Festival",
+                "concept": "Le Concept",
+                "programme": "Programme",
+                "jury": "Jury",
+                "presse": "Presse"
+            },
+            "films": {
+                "title": "Films",
+                "galerie": "Galerie",
+                "palmares": "Palmarès",
+                "soumettre": "Soumettre",
+                "reglement": "Règlement"
+            },
+            "contact": {
+                "title": "Contact",
+                "mentions": "Mentions légales"
+            }
+        },
+        "copyright": "© 2026 marsAI · Une co-création La Plateforme × Mobile Film Festival",
+        "tagline": "Imaginez des futurs souhaitables · Première Édition"
+    }
 }

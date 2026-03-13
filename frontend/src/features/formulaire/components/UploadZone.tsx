@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import type { DragState } from "../types";
 import { VIDEO_ACCEPTED_EXTENSIONS, VIDEO_ACCEPTED_TYPES } from "../constants";
 
@@ -8,6 +9,7 @@ interface UploadZoneProps {
 }
 
 const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Element | null => {
+    const { t } = useTranslation();
     const [dragState, setDragState] = useState<DragState>("idle");
     const dragDepthRef = useRef<number>(0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -142,11 +144,13 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                             <line x1="12" y1="12" x2="12" y2="21" />
                             <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
                         </svg>
-                        Glisser-déposer votre film
+                        {t("form.upload.drag")}
                     </div>
-                    <div className="text-sm text-mist mb-3.5 tracking-wide">— ou —</div>
+                    <div className="text-sm text-mist mb-3.5 tracking-wide">
+                        {t("form.upload.or")}
+                    </div>
                     <div className="text-sm text-aurora font-semibold underline mb-7">
-                        Cliquer pour parcourir vos fichiers
+                        {t("form.upload.browse")}
                     </div>
                     <div className="flex gap-2 justify-center flex-wrap">
                         {["MP4", "MOV", "200–300 Mo", "16:9", "60 sec pile"].map((spec) => (
@@ -166,11 +170,9 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                 <>
                     <div className="text-4xl mb-4 uz-bounce-icon">⬇️</div>
                     <div className="text-lg font-bold font-display text-aurora mb-2">
-                        Relâchez pour déposer
+                        {t("form.upload.dropping")}
                     </div>
-                    <div className="text-sm text-aurora/70">
-                        MP4 ou MOV — votre film va être analysé
-                    </div>
+                    <div className="text-sm text-aurora/70">{t("form.upload.droppingHint")}</div>
                 </>
             )}
 
@@ -179,9 +181,9 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                 <>
                     <div className="text-4xl mb-4">🚫</div>
                     <div className="text-lg font-bold font-display text-coral mb-2">
-                        Format non accepté
+                        {t("form.upload.errorFormat")}
                     </div>
-                    <div className="text-sm text-coral/80">Uniquement MP4 ou MOV sont acceptés</div>
+                    <div className="text-sm text-coral/80">{t("form.upload.errorFormatHint")}</div>
                 </>
             )}
         </div>

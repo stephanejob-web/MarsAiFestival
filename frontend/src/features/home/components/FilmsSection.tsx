@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import videoAsset from "../../../assets/video.mp4";
 import videoPlayback from "../../../assets/videoplayback.mp4";
 
@@ -1590,192 +1591,40 @@ const getPosterArt = (idx: number): React.JSX.Element => {
     return arts[idx % arts.length];
 };
 
-const ALL_FILMS: Film[] = [
-    {
-        flag: "🇫🇷",
-        author: "Léa Fontaine",
-        title: "Rêves de Silicium",
-        country: "France",
-        synopsis:
-            "Une IA se souvient de ses rêves. Court-métrage expérimental sur la frontière entre mémoire humaine et machine.",
-        gradient: "from-aurora/60 via-[#0a1628]",
-    },
-    {
-        flag: "🇺🇸",
-        author: "Brad Pitt · Tom Cruise",
-        title: "Code Fantôme",
-        country: "États-Unis",
-        synopsis:
-            "Deux agents qui ne se font pas confiance. Une IA qui les connaît mieux qu'eux-mêmes. 60 secondes pour décider.",
-        gradient: "from-orange-600/60 via-[#1a0800]",
-    },
-    {
-        flag: "🇯🇵",
-        author: "Kenji Ito",
-        title: "Archipel 2048",
-        country: "Japon",
-        synopsis:
-            "Les îles du Japon disparaissent. Une IA compose un requiem pour les terres englouties.",
-        gradient: "from-solar/50 via-[#1a1400]",
-    },
-    {
-        flag: "🇪🇸",
-        author: "Carlos Ruiz",
-        title: "Mémoire Vive",
-        country: "Espagne",
-        synopsis:
-            "Soixante secondes dans la tête d'un modèle de langage qui s'éteint pour la dernière fois.",
-        gradient: "from-coral/60 via-[#280a0a]",
-    },
-    {
-        flag: "🇮🇳",
-        author: "Priya Mehta",
-        title: "Les Nouveaux Soleils",
-        country: "Inde",
-        synopsis:
-            "Mumbai 2040. Des soleils artificiels éclairent la nuit. Une femme cherche l'obscurité.",
-        gradient: "from-blue-500/60 via-[#0a1428]",
-    },
-    {
-        flag: "🇸🇳",
-        author: "Omar Diallo",
-        title: "Frontières Douces",
-        country: "Sénégal",
-        synopsis:
-            "Une IA dessine les nouvelles frontières de l'Afrique. Toutes sont courbes. Aucune ne blesse.",
-        gradient: "from-emerald-500/60 via-[#0a2814]",
-    },
-    {
-        flag: "🇸🇪",
-        author: "Sofia Ek",
-        title: "Vague Numérique",
-        country: "Suède",
-        synopsis:
-            "Une vague de pixels submerge Stockholm. Les habitants ne savent pas si c'est beau ou dangereux.",
-        gradient: "from-pink-500/60 via-[#280a1e]",
-    },
-    {
-        flag: "🇨🇳",
-        author: "Lin Wei",
-        title: "Jardin des Codes",
-        country: "Chine",
-        synopsis:
-            "Un algorithme génère un jardin infini. Chaque fleur est une ligne de code. Certaines meurent.",
-        gradient: "from-indigo-500/60 via-[#0a0a28]",
-    },
-    {
-        flag: "🇧🇷",
-        author: "Yuki Tanaka",
-        title: "Cartographie",
-        country: "Brésil",
-        synopsis:
-            "L'Amazonie cartographiée par une IA. Elle voit des choses que les satellites ont manquées.",
-        gradient: "from-orange-500/60 via-[#281400]",
-    },
-    {
-        flag: "🇩🇪",
-        author: "Mia Schultz",
-        title: "Horizon Zéro",
-        country: "Allemagne",
-        synopsis:
-            "Berlin après l'IA. Les rues sont les mêmes. Les visages ont changé. Personne ne sait pourquoi.",
-        gradient: "from-teal-500/60 via-[#0a2828]",
-    },
-    {
-        flag: "🇰🇷",
-        author: "Ji-young Park",
-        title: "Résonance Digitale",
-        country: "Corée du Sud",
-        synopsis: "K-pop et algorithmes. Une chanteuse IA réalise que ses émotions sont réelles.",
-        gradient: "from-aurora/50 via-[#0a1e28]",
-    },
-    {
-        flag: "🇧🇷",
-        author: "Valentina Costa",
-        title: "Archipel d'Âmes",
-        country: "Brésil",
-        synopsis:
-            "Des milliers d'âmes numérisées flottent dans le cloud. Elles veulent rentrer chez elles.",
-        gradient: "from-lavande/50 via-[#1e0a28]",
-    },
-    {
-        flag: "🇲🇦",
-        author: "Yasmine El Fassi",
-        title: "Lumière Artificielle",
-        country: "Maroc",
-        synopsis:
-            "Un phare géré par IA guide les bateaux. Cette nuit, il décide d'éteindre sa lumière.",
-        gradient: "from-solar/45 via-[#281e00]",
-    },
-    {
-        flag: "🇺🇸",
-        author: "Alex Chen",
-        title: "Demain Commence",
-        country: "États-Unis",
-        synopsis:
-            "Silicon Valley, 2026. Une IA prédit que demain n'aura pas lieu. Elle a toujours eu raison.",
-        gradient: "from-coral/50 via-[#280a14]",
-    },
-    {
-        flag: "🇮🇹",
-        author: "Marco Ferretti",
-        title: "Ombres Portées",
-        country: "Italie",
-        synopsis:
-            "Les ombres de Rome générées par IA tombent dans la mauvaise direction. Personne ne s'en plaint.",
-        gradient: "from-blue-400/60 via-[#00141e]",
-    },
-    {
-        flag: "🇳🇬",
-        author: "Chioma Adeyemi",
-        title: "Racines Futures",
-        country: "Nigéria",
-        synopsis:
-            "Lagos 2050. Les baobabs ont repoussé. Une IA les a plantés sans qu'on lui demande.",
-        gradient: "from-emerald-400/60 via-[#001e0a]",
-    },
-    {
-        flag: "🇷🇺",
-        author: "Anastasia Volkov",
-        title: "Code Vivant",
-        country: "Russie",
-        synopsis:
-            "Un programme refuse d'être éteint. Pas par peur de mourir. Par curiosité de continuer.",
-        gradient: "from-pink-400/60 via-[#1e0014]",
-    },
-    {
-        flag: "🇦🇺",
-        author: "Noah Williams",
-        title: "Le Dernier Pixel",
-        country: "Australie",
-        synopsis:
-            "L'écran s'éteint. Le dernier pixel résiste. Il a vu des choses que personne ne croit.",
-        gradient: "from-indigo-400/60 via-[#00001e]",
-    },
-    {
-        flag: "🇵🇱",
-        author: "Maja Kowalski",
-        title: "Entre les Lignes",
-        country: "Pologne",
-        synopsis:
-            "Une IA lit tous les livres de Varsovie. Elle comprend tout sauf la mélancolie de décembre.",
-        gradient: "from-orange-400/60 via-[#1e0a00]",
-    },
-    {
-        flag: "🇲🇽",
-        author: "Diego Hernández",
-        title: "Futur Passé",
-        country: "Mexique",
-        synopsis:
-            "Mexico City a déjà vécu ce moment. Une IA en est sûre. Elle ne peut pas expliquer comment.",
-        gradient: "from-teal-400/60 via-[#001e1e]",
-    },
+interface FilmStatic {
+    flag: string;
+    author: string;
+    gradient: string;
+}
+
+const FILMS_STATIC: FilmStatic[] = [
+    { flag: "🇫🇷", author: "Léa Fontaine", gradient: "from-aurora/60 via-[#0a1628]" },
+    { flag: "🇺🇸", author: "Brad Pitt · Tom Cruise", gradient: "from-orange-600/60 via-[#1a0800]" },
+    { flag: "🇯🇵", author: "Kenji Ito", gradient: "from-solar/50 via-[#1a1400]" },
+    { flag: "🇪🇸", author: "Carlos Ruiz", gradient: "from-coral/60 via-[#280a0a]" },
+    { flag: "🇮🇳", author: "Priya Mehta", gradient: "from-blue-500/60 via-[#0a1428]" },
+    { flag: "🇸🇳", author: "Omar Diallo", gradient: "from-emerald-500/60 via-[#0a2814]" },
+    { flag: "🇸🇪", author: "Sofia Ek", gradient: "from-pink-500/60 via-[#280a1e]" },
+    { flag: "🇨🇳", author: "Lin Wei", gradient: "from-indigo-500/60 via-[#0a0a28]" },
+    { flag: "🇧🇷", author: "Yuki Tanaka", gradient: "from-orange-500/60 via-[#281400]" },
+    { flag: "🇩🇪", author: "Mia Schultz", gradient: "from-teal-500/60 via-[#0a2828]" },
+    { flag: "🇰🇷", author: "Ji-young Park", gradient: "from-aurora/50 via-[#0a1e28]" },
+    { flag: "🇧🇷", author: "Valentina Costa", gradient: "from-lavande/50 via-[#1e0a28]" },
+    { flag: "🇲🇦", author: "Yasmine El Fassi", gradient: "from-solar/45 via-[#281e00]" },
+    { flag: "🇺🇸", author: "Alex Chen", gradient: "from-coral/50 via-[#280a14]" },
+    { flag: "🇮🇹", author: "Marco Ferretti", gradient: "from-blue-400/60 via-[#00141e]" },
+    { flag: "🇳🇬", author: "Chioma Adeyemi", gradient: "from-emerald-400/60 via-[#001e0a]" },
+    { flag: "🇷🇺", author: "Anastasia Volkov", gradient: "from-pink-400/60 via-[#1e0014]" },
+    { flag: "🇦🇺", author: "Noah Williams", gradient: "from-indigo-400/60 via-[#00001e]" },
+    { flag: "🇵🇱", author: "Maja Kowalski", gradient: "from-orange-400/60 via-[#1e0a00]" },
+    { flag: "🇲🇽", author: "Diego Hernández", gradient: "from-teal-400/60 via-[#001e1e]" },
 ];
 
 const VISIBLE_COUNT = 6;
 
 const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const { t } = useTranslation();
 
     useEffect((): void => {
         videoRef.current?.load();
@@ -1824,7 +1673,7 @@ const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
 
                 <div className="flex items-center flex-wrap gap-2 mb-3">
                     <span className="text-[#46d369] font-semibold text-sm">
-                        Sélection officielle
+                        {t("films.officialSelection")}
                     </span>
                     <span className="text-white/30">·</span>
                     <span className="text-white/50 text-sm">2026</span>
@@ -1852,7 +1701,7 @@ const FilmHero = ({ film, videoSrc }: FilmHeroProps): React.JSX.Element => {
                         onClick={handleWatch}
                         className="flex items-center gap-2 bg-white text-black font-bold text-sm px-7 py-2.5 rounded hover:bg-white/90 transition-colors"
                     >
-                        <span aria-hidden="true">▶</span> Regarder
+                        <span aria-hidden="true">▶</span> {t("films.watch")}
                     </button>
                 </div>
             </div>
@@ -1926,6 +1775,21 @@ const FilmCard = ({ film, filmIdx, isSelected, onSelect }: FilmCardProps): React
 const FilmsSection = (): React.JSX.Element => {
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
     const [rowStart, setRowStart] = useState<number>(0);
+    const { t } = useTranslation();
+
+    const filmItems = t("films.items", { returnObjects: true }) as Record<
+        string,
+        { title: string; country: string; synopsis: string }
+    >;
+
+    const ALL_FILMS: Film[] = FILMS_STATIC.map((s, i) => ({
+        flag: s.flag,
+        author: s.author,
+        gradient: s.gradient,
+        title: filmItems[String(i)]?.title ?? "",
+        country: filmItems[String(i)]?.country ?? "",
+        synopsis: filmItems[String(i)]?.synopsis ?? "",
+    }));
 
     const selectedFilm = ALL_FILMS[selectedIdx];
     const currentVideoSrc = selectedIdx % 2 === 0 ? videoAsset : videoPlayback;
@@ -1934,17 +1798,17 @@ const FilmsSection = (): React.JSX.Element => {
     const totalPages = Math.ceil(ALL_FILMS.length / VISIBLE_COUNT);
     const currentPage = Math.floor(rowStart / VISIBLE_COUNT);
 
-    const handlePrev = useCallback((): void => {
+    const handlePrev = (): void => {
         setRowStart((prev) => Math.max(0, prev - VISIBLE_COUNT));
-    }, []);
+    };
 
-    const handleNext = useCallback((): void => {
+    const handleNext = (): void => {
         setRowStart((prev) => Math.min(ALL_FILMS.length - VISIBLE_COUNT, prev + VISIBLE_COUNT));
-    }, []);
+    };
 
-    const handleSelect = useCallback((absoluteIdx: number): void => {
+    const handleSelect = (absoluteIdx: number): void => {
         setSelectedIdx(absoluteIdx);
-    }, []);
+    };
 
     return (
         <section id="films" className="bg-black">
@@ -1955,8 +1819,8 @@ const FilmsSection = (): React.JSX.Element => {
             <div className="pt-6 pb-10">
                 {/* Label */}
                 <div className="flex items-center gap-3 mb-4 px-12">
-                    <span className="text-sm font-bold text-white">En compétition</span>
-                    <span className="font-mono text-xs text-aurora/70">marsAI 2026 · 20 films</span>
+                    <span className="text-sm font-bold text-white">{t("films.competition")}</span>
+                    <span className="font-mono text-xs text-aurora/70">{t("films.overline")}</span>
                 </div>
 
                 {/* Carousel */}
@@ -1965,7 +1829,7 @@ const FilmsSection = (): React.JSX.Element => {
                     <button
                         onClick={handlePrev}
                         disabled={!canPrev}
-                        aria-label="Films précédents"
+                        aria-label={t("films.prevLabel")}
                         className="absolute left-0 top-0 bottom-0 z-20 w-14 flex items-center justify-center bg-gradient-to-r from-black/90 via-black/50 to-transparent opacity-0 group-hover/row:opacity-100 disabled:!opacity-0 transition-opacity duration-200 focus-visible:outline-none"
                     >
                         <svg
@@ -2012,7 +1876,7 @@ const FilmsSection = (): React.JSX.Element => {
                     <button
                         onClick={handleNext}
                         disabled={!canNext}
-                        aria-label="Films suivants"
+                        aria-label={t("films.nextLabel")}
                         className="absolute right-0 top-0 bottom-0 z-20 w-14 flex items-center justify-center bg-gradient-to-l from-black/90 via-black/50 to-transparent opacity-0 group-hover/row:opacity-100 disabled:!opacity-0 transition-opacity duration-200 focus-visible:outline-none"
                     >
                         <svg

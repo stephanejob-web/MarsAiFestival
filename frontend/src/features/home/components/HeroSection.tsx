@@ -1,30 +1,20 @@
 import React, { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import heroVideo from "../../../assets/hero-marsai.mp4";
 import useCountdown from "../hooks/useCountdown";
-
-interface HeroTag {
-    label: string;
-    sub: string;
-}
 
 interface CountdownUnit {
     value: string;
     label: string;
 }
 
-const HERO_TAGS: HeroTag[] = [
-    { label: "60s", sub: "chrono" },
-    { label: "120+", sub: "pays" },
-    { label: "100%", sub: "gratuit" },
-    { label: "Prix", sub: "Marseille" },
-];
-
 const pad = (n: number): string => String(n).padStart(2, "0");
 
 const HeroSection = (): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { days, hours, minutes, seconds } = useCountdown();
+    const { t } = useTranslation();
 
     useEffect((): (() => void) => {
         const video = videoRef.current;
@@ -46,11 +36,18 @@ const HeroSection = (): React.JSX.Element => {
         window.open("/assets/video.mp4", "_blank");
     };
 
+    const HERO_TAGS = [
+        { label: "60s", sub: t("hero.tags.chrono") },
+        { label: "120+", sub: t("hero.tags.pays") },
+        { label: "100%", sub: t("hero.tags.gratuit") },
+        { label: t("hero.tags.prix"), sub: "Marseille" },
+    ];
+
     const countdownUnits: CountdownUnit[] = [
-        { value: pad(days), label: "Jours" },
-        { value: pad(hours), label: "Heures" },
-        { value: pad(minutes), label: "Minutes" },
-        { value: pad(seconds), label: "Secondes" },
+        { value: pad(days), label: t("hero.countdown.days") },
+        { value: pad(hours), label: t("hero.countdown.hours") },
+        { value: pad(minutes), label: t("hero.countdown.minutes") },
+        { value: pad(seconds), label: t("hero.countdown.seconds") },
     ];
 
     return (
@@ -87,7 +84,7 @@ const HeroSection = (): React.JSX.Element => {
                 <div className="flex-1">
                     {/* Partners */}
                     <div className="flex flex-wrap items-center gap-2 mb-6 text-sm text-mist">
-                        <span>Une co-création</span>
+                        <span>{t("hero.coCreation")}</span>
                         <strong className="text-white-soft">La Plateforme</strong>
                         <span>&amp;</span>
                         <strong className="text-white-soft">Mobile Film Festival</strong>
@@ -95,7 +92,7 @@ const HeroSection = (): React.JSX.Element => {
 
                     {/* Badge */}
                     <div className="inline-block font-mono text-xs text-aurora border border-aurora/30 rounded-full px-3 py-1 mb-6 tracking-wider">
-                        Festival International · Première Édition · Marseille 2026
+                        {t("hero.badge")}
                     </div>
 
                     {/* Title */}
@@ -105,7 +102,7 @@ const HeroSection = (): React.JSX.Element => {
 
                     {/* Description */}
                     <p className="text-lg font-semibold text-white-soft max-w-lg mb-6">
-                        Le premier festival mondial du cinéma généré par intelligence artificielle.
+                        {t("hero.description")}
                     </p>
 
                     {/* Tags */}
@@ -122,11 +119,9 @@ const HeroSection = (): React.JSX.Element => {
 
                     {/* Accroche */}
                     <p className="text-base text-mist mb-8 leading-relaxed">
-                        Voici ce qu'une IA peut créer.
+                        {t("hero.accroche1")}
                         <br />
-                        <span className="text-aurora font-semibold">
-                            Imaginez ce que vous allez faire.
-                        </span>
+                        <span className="text-aurora font-semibold">{t("hero.accroche2")}</span>
                     </p>
 
                     {/* CTAs */}
@@ -135,13 +130,13 @@ const HeroSection = (): React.JSX.Element => {
                             to="/formulaire"
                             className="inline-flex items-center gap-2 bg-aurora text-deep-sky font-bold px-6 py-3 rounded-lg hover:bg-aurora/90 transition-colors"
                         >
-                            Soumettre un film <span aria-hidden="true">→</span>
+                            {t("hero.cta")} <span aria-hidden="true">→</span>
                         </Link>
                         <button
                             onClick={handleDemoClick}
                             className="inline-flex items-center gap-2 border border-white/20 text-white-soft px-6 py-3 rounded-lg hover:border-aurora/50 hover:text-aurora transition-colors"
                         >
-                            Démo
+                            {t("hero.demo")}
                         </button>
                     </div>
                 </div>
@@ -152,7 +147,7 @@ const HeroSection = (): React.JSX.Element => {
                         Marseille
                     </div>
                     <p className="font-mono text-xs text-mist mb-4 text-center">
-                        Clôture des dépôts · 30 sept. 2026
+                        {t("hero.deadline")}
                     </p>
                     <div className="flex items-start justify-center gap-1">
                         {countdownUnits.map((unit, i) => (

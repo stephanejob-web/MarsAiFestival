@@ -1,19 +1,18 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const RulesBlock = (): React.JSX.Element => {
-    const rules = [
-        { label: "Durée :", value: "60 secondes pile" },
-        { label: "Formats :", value: "MP4, MOV" },
-        { label: "Résolution min. :", value: "1920×1080 · Ratio 16:9" },
-        { label: "Taille :", value: "200 à 300 Mo" },
-        { label: "Plusieurs films par réalisateur", value: "autorisés" },
-        { label: "Ouverture :", value: "2 mois, fermeture auto" },
-    ];
+    const { t } = useTranslation();
+    const rulesData = t("form.rules.items", { returnObjects: true }) as Record<
+        string,
+        { label: string; value: string }
+    >;
+    const rules = Object.values(rulesData);
 
     return (
         <div className="bg-surface border border-white/5 rounded-xl px-4 py-4">
             <h4 className="text-xs font-bold uppercase tracking-widest text-mist mb-3">
-                Règles essentielles
+                {t("form.rules.title")}
             </h4>
             <div className="flex flex-col gap-2">
                 {rules.map((rule) => (

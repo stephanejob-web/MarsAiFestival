@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { FormDepotData, FormDepotErrors, SelectOption } from "../types";
 import { COUNTRIES, DISCOVERY_OPTIONS } from "../constants";
 import { getInputClass } from "./formUtils";
@@ -19,7 +20,17 @@ const Step1Profile = ({
     onNext,
     validateAge,
 }: Step1ProfileProps): React.JSX.Element => {
+    const { t } = useTranslation();
     const [showValidationHint, setShowValidationHint] = useState(false);
+
+    const countryOptions = COUNTRIES.map((c) => ({
+        ...c,
+        label: t(`form.countries.${c.value}`, c.label),
+    }));
+    const discoveryOptions = DISCOVERY_OPTIONS.map((o) => ({
+        ...o,
+        label: t(`form.discovery.${o.value}`, o.label),
+    }));
 
     const handleInput = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -93,17 +104,16 @@ const Step1Profile = ({
                     👤
                 </div>
                 <div>
-                    <h2 className="font-display text-xl font-extrabold">Profil réalisateur</h2>
-                    <p className="text-sm text-mist mt-0.5">
-                        Informations d&apos;identité et de contact — conservées 3 ans (RGPD)
-                    </p>
+                    <h2 className="font-display text-xl font-extrabold">{t("form.step1.title")}</h2>
+                    <p className="text-sm text-mist mt-0.5">{t("form.step1.subtitle")}</p>
                 </div>
             </div>
 
             {/* Civilité */}
             <div className="mb-5">
                 <label className="text-xs font-bold uppercase tracking-wide text-mist flex items-center gap-1.5 mb-2">
-                    Civilité <span className="text-coral text-[0.65rem]">● requis</span>
+                    {t("form.step1.civilite")}{" "}
+                    <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                 </label>
                 <div className="flex gap-2.5">
                     <label className="radio-card flex items-center gap-2 px-4 py-2.5 bg-white/4 border-[1.5px] border-white/10 rounded-[10px] cursor-pointer text-sm text-mist transition-all select-none">
@@ -136,7 +146,8 @@ const Step1Profile = ({
                 {/* Prénom */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Prénom <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.prenom")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -153,7 +164,8 @@ const Step1Profile = ({
                 {/* Nom */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Nom <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.nom")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -170,8 +182,8 @@ const Step1Profile = ({
                 {/* Date de naissance */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Date de naissance{" "}
-                        <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.dob")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="date"
@@ -183,23 +195,22 @@ const Step1Profile = ({
                         autoComplete="bday"
                         className={inputClass("dob")}
                     />
-                    <div className="text-xs text-mist/70">
-                        Vous devez avoir au moins 18 ans pour candidater
-                    </div>
+                    <div className="text-xs text-mist/70">{t("form.step1.dobHint")}</div>
                     {renderError("dob")}
                 </div>
 
                 {/* Métier */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Métier actuel <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.metier")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
                         name="metier"
                         value={formData.metier}
                         onChange={handleInput}
-                        placeholder="ex : Réalisateur, Étudiant, Designer…"
+                        placeholder={t("form.step1.metierPlaceholder")}
                         autoComplete="organization-title"
                         className={inputClass("metier")}
                     />
@@ -209,29 +220,28 @@ const Step1Profile = ({
                 {/* Email — span 2 colonnes */}
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Email de contact <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.email")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInput}
-                        placeholder="vous@exemple.com"
+                        placeholder={t("form.step1.emailPlaceholder")}
                         autoComplete="email"
                         className={inputClass("email")}
                     />
-                    <div className="text-xs text-mist/70">
-                        Utilisé pour les notifications de sélection et la gestion de votre dossier
-                    </div>
+                    <div className="text-xs text-mist/70">{t("form.step1.emailHint")}</div>
                     {renderError("email")}
                 </div>
 
                 {/* Téléphone */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Téléphone{" "}
+                        {t("form.step1.tel")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </label>
                     <input
@@ -248,7 +258,8 @@ const Step1Profile = ({
                 {/* Mobile */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Mobile <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.mobile")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="tel"
@@ -266,20 +277,21 @@ const Step1Profile = ({
             {/* Séparateur — Adresse */}
             <hr className="border-white/5 my-6" />
             <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
-                Adresse postale
+                {t("form.step1.addressSection")}
             </div>
 
             <div className="grid gap-4 mb-3">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Rue / Numéro <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.rue")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
                         name="rue"
                         value={formData.rue}
                         onChange={handleInput}
-                        placeholder="12 rue de la République"
+                        placeholder={t("form.step1.ruePlaceholder")}
                         autoComplete="street-address"
                         className={inputClass("rue")}
                     />
@@ -290,7 +302,8 @@ const Step1Profile = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Code postal <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.cp")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -306,7 +319,8 @@ const Step1Profile = ({
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Ville <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.ville")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
                     <input
                         type="text"
@@ -321,9 +335,10 @@ const Step1Profile = ({
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Pays <span className="text-coral text-[0.65rem]">● requis</span>
+                        {t("form.step1.pays")}{" "}
+                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
                     </label>
-                    {renderSelect("pays", "— Pays —", COUNTRIES)}
+                    {renderSelect("pays", t("form.step1.countryPlaceholder"), countryOptions)}
                     {renderError("pays")}
                 </div>
             </div>
@@ -331,9 +346,9 @@ const Step1Profile = ({
             {/* Séparateur — Réseaux sociaux */}
             <hr className="border-white/5 my-6" />
             <div className="text-xs font-bold uppercase tracking-widest text-mist mb-4">
-                Réseaux sociaux{" "}
+                {t("form.step1.socialSection")}{" "}
                 <span className="font-normal normal-case tracking-normal text-[0.7rem] text-mist/60">
-                    (facultatif — utilisés pour promouvoir votre film si sélectionné)
+                    {t("form.step1.socialHint")}
                 </span>
             </div>
 
@@ -365,12 +380,12 @@ const Step1Profile = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        Comment avez-vous connu marsAI ?{" "}
+                        {t("form.step1.discoveryLabel")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </label>
-                    {renderSelect("discovery", "— Sélectionnez —", DISCOVERY_OPTIONS)}
+                    {renderSelect("discovery", t("form.selectPlaceholder"), discoveryOptions)}
                 </div>
             </div>
 
@@ -391,14 +406,13 @@ const Step1Profile = ({
                 <div className="newsletter-box" />
                 <div>
                     <div className="text-sm font-semibold mb-0.5">
-                        Newsletter marsAI{" "}
+                        {t("form.step1.newsletterTitle")}{" "}
                         <span className="text-mist text-[0.65rem] font-normal opacity-70">
-                            (facultatif)
+                            {t("form.optional")}
                         </span>
                     </div>
                     <div className="text-xs text-mist leading-relaxed">
-                        Je souhaite recevoir les actualités du festival, les annonces de résultats
-                        et les informations sur les prochaines éditions.
+                        {t("form.step1.newsletterDesc")}
                     </div>
                 </div>
             </div>
@@ -408,11 +422,7 @@ const Step1Profile = ({
                 {showValidationHint && Object.keys(errors).length > 0 && (
                     <div className="w-full text-sm text-coral bg-coral/8 border border-coral/20 rounded-[10px] px-4 py-2.5 flex items-center gap-2">
                         <span>⚠</span>
-                        <span>
-                            Veuillez corriger les {Object.keys(errors).length} champ
-                            {Object.keys(errors).length > 1 ? "s" : ""} en erreur ci-dessus avant de
-                            continuer.
-                        </span>
+                        <span>{t("form.validation.errorsHint")}</span>
                     </div>
                 )}
                 <div className="flex items-center justify-between w-full">
@@ -422,7 +432,7 @@ const Step1Profile = ({
                         onClick={handleNextClick}
                         className="bg-aurora border-none rounded-[10px] px-8 py-3 font-display text-sm font-extrabold text-deep-sky cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_30px_rgba(78,255,206,0.35)] flex items-center gap-2"
                     >
-                        Étape suivante — Le Film →
+                        {t("form.step1.cta")}
                     </button>
                 </div>
             </div>

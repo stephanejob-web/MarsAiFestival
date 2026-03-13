@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+type EventType = "opening" | "projection" | "masterclass" | "pause" | "gala" | "default";
 
 interface Event {
     time: string;
     title: string;
     desc?: string;
-    type: "opening" | "projection" | "masterclass" | "pause" | "gala" | "default";
+    type: EventType;
 }
 
 interface Day {
@@ -13,7 +16,7 @@ interface Day {
     events: Event[];
 }
 
-const TYPE_STYLES: Record<Event["type"], string> = {
+const TYPE_STYLES: Record<EventType, string> = {
     opening: "text-aurora border-aurora/40 bg-aurora/5",
     projection: "text-solar border-solar/40 bg-solar/5",
     masterclass: "text-lavande border-lavande/40 bg-lavande/5",
@@ -22,7 +25,7 @@ const TYPE_STYLES: Record<Event["type"], string> = {
     default: "text-white/60 border-white/10 bg-white/3",
 };
 
-const TYPE_DOT: Record<Event["type"], string> = {
+const TYPE_DOT: Record<EventType, string> = {
     opening: "bg-aurora",
     projection: "bg-solar",
     masterclass: "bg-lavande",
@@ -31,131 +34,66 @@ const TYPE_DOT: Record<Event["type"], string> = {
     default: "bg-white/30",
 };
 
-const DAYS: Day[] = [
-    {
-        label: "Jour 1",
-        date: "Samedi 14 mars 2026",
-        events: [
-            {
-                time: "09:00",
-                title: "Accueil & accréditations",
-                desc: "Ouverture des portes — Friches Belle de Mai, Marseille.",
-                type: "default",
-            },
-            {
-                time: "10:00",
-                title: "Ouverture officielle",
-                desc: "Mot de la présidente du jury et présentation de l'édition 2026.",
-                type: "opening",
-            },
-            {
-                time: "10:45",
-                title: "Masterclass — Créer avec Sora & Runway",
-                desc: "Techniques, prompts et workflow pour le court-métrage IA.",
-                type: "masterclass",
-            },
-            {
-                time: "12:30",
-                title: "Pause déjeuner",
-                type: "pause",
-            },
-            {
-                time: "14:00",
-                title: "Projections — Sélection officielle (Bloc 1/4)",
-                desc: "5 films en compétition. Séance suivie d'une discussion avec les créateurs.",
-                type: "projection",
-            },
-            {
-                time: "15:45",
-                title: "Table ronde — L'IA change-t-elle le regard du cinéaste ?",
-                desc: "Avec des réalisateurs, producteurs et artistes numériques.",
-                type: "masterclass",
-            },
-            {
-                time: "17:00",
-                title: "Projections — Sélection officielle (Bloc 2/4)",
-                desc: "5 films en compétition.",
-                type: "projection",
-            },
-            {
-                time: "18:30",
-                title: "Apéritif créateurs",
-                desc: "Networking & rencontres entre participants.",
-                type: "default",
-            },
-            {
-                time: "20:00",
-                title: "Soirée d'ouverture — DJ set génératif",
-                desc: "Musique générée en temps réel par IA. Entrée libre.",
-                type: "gala",
-            },
-        ],
-    },
-    {
-        label: "Jour 2",
-        date: "Dimanche 15 mars 2026",
-        events: [
-            {
-                time: "09:30",
-                title: "Projections — Sélection officielle (Bloc 3/4)",
-                desc: "5 films en compétition.",
-                type: "projection",
-            },
-            {
-                time: "11:00",
-                title: "Atelier live — Prompt to Screen en 60 minutes",
-                desc: "Créez un court-métrage IA en direct avec les outils du festival.",
-                type: "masterclass",
-            },
-            {
-                time: "12:30",
-                title: "Pause déjeuner",
-                type: "pause",
-            },
-            {
-                time: "14:00",
-                title: "Projections — Sélection officielle (Bloc 4/4)",
-                desc: "5 films en compétition. Dernière séance avant délibération.",
-                type: "projection",
-            },
-            {
-                time: "15:30",
-                title: "Délibération du jury",
-                desc: "Séance à huis clos — vote du public ouvert en ligne.",
-                type: "default",
-            },
-            {
-                time: "17:30",
-                title: "Clôture du vote public",
-                type: "opening",
-            },
-            {
-                time: "19:00",
-                title: "Gala de clôture — Mars.AI Night",
-                desc: "Tapis rouge, performances et remise des prix.",
-                type: "gala",
-            },
-            {
-                time: "20:30",
-                title: "Palmarès & DJ set de clôture",
-                desc: "Annonce des lauréats. Fête jusqu'au bout de la nuit.",
-                type: "gala",
-            },
-        ],
-    },
+const DAY_EVENT_TYPES: EventType[][] = [
+    [
+        "default",
+        "opening",
+        "masterclass",
+        "pause",
+        "projection",
+        "masterclass",
+        "projection",
+        "default",
+        "gala",
+    ],
+    ["projection", "masterclass", "pause", "projection", "default", "opening", "gala", "gala"],
 ];
 
-const TYPE_LABELS: Record<Event["type"], string> = {
-    opening: "Cérémonie",
-    projection: "Projection",
-    masterclass: "Masterclass",
-    pause: "Pause",
-    gala: "Gala",
-    default: "",
-};
+const DAY_EVENT_TIMES: string[][] = [
+    ["09:00", "10:00", "10:45", "12:30", "14:00", "15:45", "17:00", "18:30", "20:00"],
+    ["09:30", "11:00", "12:30", "14:00", "15:30", "17:30", "19:00", "20:30"],
+];
 
 const ProgrammeSection = (): React.JSX.Element => {
     const [activeDay, setActiveDay] = useState<number>(0);
+    const { t } = useTranslation();
+
+    const TYPE_LABELS: Record<EventType, string> = {
+        opening: t("programme.typeLabels.opening"),
+        projection: t("programme.typeLabels.projection"),
+        masterclass: t("programme.typeLabels.masterclass"),
+        pause: t("programme.typeLabels.pause"),
+        gala: t("programme.typeLabels.gala"),
+        default: t("programme.typeLabels.default"),
+    };
+
+    const buildDays = (): Day[] =>
+        [0, 1].map((di) => {
+            const eventKeys = Object.keys(
+                t(`programme.days.${di}.events`, { returnObjects: true }) as Record<
+                    string,
+                    unknown
+                >,
+            );
+            const events: Event[] = eventKeys.map((ek) => {
+                const evData = t(`programme.days.${di}.events.${ek}`, {
+                    returnObjects: true,
+                }) as { title: string; desc?: string };
+                return {
+                    time: DAY_EVENT_TIMES[di][Number(ek)],
+                    title: evData.title,
+                    desc: evData.desc,
+                    type: DAY_EVENT_TYPES[di][Number(ek)],
+                };
+            });
+            return {
+                label: t(`programme.days.${di}.label`),
+                date: t(`programme.days.${di}.date`),
+                events,
+            };
+        });
+
+    const DAYS: Day[] = buildDays();
     const day = DAYS[activeDay];
 
     return (
@@ -164,14 +102,12 @@ const ProgrammeSection = (): React.JSX.Element => {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="font-mono text-xs text-aurora tracking-widest uppercase mb-3">
-                        Marseille · 14 &amp; 15 mars 2026
+                        {t("programme.overline")}
                     </div>
                     <h2 className="font-display text-4xl lg:text-5xl font-black text-white-soft mb-4">
-                        Programme
+                        {t("programme.title")}
                     </h2>
-                    <p className="text-mist max-w-lg mx-auto">
-                        Deux jours de projections, masterclasses et rencontres autour du cinéma IA.
-                    </p>
+                    <p className="text-mist max-w-lg mx-auto">{t("programme.subtitle")}</p>
                 </div>
 
                 {/* Onglets jours */}
