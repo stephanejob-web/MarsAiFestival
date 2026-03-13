@@ -1,0 +1,292 @@
+.jury-page {
+    position: relative;
+    min-height: calc(100vh - 3rem);
+    overflow: hidden;
+    padding: 2.5rem 1rem;
+}
+
+.jury-bg {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(78, 255, 206, 0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, rgba(192, 132, 252, 0.07) 0%, transparent 55%);
+}
+
+.jury-shell {
+    position: relative;
+    z-index: 10;
+    margin: 0 auto;
+    display: flex;
+    width: 100%;
+    max-width: 420px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.jury-logo {
+    margin-bottom: 2rem;
+    font-family: var(--font-display), sans-serif;
+    font-size: 1.875rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-white-soft);
+}
+
+.jury-logo-accent {
+    color: var(--color-aurora);
+}
+
+.jury-card {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: var(--color-surface);
+    padding: 1.75rem;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+
+.jury-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.jury-icon {
+    margin: 0 auto 1rem;
+    display: flex;
+    height: 3.5rem;
+    width: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border: 1px solid rgba(78, 255, 206, 0.2);
+    background: rgba(78, 255, 206, 0.1);
+    font-size: 1.5rem;
+}
+
+.jury-title {
+    font-family: var(--font-display), sans-serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-white-soft);
+}
+
+.jury-subtitle {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-mist);
+}
+
+.jury-switch {
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem;
+}
+
+.jury-switch-btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-mist);
+    transition: all 0.2s ease;
+}
+
+.jury-switch-btn:hover {
+    color: var(--color-white-soft);
+}
+
+.jury-switch-btn-active {
+    border: 1px solid rgba(78, 255, 206, 0.3);
+    background: rgba(78, 255, 206, 0.1);
+    color: var(--color-aurora);
+}
+
+.jury-feedback {
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.jury-feedback-error {
+    border-color: rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.1);
+    color: rgb(254, 202, 202);
+}
+
+.jury-feedback-success {
+    border-color: rgba(110, 231, 183, 0.3);
+    background: rgba(110, 231, 183, 0.1);
+    color: rgb(167, 243, 208);
+}
+
+.jury-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.jury-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.jury-label {
+    margin-bottom: 0.375rem;
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-mist);
+}
+
+.jury-input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: var(--color-white-soft);
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.jury-input::placeholder {
+    color: rgba(136, 146, 176, 0.6);
+}
+
+.jury-input:focus {
+    border-color: rgba(78, 255, 206, 0.4);
+}
+
+.jury-input-password {
+    letter-spacing: 0.1em;
+}
+
+.jury-submit-btn {
+    width: 100%;
+    border-radius: 0.75rem;
+    background: var(--color-aurora);
+    padding: 0.75rem 1rem;
+    font-family: var(--font-display), sans-serif;
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--color-deep-sky);
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.jury-submit-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.jury-submit-btn-register {
+    background: linear-gradient(to right, var(--color-aurora), var(--color-lavande));
+}
+
+.jury-separator {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.jury-separator-line {
+    height: 1px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.jury-separator-text {
+    font-size: 0.75rem;
+    color: var(--color-mist);
+}
+
+.jury-oauth-btn {
+    margin-top: 1rem;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-white-soft);
+    transition: background-color 0.2s ease;
+}
+
+.jury-oauth-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.jury-link-wrap {
+    margin-top: 0.75rem;
+    text-align: center;
+}
+
+.jury-link-btn {
+    font-size: 0.75rem;
+    text-decoration: underline;
+    color: var(--color-mist);
+    transition: color 0.2s ease;
+}
+
+.jury-link-btn:hover {
+    color: var(--color-white-soft);
+}
+
+.jury-info-box {
+    margin-bottom: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(78, 255, 206, 0.2);
+    background: rgba(78, 255, 206, 0.1);
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-mist);
+}
+
+.jury-info-accent {
+    font-weight: 600;
+    color: var(--color-aurora);
+}
+
+.jury-back-link {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--color-mist);
+    transition: color 0.2s ease;
+}
+
+.jury-back-link:hover {
+    color: var(--color-white-soft);
+}
+
+@media (min-width: 640px) {
+    .jury-page {
+        padding: 3.5rem 1.5rem;
+    }
+
+    .jury-card {
+        padding: 2.25rem;
+    }
+}
