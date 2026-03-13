@@ -8,18 +8,19 @@ import useJuryAuth from "../features/jury/hooks/useJuryAuth";
 const Jury = (): React.JSX.Element => {
     const {
         activeTab,
-        role,
         feedback,
         loginForm,
         registerForm,
+        avatarPreview,
+        isLoading,
         switchTab,
-        handleRoleChange,
         handleLoginInputChange,
         handleRegisterInputChange,
+        handleAvatarChange,
+        handleAvatarRemove,
         handleLoginSubmit,
         handleRegisterSubmit,
-        handleGoogleLogin,
-        handleGoogleRegister,
+        handleGoogleAuth,
         handleForgotPassword,
     } = useJuryAuth();
 
@@ -53,15 +54,15 @@ const Jury = (): React.JSX.Element => {
                             🔐
                         </div>
                         <h1 className="font-display text-[1.45rem] font-extrabold leading-tight text-white-soft">
-                            Espace Jury et Admin
+                            Espace Jury
                         </h1>
                         <p className="mt-2 text-sm leading-relaxed text-mist">
-                            Connectez-vous ou creez votre compte pour acceder a l&apos;interface du
-                            jury ou d&apos;administration.
+                            Connectez-vous ou créez votre compte pour accéder à l&apos;interface
+                            jury.
                         </p>
                     </header>
 
-                    <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
+                    <div className="mb-6 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
                         <button
                             type="button"
                             onClick={() => switchTab("login")}
@@ -74,7 +75,7 @@ const Jury = (): React.JSX.Element => {
                             onClick={() => switchTab("register")}
                             className={`rounded-lg px-3 py-2 text-sm font-semibold transition-all hover:text-white-soft ${activeTab === "register" ? "border border-aurora/30 bg-aurora/10 !text-aurora" : "text-mist"}`}
                         >
-                            Creer un compte
+                            Créer un compte
                         </button>
                     </div>
 
@@ -82,21 +83,24 @@ const Jury = (): React.JSX.Element => {
 
                     {activeTab === "login" ? (
                         <LoginForm
-                            role={role}
                             loginForm={loginForm}
-                            onRoleChange={handleRoleChange}
+                            isLoading={isLoading}
                             onInputChange={handleLoginInputChange}
                             onSubmit={handleLoginSubmit}
-                            onGoogleLogin={handleGoogleLogin}
+                            onGoogleAuth={handleGoogleAuth}
                             onForgotPassword={handleForgotPassword}
                             onSwitchToRegister={() => switchTab("register")}
                         />
                     ) : (
                         <RegisterForm
                             registerForm={registerForm}
+                            avatarPreview={avatarPreview}
+                            isLoading={isLoading}
                             onInputChange={handleRegisterInputChange}
+                            onAvatarChange={handleAvatarChange}
+                            onAvatarRemove={handleAvatarRemove}
                             onSubmit={handleRegisterSubmit}
-                            onGoogleRegister={handleGoogleRegister}
+                            onGoogleAuth={handleGoogleAuth}
                         />
                     )}
                 </article>

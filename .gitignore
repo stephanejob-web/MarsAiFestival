@@ -3,6 +3,9 @@ node_modules/
 backend/node_modules/
 frontend/node_modules/
 
+## ── Uploads locaux ───────────────────────────────────────────────
+backend/uploads/
+
 ## ── Build ────────────────────────────────────────────────────────
 backend/dist/
 frontend/dist/
