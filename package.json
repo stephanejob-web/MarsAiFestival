@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Projet Mars AI Festival - React + Express TypeScript",
   "scripts": {
-    "postinstall": "concurrently \"npm -C backend install\" \"npm -C frontend install\"",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
     "prestart": "echo \"\n🚀 Démarrage de MarsAiFestival...\n   Backend  → http://localhost:5500\n   Frontend → http://localhost:5173\n\"",
     "start": "concurrently -n backend,frontend -c blue,green \"npm -C backend run dev\" \"npm -C frontend run dev\"",
     "format": "prettier --write \"backend/src/**/*.{ts,json}\" \"frontend/src/**/*.{ts,tsx,json}\"",
