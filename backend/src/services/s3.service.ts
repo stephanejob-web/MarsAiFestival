@@ -16,6 +16,7 @@ export async function uploadFileToS3(
     buffer: Buffer,
     filename: string,
     mimetype: string,
+    publicRead = false,
 ): Promise<string> {
     const key = `${FOLDER}/${filename}`;
 
@@ -25,6 +26,7 @@ export async function uploadFileToS3(
             Key: key,
             Body: buffer,
             ContentType: mimetype,
+            ...(publicRead && { ACL: "public-read" }),
         }),
     );
 
