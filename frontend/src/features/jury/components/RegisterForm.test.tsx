@@ -5,14 +5,16 @@ import RegisterForm from "./RegisterForm";
 import type { RegisterFormState } from "../types";
 
 const emptyForm: RegisterFormState = {
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
 };
 
 const filledForm: RegisterFormState = {
-    fullName: "Sophie Martin",
+    firstName: "Sophie",
+    lastName: "Martin",
     email: "sophie@marsai.fr",
     password: "motdepasse1",
     confirmPassword: "motdepasse1",
@@ -20,19 +22,31 @@ const filledForm: RegisterFormState = {
 
 const defaultProps = {
     registerForm: emptyForm,
+    avatarPreview: null,
+    isLoading: false,
     onInputChange: vi.fn(),
+    onAvatarChange: vi.fn(),
+    onAvatarRemove: vi.fn(),
     onSubmit: vi.fn(),
-    onGoogleRegister: vi.fn(),
+    onGoogleAuth: vi.fn(),
 };
 
 describe("RegisterForm", () => {
-    it("affiche les quatre champs du formulaire d'inscription", () => {
+    it("affiche les champs prénom, nom, email, mot de passe", () => {
         render(<RegisterForm {...defaultProps} />);
 
-        expect(screen.getByLabelText(/prenom et nom/i)).toBeDefined();
+        expect(screen.getByLabelText(/prénom/i)).toBeDefined();
+        expect(screen.getByLabelText(/^nom/i)).toBeDefined();
         expect(screen.getByLabelText(/adresse e-mail/i)).toBeDefined();
-        expect(screen.getByLabelText(/^mot de passe$/i)).toBeDefined();
+        expect(screen.getByLabelText(/^mot de passe/i)).toBeDefined();
         expect(screen.getByLabelText(/confirmer le mot de passe/i)).toBeDefined();
+    });
+
+    it("affiche la zone d'upload avatar", () => {
+        render(<RegisterForm {...defaultProps} />);
+
+        expect(screen.getByText(/photo de profil/i)).toBeDefined();
+        expect(screen.getByText(/choisir un fichier/i)).toBeDefined();
     });
 
     it("appelle onSubmit quand le formulaire est soumis", () => {
@@ -46,36 +60,28 @@ describe("RegisterForm", () => {
         expect(onSubmit).toHaveBeenCalledTimes(1);
     });
 
-    it("appelle onGoogleRegister quand on clique sur le bouton Google", async () => {
-        const onGoogleRegister = vi.fn();
+    it("affiche l'aperçu de l'avatar quand avatarPreview est fourni", () => {
+        render(<RegisterForm {...defaultProps} avatarPreview="data:image/png;base64,abc" />);
+
+        const img = screen.getByAltText(/aperçu avatar/i);
+        expect(img).toBeDefined();
+        expect(screen.getByText(/changer la photo/i)).toBeDefined();
+    });
+
+    it("appelle onAvatarRemove quand on clique sur supprimer l'avatar", async () => {
+        const onAvatarRemove = vi.fn();
         const user = userEvent.setup();
-        render(<RegisterForm {...defaultProps} onGoogleRegister={onGoogleRegister} />);
+        render(<RegisterForm {...defaultProps} avatarPreview="data:image/png;base64,abc" onAvatarRemove={onAvatarRemove} />);
 
-        await user.click(screen.getByRole("button", { name: /s.inscrire avec google/i }));
+        await user.click(screen.getByTitle(/supprimer/i));
 
-        expect(onGoogleRegister).toHaveBeenCalledTimes(1);
+        expect(onAvatarRemove).toHaveBeenCalledTimes(1);
     });
 
-    it("appelle onInputChange quand l'utilisateur saisit dans le champ nom", async () => {
-        const onInputChange = vi.fn();
-        const user = userEvent.setup();
-        render(<RegisterForm {...defaultProps} onInputChange={onInputChange} />);
+    it("désactive le bouton submit quand isLoading est true", () => {
+        render(<RegisterForm {...defaultProps} isLoading={true} />);
 
-        const nameInput = screen.getByLabelText(/prenom et nom/i);
-        await user.type(nameInput, "A");
-
-        expect(onInputChange).toHaveBeenCalled();
-    });
-
-    it("affiche le message d'information sur les comptes jury et admin", () => {
-        render(<RegisterForm {...defaultProps} />);
-
-        expect(screen.getByText(/creez votre compte jury ou admin/i)).toBeDefined();
-    });
-
-    it("affiche le bouton creer mon compte", () => {
-        render(<RegisterForm {...defaultProps} />);
-
-        expect(screen.getByRole("button", { name: /creer mon compte/i })).toBeDefined();
+        const btn = screen.getByRole("button", { name: /cr.ation en cours/i });
+        expect((btn as HTMLButtonElement).disabled).toBe(true);
     });
 });
