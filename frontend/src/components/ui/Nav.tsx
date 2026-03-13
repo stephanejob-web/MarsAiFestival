@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-interface NavLink {
-    label: string;
-    href: string;
-}
-
-const NAV_LINKS: NavLink[] = [
-    { label: "Le Festival", href: "#home" },
-    { label: "Programme", href: "#programme" },
-    { label: "Films", href: "#films" },
-    { label: "Palmarès", href: "#palmares" },
-    { label: "Jury", href: "#jury" },
-];
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 const Nav = (): React.JSX.Element => {
     const [scrolled, setScrolled] = useState<boolean>(false);
     const location = useLocation();
     const isHome = location.pathname === "/";
+    const { t } = useTranslation();
+
+    const currentLang = i18n.language === "fr" ? "fr" : "en";
+
+    const NAV_LINKS = [
+        { label: t("nav.links.festival"), href: "#home" },
+        { label: t("nav.links.programme"), href: "#programme" },
+        { label: t("nav.links.films"), href: "#films" },
+        { label: t("nav.links.palmares"), href: "#palmares" },
+        { label: t("nav.links.jury"), href: "#jury" },
+    ];
 
     useEffect((): (() => void) => {
         const onScroll = (): void => setScrolled(window.scrollY > 20);
@@ -29,6 +29,11 @@ const Nav = (): React.JSX.Element => {
         if (!isHome) return;
         const el = document.querySelector(href);
         el?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const toggleLang = (): void => {
+        const next = currentLang === "fr" ? "en" : "fr";
+        i18n.changeLanguage(next);
     };
 
     return (
@@ -68,12 +73,39 @@ const Nav = (): React.JSX.Element => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                    {/* Language switcher */}
+                    <button
+                        onClick={toggleLang}
+                        className="flex items-center gap-0 font-mono text-xs border border-white/20 hover:border-aurora/50 rounded-md overflow-hidden transition-colors"
+                        aria-label={`Switch language to ${t("nav.langSwitch")}`}
+                    >
+                        <span
+                            className={`px-2.5 py-1.5 transition-colors ${
+                                currentLang === "fr"
+                                    ? "bg-aurora text-deep-sky font-bold"
+                                    : "text-white/40 hover:text-white/70"
+                            }`}
+                        >
+                            FR
+                        </span>
+                        <span className="w-px h-4 bg-white/15" />
+                        <span
+                            className={`px-2.5 py-1.5 transition-colors ${
+                                currentLang === "en"
+                                    ? "bg-aurora text-deep-sky font-bold"
+                                    : "text-white/40 hover:text-white/70"
+                            }`}
+                        >
+                            EN
+                        </span>
+                    </button>
+
                     {/* CTA principal */}
                     <Link
                         to="/formulaire"
                         className="text-sm px-4 py-2 bg-aurora text-deep-sky font-bold rounded-lg hover:bg-aurora/90 transition-colors"
                     >
-                        Déposer un film
+                        {t("nav.cta")}
                     </Link>
 
                     {/* Liens dev — visibles uniquement en développement */}
