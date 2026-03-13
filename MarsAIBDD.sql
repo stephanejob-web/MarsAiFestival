@@ -7,166 +7,228 @@ GRANT ALL PRIVILEGES ON MarsAi.* TO 'Bruno'@'localhost';
 FLUSH PRIVILEGES;
 
 -- --------------------------------------------------
-CREATE TABLE phases (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    open_date DATE, -- Modifié en DATE selon vos instructions
-    closure_date DATE -- Modifié en DATE selon vos instructions
-);
+-- MPD pour MySQL (snake_case, tables au singulier, INT AUTO_INCREMENT PK)
+-- Jeu de caractères et moteur
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE cms_content (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    header_logo VARCHAR(255),
-    hero_video_path VARCHAR(255),
-    hero_first_paragraph TEXT, -- TEXT est souvent plus adapté pour les paragraphes
-    hero_second_paragraph TEXT,
-    hero_tags_content VARCHAR(255),
-    jury_picture VARCHAR(255),
-    jury_fullname VARCHAR(255),
-    jury_description TEXT
-);
-
-CREATE TABLE sponsors (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    sponsor_name VARCHAR(255),
-    partnership_statut VARCHAR(255),
-    sponsored_award VARCHAR(255),
-    sponsor_logo VARCHAR(255),
-    sponsor_link VARCHAR(255)
-);
-
-CREATE TABLE jury (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    email VARCHAR(255),
-    profil_picture VARCHAR(255)
-);
-
-CREATE TABLE realisator (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    gender VARCHAR(50),
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    birth_date DATE,
-    email VARCHAR(255),
-    profession VARCHAR(255),
-    phone VARCHAR(50),
-    mobile_phone VARCHAR(50),
-    nationality VARCHAR(100),
-    street VARCHAR(255),
-    postal_code VARCHAR(20),
-    city VARCHAR(100),
-    country VARCHAR(100),
-    how_did_you_know_us VARCHAR(255),
-    newsletter BOOLEAN
-);
-
-CREATE TABLE collaborator (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    gender VARCHAR(50),
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    email VARCHAR(255),
-    profession VARCHAR(255),
-    role VARCHAR(100)
-);
-
-CREATE TABLE tags (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_tags VARCHAR(255),
-    report_tags VARCHAR(255)
-);
-
-
-CREATE TABLE jury_prize (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    award_name VARCHAR(255),
-    description TEXT,
-    sponsor_id INT,
-    crash_prize INT,
-    laureat VARCHAR(255),
-    FOREIGN KEY (sponsor_id) REFERENCES sponsors(id)
-);
-
+-- Table: social_media
 CREATE TABLE social_media (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    realisator_id INT,
-    platform VARCHAR(100),
-    url VARCHAR(255),
-    FOREIGN KEY (realisator_id) REFERENCES realisator(id)
-);
+  id INT NOT NULL AUTO_INCREMENT,
+  platform VARCHAR(255) DEFAULT NULL,
+  url VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Table: realisator
+CREATE TABLE realisator (
+  id INT NOT NULL AUTO_INCREMENT,
+  gender VARCHAR(255) NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  birth_date DATE NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  profession VARCHAR(255) DEFAULT NULL,
+  phone VARCHAR(255) DEFAULT NULL,
+  mobile_phone VARCHAR(255) NOT NULL,
+  nationality VARCHAR(255) NOT NULL,
+  street VARCHAR(255) NOT NULL,
+  postal_code VARCHAR(50) NOT NULL,
+  city VARCHAR(255) NOT NULL,
+  country VARCHAR(255) NOT NULL,
+  how_did_you_know_us VARCHAR(255) NOT NULL,
+  newsletter BOOLEAN NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: socialmedia_realisator (liaison N-N social_media <-> realisator)
+CREATE TABLE socialmedia_realisator (
+  id INT NOT NULL AUTO_INCREMENT,
+  social_media_id INT NOT NULL,
+  realisator_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_smreal_social_media FOREIGN KEY (social_media_id) REFERENCES social_media(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_smreal_realisator FOREIGN KEY (realisator_id) REFERENCES realisator(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: sponsor
+CREATE TABLE sponsor (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) DEFAULT NULL,
+  partnership_statut ENUM('main', 'lead', 'partner', 'supporter', 'premium') DEFAULT NULL,
+  sponsored_award VARCHAR(255) DEFAULT NULL,
+  sponsor_link VARCHAR(255) DEFAULT NULL,
+  sponsor_logo VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Table: award
+CREATE TABLE award (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) DEFAULT NULL,
+  description VARCHAR(255) DEFAULT NULL,
+  cash_prize VARCHAR(255) DEFAULT NULL,
+  laureat INT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: film (référence realisator)
 CREATE TABLE film (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    realisator_id INT,
-    original_title VARCHAR(255),
-    english_title VARCHAR(255),
-    language VARCHAR(100),
-    original_synopsis TEXT,
-    english_synopsis TEXT,
-    video_url VARCHAR(255),
-    subtitles_id INT,
-    duration INT,
-    tech_stack VARCHAR(255),
-    creative_workflow VARCHAR(255),
-    poster_img VARCHAR(255),
-    film_media VARCHAR(255),
-    statut VARCHAR(100),
-    FOREIGN KEY (realisator_id) REFERENCES realisator(id)
-);
+  id INT NOT NULL AUTO_INCREMENT,
+  realisator_id INT NOT NULL,
+  original_title VARCHAR(255) DEFAULT NULL,
+  english_title VARCHAR(255) DEFAULT NULL,
+  language VARCHAR(255) DEFAULT NULL,
+  original_synopsis VARCHAR(255) DEFAULT NULL,
+  english_synopsis VARCHAR(255) DEFAULT NULL,
+  video_url VARCHAR(255) DEFAULT NULL,
+  original_subtitles VARCHAR(255) DEFAULT NULL,
+  english_subtitles VARCHAR(255) DEFAULT NULL,
+  poster_img VARCHAR(255) DEFAULT NULL,
+  duration INT DEFAULT NULL,
+  tech_stack VARCHAR(255) DEFAULT NULL,
+  creative_workflow VARCHAR(255) DEFAULT NULL,
+  statut ENUM('valided', 'refused', 'to_review', 'in_discussion', 'asked_to_modify') DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_film_realisator FOREIGN KEY (realisator_id) REFERENCES realisator(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+-- Table: sponsor_award_film (liaison sponsor <-> award <-> film)
+CREATE TABLE sponsor_award_film (
+  id INT NOT NULL AUTO_INCREMENT,
+  sponsor_id INT NOT NULL,
+  award_id INT NOT NULL,
+  film_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_saf_sponsor FOREIGN KEY (sponsor_id) REFERENCES sponsor(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_saf_award FOREIGN KEY (award_id) REFERENCES award(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_saf_film FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: collaborator
+CREATE TABLE collaborator (
+  id INT NOT NULL AUTO_INCREMENT,
+  gender VARCHAR(255) DEFAULT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  profession VARCHAR(255) DEFAULT NULL,
+  role VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Table: collaborator_film (liaison collaborator <-> film)
+CREATE TABLE collaborator_film (
+  id INT NOT NULL AUTO_INCREMENT,
+  film_id INT NOT NULL,
+  collaborator_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_collabfilm_film FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_collabfilm_collaborator FOREIGN KEY (collaborator_id) REFERENCES collaborator(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- Table: gallery
+CREATE TABLE gallery (
+  id INT NOT NULL AUTO_INCREMENT,
+  img VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: film_gallery (liaison film <-> gallery)
 CREATE TABLE film_gallery (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    path_1 VARCHAR(255),
-    path_2 VARCHAR(255),
-    path_3 VARCHAR(255),
-    FOREIGN KEY (film_id) REFERENCES film(id)
-);
+  id INT NOT NULL AUTO_INCREMENT,
+  film_id INT NOT NULL,
+  gallery_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_filmgallery_film FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_filmgallery_gallery FOREIGN KEY (gallery_id) REFERENCES gallery(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE film_subtitles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    language VARCHAR(100),
-    path VARCHAR(255),
-    FOREIGN KEY (film_id) REFERENCES film(id)
-);
+-- Table: cms_content
+CREATE TABLE cms_content (
+  id INT NOT NULL AUTO_INCREMENT,
+  header_logo VARCHAR(255) DEFAULT NULL,
+  hero_video_path VARCHAR(255) DEFAULT NULL,
+  hero_label VARCHAR(255) DEFAULT NULL,
+  hero_title VARCHAR(255) DEFAULT NULL,
+  hero_description VARCHAR(255) DEFAULT NULL,
+  hero_content VARCHAR(255) DEFAULT NULL,
+  jury_section_label VARCHAR(255) DEFAULT NULL,
+  jury_section_title VARCHAR(255) DEFAULT NULL,
+  jury_section_description VARCHAR(255) DEFAULT NULL,
+  jury_section_content VARCHAR(255) DEFAULT NULL,
+  phase_top50_open_date DATE DEFAULT NULL,
+  phase_top50_close_date DATE DEFAULT NULL,
+  phase_award_open_date DATE DEFAULT NULL,
+  phase_award_close_date DATE DEFAULT NULL,
+  header_logo_toggle BOOLEAN DEFAULT NULL,
+  hero_video_toggle BOOLEAN DEFAULT NULL,
+  is_jury_list_toggle BOOLEAN DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE film_collaborator (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    collaborator_id INT,
-    role VARCHAR(100),
-    FOREIGN KEY (film_id) REFERENCES film(id),
-    FOREIGN KEY (collaborator_id) REFERENCES collaborator(id)
-);
+-- Table: jury
+CREATE TABLE jury (
+  id INT NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) DEFAULT NULL,
+  profil_picture VARCHAR(255) DEFAULT NULL,
+  jury_description VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE film_jury (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    jury_id INT,
-    assignation VARCHAR(255),
-    commentary TEXT,
-    to_review VARCHAR(255),
-    FOREIGN KEY (film_id) REFERENCES film(id),
-    FOREIGN KEY (jury_id) REFERENCES jury(id)
-);
+-- Table: commentary
+CREATE TABLE commentary (
+  id INT NOT NULL AUTO_INCREMENT,
+  commentary VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE film_reported (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    jury_id INT,
-    report_tags VARCHAR(255),
-    commentary TEXT,
-    FOREIGN KEY (film_id) REFERENCES film(id),
-    FOREIGN KEY (jury_id) REFERENCES jury(id)
-);
+-- Table: jury_film_commentary (liaison jury <-> film <-> commentary)
+CREATE TABLE jury_film_commentary (
+  id INT NOT NULL AUTO_INCREMENT,
+  jury_id INT NOT NULL,
+  film_id INT NOT NULL,
+  commentary_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_jfc_jury FOREIGN KEY (jury_id) REFERENCES jury(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_jfc_film FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_jfc_commentary FOREIGN KEY (commentary_id) REFERENCES commentary(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE film_tags (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    film_id INT,
-    tags_id INT,
-    FOREIGN KEY (film_id) REFERENCES film(id),
-    FOREIGN KEY (tags_id) REFERENCES tags(id)
-);
+SET FOREIGN_KEY_CHECKS = 1;
