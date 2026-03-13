@@ -76,10 +76,28 @@ const Nav = (): React.JSX.Element => {
                     {/* Language switcher */}
                     <button
                         onClick={toggleLang}
-                        className="font-mono text-xs text-white/50 hover:text-aurora transition-colors border border-white/10 hover:border-aurora/30 rounded px-2 py-1"
+                        className="flex items-center gap-0 font-mono text-xs border border-white/20 hover:border-aurora/50 rounded-md overflow-hidden transition-colors"
                         aria-label={`Switch language to ${t("nav.langSwitch")}`}
                     >
-                        {t("nav.langSwitch")}
+                        <span
+                            className={`px-2.5 py-1.5 transition-colors ${
+                                currentLang === "fr"
+                                    ? "bg-aurora text-deep-sky font-bold"
+                                    : "text-white/40 hover:text-white/70"
+                            }`}
+                        >
+                            FR
+                        </span>
+                        <span className="w-px h-4 bg-white/15" />
+                        <span
+                            className={`px-2.5 py-1.5 transition-colors ${
+                                currentLang === "en"
+                                    ? "bg-aurora text-deep-sky font-bold"
+                                    : "text-white/40 hover:text-white/70"
+                            }`}
+                        >
+                            EN
+                        </span>
                     </button>
 
                     {/* CTA principal */}
