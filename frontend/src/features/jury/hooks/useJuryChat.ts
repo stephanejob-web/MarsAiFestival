@@ -82,7 +82,7 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        if (isChatOpen) setUnreadCount(0);
+        if (isChatOpen) setUnreadCount(0); // eslint-disable-line react-hooks/set-state-in-effect
     }, [isChatOpen]);
 
     const sendMessage = (): void => {
