@@ -5,6 +5,34 @@ import { describe, expect, it, vi } from "vitest";
 
 import JurySidebar from "./JurySidebar";
 
+vi.mock("../hooks/useJuryUser", () => ({
+    default: () => ({
+        id: 1,
+        email: "marie@marsai.fr",
+        firstName: "Marie",
+        lastName: "Lefebvre",
+        role: "president",
+        profilPicture: null,
+        initials: "ML",
+        fullName: "Marie Lefebvre",
+        roleLabel: "Présidente du Jury",
+    }),
+}));
+
+vi.mock("../hooks/useJuryChat", () => ({
+    default: () => ({
+        messages: [],
+        connectedUsers: [],
+        inputValue: "",
+        unreadCount: 0,
+        isConnected: true,
+        onlineCount: 0,
+        mySocketId: "socket-1",
+        setInputValue: vi.fn(),
+        sendMessage: vi.fn(),
+    }),
+}));
+
 const defaultProps = {
     activeView: "eval" as const,
     onViewChange: vi.fn(),

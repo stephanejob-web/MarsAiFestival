@@ -2,6 +2,14 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import LoginForm from "./LoginForm";
+
+vi.mock("@react-oauth/google", () => ({
+    GoogleLogin: ({ onSuccess }: { onSuccess: () => void }) => (
+        <button type="button" onClick={onSuccess}>
+            Connexion Google
+        </button>
+    ),
+}));
 import type { LoginFormState } from "../types";
 
 const defaultLoginForm: LoginFormState = {
@@ -62,7 +70,7 @@ describe("LoginForm", () => {
     it("désactive le bouton submit quand isLoading est true", () => {
         render(<LoginForm {...defaultProps} isLoading={true} />);
 
-        const btn = screen.getByRole("button", { name: /connexion/i });
+        const btn = screen.getByRole("button", { name: /^connexion…$/i });
         expect((btn as HTMLButtonElement).disabled).toBe(true);
     });
 });

@@ -2,6 +2,14 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import RegisterForm from "./RegisterForm";
+
+vi.mock("@react-oauth/google", () => ({
+    GoogleLogin: ({ onSuccess }: { onSuccess: () => void }) => (
+        <button type="button" onClick={onSuccess}>
+            Connexion Google
+        </button>
+    ),
+}));
 import type { RegisterFormState } from "../types";
 
 const emptyForm: RegisterFormState = {
@@ -71,7 +79,13 @@ describe("RegisterForm", () => {
     it("appelle onAvatarRemove quand on clique sur supprimer l'avatar", async () => {
         const onAvatarRemove = vi.fn();
         const user = userEvent.setup();
-        render(<RegisterForm {...defaultProps} avatarPreview="data:image/png;base64,abc" onAvatarRemove={onAvatarRemove} />);
+        render(
+            <RegisterForm
+                {...defaultProps}
+                avatarPreview="data:image/png;base64,abc"
+                onAvatarRemove={onAvatarRemove}
+            />,
+        );
 
         await user.click(screen.getByTitle(/supprimer/i));
 
