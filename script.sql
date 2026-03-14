@@ -350,4 +350,11 @@ CREATE TABLE jury_film_assignment (
     FOREIGN KEY (assigned_by) REFERENCES jury(id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ----------------------------------------------------------------
+-- Données initiales : compte administrateur par défaut
+-- Mot de passe : azerty (bcrypt 12 rounds)
+-- ----------------------------------------------------------------
+INSERT INTO jury (first_name, last_name, email, password_hash, role, is_active)
+VALUES ('Admin', 'marsAI', 'admin@gmail.com', '$2b$12$cgguIR7ieg3UDlxTvKC.0.YiUZ0k8/cbN/zR4BuB7YzimiOZB4W56', 'admin', TRUE);
+
 SET FOREIGN_KEY_CHECKS = 1;
