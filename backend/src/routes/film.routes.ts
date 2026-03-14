@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
-import { submitFilm, listFilms, showFilm } from "../controllers/film.controller";
+import { submitFilm, listFilms, showFilm, patchFilm, filmsStats } from "../controllers/film.controller";
+import { requireAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();
 const upload = multer({
@@ -9,7 +10,9 @@ const upload = multer({
 });
 
 router.get("/", listFilms);
+router.get("/stats", requireAdmin, filmsStats);
 router.get("/:id", showFilm);
+router.patch("/:id", requireAdmin, patchFilm);
 router.post(
     "/",
     upload.fields([
