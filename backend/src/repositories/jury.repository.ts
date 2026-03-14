@@ -87,7 +87,7 @@ export const updateJuryUser = async (
     }>,
 ): Promise<boolean> => {
     const fields: string[] = [];
-    const values: unknown[] = [];
+    const values: (string | number | null)[] = [];
     if (data.first_name !== undefined) {
         fields.push("first_name = ?");
         values.push(data.first_name);
