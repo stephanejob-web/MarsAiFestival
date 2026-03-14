@@ -18,6 +18,7 @@ export interface JuryInsert {
     last_name: string;
     email: string;
     password_hash: string;
+    role?: "jury" | "admin";
     profil_picture?: string | null;
 }
 
@@ -42,12 +43,13 @@ export const findByGoogleId = async (googleId: string): Promise<JuryRow | null> 
 export const insertJury = async (data: JuryInsert): Promise<JuryRow> => {
     const [result] = await pool.execute<ResultSetHeader>(
         `INSERT INTO jury (first_name, last_name, email, password_hash, role, profil_picture)
-         VALUES (?, ?, ?, ?, 'jury', ?)`,
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
             data.first_name,
             data.last_name,
             data.email,
             data.password_hash,
+            data.role ?? "jury",
             data.profil_picture ?? null,
         ],
     );
@@ -57,6 +59,54 @@ export const insertJury = async (data: JuryInsert): Promise<JuryRow> => {
         [result.insertId],
     );
     return rows[0];
+};
+
+export const getAllJury = async (): Promise<RowDataPacket[]> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT
+            j.id, j.first_name, j.last_name, j.email, j.role, j.is_active,
+            j.profil_picture, j.jury_description, j.created_at,
+            COUNT(DISTINCT jfa.film_id) AS films_assigned,
+            COUNT(DISTINCT jfc.film_id) AS films_evaluated
+         FROM jury j
+         LEFT JOIN jury_film_assignment jfa ON jfa.jury_id = j.id
+         LEFT JOIN jury_film_commentary jfc ON jfc.jury_id = j.id AND jfc.decision IS NOT NULL
+         GROUP BY j.id
+         ORDER BY j.last_name ASC`,
+    );
+    return rows;
+};
+
+export const updateJuryUser = async (
+    id: number,
+    data: Partial<{ first_name: string; last_name: string; role: "jury" | "admin"; jury_description: string }>,
+): Promise<boolean> => {
+    const fields: string[] = [];
+    const values: unknown[] = [];
+    if (data.first_name !== undefined) { fields.push("first_name = ?"); values.push(data.first_name); }
+    if (data.last_name !== undefined)  { fields.push("last_name = ?");  values.push(data.last_name); }
+    if (data.role !== undefined)       { fields.push("role = ?");        values.push(data.role); }
+    if (data.jury_description !== undefined) { fields.push("jury_description = ?"); values.push(data.jury_description); }
+    if (fields.length === 0) return false;
+    values.push(id);
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        values,
+    );
+    return result.affectedRows > 0;
+};
+
+export const toggleJuryActive = async (id: number, isActive: boolean): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [isActive, id],
+    );
+    return result.affectedRows > 0;
+};
+
+export const deleteJuryUser = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM jury WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
 };
 
 export const upsertGoogleJury = async (data: {
