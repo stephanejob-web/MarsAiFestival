@@ -1,0 +1,1297 @@
+openapi: 3.0.3
+info:
+  title: marsAI Festival 2026 — API
+  description: |
+    Documentation complète de l'API REST du festival marsAI 2026.
+
+    ## Authentification
+    La plupart des routes protégées nécessitent un token JWT passé dans le header :
+    ```
+    Authorization: Bearer <token>
+    ```
+    Le token est obtenu via `/api/auth/login`, `/api/auth/google` ou `/api/auth/accept-invite`.
+
+    ## Rôles
+    - **public** — accessible sans authentification
+    - **auth** — tout juré ou admin connecté
+    - **admin** — réservé aux comptes avec `role: "admin"`
+  version: 1.0.0
+  contact:
+    name: Équipe marsAI
+
+servers:
+  - url: http://localhost:5500
+    description: Serveur de développement local
+
+tags:
+  - name: Authentification
+    description: Connexion, inscription et gestion du compte
+  - name: Films
+    description: Soumission et consultation des films
+  - name: Votes
+    description: Votes et décisions des jurés sur les films
+  - name: Commentaires
+    description: Commentaires des jurés sur les films
+  - name: Attributions
+    description: Attribution des films aux jurés (admin)
+  - name: Phases
+    description: Configuration des phases d'évaluation (admin)
+  - name: Tickets
+    description: Signalements créés par les jurés, traités par l'admin
+  - name: Administration
+    description: Gestion des utilisateurs, vidéos S3, invitations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Message d'erreur"
+
+    JuryUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: sophie.martin@email.com
+        firstName:
+          type: string
+          example: Sophie
+        lastName:
+          type: string
+          example: Martin
+        role:
+          type: string
+          enum: [jury, admin]
+          example: jury
+        profilPicture:
+          type: string
+          nullable: true
+          example: http://localhost:5500/uploads/avatars/avatar.jpg
+
+    Film:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        dossier_num:
+          type: string
+          example: MAI-2026-12345
+        original_title:
+          type: string
+          example: L'IA et moi
+        english_title:
+          type: string
+          nullable: true
+          example: AI and Me
+        language:
+          type: string
+          example: Français
+        tags:
+          type: string
+          nullable: true
+          example: SF, Drame
+        original_synopsis:
+          type: string
+          nullable: true
+        poster_img:
+          type: string
+          nullable: true
+        duration:
+          type: integer
+          nullable: true
+          description: Durée en secondes
+          example: 480
+        ia_class:
+          type: string
+          enum: [full, hybrid]
+        statut:
+          type: string
+          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+          example: to_review
+        first_name:
+          type: string
+          description: Prénom du réalisateur
+        last_name:
+          type: string
+          description: Nom du réalisateur
+        realisator_email:
+          type: string
+        country:
+          type: string
+
+    Vote:
+      type: object
+      properties:
+        id:
+          type: integer
+        jury_id:
+          type: integer
+        film_id:
+          type: integer
+        decision:
+          type: string
+          enum: [valide, arevoir, refuse, in_discussion]
+        updated_at:
+          type: string
+          format: date-time
+
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [content, technical, rights, other]
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, in_progress, resolved, rejected]
+        admin_note:
+          type: string
+          nullable: true
+        jury_first_name:
+          type: string
+        jury_last_name:
+          type: string
+        original_title:
+          type: string
+        dossier_num:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Phase:
+      type: object
+      properties:
+        phase1_open:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-12-12"
+        phase1_close:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-12-19"
+        phase2_open:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-12-22"
+        phase2_close:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-12-28"
+        activePhase:
+          type: integer
+          nullable: true
+          enum: [1, 2, null]
+          example: 1
+
+paths:
+  # ────────────────────────────────────────────────────────────────
+  # AUTHENTIFICATION
+  # ────────────────────────────────────────────────────────────────
+  /api/auth/login:
+    post:
+      tags: [Authentification]
+      summary: Connexion par email et mot de passe
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: sophie.martin@email.com
+                password:
+                  type: string
+                  example: motdepasse123
+      responses:
+        "200":
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+                    description: JWT valable 7 jours
+                  user:
+                    $ref: "#/components/schemas/JuryUser"
+        "401":
+          description: Identifiants incorrects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/auth/register:
+    post:
+      tags: [Authentification]
+      summary: Créer un compte juré (inscription directe)
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [firstName, lastName, email, password, avatar]
+              properties:
+                firstName:
+                  type: string
+                  example: Sophie
+                lastName:
+                  type: string
+                  example: Martin
+                email:
+                  type: string
+                  example: sophie@email.com
+                password:
+                  type: string
+                  minLength: 8
+                avatar:
+                  type: string
+                  format: binary
+                  description: Photo de profil (obligatoire)
+      responses:
+        "201":
+          description: Compte créé
+        "409":
+          description: Email déjà utilisé
+
+  /api/auth/accept-invite:
+    post:
+      tags: [Authentification]
+      summary: Finaliser son compte via un lien d'invitation
+      description: |
+        Le membre invité par l'admin clique sur le lien dans son email.
+        Il soumet ce formulaire avec le token d'invitation pour créer son compte.
+        Le rôle est extrait du token — impossible de s'auto-promouvoir.
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, firstName, lastName, password]
+              properties:
+                token:
+                  type: string
+                  description: Token JWT d'invitation reçu par email
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                password:
+                  type: string
+                  minLength: 8
+                avatar:
+                  type: string
+                  format: binary
+                  description: Photo de profil (optionnelle)
+      responses:
+        "201":
+          description: Compte créé, token de session retourné
+        "401":
+          description: Token d'invitation invalide ou expiré
+        "409":
+          description: Compte déjà créé avec cette invitation
+
+  /api/auth/google:
+    post:
+      tags: [Authentification]
+      summary: Connexion via Google OAuth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credential]
+              properties:
+                credential:
+                  type: string
+                  description: ID token Google (fourni par Google Sign-In)
+      responses:
+        "200":
+          description: Connexion réussie (compte existant)
+        "201":
+          description: Nouveau compte créé via Google
+
+  /api/auth/me:
+    get:
+      tags: [Authentification]
+      summary: Récupérer son profil connecté
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil du juré connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: "#/components/schemas/JuryUser"
+        "401":
+          description: Token manquant ou invalide
+
+  /api/otp/send:
+    post:
+      tags: [Authentification]
+      summary: Envoyer un code OTP par email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Code OTP envoyé (expire dans 5 minutes)
+
+  /api/otp/verify:
+    post:
+      tags: [Authentification]
+      summary: Vérifier un code OTP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                code:
+                  type: string
+                  example: "482931"
+      responses:
+        "200":
+          description: Code valide
+        "400":
+          description: Code invalide ou expiré
+
+  # ────────────────────────────────────────────────────────────────
+  # FILMS
+  # ────────────────────────────────────────────────────────────────
+  /api/films:
+    get:
+      tags: [Films]
+      summary: Lister tous les films soumis
+      security: []
+      responses:
+        "200":
+          description: Liste des films
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Film"
+
+    post:
+      tags: [Films]
+      summary: Soumettre un film au festival (formulaire public)
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [civilite, prenom, nom, dob, email, mobile, rue, cp, ville, pays, titre, langue, iaClass]
+              properties:
+                civilite:
+                  type: string
+                  enum: [M, Mme]
+                prenom:
+                  type: string
+                nom:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                email:
+                  type: string
+                mobile:
+                  type: string
+                rue:
+                  type: string
+                cp:
+                  type: string
+                ville:
+                  type: string
+                pays:
+                  type: string
+                titre:
+                  type: string
+                  description: Titre original du film
+                titreEn:
+                  type: string
+                  description: Titre en anglais (optionnel)
+                langue:
+                  type: string
+                tags:
+                  type: string
+                  example: "SF, Drame"
+                synopsis:
+                  type: string
+                synopsisEn:
+                  type: string
+                intention:
+                  type: string
+                  description: Note d'intention (creative workflow)
+                outils:
+                  type: string
+                  description: Outils IA utilisés (tech stack)
+                iaClass:
+                  type: string
+                  enum: [full, hybrid]
+                iaImg:
+                  type: string
+                  enum: ["true", "false"]
+                iaSon:
+                  type: string
+                  enum: ["true", "false"]
+                iaScenario:
+                  type: string
+                  enum: ["true", "false"]
+                iaPost:
+                  type: string
+                  enum: ["true", "false"]
+                video:
+                  type: string
+                  format: binary
+                  description: Fichier vidéo (uploadé sur S3 + YouTube)
+                subtitleFR:
+                  type: string
+                  format: binary
+                  description: Sous-titres français (.srt / .vtt)
+                subtitleEN:
+                  type: string
+                  format: binary
+                  description: Sous-titres anglais (.srt / .vtt)
+      responses:
+        "201":
+          description: Dossier enregistré avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  dossierNum:
+                    type: string
+                    example: MAI-2026-12345
+                  message:
+                    type: string
+                  youtubeWarning:
+                    type: string
+                    description: Présent uniquement si l'upload YouTube a échoué
+
+  /api/films/stats:
+    get:
+      tags: [Films]
+      summary: Synthèse des votes par film — vue Sélection (admin)
+      description: Retourne pour chaque film le détail des votes, commentaires et tickets ouverts.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Statistiques par film
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        film_id:
+                          type: integer
+                        original_title:
+                          type: string
+                        statut:
+                          type: string
+                        total_votes:
+                          type: integer
+                        votes_valide:
+                          type: integer
+                        votes_arevoir:
+                          type: integer
+                        votes_refuse:
+                          type: integer
+                        votes_discussion:
+                          type: integer
+                        total_assigned:
+                          type: integer
+                        total_comments:
+                          type: integer
+                        total_tickets:
+                          type: integer
+
+  /api/films/{id}:
+    get:
+      tags: [Films]
+      summary: Détail d'un film
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Détail complet du film avec informations réalisateur
+        "404":
+          description: Film introuvable
+
+    patch:
+      tags: [Films]
+      summary: Mettre à jour le statut d'un film (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [statut]
+              properties:
+                statut:
+                  type: string
+                  enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+      responses:
+        "200":
+          description: Statut mis à jour
+        "404":
+          description: Film introuvable
+
+  # ────────────────────────────────────────────────────────────────
+  # VOTES
+  # ────────────────────────────────────────────────────────────────
+  /api/votes:
+    post:
+      tags: [Votes]
+      summary: Soumettre ou modifier son vote sur un film
+      description: |
+        Un juré vote sur un film assigné. Si un vote existe déjà pour ce couple
+        (juré, film), il est remplacé (upsert).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, decision]
+              properties:
+                filmId:
+                  type: integer
+                  example: 5
+                decision:
+                  type: string
+                  enum: [valide, arevoir, refuse, in_discussion]
+                  example: valide
+      responses:
+        "200":
+          description: Vote enregistré
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Vote"
+        "400":
+          description: Paramètres manquants ou decision invalide
+
+    get:
+      tags: [Votes]
+      summary: Lister les votes par film ou par juré
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          description: ID du film — retourne les votes de tous les jurés pour ce film
+          schema:
+            type: integer
+        - name: juryId
+          in: query
+          description: ID du juré — retourne tous ses votes
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste des votes
+        "400":
+          description: filmId ou juryId requis
+
+  /api/votes/summary:
+    get:
+      tags: [Votes]
+      summary: Synthèse globale des votes pour tous les films (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Résumé agrégé des votes
+
+  # ────────────────────────────────────────────────────────────────
+  # COMMENTAIRES
+  # ────────────────────────────────────────────────────────────────
+  /api/comments:
+    post:
+      tags: [Commentaires]
+      summary: Publier un commentaire sur un film
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, text]
+              properties:
+                filmId:
+                  type: integer
+                  example: 5
+                text:
+                  type: string
+                  example: Film très bien réalisé, IA utilisée de façon subtile.
+      responses:
+        "201":
+          description: Commentaire publié
+        "400":
+          description: filmId et text obligatoires
+
+    get:
+      tags: [Commentaires]
+      summary: Commentaires d'un film
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste des commentaires avec infos juré et décision associée
+
+  # ────────────────────────────────────────────────────────────────
+  # ATTRIBUTIONS
+  # ────────────────────────────────────────────────────────────────
+  /api/assignments:
+    get:
+      tags: [Attributions]
+      summary: Toutes les attributions films ↔ jurés (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste complète des attributions
+
+    post:
+      tags: [Attributions]
+      summary: Attribuer un film à un juré (admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [juryId, filmId]
+              properties:
+                juryId:
+                  type: integer
+                  example: 3
+                filmId:
+                  type: integer
+                  example: 12
+      responses:
+        "201":
+          description: Film attribué
+        "409":
+          description: Ce film est déjà attribué à ce juré
+
+    delete:
+      tags: [Attributions]
+      summary: Retirer une attribution (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: juryId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attribution supprimée
+        "404":
+          description: Attribution introuvable
+
+  /api/assignments/auto-distribute:
+    post:
+      tags: [Attributions]
+      summary: Répartir équitablement tous les films non assignés (admin)
+      description: |
+        Distribue automatiquement tous les films sans attribution entre
+        les jurés actifs de façon circulaire (round-robin).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Répartition effectuée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  assigned:
+                    type: integer
+                    description: Nombre de films assignés
+                  skipped:
+                    type: integer
+                    description: Nombre d'erreurs
+                  message:
+                    type: string
+                    example: "42 film(s) réparti(s) entre 6 juré(s)."
+
+  /api/assignments/jury-members:
+    get:
+      tags: [Attributions]
+      summary: Liste de tous les jurés — pour le sélecteur d'attribution (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des jurés
+
+  /api/assignments/jury/{juryId}:
+    get:
+      tags: [Attributions]
+      summary: Films assignés à un juré
+      description: Un juré peut consulter ses propres films. L'admin peut consulter ceux de n'importe quel juré.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: juryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste des films assignés au juré
+
+  /api/assignments/film/{filmId}:
+    get:
+      tags: [Attributions]
+      summary: Jurés assignés à un film (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Liste des jurés assignés au film
+
+  # ────────────────────────────────────────────────────────────────
+  # PHASES
+  # ────────────────────────────────────────────────────────────────
+  /api/phases:
+    get:
+      tags: [Phases]
+      summary: Récupérer la configuration des phases et la phase active
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Configuration des deux phases + phase active calculée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Phase"
+
+  /api/phases/{phaseNumber}:
+    put:
+      tags: [Phases]
+      summary: Sauvegarder les dates d'une phase (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: phaseNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [1, 2]
+          description: 1 = Présélection Top 50 · 2 = Finale Top 5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [openDate, closeDate]
+              properties:
+                openDate:
+                  type: string
+                  format: date
+                  example: "2026-12-12"
+                closeDate:
+                  type: string
+                  format: date
+                  example: "2026-12-19"
+      responses:
+        "200":
+          description: Phase sauvegardée
+        "400":
+          description: phaseNumber invalide ou dates manquantes
+
+  # ────────────────────────────────────────────────────────────────
+  # TICKETS / SIGNALEMENTS
+  # ────────────────────────────────────────────────────────────────
+  /api/tickets:
+    post:
+      tags: [Tickets]
+      summary: Créer un signalement sur un film (juré)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, description]
+              properties:
+                filmId:
+                  type: integer
+                  example: 5
+                type:
+                  type: string
+                  enum: [content, technical, rights, other]
+                  default: other
+                  description: |
+                    content = contenu problématique
+                    technical = problème technique (son, image)
+                    rights = droits d'auteur
+                    other = autre
+                description:
+                  type: string
+                  example: La vidéo ne se charge pas correctement.
+      responses:
+        "201":
+          description: Signalement créé
+        "400":
+          description: filmId et description obligatoires
+
+    get:
+      tags: [Tickets]
+      summary: Tous les signalements (admin)
+      description: Retourne les tickets triés par statut (ouverts en premier) puis par date.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ticket"
+
+  /api/tickets/{id}:
+    get:
+      tags: [Tickets]
+      summary: Détail d'un ticket (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ticket avec infos juré, film et réalisateur
+        "404":
+          description: Ticket introuvable
+
+    patch:
+      tags: [Tickets]
+      summary: Mettre à jour le statut et la note admin d'un ticket (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [open, in_progress, resolved, rejected]
+                  description: |
+                    open = ouvert
+                    in_progress = pris en charge
+                    resolved = résolu
+                    rejected = refusé
+                adminNote:
+                  type: string
+                  description: Note interne de l'admin (optionnelle)
+      responses:
+        "200":
+          description: Ticket mis à jour
+        "404":
+          description: Ticket introuvable
+
+  /api/tickets/{id}/email:
+    post:
+      tags: [Tickets]
+      summary: Envoyer un email au réalisateur depuis un ticket (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, body]
+              properties:
+                subject:
+                  type: string
+                  example: "Votre film MAI-2026-12345 — demande de modification"
+                body:
+                  type: string
+                  example: "Bonjour, nous avons remarqué un problème technique dans votre film..."
+      responses:
+        "200":
+          description: Email envoyé au réalisateur
+        "404":
+          description: Ticket introuvable
+
+  # ────────────────────────────────────────────────────────────────
+  # ADMINISTRATION
+  # ────────────────────────────────────────────────────────────────
+  /api/admin/users:
+    get:
+      tags: [Administration]
+      summary: Lister tous les jurés et admins (admin)
+      description: Inclut le nombre de films assignés et évalués par chaque membre.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des utilisateurs avec statistiques de participation
+
+  /api/admin/users/{id}:
+    patch:
+      tags: [Administration]
+      summary: Modifier un utilisateur (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                role:
+                  type: string
+                  enum: [jury, admin]
+                juryDescription:
+                  type: string
+                  description: Biographie publique du juré
+      responses:
+        "200":
+          description: Utilisateur mis à jour
+        "404":
+          description: Utilisateur introuvable
+
+    delete:
+      tags: [Administration]
+      summary: Supprimer un utilisateur (admin)
+      description: Impossible de supprimer son propre compte.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Utilisateur supprimé
+        "403":
+          description: Impossible de supprimer son propre compte
+        "404":
+          description: Utilisateur introuvable
+
+  /api/admin/users/{id}/status:
+    patch:
+      tags: [Administration]
+      summary: Activer ou désactiver un compte (admin)
+      description: Un admin ne peut pas désactiver son propre compte.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isActive]
+              properties:
+                isActive:
+                  type: boolean
+                  example: false
+                  description: false = compte désactivé (accès révoqué)
+      responses:
+        "200":
+          description: Statut du compte mis à jour
+        "403":
+          description: Impossible de désactiver son propre compte
+
+  /api/admin/invite:
+    post:
+      tags: [Administration]
+      summary: Envoyer une invitation par email (admin)
+      description: |
+        Génère un lien d'invitation sécurisé (JWT valable 48h) et l'envoie
+        par email. Le destinataire clique sur le lien et crée son compte
+        via `/api/auth/accept-invite`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  example: sophie.martin@email.com
+                role:
+                  type: string
+                  enum: [jury, admin]
+      responses:
+        "201":
+          description: Invitation envoyée
+        "409":
+          description: Un compte existe déjà avec cette adresse email
+
+  /api/admin/invite/verify:
+    get:
+      tags: [Administration]
+      summary: Vérifier un token d'invitation (public)
+      description: |
+        Appelé par la page d'inscription quand le membre clique sur le lien.
+        Retourne l'email et le rôle pré-remplis depuis le token.
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token valide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum: [jury, admin]
+        "401":
+          description: Token invalide ou expiré
+
+  /api/admin/videos:
+    get:
+      tags: [Administration]
+      summary: Lister toutes les vidéos du bucket S3 (admin)
+      description: |
+        Retourne tous les fichiers vidéo (.mp4, .mov, .avi, .mkv, .webm, .m4v)
+        présents dans le bucket Scaleway S3. Extrait automatiquement le numéro
+        de dossier depuis le nom de fichier.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des vidéos S3
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  count:
+                    type: integer
+                    example: 42
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          example: grp1/MAI-2026-12345-video-monfilm.mp4
+                        url:
+                          type: string
+                          example: https://s3.fr-par.scw.cloud/tln/grp1/MAI-2026-12345-video-monfilm.mp4
+                        filename:
+                          type: string
+                          example: MAI-2026-12345-video-monfilm.mp4
+                        dossierNum:
+                          type: string
+                          nullable: true
+                          example: MAI-2026-12345
+                        sizeBytes:
+                          type: integer
+                          example: 104857600
+                        lastModified:
+                          type: string
+                          format: date-time
