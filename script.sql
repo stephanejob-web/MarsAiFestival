@@ -299,4 +299,55 @@ CREATE TABLE jury_film_commentary (
     FOREIGN KEY (commentary_id) REFERENCES commentary(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ----------------------------------------------------------------
+-- Table: ticket
+-- Signalements créés par les jurés, traités par l'admin.
+-- ----------------------------------------------------------------
+CREATE TABLE ticket (
+  id           INT NOT NULL AUTO_INCREMENT,
+  jury_id      INT NOT NULL,
+  film_id      INT NOT NULL,
+  type         ENUM('content','technical','rights','other') NOT NULL DEFAULT 'other',
+  description  TEXT NOT NULL,
+  status       ENUM('open','in_progress','resolved','rejected') NOT NULL DEFAULT 'open',
+  admin_note   TEXT DEFAULT NULL,
+  created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_ticket_jury FOREIGN KEY (jury_id) REFERENCES jury(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_ticket_film FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------------------------------------------
+-- Patch: jury.is_active — désactivation de compte sans suppression
+-- ----------------------------------------------------------------
+ALTER TABLE jury ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- ----------------------------------------------------------------
+-- Patch: jury_film_commentary.commentary_id → nullable
+-- Permet d'enregistrer un vote sans commentaire obligatoire.
+-- ----------------------------------------------------------------
+ALTER TABLE jury_film_commentary MODIFY commentary_id INT DEFAULT NULL;
+
+-- ----------------------------------------------------------------
+-- Table: jury_film_assignment
+-- L'admin attribue des films à des jurés avant évaluation.
+-- Séparé de jury_film_commentary pour découpler attribution et vote.
+-- ----------------------------------------------------------------
+CREATE TABLE jury_film_assignment (
+  id          INT NOT NULL AUTO_INCREMENT,
+  jury_id     INT NOT NULL,
+  film_id     INT NOT NULL,
+  assigned_by INT NOT NULL,                              -- FK → jury(id) : l'admin qui assigne
+  assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_assignment (jury_id, film_id),          -- un film assigné une seule fois par juré
+  CONSTRAINT fk_assign_jury
+    FOREIGN KEY (jury_id)     REFERENCES jury(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_assign_film
+    FOREIGN KEY (film_id)     REFERENCES film(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_assign_by
+    FOREIGN KEY (assigned_by) REFERENCES jury(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 1;
