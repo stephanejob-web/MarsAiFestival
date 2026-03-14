@@ -20,7 +20,10 @@ const useJuryUser = (): JuryUser | null => {
     if (!token) return null;
 
     try {
-        const payload = JSON.parse(atob(token.split(".")[1])) as {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+        const payload = JSON.parse(atob(padded)) as {
             id: number;
             email: string;
             firstName: string;
