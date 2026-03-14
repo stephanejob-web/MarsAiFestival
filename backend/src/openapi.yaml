@@ -17,7 +17,8 @@ info:
     - **admin** — réservé aux comptes avec `role: "admin"`
 
     ## Compte administrateur par défaut
-    Un compte admin est créé automatiquement lors de l'initialisation de la base de données (`script.sql`).
+
+    Un compte admin est créé automatiquement à l'initialisation de la base de données (`script.sql`).
 
     | Champ | Valeur |
     |---|---|
@@ -25,7 +26,31 @@ info:
     | Mot de passe | `azerty` |
     | Rôle | `admin` |
 
-    Utilisez ces identifiants sur `POST /api/auth/login` pour obtenir un token JWT, puis cliquez sur **Authorize** en haut à droite pour tester les routes protégées.
+    ### Comment se connecter et tester les routes protégées
+
+    **Étape 1 — Obtenir un token JWT**
+
+    Déroulez la section **Authentification** ci-dessous, ouvrez `POST /api/auth/login`, cliquez sur **Try it out** et envoyez :
+    ```json
+    {
+      "email": "admin@gmail.com",
+      "password": "azerty"
+    }
+    ```
+    La réponse contient un champ `token` — copiez sa valeur.
+
+    **Étape 2 — Autoriser Swagger**
+
+    Cliquez sur le bouton **Authorize 🔒** en haut à droite de cette page.
+    Dans le champ **Value**, saisissez :
+    ```
+    Bearer <collez_votre_token_ici>
+    ```
+    Cliquez sur **Authorize** puis **Close**.
+
+    **Étape 3 — Tester les routes admin**
+
+    Toutes les routes marquées 🔒 sont maintenant accessibles. Le token est valable **7 jours**.
   version: 1.0.0
   contact:
     name: Équipe marsAI
