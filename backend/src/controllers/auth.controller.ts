@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { findByEmail, insertJury, upsertGoogleJury } from "../repositories/jury.repository";
+import { verifyInviteToken } from "../services/invite.service";
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
@@ -131,6 +132,87 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             role: jury.role,
         },
     });
+};
+
+// ── GET /api/auth/me — Profil du juré connecté ────────────────────────────────
+export const me = (req: Request, res: Response): void => {
+    res.json({ success: true, user: req.juryUser });
+};
+
+// ── POST /api/auth/accept-invite ──────────────────────────────────────────────
+// Le membre invité finalise son compte (nom, mot de passe, avatar) via le token d'invitation.
+export const acceptInvite = async (req: Request, res: Response): Promise<void> => {
+    const { token, firstName, lastName, password } = req.body as Record<string, string>;
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const avatarFile = files?.["avatar"]?.[0] ?? null;
+
+    if (!token || !firstName?.trim() || !lastName?.trim() || !password?.trim()) {
+        res.status(400).json({ success: false, message: "Tous les champs sont obligatoires." });
+        return;
+    }
+    if (password.length < 8) {
+        res.status(400).json({
+            success: false,
+            message: "Le mot de passe doit contenir au moins 8 caractères.",
+        });
+        return;
+    }
+
+    let invitePayload: { email: string; role: "jury" | "admin" };
+    try {
+        invitePayload = verifyInviteToken(token);
+    } catch {
+        res.status(401).json({ success: false, message: "Token d'invitation invalide ou expiré." });
+        return;
+    }
+
+    const existing = await findByEmail(invitePayload.email);
+    if (existing) {
+        res.status(409).json({
+            success: false,
+            message: "Ce compte a déjà été créé. Connectez-vous directement.",
+        });
+        return;
+    }
+
+    try {
+        let profilPicture: string | null = null;
+        if (avatarFile) {
+            const ext = path.extname(avatarFile.originalname).toLowerCase() || ".jpg";
+            const avatarFilename = `${Date.now()}${ext}`;
+            fs.writeFileSync(path.join(AVATARS_DIR, avatarFilename), avatarFile.buffer);
+            profilPicture = `http://localhost:5500/uploads/avatars/${avatarFilename}`;
+        }
+
+        const password_hash = await bcrypt.hash(password, 12);
+        const jury = await insertJury({
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            email: invitePayload.email,
+            password_hash,
+            role: invitePayload.role,
+            profil_picture: profilPicture,
+        });
+
+        res.status(201).json({
+            success: true,
+            token: makeToken(jury),
+            user: {
+                id: jury.id,
+                email: jury.email,
+                firstName: jury.first_name,
+                lastName: jury.last_name,
+                role: jury.role,
+                profilPicture,
+            },
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la création du compte.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
 };
 
 // ── POST /api/auth/google ──────────────────────────────────────────────────────
