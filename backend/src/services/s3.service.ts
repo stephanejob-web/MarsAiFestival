@@ -64,8 +64,9 @@ export async function listVideosFromS3(): Promise<S3VideoItem[]> {
             if (!VIDEO_EXTENSIONS.some((ext) => lowerKey.endsWith(ext))) continue;
 
             const filename = obj.Key.split("/").pop() ?? obj.Key;
-            // Pattern attendu : MAI-2026-XXXXX-video-nomoriginal.ext
-            const dossierMatch = filename.match(/^(MAI-\d{4}-\d{5})/i);
+            // Structure : grp1/MAI-2026-XXXXX/video-nomoriginal.ext
+            const segments = obj.Key.split("/");
+            const dossierMatch = segments[segments.length - 2]?.match(/^(MAI-\d{4}-\d{5})$/i) ?? null;
 
             videos.push({
                 key: obj.Key,

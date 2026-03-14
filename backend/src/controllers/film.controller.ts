@@ -36,7 +36,7 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
                 const file = fileArr[0];
-                const filename = `${dossierNum}-${field}-${file.originalname}`;
+                const filename = `${dossierNum}/${field}-${file.originalname}`;
                 urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
             }
         }
