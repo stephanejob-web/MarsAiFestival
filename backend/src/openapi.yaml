@@ -15,6 +15,17 @@ info:
     - **public** — accessible sans authentification
     - **auth** — tout juré ou admin connecté
     - **admin** — réservé aux comptes avec `role: "admin"`
+
+    ## Compte administrateur par défaut
+    Un compte admin est créé automatiquement lors de l'initialisation de la base de données (`script.sql`).
+
+    | Champ | Valeur |
+    |---|---|
+    | Email | `admin@gmail.com` |
+    | Mot de passe | `azerty` |
+    | Rôle | `admin` |
+
+    Utilisez ces identifiants sur `POST /api/auth/login` pour obtenir un token JWT, puis cliquez sur **Authorize** en haut à droite pour tester les routes protégées.
   version: 1.0.0
   contact:
     name: Équipe marsAI
