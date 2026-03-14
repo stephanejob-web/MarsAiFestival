@@ -39,7 +39,7 @@ export interface S3VideoItem {
     key: string;
     url: string;
     filename: string;
-    dossierNum: string | null;   // extrait du nom de fichier : MAI-2026-XXXXX
+    dossierNum: string | null; // extrait du nom de fichier : MAI-2026-XXXXX
     sizeBytes: number;
     lastModified: Date;
 }

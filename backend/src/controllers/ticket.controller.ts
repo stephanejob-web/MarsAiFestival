@@ -21,7 +21,10 @@ export const submitTicket = async (req: Request, res: Response): Promise<void> =
     const juryId = req.juryUser!.id;
 
     if (!filmId || !description?.trim()) {
-        res.status(400).json({ success: false, message: "filmId et description sont obligatoires." });
+        res.status(400).json({
+            success: false,
+            message: "filmId et description sont obligatoires.",
+        });
         return;
     }
     const ticketType = TICKET_TYPES.includes(type as (typeof TICKET_TYPES)[number])

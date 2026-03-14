@@ -8,7 +8,7 @@ export const listPhases = async (_req: Request, res: Response): Promise<void> =>
 
         // Calcule la phase active selon la date du jour
         const now = new Date();
-        const toDate = (s: string | null) => (s ? new Date(s) : null);
+        const toDate = (s: string | null): Date | null => (s ? new Date(s) : null);
         const p1Open = toDate(data.phase1_open);
         const p1Close = toDate(data.phase1_close);
         const p2Open = toDate(data.phase2_open);
@@ -38,7 +38,10 @@ export const updatePhase = async (req: Request, res: Response): Promise<void> =>
 
     const { openDate, closeDate } = req.body as { openDate?: string; closeDate?: string };
     if (!openDate || !closeDate) {
-        res.status(400).json({ success: false, message: "openDate et closeDate sont obligatoires." });
+        res.status(400).json({
+            success: false,
+            message: "openDate et closeDate sont obligatoires.",
+        });
         return;
     }
 

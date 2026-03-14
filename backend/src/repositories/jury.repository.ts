@@ -79,14 +79,31 @@ export const getAllJury = async (): Promise<RowDataPacket[]> => {
 
 export const updateJuryUser = async (
     id: number,
-    data: Partial<{ first_name: string; last_name: string; role: "jury" | "admin"; jury_description: string }>,
+    data: Partial<{
+        first_name: string;
+        last_name: string;
+        role: "jury" | "admin";
+        jury_description: string;
+    }>,
 ): Promise<boolean> => {
     const fields: string[] = [];
     const values: unknown[] = [];
-    if (data.first_name !== undefined) { fields.push("first_name = ?"); values.push(data.first_name); }
-    if (data.last_name !== undefined)  { fields.push("last_name = ?");  values.push(data.last_name); }
-    if (data.role !== undefined)       { fields.push("role = ?");        values.push(data.role); }
-    if (data.jury_description !== undefined) { fields.push("jury_description = ?"); values.push(data.jury_description); }
+    if (data.first_name !== undefined) {
+        fields.push("first_name = ?");
+        values.push(data.first_name);
+    }
+    if (data.last_name !== undefined) {
+        fields.push("last_name = ?");
+        values.push(data.last_name);
+    }
+    if (data.role !== undefined) {
+        fields.push("role = ?");
+        values.push(data.role);
+    }
+    if (data.jury_description !== undefined) {
+        fields.push("jury_description = ?");
+        values.push(data.jury_description);
+    }
     if (fields.length === 0) return false;
     values.push(id);
     const [result] = await pool.execute<ResultSetHeader>(

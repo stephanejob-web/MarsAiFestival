@@ -2,11 +2,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/db";
 
 // ── Ajouter un commentaire sur un film ────────────────────────────────────────
-export const addComment = async (
-    juryId: number,
-    filmId: number,
-    text: string,
-): Promise<number> => {
+export const addComment = async (juryId: number, filmId: number, text: string): Promise<number> => {
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();

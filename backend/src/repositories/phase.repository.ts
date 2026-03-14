@@ -5,9 +5,7 @@ import pool from "../config/db";
 // Si aucune ligne n'existe, on en crée une à la volée.
 
 const ensureCmsRow = async (): Promise<void> => {
-    await pool.execute(
-        `INSERT IGNORE INTO cms_content (id) VALUES (1)`,
-    );
+    await pool.execute(`INSERT IGNORE INTO cms_content (id) VALUES (1)`);
 };
 
 export interface PhasesConfig {

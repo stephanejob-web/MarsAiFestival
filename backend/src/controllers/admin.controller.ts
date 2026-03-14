@@ -117,7 +117,10 @@ export const toggleUserStatus = async (req: Request, res: Response): Promise<voi
     }
     // Empêcher l'admin de se désactiver lui-même
     if (id === req.juryUser!.id && !isActive) {
-        res.status(403).json({ success: false, message: "Impossible de désactiver votre propre compte." });
+        res.status(403).json({
+            success: false,
+            message: "Impossible de désactiver votre propre compte.",
+        });
         return;
     }
 
@@ -142,7 +145,10 @@ export const removeUser = async (req: Request, res: Response): Promise<void> => 
     const id = Number(req.params.id);
 
     if (id === req.juryUser!.id) {
-        res.status(403).json({ success: false, message: "Impossible de supprimer votre propre compte." });
+        res.status(403).json({
+            success: false,
+            message: "Impossible de supprimer votre propre compte.",
+        });
         return;
     }
 

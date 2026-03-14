@@ -1,6 +1,12 @@
 import { Router } from "express";
 import multer from "multer";
-import { submitFilm, listFilms, showFilm, patchFilm, filmsStats } from "../controllers/film.controller";
+import {
+    submitFilm,
+    listFilms,
+    showFilm,
+    patchFilm,
+    filmsStats,
+} from "../controllers/film.controller";
 import { requireAdmin } from "../middlewares/auth.middleware";
 
 const router = Router();

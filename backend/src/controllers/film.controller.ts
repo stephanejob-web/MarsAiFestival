@@ -2,7 +2,12 @@ import { Request, Response } from "express";
 import { uploadFileToS3 } from "../services/s3.service";
 import { uploadVideoToYoutube } from "../services/youtube.service";
 import { insertRealisator } from "../repositories/realisator.repository";
-import { insertFilm, getFilms, getFilmById, updateFilmStatut } from "../repositories/film.repository";
+import {
+    insertFilm,
+    getFilms,
+    getFilmById,
+    updateFilmStatut,
+} from "../repositories/film.repository";
 import { getVotesSummary } from "../repositories/vote.repository";
 
 // ── POST /api/films ────────────────────────────────────────────────────────────
@@ -149,14 +154,24 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
 export const patchFilm = async (req: Request, res: Response): Promise<void> => {
     const id = Number(req.params.id);
     const { statut } = req.body as { statut?: string };
-    const validStatuts = ["to_review", "valide", "arevoir", "refuse", "in_discussion", "asked_to_modify"] as const;
+    const validStatuts = [
+        "to_review",
+        "valide",
+        "arevoir",
+        "refuse",
+        "in_discussion",
+        "asked_to_modify",
+    ] as const;
 
     if (isNaN(id)) {
         res.status(400).json({ success: false, message: "ID invalide." });
         return;
     }
     if (!statut || !validStatuts.includes(statut as (typeof validStatuts)[number])) {
-        res.status(400).json({ success: false, message: `statut doit être parmi : ${validStatuts.join(", ")}` });
+        res.status(400).json({
+            success: false,
+            message: `statut doit être parmi : ${validStatuts.join(", ")}`,
+        });
         return;
     }
 
