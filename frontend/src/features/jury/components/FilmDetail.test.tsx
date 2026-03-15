@@ -19,6 +19,7 @@ const baseFilm: JuryFilm = {
     iaImage: "Runway Gen-3",
     iaPost: "MusicGen",
     note: "Film sur la memoire humaine et l apprentissage machine.",
+    videoUrl: null,
     myDecision: null,
     comments: [],
     opinions: [
@@ -99,8 +100,16 @@ describe("FilmDetail", () => {
         expect(screen.getByText("MusicGen")).toBeDefined();
     });
 
-    it("affiche le lecteur video avec le bouton play", () => {
+    it("affiche le placeholder video quand videoUrl est null", () => {
         render(<FilmDetail film={baseFilm} />);
-        expect(screen.getAllByText("▶").length).toBeGreaterThan(0);
+        expect(screen.getByText(/vidéo non disponible/i)).toBeDefined();
+    });
+
+    it("affiche un element video quand videoUrl est defini", () => {
+        const filmWithVideo: JuryFilm = { ...baseFilm, videoUrl: "https://example.com/video.mp4" };
+        const { container } = render(<FilmDetail film={filmWithVideo} />);
+        const videoEl = container.querySelector("video");
+        expect(videoEl).not.toBeNull();
+        expect(videoEl?.getAttribute("src")).toBe("https://example.com/video.mp4");
     });
 });
