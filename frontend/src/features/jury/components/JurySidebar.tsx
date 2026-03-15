@@ -239,7 +239,10 @@ const JurySidebar = ({
                                 </div>
                             ) : (
                                 chat.messages.map((msg) => {
-                                    const isMe = msg.senderId === chat.mySocketId;
+                                    const isMe =
+                                        msg.senderId !== null
+                                            ? msg.senderId === chat.mySocketId
+                                            : msg.juryId === user?.id;
                                     const time = new Date(msg.timestamp).toLocaleTimeString("fr", {
                                         hour: "2-digit",
                                         minute: "2-digit",
@@ -247,44 +250,39 @@ const JurySidebar = ({
                                     return (
                                         <div
                                             key={msg.id}
-                                            className={`flex items-end gap-1.5 ${isMe ? "flex-row-reverse" : "flex-row"}`}
+                                            className={`flex items-start gap-2 ${isMe ? "bg-aurora/5" : ""} rounded-lg px-1 py-0.5`}
                                         >
                                             {/* Avatar */}
                                             {msg.profilPicture ? (
                                                 <img
                                                     src={msg.profilPicture}
                                                     alt={msg.initials}
-                                                    className="h-[22px] w-[22px] flex-shrink-0 rounded-full object-cover"
+                                                    className="mt-0.5 h-[26px] w-[26px] flex-shrink-0 rounded-full object-cover"
                                                     onError={(e) => {
-                                                        (
-                                                            e.target as HTMLImageElement
-                                                        ).style.display = "none";
+                                                        (e.target as HTMLImageElement).style.display =
+                                                            "none";
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora/60 to-lavande/60 text-[0.55rem] font-bold text-deep-sky">
+                                                <div className="mt-0.5 flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora/60 to-lavande/60 text-[0.55rem] font-bold text-deep-sky">
                                                     {msg.initials}
                                                 </div>
                                             )}
-                                            {/* Bulle */}
-                                            <div
-                                                className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}
-                                            >
-                                                <div
-                                                    className={`flex items-baseline gap-1 ${isMe ? "flex-row-reverse" : ""}`}
-                                                >
-                                                    <span className="text-[0.6rem] font-semibold text-white-soft/70">
-                                                        {msg.initials}
+                                            {/* Contenu */}
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline gap-1.5">
+                                                    <span
+                                                        className={`text-[0.7rem] font-semibold ${isMe ? "text-aurora" : "text-white-soft"}`}
+                                                    >
+                                                        {msg.author}
                                                     </span>
                                                     <span className="text-[0.55rem] text-mist/40">
                                                         {time}
                                                     </span>
                                                 </div>
-                                                <div
-                                                    className={`rounded-xl px-2 py-1.5 text-[0.7rem] leading-snug ${isMe ? "rounded-br-sm bg-aurora/15 text-aurora" : "rounded-bl-sm bg-white/6 text-white-soft/85"}`}
-                                                >
+                                                <p className="break-words text-[0.7rem] leading-snug text-white-soft/80">
                                                     {msg.text}
-                                                </div>
+                                                </p>
                                             </div>
                                         </div>
                                     );
