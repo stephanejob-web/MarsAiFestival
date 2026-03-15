@@ -116,6 +116,11 @@ tags:
     description: |
       Commentaires persistants des jurés sur les films, visibles par tous les membres du jury.
       Un juré a un seul commentaire par film (modifiable).
+  - name: Discussion
+    description: |
+      Liste partagée des films mis en discussion par les jurés.
+      Un film ajouté est visible par tous les membres du jury dans l'onglet « À discuter ».
+      Le chat temps réel associé est géré via Socket.IO (`discussion:*`).
   - name: Attributions
     description: |
       Système d'attribution des films aux jurés, géré par l'admin.
@@ -722,6 +727,102 @@ paths:
                     $ref: "#/components/schemas/JuryUser"
         "401":
           description: Token manquant, invalide ou expiré
+
+  /api/auth/profile/avatar:
+    put:
+      tags: [Authentification]
+      summary: Changer son avatar 🔒
+      description: |
+        Permet au juré connecté de remplacer son avatar par une nouvelle image.
+
+        L'image est stockée sur le serveur (`uploads/avatars/`) et l'URL est mise à jour en base.
+        La réponse contient un **nouveau token JWT** incluant la nouvelle `profilPicture` — le client
+        doit remplacer l'ancien token dans `localStorage` pour que l'interface se mette à jour.
+
+        > Formats acceptés : JPG, PNG, WebP — 5 Mo maximum.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [avatar]
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Fichier image (JPG, PNG, WebP — max 5 Mo)
+      responses:
+        "200":
+          description: Avatar mis à jour — nouveau token JWT retourné
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    description: Nouveau JWT incluant la nouvelle profilPicture
+                  profilPicture:
+                    type: string
+                    description: URL publique du nouvel avatar
+                    example: http://localhost:5500/uploads/avatars/1710500000000.jpg
+        "400":
+          description: Aucun fichier fourni
+        "401":
+          description: Token manquant ou invalide
+
+  /api/auth/profile/password:
+    put:
+      tags: [Authentification]
+      summary: Changer son mot de passe 🔒
+      description: |
+        Permet au juré connecté de changer son mot de passe.
+
+        - Si le compte a été créé avec un mot de passe (email/password), le champ `currentPassword`
+          est **obligatoire** et doit correspondre au mot de passe actuel.
+        - Si le compte est purement Google OAuth (pas de `password_hash`), `currentPassword` est ignoré.
+        - Le nouveau mot de passe doit contenir **au moins 8 caractères**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  description: Mot de passe actuel (obligatoire si le compte n'est pas Google)
+                  example: mon_ancien_mdp
+                newPassword:
+                  type: string
+                  description: Nouveau mot de passe (8 caractères minimum)
+                  example: nouveau_mdp_securise
+      responses:
+        "200":
+          description: Mot de passe changé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Nouveau mot de passe trop court ou mot de passe actuel manquant
+        "401":
+          description: Token invalide ou mot de passe actuel incorrect
+        "404":
+          description: Juré introuvable
 
   /api/otp/send:
     post:
@@ -1381,6 +1482,143 @@ paths:
                       $ref: "#/components/schemas/Comment"
         "400":
           description: filmId manquant ou invalide
+
+  /api/comments/mine:
+    get:
+      tags: [Commentaires]
+      summary: Tous mes commentaires (bulk) 🔒
+      description: |
+        Retourne en une seule requête tous les commentaires rédigés par le juré connecté,
+        indexés par `film_id`. Utilisé au chargement du panel jury pour pré-remplir
+        les zones de texte de chaque film sans multiplier les requêtes.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des commentaires du juré connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        film_id:
+                          type: integer
+                          description: ID du film commenté
+                        text:
+                          type: string
+                          description: Texte du commentaire
+        "401":
+          description: Token manquant ou invalide
+
+  # ════════════════════════════════════════════════════════════════
+  # DISCUSSION
+  # ════════════════════════════════════════════════════════════════
+  /api/discussion:
+    get:
+      tags: [Discussion]
+      summary: Liste des films en discussion 🔒
+      description: |
+        Retourne les IDs de tous les films actuellement dans la liste de discussion partagée.
+        Cette liste est commune à tous les jurés : dès qu'un film est ajouté par l'un d'eux,
+        il apparaît dans l'onglet « À discuter » pour tout le monde.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des film_id en discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                    example: [12, 34, 57]
+        "401":
+          description: Token manquant ou invalide
+
+    post:
+      tags: [Discussion]
+      summary: Ajouter un film à la discussion 🔒
+      description: |
+        Ajoute un film à la liste de discussion partagée (`film_discussion`).
+        Si le film est déjà dans la liste, la requête est ignorée silencieusement (`INSERT IGNORE`).
+
+        L'ajout est immédiatement visible par tous les jurés connectés.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film à ajouter à la discussion
+                  example: 34
+      responses:
+        "201":
+          description: Film ajouté à la discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: filmId manquant ou invalide
+        "401":
+          description: Token manquant ou invalide
+
+    delete:
+      tags: [Discussion]
+      summary: Retirer un film de la discussion 🔒
+      description: |
+        Retire un film de la liste de discussion partagée.
+        L'opération est immédiate et visible par tous les jurés.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film à retirer de la discussion
+          example: 34
+      responses:
+        "200":
+          description: Film retiré de la discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: filmId manquant ou invalide
+        "404":
+          description: Film non trouvé dans la liste de discussion
+        "401":
+          description: Token manquant ou invalide
 
   # ════════════════════════════════════════════════════════════════
   # ATTRIBUTIONS
