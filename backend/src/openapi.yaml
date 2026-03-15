@@ -1,0 +1,2470 @@
+openapi: 3.0.3
+info:
+  title: marsAI Festival 2026 — API
+  description: |
+    Documentation complète de l'API REST du festival marsAI 2026.
+
+    ---
+
+    ## 🔑 Accès administrateur
+
+    | Champ | Valeur |
+    |---|---|
+    | **Email** | `admin@gmail.com` |
+    | **Mot de passe** | `azerty` |
+    | **Rôle** | `admin` |
+
+    > Utilisez ces identifiants avec `POST /api/auth/login` pour obtenir un token JWT,
+    > puis cliquez sur **Authorize 🔒** en haut à droite et saisissez `Bearer <token>`.
+
+    ---
+
+    ## Authentification
+
+    La plupart des routes protégées nécessitent un token JWT passé dans le header :
+    ```
+    Authorization: Bearer <token>
+    ```
+    Le token est obtenu via `POST /api/auth/login`, `POST /api/auth/google` ou `POST /api/auth/accept-invite`.
+    Il est **valable 7 jours**.
+
+    ---
+
+    ## Rôles
+
+    | Rôle | Description |
+    |---|---|
+    | **public** | Accessible sans authentification |
+    | **auth** | Tout juré ou admin connecté (token JWT valide) |
+    | **admin** | Réservé aux comptes avec `role: "admin"` |
+
+    Les routes marquées 🔒 nécessitent un token. Les routes marquées 🛡️ nécessitent le rôle `admin`.
+
+    ---
+
+    ## Guide de connexion rapide
+
+    **Étape 1** — `POST /api/auth/login`
+    ```json
+    { "email": "admin@gmail.com", "password": "azerty" }
+    ```
+    Copiez la valeur du champ `token` dans la réponse.
+
+    **Étape 2** — Cliquez sur **Authorize 🔒** (en haut à droite), saisissez :
+    ```
+    Bearer <collez_votre_token_ici>
+    ```
+
+    **Étape 3** — Toutes les routes admin sont maintenant accessibles.
+
+    ---
+
+    ## Structure des fichiers S3
+
+    Les fichiers uploadés lors d'un dépôt de film sont organisés par dossier de candidature :
+    ```
+    grp1/
+      MAI-2026-XXXXX/
+        video-nomoriginal.mp4
+        subtitleFR-sous-titres.srt
+        subtitleEN-subtitles.srt
+    ```
+
+    ---
+
+    ## Chat jury (Socket.IO)
+
+    Le chat en temps réel entre jurés utilise **Socket.IO** (non documenté ici car hors REST).
+    Le serveur écoute sur le même port que l'API.
+
+    | Événement émis | Description |
+    |---|---|
+    | `chat:join` | Rejoindre le chat avec `{ author, initials, profilPicture }` |
+    | `chat:send` | Envoyer un message avec `{ author, initials, profilPicture, text }` |
+
+    | Événement reçu | Description |
+    |---|---|
+    | `chat:history` | Historique des 100 derniers messages (à la connexion) |
+    | `chat:message` | Nouveau message diffusé à tous |
+    | `chat:online` | Liste des jurés connectés (mise à jour en temps réel) |
+
+    > Le chat est **éphémère** : les messages sont en mémoire et perdus au redémarrage du serveur.
+    > Les commentaires sur les films, eux, sont persistants en base de données.
+
+  version: 1.0.0
+  contact:
+    name: Équipe marsAI
+
+servers:
+  - url: http://localhost:5500
+    description: Serveur de développement local
+
+tags:
+  - name: Authentification
+    description: |
+      Connexion, inscription et gestion du compte.
+      Trois méthodes disponibles : email/mot de passe, Google OAuth, ou lien d'invitation admin.
+  - name: Films
+    description: |
+      Soumission publique des films (formulaire réalisateur) et consultation par les jurés/admins.
+      Les fichiers vidéo et sous-titres sont stockés sur Scaleway S3.
+  - name: Votes
+    description: |
+      Votes des jurés sur les films qui leur sont assignés.
+      Un vote `arevoir` ou `refuse` avec un message envoie automatiquement un email au réalisateur.
+  - name: Commentaires
+    description: |
+      Commentaires persistants des jurés sur les films, visibles par tous les membres du jury.
+      Un juré a un seul commentaire par film (modifiable).
+  - name: Discussion
+    description: |
+      Liste partagée des films mis en discussion par les jurés.
+      Un film ajouté est visible par tous les membres du jury dans l'onglet « À discuter ».
+      Le chat temps réel associé est géré via Socket.IO (`discussion:*`).
+  - name: Attributions
+    description: |
+      Système d'attribution des films aux jurés, géré par l'admin.
+      L'attribution est séparée du vote : un film peut être assigné sans avoir encore été évalué.
+  - name: Phases
+    description: |
+      Configuration des deux phases d'évaluation du festival.
+      Phase 1 = Présélection Top 50. Phase 2 = Finale Top 5.
+      La phase active est calculée automatiquement selon la date du jour.
+  - name: Tickets
+    description: |
+      Système de signalement : un juré crée un ticket sur un film (problème technique, contenu, droits...).
+      L'admin traite les tickets et peut envoyer un email au réalisateur directement depuis le ticket.
+  - name: Administration
+    description: |
+      Routes réservées à l'admin : gestion des utilisateurs (jurés/admins),
+      visualisation des vidéos S3, envoi d'invitations par email.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenu via /api/auth/login. Format — `Bearer <token>`
+
+  schemas:
+    Success:
+      type: object
+      description: Réponse générique de succès
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      description: Réponse générique d'erreur
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Description lisible de l'erreur
+          example: "Film introuvable."
+        error:
+          type: string
+          description: Détail technique (présent en cas d'erreur serveur 500)
+
+    JuryUser:
+      type: object
+      description: Profil d'un juré ou admin connecté (contenu du token JWT)
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique en base de données
+          example: 1
+        email:
+          type: string
+          example: sophie.martin@email.com
+        firstName:
+          type: string
+          example: Sophie
+        lastName:
+          type: string
+          example: Martin
+        role:
+          type: string
+          enum: [jury, admin]
+          description: "`jury` = évaluateur | `admin` = accès complet"
+          example: jury
+        profilPicture:
+          type: string
+          nullable: true
+          description: URL de la photo de profil (S3 ou null)
+          example: https://s3.fr-par.scw.cloud/tln/grp1/avatar.jpg
+
+    Film:
+      type: object
+      description: Film soumis au festival avec informations du réalisateur
+      properties:
+        id:
+          type: integer
+          example: 1
+        dossier_num:
+          type: string
+          description: Numéro de dossier généré automatiquement par le backend
+          example: MAI-2026-12345
+        original_title:
+          type: string
+          example: L'IA et moi
+        english_title:
+          type: string
+          nullable: true
+          example: AI and Me
+        language:
+          type: string
+          description: Langue originale du film
+          example: Français
+        tags:
+          type: string
+          nullable: true
+          description: Genres séparés par des virgules
+          example: SF, Drame
+        original_synopsis:
+          type: string
+          nullable: true
+        poster_img:
+          type: string
+          nullable: true
+          description: URL de l'affiche sur S3
+        duration:
+          type: integer
+          nullable: true
+          description: Durée du film en secondes
+          example: 480
+        ia_class:
+          type: string
+          enum: [full, hybrid]
+          description: "`full` = 100% IA | `hybrid` = IA + humain"
+        ia_image:
+          type: boolean
+          description: Images générées par IA
+        ia_son:
+          type: boolean
+          description: Son/musique générés par IA
+        ia_scenario:
+          type: boolean
+          description: Scénario généré par IA
+        ia_post:
+          type: boolean
+          description: Post-production assistée par IA
+        statut:
+          type: string
+          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+          description: |
+            `to_review` = en attente d'évaluation (défaut)
+            `valide` = sélectionné
+            `arevoir` = à retravailler
+            `refuse` = refusé
+            `in_discussion` = délibération en cours
+            `asked_to_modify` = modifications demandées au réalisateur
+          example: to_review
+        first_name:
+          type: string
+          description: Prénom du réalisateur (jointure)
+        last_name:
+          type: string
+          description: Nom du réalisateur (jointure)
+        realisator_email:
+          type: string
+          description: Email du réalisateur (jointure)
+        country:
+          type: string
+          description: Pays de résidence du réalisateur
+
+    Vote:
+      type: object
+      description: Vote d'un juré sur un film
+      properties:
+        id:
+          type: integer
+        jury_id:
+          type: integer
+        film_id:
+          type: integer
+        decision:
+          type: string
+          enum: [valide, arevoir, refuse, in_discussion]
+          description: Décision du juré
+        updated_at:
+          type: string
+          format: date-time
+          description: Date de la dernière mise à jour du vote
+
+    Comment:
+      type: object
+      description: Commentaire d'un juré sur un film (persistant en BDD, visible par tout le jury)
+      properties:
+        comment_id:
+          type: integer
+        text:
+          type: string
+          description: Texte du commentaire
+        updated_at:
+          type: string
+          format: date-time
+        jury_id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        profil_picture:
+          type: string
+          nullable: true
+        decision:
+          type: string
+          nullable: true
+          description: Vote associé du juré sur ce film (si renseigné)
+
+    Ticket:
+      type: object
+      description: Signalement créé par un juré sur un film
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [content, technical, rights, other]
+          description: |
+            `content` = contenu problématique
+            `technical` = problème technique (son, image, lecture)
+            `rights` = droits d'auteur ou de propriété intellectuelle
+            `other` = autre problème
+        description:
+          type: string
+          description: Description détaillée du problème
+        status:
+          type: string
+          enum: [open, in_progress, resolved, rejected]
+          description: |
+            `open` = ouvert, non traité
+            `in_progress` = pris en charge par l'admin
+            `resolved` = résolu
+            `rejected` = rejeté (fausse alerte)
+        admin_note:
+          type: string
+          nullable: true
+          description: Note interne de l'admin (non visible par le juré)
+        jury_first_name:
+          type: string
+        jury_last_name:
+          type: string
+        original_title:
+          type: string
+          description: Titre du film signalé
+        dossier_num:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    AssignedFilm:
+      type: object
+      description: Film assigné à un juré — réponse enrichie de GET /api/assignments/jury/{juryId}
+      properties:
+        id:
+          type: integer
+          description: ID de la ligne d'assignation
+        assigned_at:
+          type: string
+          format: date-time
+          description: Date à laquelle l'admin a assigné ce film au juré
+        film_id:
+          type: integer
+        dossier_num:
+          type: string
+          example: MAI-2026-10001
+        original_title:
+          type: string
+          example: Fragments d'IA
+        english_title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+          example: Français
+        tags:
+          type: string
+          nullable: true
+          example: "SF, Expérimental"
+        poster_img:
+          type: string
+          nullable: true
+        duration:
+          type: integer
+          nullable: true
+          description: Durée en secondes
+          example: 480
+        ia_class:
+          type: string
+          enum: [full, hybrid]
+          nullable: true
+        statut:
+          type: string
+          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+        video_url:
+          type: string
+          nullable: true
+          description: URL S3 de la vidéo
+        ia_image:
+          type: integer
+          enum: [0, 1]
+          description: Images/visuels générés par IA
+        ia_son:
+          type: integer
+          enum: [0, 1]
+          description: Son ou musique générés par IA
+        ia_scenario:
+          type: integer
+          enum: [0, 1]
+          description: Scénario généré par IA
+        ia_post:
+          type: integer
+          enum: [0, 1]
+          description: Post-production assistée par IA
+        creative_workflow:
+          type: string
+          nullable: true
+          description: Note d'intention / démarche créative
+        tech_stack:
+          type: string
+          nullable: true
+          description: Outils IA utilisés (ex. Runway, Sora, Udio...)
+        subtitle_fr_url:
+          type: string
+          nullable: true
+          description: URL S3 des sous-titres français
+        subtitle_en_url:
+          type: string
+          nullable: true
+          description: URL S3 des sous-titres anglais
+        film_year:
+          type: integer
+          nullable: true
+          description: Année de soumission du film (YEAR de created_at)
+          example: 2026
+        realisator_first:
+          type: string
+          description: Prénom du réalisateur
+        realisator_last:
+          type: string
+          description: Nom du réalisateur
+        realisator_country:
+          type: string
+          nullable: true
+          description: Pays du réalisateur
+
+    Phase:
+      type: object
+      description: Configuration des phases d'évaluation et phase actuellement active
+      properties:
+        phase1_open:
+          type: string
+          format: date
+          nullable: true
+          description: Date d'ouverture de la phase 1 (Présélection Top 50)
+          example: "2026-12-01"
+        phase1_close:
+          type: string
+          format: date
+          nullable: true
+          description: Date de fermeture de la phase 1
+          example: "2026-12-15"
+        phase2_open:
+          type: string
+          format: date
+          nullable: true
+          description: Date d'ouverture de la phase 2 (Finale Top 5)
+          example: "2026-12-18"
+        phase2_close:
+          type: string
+          format: date
+          nullable: true
+          description: Date de fermeture de la phase 2
+          example: "2026-12-28"
+        activePhase:
+          type: integer
+          nullable: true
+          enum: [1, 2, null]
+          description: |
+            Phase actuellement active calculée selon la date du jour.
+            `1` = phase 1 en cours | `2` = phase 2 en cours | `null` = hors phase
+          example: 1
+
+paths:
+  # ════════════════════════════════════════════════════════════════
+  # AUTHENTIFICATION
+  # ════════════════════════════════════════════════════════════════
+  /api/auth/login:
+    post:
+      tags: [Authentification]
+      summary: Connexion par email et mot de passe
+      description: |
+        Authentifie un juré ou un admin. Retourne un token JWT valable **7 jours**
+        à passer dans le header `Authorization: Bearer <token>` pour toutes les routes protégées.
+
+        **Compte admin par défaut :**
+        - Email : `admin@gmail.com`
+        - Mot de passe : `azerty`
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: admin@gmail.com
+                password:
+                  type: string
+                  example: azerty
+            examples:
+              admin:
+                summary: Connexion admin
+                value:
+                  email: admin@gmail.com
+                  password: azerty
+              jury:
+                summary: Connexion juré
+                value:
+                  email: sophie.martin@email.com
+                  password: motdepasse123
+      responses:
+        "200":
+          description: Connexion réussie — token JWT retourné
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    description: JWT valable 7 jours — à utiliser dans Authorization Bearer
+                  user:
+                    $ref: "#/components/schemas/JuryUser"
+        "401":
+          description: Email ou mot de passe incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Compte désactivé par l'admin
+
+  /api/auth/register:
+    post:
+      tags: [Authentification]
+      summary: Créer un compte juré (inscription directe)
+      description: |
+        Crée un nouveau compte avec le rôle `jury` par défaut.
+        La photo de profil est obligatoire et uploadée sur S3.
+
+        > Pour créer un compte avec le rôle `admin`, utilisez le système d'invitation
+        > (`POST /api/admin/invite` + `POST /api/auth/accept-invite`).
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [firstName, lastName, email, password, avatar]
+              properties:
+                firstName:
+                  type: string
+                  example: Sophie
+                lastName:
+                  type: string
+                  example: Martin
+                email:
+                  type: string
+                  example: sophie@email.com
+                password:
+                  type: string
+                  minLength: 8
+                  description: Minimum 8 caractères
+                avatar:
+                  type: string
+                  format: binary
+                  description: Photo de profil (JPG, PNG — stockée sur S3)
+      responses:
+        "201":
+          description: Compte créé — token JWT retourné
+        "409":
+          description: Un compte existe déjà avec cette adresse email
+
+  /api/auth/accept-invite:
+    post:
+      tags: [Authentification]
+      summary: Finaliser son compte via un lien d'invitation
+      description: |
+        Utilisé quand un membre clique sur le lien d'invitation envoyé par l'admin
+        (`POST /api/admin/invite`). Le token est extrait de l'URL (`?token=...`).
+
+        Le **rôle est imposé par le token** d'invitation — impossible de s'auto-promouvoir.
+        Un token d'invitation est valable **48 heures**.
+
+        **Flux complet :**
+        1. Admin envoie une invitation → `POST /api/admin/invite`
+        2. Le membre reçoit un email avec un lien `https://frontend.com/register?token=xxx`
+        3. Le frontend vérifie le token → `GET /api/admin/invite/verify?token=xxx`
+        4. Le membre remplit le formulaire et crée son compte → `POST /api/auth/accept-invite`
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, firstName, lastName, password]
+              properties:
+                token:
+                  type: string
+                  description: Token JWT d'invitation reçu par email (depuis l'URL ?token=...)
+                firstName:
+                  type: string
+                  example: Pierre
+                lastName:
+                  type: string
+                  example: Dupont
+                password:
+                  type: string
+                  minLength: 8
+                avatar:
+                  type: string
+                  format: binary
+                  description: Photo de profil (optionnelle)
+      responses:
+        "201":
+          description: Compte créé — token de session JWT retourné
+        "401":
+          description: Token d'invitation invalide ou expiré (après 48h)
+        "409":
+          description: Un compte existe déjà avec cet email (invitation déjà utilisée)
+
+  /api/auth/google:
+    post:
+      tags: [Authentification]
+      summary: Connexion / inscription via Google OAuth
+      description: |
+        Authentifie un utilisateur via Google Sign-In.
+
+        **Comportement :**
+        - Si un compte avec le même `google_id` existe → connexion (200)
+        - Si un compte avec le même email existe → liaison du compte Google + connexion (200)
+        - Si aucun compte n'existe → création automatique avec rôle `jury` (201)
+
+        Le `credential` est l'**ID token** fourni par la bibliothèque Google Sign-In côté frontend.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credential]
+              properties:
+                credential:
+                  type: string
+                  description: |
+                    ID token Google (JWT) fourni par `google.accounts.id.initialize` ou
+                    `@react-oauth/google`. Ne pas confondre avec l'access token.
+      responses:
+        "200":
+          description: Connexion réussie (compte existant)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+                    description: JWT de session valable 7 jours
+                  user:
+                    $ref: "#/components/schemas/JuryUser"
+        "201":
+          description: Nouveau compte créé via Google
+        "401":
+          description: Token Google invalide
+
+  /api/auth/me:
+    get:
+      tags: [Authentification]
+      summary: Récupérer son profil connecté 🔒
+      description: |
+        Retourne les informations du juré/admin actuellement connecté,
+        extraites directement du token JWT sans requête en base de données.
+        Utile pour initialiser l'interface au chargement de l'application.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil de l'utilisateur connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: "#/components/schemas/JuryUser"
+        "401":
+          description: Token manquant, invalide ou expiré
+
+  /api/auth/profile/avatar:
+    put:
+      tags: [Authentification]
+      summary: Changer son avatar 🔒
+      description: |
+        Permet au juré connecté de remplacer son avatar par une nouvelle image.
+
+        L'image est stockée sur le serveur (`uploads/avatars/`) et l'URL est mise à jour en base.
+        La réponse contient un **nouveau token JWT** incluant la nouvelle `profilPicture` — le client
+        doit remplacer l'ancien token dans `localStorage` pour que l'interface se mette à jour.
+
+        > Formats acceptés : JPG, PNG, WebP — 5 Mo maximum.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [avatar]
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Fichier image (JPG, PNG, WebP — max 5 Mo)
+      responses:
+        "200":
+          description: Avatar mis à jour — nouveau token JWT retourné
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    description: Nouveau JWT incluant la nouvelle profilPicture
+                  profilPicture:
+                    type: string
+                    description: URL publique du nouvel avatar
+                    example: http://localhost:5500/uploads/avatars/1710500000000.jpg
+        "400":
+          description: Aucun fichier fourni
+        "401":
+          description: Token manquant ou invalide
+
+  /api/auth/profile/password:
+    put:
+      tags: [Authentification]
+      summary: Changer son mot de passe 🔒
+      description: |
+        Permet au juré connecté de changer son mot de passe.
+
+        - Si le compte a été créé avec un mot de passe (email/password), le champ `currentPassword`
+          est **obligatoire** et doit correspondre au mot de passe actuel.
+        - Si le compte est purement Google OAuth (pas de `password_hash`), `currentPassword` est ignoré.
+        - Le nouveau mot de passe doit contenir **au moins 8 caractères**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  description: Mot de passe actuel (obligatoire si le compte n'est pas Google)
+                  example: mon_ancien_mdp
+                newPassword:
+                  type: string
+                  description: Nouveau mot de passe (8 caractères minimum)
+                  example: nouveau_mdp_securise
+      responses:
+        "200":
+          description: Mot de passe changé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Nouveau mot de passe trop court ou mot de passe actuel manquant
+        "401":
+          description: Token invalide ou mot de passe actuel incorrect
+        "404":
+          description: Juré introuvable
+
+  /api/otp/send:
+    post:
+      tags: [Authentification]
+      summary: Envoyer un code OTP par email
+      description: |
+        Génère et envoie un code à 6 chiffres à l'adresse indiquée.
+        Le code expire après **5 minutes**.
+        Utilisé pour la vérification d'email avant inscription.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  example: nouveau@email.com
+      responses:
+        "200":
+          description: Code OTP envoyé par email (expire dans 5 minutes)
+        "500":
+          description: Échec d'envoi email (SMTP indisponible)
+
+  /api/otp/verify:
+    post:
+      tags: [Authentification]
+      summary: Vérifier un code OTP
+      description: |
+        Vérifie que le code saisi correspond au code envoyé par email.
+        Le code est à usage unique et expire après 5 minutes.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                  example: nouveau@email.com
+                code:
+                  type: string
+                  description: Code à 6 chiffres reçu par email
+                  example: "482931"
+      responses:
+        "200":
+          description: Code valide — email vérifié
+        "400":
+          description: Code incorrect ou expiré
+
+  # ════════════════════════════════════════════════════════════════
+  # FILMS
+  # ════════════════════════════════════════════════════════════════
+  /api/films:
+    get:
+      tags: [Films]
+      summary: Lister tous les films soumis
+      description: |
+        Retourne tous les films avec les informations du réalisateur (jointure).
+        Triés par date de soumission décroissante (plus récent en premier).
+        Route publique — aucun token requis.
+      security: []
+      responses:
+        "200":
+          description: Liste des films
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Film"
+
+    post:
+      tags: [Films]
+      summary: Soumettre un film au festival (formulaire public)
+      description: |
+        Endpoint principal du formulaire de dépôt public. Traitement en 3 étapes :
+
+        **Étape 1 — Upload S3 (bloquant)**
+        La vidéo et les sous-titres sont uploadés sur Scaleway S3 dans le dossier
+        `grp1/MAI-2026-XXXXX/` avant tout enregistrement en BDD.
+        Si l'upload S3 échoue, la requête retourne une erreur 500.
+
+        **Étape 2 — Upload YouTube (non bloquant)**
+        La vidéo est également uploadée sur YouTube en privé. Si YouTube est indisponible,
+        le dossier est quand même validé (un warning `youtubeWarning` est retourné).
+
+        **Étape 3 — Enregistrement en base de données**
+        Création du réalisateur (`realisator`) et du film (`film`) avec le numéro de
+        dossier généré automatiquement au format `MAI-2026-XXXXX`.
+
+        Le formulaire est envoyé en `multipart/form-data` car il contient des fichiers.
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [civilite, prenom, nom, dob, email, mobile, rue, cp, ville, pays, titre, langue, iaClass]
+              properties:
+                civilite:
+                  type: string
+                  enum: [M, Mme]
+                  description: Civilité du réalisateur
+                prenom:
+                  type: string
+                  example: Jean
+                nom:
+                  type: string
+                  example: Dupont
+                dob:
+                  type: string
+                  format: date
+                  description: Date de naissance (YYYY-MM-DD)
+                  example: "1990-05-15"
+                email:
+                  type: string
+                  example: jean.dupont@email.com
+                tel:
+                  type: string
+                  description: Téléphone fixe (optionnel)
+                mobile:
+                  type: string
+                  example: "+33612345678"
+                rue:
+                  type: string
+                  example: 12 rue de la Paix
+                cp:
+                  type: string
+                  example: "75001"
+                ville:
+                  type: string
+                  example: Paris
+                pays:
+                  type: string
+                  example: France
+                youtube:
+                  type: string
+                  description: Lien profil YouTube (optionnel)
+                instagram:
+                  type: string
+                  description: Lien profil Instagram (optionnel)
+                linkedin:
+                  type: string
+                  description: Lien profil LinkedIn (optionnel)
+                facebook:
+                  type: string
+                  description: Lien profil Facebook (optionnel)
+                xtwitter:
+                  type: string
+                  description: Lien profil X/Twitter (optionnel)
+                discovery:
+                  type: string
+                  description: Comment le réalisateur a connu le festival (optionnel)
+                newsletter:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Inscription à la newsletter
+                titre:
+                  type: string
+                  description: Titre original du film
+                  example: L'IA et moi
+                titreEn:
+                  type: string
+                  description: Titre anglais (optionnel)
+                  example: AI and Me
+                langue:
+                  type: string
+                  description: Langue originale du film
+                  example: Français
+                tags:
+                  type: string
+                  description: Genres séparés par des virgules
+                  example: "SF, Drame"
+                synopsis:
+                  type: string
+                  description: Synopsis dans la langue originale
+                synopsisEn:
+                  type: string
+                  description: Synopsis en anglais (optionnel)
+                intention:
+                  type: string
+                  description: Note d'intention — démarche créative avec l'IA (Step 2)
+                outils:
+                  type: string
+                  description: Outils IA utilisés — ex. Sora, Runway, Udio... (Step 2)
+                iaClass:
+                  type: string
+                  enum: [full, hybrid]
+                  description: "`full` = film 100% IA | `hybrid` = IA + intervention humaine"
+                iaImg:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Images/visuels générés par IA
+                iaSon:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Son ou musique générés par IA
+                iaScenario:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Scénario ou narration générés par IA
+                iaPost:
+                  type: string
+                  enum: ["true", "false"]
+                  description: Post-production assistée par IA (montage, étalonnage...)
+                video:
+                  type: string
+                  format: binary
+                  description: |
+                    Fichier vidéo du film (MP4, MOV, AVI, MKV, WEBM, M4V).
+                    Stocké sur S3 dans `grp1/MAI-2026-XXXXX/video-nomoriginal.mp4`.
+                subtitleFR:
+                  type: string
+                  format: binary
+                  description: |
+                    Sous-titres français (.srt ou .vtt).
+                    Stockés sur S3 dans `grp1/MAI-2026-XXXXX/subtitleFR-nomoriginal.srt`.
+                subtitleEN:
+                  type: string
+                  format: binary
+                  description: |
+                    Sous-titres anglais (.srt ou .vtt).
+                    Stockés sur S3 dans `grp1/MAI-2026-XXXXX/subtitleEN-nomoriginal.srt`.
+      responses:
+        "201":
+          description: Dossier enregistré avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  dossierNum:
+                    type: string
+                    description: Numéro de dossier généré — à conserver par le réalisateur
+                    example: MAI-2026-12345
+                  message:
+                    type: string
+                    example: Dépôt reçu avec succès
+                  youtubeWarning:
+                    type: string
+                    description: |
+                      Présent uniquement si l'upload YouTube a échoué.
+                      Le dossier est quand même validé — la vidéo est sur S3.
+        "500":
+          description: Échec upload S3 ou erreur base de données
+
+  /api/films/stats:
+    get:
+      tags: [Films]
+      summary: Synthèse des votes par film — vue Sélection 🛡️
+      description: |
+        Retourne pour chaque film un agrégat des votes de tous les jurés,
+        du nombre de commentaires et de tickets ouverts.
+        Utilisé par le panel admin "Sélection" pour avoir une vue d'ensemble.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Statistiques agrégées par film
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        film_id:
+                          type: integer
+                        dossier_num:
+                          type: string
+                          example: MAI-2026-12345
+                        original_title:
+                          type: string
+                        statut:
+                          type: string
+                          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+                        total_votes:
+                          type: integer
+                          description: Nombre total de jurés ayant voté
+                        votes_valide:
+                          type: integer
+                        votes_arevoir:
+                          type: integer
+                        votes_refuse:
+                          type: integer
+                        votes_discussion:
+                          type: integer
+                        total_assigned:
+                          type: integer
+                          description: Nombre de jurés à qui ce film a été assigné
+                        total_comments:
+                          type: integer
+                          description: Nombre de commentaires publiés sur ce film
+                        total_tickets:
+                          type: integer
+                          description: Nombre de tickets ouverts sur ce film
+
+  /api/films/{id}:
+    get:
+      tags: [Films]
+      summary: Détail complet d'un film
+      description: |
+        Retourne toutes les informations du film ainsi que le profil complet du réalisateur
+        (coordonnées, réseaux sociaux, téléphone).
+        Route publique — aucun token requis.
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film en base de données
+      responses:
+        "200":
+          description: Détail complet du film avec informations réalisateur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Film"
+        "400":
+          description: ID invalide (non numérique)
+        "404":
+          description: Film introuvable
+
+    patch:
+      tags: [Films]
+      summary: Mettre à jour le statut d'un film 🛡️
+      description: |
+        Permet à l'admin de changer manuellement le statut d'un film.
+        Utilisé dans le panel "Sélection" pour valider ou refuser des films
+        indépendamment des votes individuels des jurés.
+
+        > Cette action ne déclenche **pas** d'email au réalisateur.
+        > Pour envoyer un email, utilisez `POST /api/votes` avec `decision` et `message`,
+        > ou `POST /api/tickets/{id}/email`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [statut]
+              properties:
+                statut:
+                  type: string
+                  enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+                  description: Nouveau statut à appliquer au film
+            example:
+              statut: valide
+      responses:
+        "200":
+          description: Statut mis à jour
+        "400":
+          description: Statut invalide ou ID non numérique
+        "404":
+          description: Film introuvable
+
+  # ════════════════════════════════════════════════════════════════
+  # VOTES
+  # ════════════════════════════════════════════════════════════════
+  /api/votes:
+    post:
+      tags: [Votes]
+      summary: Soumettre ou modifier son vote sur un film 🔒
+      description: |
+        Un juré enregistre sa décision sur un film qui lui a été assigné.
+        Si un vote existe déjà pour ce couple (juré, film), il est **remplacé** (upsert).
+        Un juré a donc **un seul vote par film** à tout moment.
+
+        ---
+
+        **Email automatique au réalisateur**
+
+        Lorsque la décision est `arevoir` ou `refuse` **et** qu'un champ `message` est fourni,
+        un email est envoyé automatiquement à l'adresse du réalisateur du film.
+
+        | Décision | Email si `message` fourni |
+        |---|---|
+        | `valide` | Non |
+        | `in_discussion` | Non |
+        | `arevoir` | **Oui** — informe le réalisateur de réviser son film |
+        | `refuse` | **Oui** — informe le réalisateur du refus |
+
+        > L'envoi d'email est **non-bloquant** : si le serveur SMTP est indisponible,
+        > le vote est quand même enregistré et une erreur apparaît dans les logs serveur.
+
+        ---
+
+        **Différence avec `PATCH /api/films/{id}`**
+
+        - `POST /api/votes` = vote individuel d'un **juré** (peut envoyer un email)
+        - `PATCH /api/films/{id}` = décision finale de l'**admin** (sans email)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, decision]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film à évaluer
+                  example: 5
+                decision:
+                  type: string
+                  enum: [valide, arevoir, refuse, in_discussion]
+                  description: Décision du juré
+                  example: arevoir
+                message:
+                  type: string
+                  description: |
+                    Message destiné au réalisateur.
+                    Requis pour déclencher l'email lors d'un vote `arevoir` ou `refuse`.
+                    Ignoré (et non envoyé) pour `valide` et `in_discussion`.
+                  example: "La narration est prometteuse mais le montage nécessite d'être retravaillé."
+            examples:
+              vote_valide:
+                summary: Valider un film (pas d'email)
+                value:
+                  filmId: 5
+                  decision: valide
+              vote_arevoir:
+                summary: Demander une révision — email envoyé au réalisateur
+                value:
+                  filmId: 5
+                  decision: arevoir
+                  message: "La narration est prometteuse mais le montage nécessite d'être retravaillé."
+              vote_refuse:
+                summary: Refuser un film — email envoyé au réalisateur
+                value:
+                  filmId: 5
+                  decision: refuse
+                  message: "Le film ne correspond pas aux critères de sélection du festival."
+              vote_discussion:
+                summary: Mettre en discussion (pas d'email)
+                value:
+                  filmId: 5
+                  decision: in_discussion
+      responses:
+        "200":
+          description: Vote enregistré (et email envoyé si applicable)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Vote"
+        "400":
+          description: filmId ou decision manquants, ou decision invalide
+        "401":
+          description: Token JWT manquant ou invalide
+
+    get:
+      tags: [Votes]
+      summary: Lister les votes par film ou par juré 🔒
+      description: |
+        Deux modes d'utilisation via query parameter :
+        - `?filmId=X` → retourne les votes de **tous les jurés** pour ce film (utile pour l'admin)
+        - `?juryId=X` → retourne **tous les votes** d'un juré donné (utile pour l'interface juré)
+
+        Au moins l'un des deux paramètres est obligatoire.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          schema:
+            type: integer
+          description: ID du film — retourne les votes de tous les jurés pour ce film
+        - name: juryId
+          in: query
+          schema:
+            type: integer
+          description: ID du juré — retourne tous ses votes (sur tous ses films assignés)
+      responses:
+        "200":
+          description: Liste des votes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Vote"
+        "400":
+          description: Aucun paramètre fourni (filmId ou juryId requis)
+
+    delete:
+      tags: [Votes]
+      summary: Annuler son vote sur un film 🔒
+      description: |
+        Supprime le vote du juré connecté sur un film donné.
+        Utilisé quand un juré retire un film de la discussion ou annule sa décision.
+
+        > Nécessite d'être authentifié (`requireAuth`). Le `juryId` est extrait du token JWT.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film dont on retire le vote
+      responses:
+        "200":
+          description: Vote supprimé (ou inexistant — pas d'erreur si aucun vote à supprimer)
+        "400":
+          description: filmId manquant ou invalide
+
+  /api/votes/summary:
+    get:
+      tags: [Votes]
+      summary: Synthèse globale des votes pour tous les films 🛡️
+      description: |
+        Identique à `GET /api/films/stats` — retourne un agrégat des votes pour chaque film.
+        Utilisé par le panel admin "Sélection".
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Résumé agrégé des votes par film
+
+  # ════════════════════════════════════════════════════════════════
+  # COMMENTAIRES
+  # ════════════════════════════════════════════════════════════════
+  /api/comments:
+    post:
+      tags: [Commentaires]
+      summary: Publier un commentaire sur un film 🔒
+      description: |
+        Un juré publie un commentaire écrit sur un film.
+        Les commentaires sont **persistants en base de données** et visibles par **tout le jury**.
+
+        > **Un juré a un seul commentaire par film.** Si un commentaire existe déjà,
+        > il est remplacé par le nouveau (upsert). Ce n'est pas un fil de discussion
+        > mais une fiche d'évaluation éditable.
+
+        **Différence avec le chat jury**
+        - Commentaires (`/api/comments`) = persistants, liés à un film précis, visibles par tous
+        - Chat jury (Socket.IO) = éphémère, discussion générale en temps réel
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, text]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film commenté
+                  example: 5
+                text:
+                  type: string
+                  description: Texte du commentaire (non vide)
+                  example: Film très bien réalisé, l'IA est utilisée de façon subtile et cohérente avec le propos.
+      responses:
+        "201":
+          description: Commentaire publié (ou mis à jour si un commentaire existait déjà)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID du commentaire en base de données
+        "400":
+          description: filmId ou text manquants / text vide
+
+    get:
+      tags: [Commentaires]
+      summary: Commentaires d'un film 🔒
+      description: |
+        Retourne tous les commentaires publiés sur un film par les jurés,
+        avec les informations du juré (nom, photo) et sa décision associée.
+        Triés par date de mise à jour décroissante.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film dont on veut les commentaires
+      responses:
+        "200":
+          description: Liste des commentaires avec infos juré et décision
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+        "400":
+          description: filmId manquant ou invalide
+
+  /api/comments/mine:
+    get:
+      tags: [Commentaires]
+      summary: Tous mes commentaires (bulk) 🔒
+      description: |
+        Retourne en une seule requête tous les commentaires rédigés par le juré connecté,
+        indexés par `film_id`. Utilisé au chargement du panel jury pour pré-remplir
+        les zones de texte de chaque film sans multiplier les requêtes.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des commentaires du juré connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        film_id:
+                          type: integer
+                          description: ID du film commenté
+                        text:
+                          type: string
+                          description: Texte du commentaire
+        "401":
+          description: Token manquant ou invalide
+
+  # ════════════════════════════════════════════════════════════════
+  # DISCUSSION
+  # ════════════════════════════════════════════════════════════════
+  /api/discussion:
+    get:
+      tags: [Discussion]
+      summary: Liste des films en discussion 🔒
+      description: |
+        Retourne les IDs de tous les films actuellement dans la liste de discussion partagée.
+        Cette liste est commune à tous les jurés : dès qu'un film est ajouté par l'un d'eux,
+        il apparaît dans l'onglet « À discuter » pour tout le monde.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des film_id en discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: integer
+                    example: [12, 34, 57]
+        "401":
+          description: Token manquant ou invalide
+
+    post:
+      tags: [Discussion]
+      summary: Ajouter un film à la discussion 🔒
+      description: |
+        Ajoute un film à la liste de discussion partagée (`film_discussion`).
+        Si le film est déjà dans la liste, la requête est ignorée silencieusement (`INSERT IGNORE`).
+
+        L'ajout est immédiatement visible par tous les jurés connectés.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film à ajouter à la discussion
+                  example: 34
+      responses:
+        "201":
+          description: Film ajouté à la discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: filmId manquant ou invalide
+        "401":
+          description: Token manquant ou invalide
+
+    delete:
+      tags: [Discussion]
+      summary: Retirer un film de la discussion 🔒
+      description: |
+        Retire un film de la liste de discussion partagée.
+        L'opération est immédiate et visible par tous les jurés.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film à retirer de la discussion
+          example: 34
+      responses:
+        "200":
+          description: Film retiré de la discussion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: filmId manquant ou invalide
+        "404":
+          description: Film non trouvé dans la liste de discussion
+        "401":
+          description: Token manquant ou invalide
+
+  # ════════════════════════════════════════════════════════════════
+  # ATTRIBUTIONS
+  # ════════════════════════════════════════════════════════════════
+  /api/assignments:
+    get:
+      tags: [Attributions]
+      summary: Toutes les attributions films ↔ jurés 🛡️
+      description: |
+        Retourne la liste complète des attributions : quel juré est assigné à quel film.
+        Inclut les infos du film (titre, statut) et du juré (nom, email).
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste complète des attributions
+
+    post:
+      tags: [Attributions]
+      summary: Attribuer un film à un juré 🛡️
+      description: |
+        L'admin assigne manuellement un film à un juré.
+        Un film peut être assigné à plusieurs jurés, mais un juré ne peut
+        recevoir le même film qu'une seule fois (contrainte UNIQUE en BDD).
+
+        > Cette route ne crée **pas** de vote — elle prépare la liste de films
+        > que le juré devra évaluer. Le vote se fait via `POST /api/votes`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [juryId, filmId]
+              properties:
+                juryId:
+                  type: integer
+                  description: ID du juré à qui assigner le film
+                  example: 3
+                filmId:
+                  type: integer
+                  description: ID du film à assigner
+                  example: 12
+      responses:
+        "201":
+          description: Film attribué au juré
+        "409":
+          description: Ce film est déjà attribué à ce juré
+
+    delete:
+      tags: [Attributions]
+      summary: Retirer une attribution 🛡️
+      description: |
+        Supprime l'attribution d'un film à un juré.
+        Si le juré a déjà voté sur ce film, le vote est conservé en base de données.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: juryId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du juré
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      responses:
+        "200":
+          description: Attribution supprimée
+        "404":
+          description: Attribution introuvable (ce juré n'a pas ce film assigné)
+
+  /api/assignments/auto-distribute:
+    post:
+      tags: [Attributions]
+      summary: Répartir automatiquement tous les films non assignés 🛡️
+      description: |
+        Distribue en **round-robin** (rotation circulaire équitable) tous les films
+        qui n'ont encore été assignés à aucun juré, parmi les jurés actifs (`is_active = true`).
+
+        **Exemple :** 12 films + 4 jurés actifs → chaque juré reçoit 3 films supplémentaires.
+
+        Les films déjà assignés à au moins un juré sont ignorés.
+        Les jurés inactifs sont ignorés.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Répartition effectuée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  assigned:
+                    type: integer
+                    description: Nombre de films nouvellement assignés
+                    example: 12
+                  skipped:
+                    type: integer
+                    description: Nombre d'erreurs (films non assignés suite à une erreur)
+                    example: 0
+                  message:
+                    type: string
+                    example: "12 film(s) réparti(s) entre 4 juré(s)."
+        "400":
+          description: Aucun juré actif disponible pour l'attribution
+
+  /api/assignments/jury-members:
+    get:
+      tags: [Attributions]
+      summary: Liste de tous les jurés — pour le sélecteur d'attribution 🛡️
+      description: |
+        Retourne la liste des jurés (id, nom, email, photo) pour peupler
+        le menu déroulant de sélection lors d'une attribution manuelle.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des jurés (id, first_name, last_name, email, profil_picture)
+
+  /api/assignments/jury/{juryId}:
+    get:
+      tags: [Attributions]
+      summary: Films assignés à un juré 🔒
+      description: |
+        Retourne la liste des films assignés à un juré, enrichie avec les données
+        du réalisateur (nom, pays) et tous les champs IA du film.
+
+        - Un **juré** peut consulter uniquement ses propres films (`juryId` = son id)
+        - Un **admin** peut consulter les films de n'importe quel juré
+
+        Utilisé par l'interface juré (`/jury/panel`) pour charger les films à évaluer.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: juryId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du juré
+      responses:
+        "200":
+          description: Liste des films assignés au juré
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AssignedFilm"
+        "400":
+          description: ID invalide
+
+  /api/assignments/film/{filmId}:
+    get:
+      tags: [Attributions]
+      summary: Jurés assignés à un film 🛡️
+      description: |
+        Retourne la liste des jurés assignés à un film donné, avec leur décision de vote si elle existe.
+        Utile pour l'admin afin de savoir quels jurés ont encore des films à évaluer.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      responses:
+        "200":
+          description: Liste des jurés assignés au film
+        "400":
+          description: ID invalide
+
+  # ════════════════════════════════════════════════════════════════
+  # PHASES
+  # ════════════════════════════════════════════════════════════════
+  /api/phases:
+    get:
+      tags: [Phases]
+      summary: Configuration des phases et phase active 🔒
+      description: |
+        Retourne les dates des deux phases d'évaluation et calcule
+        automatiquement la phase actuellement active selon la date du jour.
+
+        **Phase 1** — Présélection Top 50 : les jurés évaluent tous les films soumis.
+        **Phase 2** — Finale Top 5 : délibération finale sur les films présélectionnés.
+
+        Si la date du jour est entre `phase1_open` et `phase1_close` → `activePhase: 1`
+        Si la date du jour est entre `phase2_open` et `phase2_close` → `activePhase: 2`
+        Sinon → `activePhase: null`
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Configuration des phases + phase active calculée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: "#/components/schemas/Phase"
+
+  /api/phases/{phaseNumber}:
+    put:
+      tags: [Phases]
+      summary: Sauvegarder les dates d'une phase 🛡️
+      description: |
+        Définit les dates d'ouverture et de fermeture d'une phase.
+        Les dates sont stockées dans la table `cms_content` (ligne unique id=1).
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: phaseNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [1, 2]
+          description: "`1` = Présélection Top 50 | `2` = Finale Top 5"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [openDate, closeDate]
+              properties:
+                openDate:
+                  type: string
+                  format: date
+                  description: Date d'ouverture de la phase (YYYY-MM-DD)
+                  example: "2026-12-01"
+                closeDate:
+                  type: string
+                  format: date
+                  description: Date de fermeture de la phase (YYYY-MM-DD)
+                  example: "2026-12-15"
+            example:
+              openDate: "2026-12-01"
+              closeDate: "2026-12-15"
+      responses:
+        "200":
+          description: Dates de la phase sauvegardées
+        "400":
+          description: phaseNumber invalide (doit être 1 ou 2) ou dates manquantes
+
+  # ════════════════════════════════════════════════════════════════
+  # TICKETS / SIGNALEMENTS
+  # ════════════════════════════════════════════════════════════════
+  /api/tickets:
+    post:
+      tags: [Tickets]
+      summary: Créer un signalement sur un film 🔒
+      description: |
+        Un juré signale un problème sur un film qu'il évalue.
+        Le ticket est créé avec le statut `open` et notifié à l'admin.
+
+        **Types de signalement :**
+        - `content` — contenu choquant, inapproprié ou non conforme au règlement
+        - `technical` — problème technique (vidéo ne charge pas, son absent, image corrompue)
+        - `rights` — droits d'auteur ou propriété intellectuelle suspectés
+        - `other` — autre problème non catégorisé
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, description]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film signalé
+                  example: 5
+                type:
+                  type: string
+                  enum: [content, technical, rights, other]
+                  default: other
+                  description: Catégorie du problème (défaut — `other`)
+                description:
+                  type: string
+                  description: Description détaillée du problème constaté
+                  example: La vidéo ne se charge pas après 2 minutes de lecture.
+            examples:
+              technique:
+                summary: Problème technique
+                value:
+                  filmId: 5
+                  type: technical
+                  description: La vidéo se coupe à 2:14 et ne reprend pas.
+              droits:
+                summary: Problème de droits
+                value:
+                  filmId: 8
+                  type: rights
+                  description: La bande-son semble être une œuvre protégée sans autorisation.
+      responses:
+        "201":
+          description: Signalement créé avec statut `open`
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID du ticket créé
+        "400":
+          description: filmId ou description manquants
+
+    get:
+      tags: [Tickets]
+      summary: Tous les signalements 🛡️
+      description: |
+        Retourne tous les tickets, triés par statut (ouverts en premier) puis par date de création.
+        Inclut les informations du juré auteur et du film concerné.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des tickets (ouverts en premier)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ticket"
+
+  /api/tickets/{id}:
+    get:
+      tags: [Tickets]
+      summary: Détail d'un ticket 🛡️
+      description: |
+        Retourne le détail complet d'un ticket, incluant :
+        - Informations du juré auteur (nom, photo, email)
+        - Informations du film (titre, dossier, statut, affiche)
+        - Informations du réalisateur (nom, email) — pour pouvoir le contacter
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du ticket
+      responses:
+        "200":
+          description: Ticket avec infos juré, film et réalisateur
+        "404":
+          description: Ticket introuvable
+
+    patch:
+      tags: [Tickets]
+      summary: Mettre à jour le statut et la note admin d'un ticket 🛡️
+      description: |
+        L'admin traite un ticket en changeant son statut et en ajoutant une note interne.
+
+        **Cycle de vie d'un ticket :**
+        `open` → `in_progress` → `resolved` ou `rejected`
+
+        La `adminNote` est une note **interne** (non visible par le juré).
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [open, in_progress, resolved, rejected]
+                  description: |
+                    `open` = ouvert, non traité
+                    `in_progress` = pris en charge
+                    `resolved` = résolu
+                    `rejected` = rejeté (fausse alerte)
+                adminNote:
+                  type: string
+                  description: Note interne de l'admin (non visible par le juré auteur)
+                  example: Problème confirmé — vidéo re-encodée et remplacée sur S3.
+            examples:
+              prise_en_charge:
+                summary: Prendre en charge le ticket
+                value:
+                  status: in_progress
+                  adminNote: Je regarde le problème technique signalé.
+              resolu:
+                summary: Marquer comme résolu
+                value:
+                  status: resolved
+                  adminNote: Vidéo remplacée, le problème est corrigé.
+      responses:
+        "200":
+          description: Ticket mis à jour
+        "400":
+          description: Status invalide
+        "404":
+          description: Ticket introuvable
+
+  /api/tickets/{id}/email:
+    post:
+      tags: [Tickets]
+      summary: Envoyer un email au réalisateur depuis un ticket 🛡️
+      description: |
+        Permet à l'admin d'envoyer un email personnalisé au réalisateur du film concerné par le ticket.
+        L'adresse du réalisateur est récupérée automatiquement depuis le ticket (via la jointure film → realisator).
+
+        Utile pour demander une correction, informer d'un problème ou demander une pièce justificative.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du ticket (pour récupérer l'email du réalisateur)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, body]
+              properties:
+                subject:
+                  type: string
+                  description: Objet de l'email
+                  example: "Votre film MAI-2026-12345 — demande de modification"
+                body:
+                  type: string
+                  description: Corps de l'email (les retours à la ligne sont convertis en `<br/>`)
+                  example: "Bonjour,\n\nNous avons constaté un problème technique dans votre film.\nMerci de nous soumettre une nouvelle version."
+            example:
+              subject: "Votre film MAI-2026-12345 — problème technique"
+              body: "Bonjour,\n\nNous avons constaté un problème de lecture sur votre film.\nMerci de contacter notre équipe technique."
+      responses:
+        "200":
+          description: Email envoyé au réalisateur
+        "404":
+          description: Ticket introuvable
+        "500":
+          description: Échec envoi email (SMTP indisponible)
+
+  # ════════════════════════════════════════════════════════════════
+  # ADMINISTRATION
+  # ════════════════════════════════════════════════════════════════
+  /api/admin/users:
+    get:
+      tags: [Administration]
+      summary: Lister tous les jurés et admins 🛡️
+      description: |
+        Retourne la liste de tous les comptes (jurés + admins) avec leurs statistiques de participation :
+        - `films_assigned` — nombre de films qui leur ont été attribués
+        - `films_evaluated` — nombre de films sur lesquels ils ont voté
+
+        Trié par nom de famille alphabétiquement.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des utilisateurs avec statistiques
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        email:
+                          type: string
+                        role:
+                          type: string
+                          enum: [jury, admin]
+                        is_active:
+                          type: boolean
+                          description: Compte actif ou désactivé
+                        profil_picture:
+                          type: string
+                          nullable: true
+                        jury_description:
+                          type: string
+                          nullable: true
+                          description: Biographie publique du juré
+                        created_at:
+                          type: string
+                          format: date-time
+                        films_assigned:
+                          type: integer
+                        films_evaluated:
+                          type: integer
+
+  /api/admin/users/{id}:
+    patch:
+      tags: [Administration]
+      summary: Modifier un utilisateur 🛡️
+      description: |
+        Permet à l'admin de modifier les informations d'un juré ou admin :
+        nom, prénom, rôle ou biographie.
+
+        Tous les champs sont optionnels — seuls les champs présents dans le body sont mis à jour.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur à modifier
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: Sophie
+                lastName:
+                  type: string
+                  example: Martin
+                role:
+                  type: string
+                  enum: [jury, admin]
+                  description: Changer le rôle (jury ↔ admin)
+                juryDescription:
+                  type: string
+                  description: Biographie publique du juré (affichée sur le site)
+                  example: Réalisatrice primée, spécialiste des courts-métrages expérimentaux.
+      responses:
+        "200":
+          description: Utilisateur mis à jour
+        "400":
+          description: Aucun champ fourni
+        "404":
+          description: Utilisateur introuvable
+
+    delete:
+      tags: [Administration]
+      summary: Supprimer un utilisateur 🛡️
+      description: |
+        Supprime définitivement un compte de la base de données.
+        Les votes, commentaires et tickets associés sont supprimés en cascade (ON DELETE CASCADE).
+
+        > **Impossible de supprimer son propre compte** (retourne 403).
+        > Pour désactiver temporairement un compte sans le supprimer,
+        > utilisez `PATCH /api/admin/users/{id}/status`.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur à supprimer
+      responses:
+        "200":
+          description: Utilisateur supprimé définitivement
+        "403":
+          description: Impossible de supprimer son propre compte
+        "404":
+          description: Utilisateur introuvable
+
+  /api/admin/users/{id}/status:
+    patch:
+      tags: [Administration]
+      summary: Activer ou désactiver un compte 🛡️
+      description: |
+        Désactive un compte sans le supprimer. Un compte désactivé (`is_active: false`)
+        ne peut plus se connecter (retourne 403 au login).
+
+        Utile pour suspendre temporairement un juré sans perdre ses votes et commentaires.
+
+        > **Impossible de désactiver son propre compte** (retourne 403).
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [isActive]
+              properties:
+                isActive:
+                  type: boolean
+                  description: "`true` = compte actif | `false` = compte suspendu"
+            examples:
+              desactiver:
+                summary: Désactiver un compte
+                value:
+                  isActive: false
+              reactiver:
+                summary: Réactiver un compte
+                value:
+                  isActive: true
+      responses:
+        "200":
+          description: Statut du compte mis à jour
+        "403":
+          description: Impossible de désactiver son propre compte
+        "404":
+          description: Utilisateur introuvable
+
+  /api/admin/invite:
+    post:
+      tags: [Administration]
+      summary: Envoyer une invitation par email 🛡️
+      description: |
+        Génère un lien d'invitation sécurisé et l'envoie par email.
+        Le token d'invitation est un JWT valable **48 heures** qui encode l'email et le rôle.
+
+        **Flux complet d'invitation :**
+        1. Admin appelle `POST /api/admin/invite` avec l'email et le rôle souhaité
+        2. Le destinataire reçoit un email avec un lien `https://frontend.com/register?token=xxx`
+        3. Le frontend vérifie le token → `GET /api/admin/invite/verify?token=xxx`
+        4. Le membre remplit le formulaire → `POST /api/auth/accept-invite`
+
+        > Si un compte existe déjà avec cet email, retourne 409.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  description: Adresse email du futur membre
+                  example: pierre.dupont@email.com
+                role:
+                  type: string
+                  enum: [jury, admin]
+                  description: Rôle qui sera attribué lors de la création du compte
+            examples:
+              invite_jury:
+                summary: Inviter un juré
+                value:
+                  email: pierre.dupont@email.com
+                  role: jury
+              invite_admin:
+                summary: Inviter un administrateur
+                value:
+                  email: marie.admin@festival.com
+                  role: admin
+      responses:
+        "201":
+          description: Invitation envoyée par email (token valable 48h)
+        "409":
+          description: Un compte existe déjà avec cette adresse email
+        "500":
+          description: Échec envoi email (SMTP indisponible)
+
+  /api/admin/invite/verify:
+    get:
+      tags: [Administration]
+      summary: Vérifier un token d'invitation (public)
+      description: |
+        Appelé par la page d'inscription du frontend quand le membre clique sur le lien d'invitation.
+        Retourne l'email et le rôle pré-remplis depuis le token pour afficher le formulaire.
+
+        Ne crée pas de compte — c'est uniquement une vérification.
+        Route publique (le token est la preuve d'identité).
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Token JWT d'invitation extrait de l'URL (?token=...)
+      responses:
+        "200":
+          description: Token valide — retourne email et rôle pré-remplis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  email:
+                    type: string
+                    description: Email pré-rempli pour le formulaire d'inscription
+                    example: pierre.dupont@email.com
+                  role:
+                    type: string
+                    enum: [jury, admin]
+                    description: Rôle qui sera attribué au compte
+        "401":
+          description: Token invalide, malformé ou expiré (après 48h)
+
+  /api/admin/videos:
+    get:
+      tags: [Administration]
+      summary: Lister toutes les vidéos du bucket S3 🛡️
+      description: |
+        Retourne la liste de tous les fichiers vidéo présents dans le bucket Scaleway S3.
+        Formats supportés : `.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`, `.m4v`
+
+        Le `dossierNum` est extrait automatiquement depuis le chemin S3.
+        Structure attendue : `grp1/MAI-2026-XXXXX/video-nomoriginal.mp4`
+
+        Utilise la pagination S3 (continuation token) pour lister tous les fichiers
+        même si le bucket en contient plus de 1000.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des vidéos avec métadonnées S3
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  count:
+                    type: integer
+                    description: Nombre total de vidéos trouvées
+                    example: 42
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          description: Clé complète de l'objet dans S3
+                          example: grp1/MAI-2026-12345/video-monfilm.mp4
+                        url:
+                          type: string
+                          description: URL publique de lecture directe
+                          example: https://s3.fr-par.scw.cloud/tln/grp1/MAI-2026-12345/video-monfilm.mp4
+                        filename:
+                          type: string
+                          description: Nom du fichier seul (sans chemin)
+                          example: video-monfilm.mp4
+                        dossierNum:
+                          type: string
+                          nullable: true
+                          description: |
+                            Numéro de dossier extrait du chemin S3.
+                            `null` si le fichier ne suit pas la convention `grp1/MAI-2026-XXXXX/...`
+                          example: MAI-2026-12345
+                        sizeBytes:
+                          type: integer
+                          description: Taille du fichier en octets
+                          example: 104857600
+                        lastModified:
+                          type: string
+                          format: date-time
+                          description: Date de dernier upload sur S3
+        "500":
+          description: Impossible de contacter le bucket S3 (credentials manquants ou réseau)

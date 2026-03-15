@@ -36,7 +36,7 @@ const JuryPanel = (): React.JSX.Element => {
                 />
                 {panel.activeView === "eval" && <EvalView panel={panel} />}
                 {panel.activeView === "listes" && <ListesView />}
-                {panel.activeView === "discuter" && <DiscuterView />}
+                {panel.activeView === "discuter" && <DiscuterView panel={panel} />}
                 {panel.activeView === "delib" && <DelibView />}
             </div>
             <ModalARevoir

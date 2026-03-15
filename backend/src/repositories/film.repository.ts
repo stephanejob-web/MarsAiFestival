@@ -72,6 +72,25 @@ export const getFilms = async (): Promise<RowDataPacket[]> => {
     return rows;
 };
 
+export const updateFilmStatut = async (
+    id: number,
+    statut: "to_review" | "valide" | "arevoir" | "refuse" | "in_discussion" | "asked_to_modify",
+): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE film SET statut = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [statut, id],
+    );
+    return result.affectedRows > 0;
+};
+
+export const getUnassignedFilms = async (): Promise<RowDataPacket[]> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT f.id FROM film f
+         WHERE f.id NOT IN (SELECT DISTINCT film_id FROM jury_film_assignment)`,
+    );
+    return rows;
+};
+
 export const getFilmById = async (id: number): Promise<RowDataPacket | null> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT

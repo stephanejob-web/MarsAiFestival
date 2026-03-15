@@ -14,9 +14,11 @@
     "check": "tsc --noEmit && eslint . && vitest run"
   },
   "dependencies": {
+    "@livekit/components-react": "^2.9.20",
     "@react-oauth/google": "^0.13.4",
     "@tailwindcss/vite": "^4.2.1",
     "i18next": "^25.8.14",
+    "livekit-client": "^2.17.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.4",

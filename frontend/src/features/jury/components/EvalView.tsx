@@ -11,11 +11,7 @@ interface EvalViewProps {
 
 const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
     const handlePublish = (): void => {
-        const content = panel.notationComment.trim();
-        if (!content) return;
-
-        panel.setNotationComment("");
-        panel.showToast("Commentaire publié ✓");
+        panel.handleCommentPublish();
     };
 
     return (

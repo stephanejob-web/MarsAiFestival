@@ -2,7 +2,13 @@ import { Request, Response } from "express";
 import { uploadFileToS3 } from "../services/s3.service";
 import { uploadVideoToYoutube } from "../services/youtube.service";
 import { insertRealisator } from "../repositories/realisator.repository";
-import { insertFilm, getFilms, getFilmById } from "../repositories/film.repository";
+import {
+    insertFilm,
+    getFilms,
+    getFilmById,
+    updateFilmStatut,
+} from "../repositories/film.repository";
+import { getVotesSummary } from "../repositories/vote.repository";
 
 // ── POST /api/films ────────────────────────────────────────────────────────────
 export const submitFilm = async (req: Request, res: Response): Promise<void> => {
@@ -30,7 +36,7 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
                 const file = fileArr[0];
-                const filename = `${dossierNum}-${field}-${file.originalname}`;
+                const filename = `${dossierNum}/${field}-${file.originalname}`;
                 urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
             }
         }
@@ -142,6 +148,61 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
         files: urls,
         ...(youtubeWarning && { youtubeWarning }),
     });
+};
+
+// ── PATCH /api/films/:id — Mettre à jour le statut d'un film (admin) ──────────
+export const patchFilm = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    const { statut } = req.body as { statut?: string };
+    const validStatuts = [
+        "to_review",
+        "valide",
+        "arevoir",
+        "refuse",
+        "in_discussion",
+        "asked_to_modify",
+    ] as const;
+
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    if (!statut || !validStatuts.includes(statut as (typeof validStatuts)[number])) {
+        res.status(400).json({
+            success: false,
+            message: `statut doit être parmi : ${validStatuts.join(", ")}`,
+        });
+        return;
+    }
+
+    try {
+        const updated = await updateFilmStatut(id, statut as (typeof validStatuts)[number]);
+        if (!updated) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la mise à jour du film.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── GET /api/films/stats — Synthèse votes par film (admin Sélection) ──────────
+export const filmsStats = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await getVotesSummary();
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la récupération des stats.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
 };
 
 // ── GET /api/films ─────────────────────────────────────────────────────────────
