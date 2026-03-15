@@ -360,6 +360,103 @@ components:
           type: string
           format: date-time
 
+    AssignedFilm:
+      type: object
+      description: Film assigné à un juré — réponse enrichie de GET /api/assignments/jury/{juryId}
+      properties:
+        id:
+          type: integer
+          description: ID de la ligne d'assignation
+        assigned_at:
+          type: string
+          format: date-time
+          description: Date à laquelle l'admin a assigné ce film au juré
+        film_id:
+          type: integer
+        dossier_num:
+          type: string
+          example: MAI-2026-10001
+        original_title:
+          type: string
+          example: Fragments d'IA
+        english_title:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+          example: Français
+        tags:
+          type: string
+          nullable: true
+          example: "SF, Expérimental"
+        poster_img:
+          type: string
+          nullable: true
+        duration:
+          type: integer
+          nullable: true
+          description: Durée en secondes
+          example: 480
+        ia_class:
+          type: string
+          enum: [full, hybrid]
+          nullable: true
+        statut:
+          type: string
+          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+        video_url:
+          type: string
+          nullable: true
+          description: URL S3 de la vidéo
+        ia_image:
+          type: integer
+          enum: [0, 1]
+          description: Images/visuels générés par IA
+        ia_son:
+          type: integer
+          enum: [0, 1]
+          description: Son ou musique générés par IA
+        ia_scenario:
+          type: integer
+          enum: [0, 1]
+          description: Scénario généré par IA
+        ia_post:
+          type: integer
+          enum: [0, 1]
+          description: Post-production assistée par IA
+        creative_workflow:
+          type: string
+          nullable: true
+          description: Note d'intention / démarche créative
+        tech_stack:
+          type: string
+          nullable: true
+          description: Outils IA utilisés (ex. Runway, Sora, Udio...)
+        subtitle_fr_url:
+          type: string
+          nullable: true
+          description: URL S3 des sous-titres français
+        subtitle_en_url:
+          type: string
+          nullable: true
+          description: URL S3 des sous-titres anglais
+        film_year:
+          type: integer
+          nullable: true
+          description: Année de soumission du film (YEAR de created_at)
+          example: 2026
+        realisator_first:
+          type: string
+          description: Prénom du réalisateur
+        realisator_last:
+          type: string
+          description: Nom du réalisateur
+        realisator_country:
+          type: string
+          nullable: true
+          description: Pays du réalisateur
+
     Phase:
       type: object
       description: Configuration des phases d'évaluation et phase actuellement active
@@ -1159,6 +1256,29 @@ paths:
         "400":
           description: Aucun paramètre fourni (filmId ou juryId requis)
 
+    delete:
+      tags: [Votes]
+      summary: Annuler son vote sur un film 🔒
+      description: |
+        Supprime le vote du juré connecté sur un film donné.
+        Utilisé quand un juré retire un film de la discussion ou annule sa décision.
+
+        > Nécessite d'être authentifié (`requireAuth`). Le `juryId` est extrait du token JWT.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film dont on retire le vote
+      responses:
+        "200":
+          description: Vote supprimé (ou inexistant — pas d'erreur si aucun vote à supprimer)
+        "400":
+          description: filmId manquant ou invalide
+
   /api/votes/summary:
     get:
       tags: [Votes]
@@ -1401,10 +1521,13 @@ paths:
       tags: [Attributions]
       summary: Films assignés à un juré 🔒
       description: |
-        Retourne la liste des films assignés à un juré, avec toutes les infos du film.
+        Retourne la liste des films assignés à un juré, enrichie avec les données
+        du réalisateur (nom, pays) et tous les champs IA du film.
 
         - Un **juré** peut consulter uniquement ses propres films (`juryId` = son id)
         - Un **admin** peut consulter les films de n'importe quel juré
+
+        Utilisé par l'interface juré (`/jury/panel`) pour charger les films à évaluer.
       security:
         - bearerAuth: []
       parameters:
@@ -1416,7 +1539,18 @@ paths:
           description: ID du juré
       responses:
         "200":
-          description: Liste des films assignés au juré avec détails (titre, statut, ia_class...)
+          description: Liste des films assignés au juré
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AssignedFilm"
         "400":
           description: ID invalide
 
