@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAdmin } from "../middlewares/auth.middleware";
 import {
+    listAdminFilms,
     listS3Videos,
     sendInvite,
     verifyInvite,
@@ -11,6 +12,10 @@ import {
 } from "../controllers/admin.controller";
 
 const router = Router();
+
+// ── Films (avec URLs pré-signées) ─────────────────────────────────────────────
+// GET  /api/admin/films
+router.get("/films", requireAdmin, listAdminFilms);
 
 // ── Vidéos S3 ────────────────────────────────────────────────────────────────
 // GET  /api/admin/videos
