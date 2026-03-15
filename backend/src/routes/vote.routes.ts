@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, requireAdmin } from "../middlewares/auth.middleware";
-import { submitVote, listVotes, votesSummary } from "../controllers/vote.controller";
+import { submitVote, removeVote, listVotes, votesSummary } from "../controllers/vote.controller";
 
 const router = Router();
 
@@ -10,6 +10,9 @@ router.post("/", requireAuth, submitVote);
 // GET    /api/votes?filmId=X     — Votes pour un film
 // GET    /api/votes?juryId=X     — Votes d'un juré
 router.get("/", requireAuth, listVotes);
+
+// DELETE /api/votes?filmId=X     — Annuler son vote sur un film
+router.delete("/", requireAuth, removeVote);
 
 // GET    /api/votes/summary      — Synthèse complète pour admin
 router.get("/summary", requireAdmin, votesSummary);
