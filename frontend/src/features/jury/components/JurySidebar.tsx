@@ -5,6 +5,7 @@ import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
 import ProfileModal from "./ProfileModal";
+import { VocalJoinButton } from "./VocalPanel";
 
 interface JurySidebarProps {
     activeView: ActiveView;
@@ -79,6 +80,7 @@ const JurySidebar = ({
     const user = useJuryUser();
     const [avatarError, setAvatarError] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isVocalJoined, setIsVocalJoined] = useState(false);
 
     return (
         <>
@@ -177,6 +179,15 @@ const JurySidebar = ({
                     <span>Se déconnecter</span>
                 </button>
             </nav>
+
+            {/* Vocal */}
+            <div className="mx-3 border-t border-white/5">
+                <VocalJoinButton
+                    isJoined={isVocalJoined}
+                    onJoin={() => setIsVocalJoined(true)}
+                    onLeave={() => setIsVocalJoined(false)}
+                />
+            </div>
 
             {/* Chat */}
             <div className="mx-3 border-t border-white/5">
