@@ -49,6 +49,15 @@ export interface VoteRow {
     avatarVariant: 1 | 2 | 3 | 4;
 }
 
+export interface JuryComment {
+    juryId: number;
+    name: string;
+    initials: string;
+    profilPicture: string | null;
+    text: string;
+    updatedAt: string;
+}
+
 export interface JuryFilm {
     id: number;
     title: string;
@@ -66,7 +75,7 @@ export interface JuryFilm {
     note: string;
     videoUrl: string | null;
     myDecision: Decision;
-    comments: string[];
+    comments: JuryComment[];
     opinions: JuryOpinion[];
     votes: VoteRow[];
 }
