@@ -117,7 +117,8 @@ const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =
                 </div>
 
                 <div className="text-center text-[0.62rem] text-mist/40">
-                    {participants.length} participant{participants.length > 1 ? "s" : ""} · Salon vocal jury
+                    {participants.length} participant{participants.length > 1 ? "s" : ""} · Salon
+                    vocal jury
                 </div>
             </div>
         </div>
@@ -144,7 +145,11 @@ const VocalPanel = ({ isJoined, onJoin, onLeave }: VocalPanelProps): React.JSX.E
             const res = await fetch(`${API}/api/vocal/token`, {
                 headers: { Authorization: `Bearer ${jwt}` },
             });
-            const data = (await res.json()) as { success: boolean; token?: string; message?: string };
+            const data = (await res.json()) as {
+                success: boolean;
+                token?: string;
+                message?: string;
+            };
             if (data.success && data.token) {
                 setToken(data.token);
                 onJoin();
@@ -203,7 +208,11 @@ export const VocalJoinButton = ({
             const res = await fetch(`${API}/api/vocal/token`, {
                 headers: { Authorization: `Bearer ${jwt}` },
             });
-            const data = (await res.json()) as { success: boolean; token?: string; message?: string };
+            const data = (await res.json()) as {
+                success: boolean;
+                token?: string;
+                message?: string;
+            };
             if (data.success && data.token) {
                 setToken(data.token);
                 onJoin();

@@ -2,7 +2,14 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import { findByEmail, insertJury, upsertGoogleJury, findById, updateProfilPicture, updatePassword } from "../repositories/jury.repository";
+import {
+    findByEmail,
+    insertJury,
+    upsertGoogleJury,
+    findById,
+    updateProfilPicture,
+    updatePassword,
+} from "../repositories/jury.repository";
 import { verifyInviteToken } from "../services/invite.service";
 import fs from "fs";
 import path from "path";

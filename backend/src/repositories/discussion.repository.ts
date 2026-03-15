@@ -2,10 +2,10 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/db";
 
 export const addFilmToDiscussion = async (filmId: number, addedBy: number): Promise<void> => {
-    await pool.execute(
-        `INSERT IGNORE INTO film_discussion (film_id, added_by) VALUES (?, ?)`,
-        [filmId, addedBy],
-    );
+    await pool.execute(`INSERT IGNORE INTO film_discussion (film_id, added_by) VALUES (?, ?)`, [
+        filmId,
+        addedBy,
+    ]);
 };
 
 export const removeFilmFromDiscussion = async (filmId: number): Promise<boolean> => {

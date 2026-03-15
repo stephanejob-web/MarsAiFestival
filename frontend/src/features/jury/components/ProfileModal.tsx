@@ -46,7 +46,11 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData,
             });
-            const data = (await res.json()) as { success: boolean; token?: string; message?: string };
+            const data = (await res.json()) as {
+                success: boolean;
+                token?: string;
+                message?: string;
+            };
             if (data.success && data.token) {
                 localStorage.setItem("jury_token", data.token);
                 window.dispatchEvent(new Event("jury-profile-updated"));
@@ -104,7 +108,9 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose();
+            }}
         >
             <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl">
                 {/* Header */}
@@ -232,7 +238,9 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     placeholder="••••••••"
                                     className="w-full rounded-[8px] border border-white/10 bg-white/4 px-3 py-2.5 text-[0.85rem] text-white-soft outline-none placeholder:text-mist/40 focus:border-aurora/40"
-                                    onKeyDown={(e) => { if (e.key === "Enter") void handlePasswordSave(); }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") void handlePasswordSave();
+                                    }}
                                 />
                             </div>
 

@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { INITIAL_FILMS } from "../../../constants/jury";
-import type { ActiveView, Decision, JuryComment, JuryFilm, ListTab, ModalType, ReasonTag } from "../types";
+import type {
+    ActiveView,
+    Decision,
+    JuryComment,
+    JuryFilm,
+    ListTab,
+    ModalType,
+    ReasonTag,
+} from "../types";
 import useJuryUser from "./useJuryUser";
 
 const API = import.meta.env.VITE_API_URL as string;
@@ -157,14 +165,23 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         const token = localStorage.getItem("jury_token");
         const headers = { Authorization: `Bearer ${token ?? ""}` };
         setIsLoadingFilms(true);
-        const fallbackVotes = { success: false, data: [] as { film_id: number; decision: string }[] };
+        const fallbackVotes = {
+            success: false,
+            data: [] as { film_id: number; decision: string }[],
+        };
         const fallbackDiscussion = { success: false, data: [] as number[] };
         Promise.all([
             fetch(`${API}/api/assignments/jury/${user.id}`, { headers }).then(
                 (r) => r.json() as Promise<{ success: boolean; data: ApiFilmRow[] }>,
             ),
             fetch(`${API}/api/votes?juryId=${user.id}`, { headers })
-                .then((r) => r.json() as Promise<{ success: boolean; data: { film_id: number; decision: string }[] }>)
+                .then(
+                    (r) =>
+                        r.json() as Promise<{
+                            success: boolean;
+                            data: { film_id: number; decision: string }[];
+                        }>,
+                )
                 .catch(() => fallbackVotes),
             fetch(`${API}/api/discussion`, { headers })
                 .then((r) => r.json() as Promise<{ success: boolean; data: number[] }>)
@@ -410,29 +427,32 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         [showToast],
     );
 
-    const addDiscussionComment = useCallback((filmId: number, comment: string): void => {
-        const content = comment.trim();
-        if (!content) return;
-        setFilms((prev) =>
-            prev.map((film) => {
-                if (film.id !== filmId) return film;
-                return {
-                    ...film,
-                    comments: [
-                        ...film.comments.filter((c) => c.juryId !== user?.id),
-                        {
-                            juryId: user?.id ?? 0,
-                            name: user?.fullName ?? "",
-                            initials: user?.initials ?? "",
-                            profilPicture: user?.profilPicture ?? null,
-                            text: content,
-                            updatedAt: new Date().toISOString(),
-                        },
-                    ],
-                };
-            }),
-        );
-    }, [user]);
+    const addDiscussionComment = useCallback(
+        (filmId: number, comment: string): void => {
+            const content = comment.trim();
+            if (!content) return;
+            setFilms((prev) =>
+                prev.map((film) => {
+                    if (film.id !== filmId) return film;
+                    return {
+                        ...film,
+                        comments: [
+                            ...film.comments.filter((c) => c.juryId !== user?.id),
+                            {
+                                juryId: user?.id ?? 0,
+                                name: user?.fullName ?? "",
+                                initials: user?.initials ?? "",
+                                profilPicture: user?.profilPicture ?? null,
+                                text: content,
+                                updatedAt: new Date().toISOString(),
+                            },
+                        ],
+                    };
+                }),
+            );
+        },
+        [user],
+    );
 
     const handleCommentPublish = useCallback((): void => {
         const content = notationComment.trim();
@@ -454,10 +474,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 if (film.id !== activeFilm.id) return film;
                 return {
                     ...film,
-                    comments: [
-                        ...film.comments.filter((c) => c.juryId !== user.id),
-                        newComment,
-                    ],
+                    comments: [...film.comments.filter((c) => c.juryId !== user.id), newComment],
                 };
             }),
         );

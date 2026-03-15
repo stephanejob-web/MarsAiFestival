@@ -45,7 +45,24 @@ const baseFilm: JuryFilm = {
 const filmWithDecision: JuryFilm = {
     ...baseFilm,
     myDecision: "valide",
-    comments: ["Tres belle utilisation.", "Rythme solide."],
+    comments: [
+        {
+            juryId: 1,
+            name: "Thomas Richard",
+            initials: "TR",
+            profilPicture: null,
+            text: "Tres belle utilisation.",
+            updatedAt: "2026-03-15T10:00:00Z",
+        },
+        {
+            juryId: 2,
+            name: "Marie Lefebvre",
+            initials: "ML",
+            profilPicture: null,
+            text: "Rythme solide.",
+            updatedAt: "2026-03-15T11:00:00Z",
+        },
+    ],
 };
 
 describe("FilmDetail", () => {

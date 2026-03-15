@@ -31,8 +31,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
     const currentUser = useJuryUser();
     const discussFilms = panel.films.filter((f) => f.myDecision === "discuter");
 
-    const defaultFilm =
-        discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
+    const defaultFilm = discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
     const [selectedFilmId, setSelectedFilmId] = useState<number | null>(
         defaultFilm?.id ?? discussFilms[0]?.id ?? null,
     );
@@ -41,8 +40,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
 
     const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
 
-    const { messages, onlineUsers, sendMessage, isConnected } =
-        useDiscussionSocket(selectedFilmId);
+    const { messages, onlineUsers, sendMessage, isConnected } = useDiscussionSocket(selectedFilmId);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -216,7 +214,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                                         alt={u.initials}
                                                         className="h-6 w-6 flex-shrink-0 rounded-full object-cover"
                                                         onError={(e) => {
-                                                            (e.target as HTMLImageElement).style.display = "none";
+                                                            (
+                                                                e.target as HTMLImageElement
+                                                            ).style.display = "none";
                                                         }}
                                                     />
                                                 ) : (
@@ -281,7 +281,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                                             alt={msg.initials}
                                                             className="mt-0.5 h-9 w-9 flex-shrink-0 rounded-full object-cover"
                                                             onError={(e) => {
-                                                                (e.target as HTMLImageElement).style.display = "none";
+                                                                (
+                                                                    e.target as HTMLImageElement
+                                                                ).style.display = "none";
                                                             }}
                                                         />
                                                     ) : (
