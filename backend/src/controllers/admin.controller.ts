@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { listVideosFromS3 } from "../services/s3.service";
+import { listVideosFromS3, getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
+import { getFilms } from "../repositories/film.repository";
 import {
     generateInviteToken,
     verifyInviteToken,
@@ -12,6 +13,33 @@ import {
     toggleJuryActive,
     deleteJuryUser,
 } from "../repositories/jury.repository";
+
+// ── GET /api/admin/films — Films avec URLs vidéo pré-signées (1h) ─────────────
+export const listAdminFilms = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const rows = await getFilms();
+        const data = await Promise.all(
+            rows.map(async (row) => {
+                if (!row.video_url) return row;
+                const key = extractS3Key(row.video_url as string);
+                if (!key) return row;
+                try {
+                    const presignedUrl = await getPresignedVideoUrl(key);
+                    return { ...row, video_url: presignedUrl };
+                } catch {
+                    return row;
+                }
+            }),
+        );
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la récupération des films.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
 
 // ── GET /api/admin/videos ──────────────────────────────────────────────────────
 export const listS3Videos = async (_req: Request, res: Response): Promise<void> => {
