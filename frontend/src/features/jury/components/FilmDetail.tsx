@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { JuryFilm, JuryOpinion, VoteRow } from "../types";
+import type { JuryComment, JuryFilm, JuryOpinion, VoteRow } from "../types";
 
 interface FilmDetailProps {
     film: JuryFilm;
@@ -79,6 +79,48 @@ const SectionCard = ({
         {children}
     </section>
 );
+
+const CommentCard = ({ comment }: { comment: JuryComment }): React.JSX.Element => {
+    const date = new Date(comment.updatedAt);
+    const dateStr = date.toLocaleDateString("fr", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+    const timeStr = date.toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" });
+
+    return (
+        <div className="flex items-start gap-3 rounded-[10px] border border-white/5 bg-surface p-3.5">
+            {comment.profilPicture ? (
+                <img
+                    src={comment.profilPicture}
+                    alt={comment.initials}
+                    className="h-9 w-9 flex-shrink-0 rounded-full object-cover"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                />
+            ) : (
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.75rem] font-extrabold text-deep-sky">
+                    {comment.initials}
+                </div>
+            )}
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-1.5">
+                    <span className="text-[0.85rem] font-semibold text-white-soft">
+                        {comment.name}
+                    </span>
+                    <span className="text-[0.68rem] text-mist/50">
+                        {dateStr} à {timeStr}
+                    </span>
+                </div>
+                <p className="mt-1 text-[0.82rem] leading-[1.6] text-white-soft/80">
+                    {comment.text}
+                </p>
+            </div>
+        </div>
+    );
+};
 
 const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
     return (
@@ -257,11 +299,9 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                 {/* Comments */}
                 <SectionCard title="Commentaires du jury">
                     {film.comments.length > 0 ? (
-                        <div className="flex flex-col gap-2">
-                            {film.comments.map((comment, i) => (
-                                <div key={i} className="text-[0.78rem] text-white-soft/80">
-                                    {comment}
-                                </div>
+                        <div className="flex flex-col gap-3">
+                            {film.comments.map((comment: JuryComment) => (
+                                <CommentCard key={comment.juryId} comment={comment} />
                             ))}
                         </div>
                     ) : (
