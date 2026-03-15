@@ -32,6 +32,20 @@ export const addComment = async (juryId: number, filmId: number, text: string): 
     }
 };
 
+// ── Tous les commentaires d'un juré (bulk load au démarrage) ─────────────────
+export const getMyCommentsByJury = async (
+    juryId: number,
+): Promise<{ film_id: number; text: string }[]> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT jfc.film_id, c.commentary AS text
+         FROM jury_film_commentary jfc
+         JOIN commentary c ON c.id = jfc.commentary_id
+         WHERE jfc.jury_id = ? AND c.commentary IS NOT NULL AND c.commentary != ''`,
+        [juryId],
+    );
+    return rows as { film_id: number; text: string }[];
+};
+
 // ── Commentaires d'un film (avec infos juré) ──────────────────────────────────
 export const getCommentsByFilm = async (filmId: number): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
