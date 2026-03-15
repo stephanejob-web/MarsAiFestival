@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3 = new S3Client({
     region: process.env.SCALEWAY_REGION ?? "fr-par",
@@ -31,6 +32,25 @@ export async function uploadFileToS3(
     );
 
     return `${process.env.SCALEWAY_ENDPOINT}/${BUCKET}/${key}`;
+}
+
+export async function getPresignedVideoUrl(key: string, expiresIn = 3600): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: BUCKET, Key: key });
+    return getSignedUrl(s3, command, { expiresIn });
+}
+
+// Extract S3 key from a full URL (e.g. https://s3.fr-par.scw.cloud/tln/grp1/foo.mp4 → grp1/foo.mp4)
+export function extractS3Key(url: string): string | null {
+    try {
+        const parsed = new URL(url);
+        // pathname = /<bucket>/<key>
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        // parts[0] is bucket, rest is key
+        if (parts.length < 2) return null;
+        return parts.slice(1).join("/");
+    } catch {
+        return null;
+    }
 }
 
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"];
