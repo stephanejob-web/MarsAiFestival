@@ -119,7 +119,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
     const user = useJuryUser();
 
     const [films, setFilms] = useState<JuryFilm[]>(INITIAL_FILMS);
-    const [isLoadingFilms, setIsLoadingFilms] = useState<boolean>(true);
+    const [isLoadingFilms, setIsLoadingFilms] = useState<boolean>(false);
     const [activeFilmId, setActiveFilmId] = useState<number>(INITIAL_FILMS[0].id);
     const [activeTab, setActiveTab] = useState<ListTab>("pending");
     const [commentDraft, setCommentDraft] = useState<string>("");
@@ -134,10 +134,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     // ── Fetch real films + existing votes when user is authenticated ──────────
     useEffect(() => {
-        if (!user) {
-            setIsLoadingFilms(false);
-            return;
-        }
+        if (!user) return;
         const token = localStorage.getItem("jury_token");
         const headers = { Authorization: `Bearer ${token ?? ""}` };
         setIsLoadingFilms(true);
@@ -173,7 +170,8 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 // Keep INITIAL_FILMS on network error
             })
             .finally(() => setIsLoadingFilms(false));
-    }, [user?.id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]); // intentionally track only id to avoid re-fetch on reference change
 
     const pendingCount = useMemo(
         () => films.filter((film) => film.myDecision === null).length,
@@ -283,7 +281,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
             applyDecision(decision);
             showToast("Film validé ✓");
         },
-        [applyDecision, showToast],
+        [applyDecision, showToast, activeFilm.id, activeFilm.myDecision],
     );
 
     const confirmARevoir = useCallback((): void => {
