@@ -6,16 +6,18 @@ const SOCKET_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http
 
 export interface ChatMessage {
     id: string;
+    juryId: number | null;
     author: string;
     initials: string;
     profilPicture: string | null;
     text: string;
     timestamp: number;
-    senderId: string;
+    senderId: string | null;
 }
 
 export interface ConnectedUser {
     socketId: string;
+    juryId: number;
     author: string;
     initials: string;
     profilPicture: string | null;
@@ -45,18 +47,19 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        const socket = io(SOCKET_URL, { transports: ["websocket", "polling"] });
+        const token = localStorage.getItem("jury_token");
+        if (!token) return;
+
+        const socket = io(SOCKET_URL, {
+            transports: ["websocket", "polling"],
+            auth: { token },
+        });
         socketRef.current = socket;
 
         socket.on("connect", () => {
             setIsConnected(true);
             setMySocketId(socket.id ?? null);
-            // Annonce la présence avec le profil
-            socket.emit("chat:join", {
-                author: user?.fullName ?? "Jury",
-                initials: user?.initials ?? "??",
-                profilPicture: user?.profilPicture ?? null,
-            });
+            socket.emit("chat:join");
         });
 
         socket.on("disconnect", () => {
@@ -78,6 +81,7 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
 
         return () => {
             socket.disconnect();
+            socketRef.current = null;
         };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -88,14 +92,7 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     const sendMessage = (): void => {
         const text = inputValue.trim();
         if (!text || !socketRef.current) return;
-
-        socketRef.current.emit("chat:send", {
-            author: user?.fullName ?? "Jury",
-            initials: user?.initials ?? "??",
-            profilPicture: user?.profilPicture ?? null,
-            text,
-        });
-
+        socketRef.current.emit("chat:send", { text });
         setInputValue("");
     };
 
