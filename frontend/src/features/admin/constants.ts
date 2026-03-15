@@ -2,28 +2,37 @@ import type { AdminNavCategory } from "./types";
 
 export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
     {
-        category: "Contenu Principal",
+        category: "Gestion",
         items: [
-            { label: "Utilisateurs", to: "/admin", indicator: "bg-emerald-500" },
-            { label: "Assignations films", to: "/admin/films", indicator: "bg-zinc-600" },
-            { label: "Phases & Dates", to: "/admin/jury", indicator: "bg-zinc-600" },
-            { label: "Selection & Votes", to: "/admin/realisator", indicator: "bg-zinc-600" },
+            { label: "Utilisateurs", to: "/admin", icon: "👥", count: 6 },
+            { label: "Assignation films", to: "/admin/films", icon: "🎬", count: 50 },
         ],
     },
     {
-        category: "Configuration",
-        items: [
-            { label: "Awards & Sponsors", to: "/admin/tags", indicator: "bg-zinc-600" },
-            { label: "Administration site", to: "/admin/site", indicator: "bg-zinc-600" },
-        ],
+        category: "Concours",
+        items: [{ label: "Phases & Dates", to: "/admin/phases", icon: "📅" }],
+    },
+    {
+        category: "Suivi",
+        items: [{ label: "Sélection & Votes", to: "/admin/selection", icon: "🏅" }],
+    },
+    {
+        category: "Festival",
+        items: [{ label: "Awards & Sponsors", to: "/admin/awards", icon: "🏆" }],
+    },
+    {
+        category: "Site",
+        items: [{ label: "Administration site", to: "/admin/site", icon: "🌐" }],
     },
 ];
 
 export const ADMIN_LABELS = {
-    TITLE: "Mars AI Festival",
-    HELLO_ADMIN: "Hello Admin",
+    TITLE: "marsAI",
+    SUBTITLE: "Panneau d'administration",
+    ADMIN_NAME: "Admin marsAI",
+    ADMIN_ROLE: "Administrateur",
     LOGOUT: "Déconnexion",
     ADMIN_PANEL: "Panneau Admin",
-    WELCOME_MESSAGE: "Bonjour Dylan — cette page est dédiée au développement du panneau admin.",
+    WELCOME_MESSAGE: "Sélectionnez une section dans le menu de navigation.",
     RETURN_HOME: "Retour à l'accueil",
 };
