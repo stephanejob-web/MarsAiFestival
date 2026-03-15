@@ -83,8 +83,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                 </span>
                 <div className="h-[18px] w-px bg-white/[0.08]" />
                 <span className="text-[0.75rem] text-mist">
-                    {films.length} films · {activeJuryCount} jurés actifs ·{" "}
-                    {assignments.length} assignations
+                    {films.length} films · {activeJuryCount} jurés actifs · {assignments.length}{" "}
+                    assignations
                 </span>
                 <div className="ml-auto">
                     <span className="rounded-md border border-aurora/20 bg-aurora/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
@@ -117,16 +117,46 @@ const AdminFilmsPage = (): React.JSX.Element => {
                             <div className="flex flex-1 items-center gap-4">
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aurora/20 bg-aurora/10 text-aurora">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                        <circle cx="3.5" cy="10" r="2" stroke="currentColor" strokeWidth="1.6" />
-                                        <circle cx="16.5" cy="4.5" r="2" stroke="currentColor" strokeWidth="1.6" />
-                                        <circle cx="16.5" cy="15.5" r="2" stroke="currentColor" strokeWidth="1.6" />
-                                        <path d="M5.5 10C7 10 8 4.5 14.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                                        <path d="M5.5 10C7 10 8 15.5 14.5 15.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                                        <circle
+                                            cx="3.5"
+                                            cy="10"
+                                            r="2"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                        />
+                                        <circle
+                                            cx="16.5"
+                                            cy="4.5"
+                                            r="2"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                        />
+                                        <circle
+                                            cx="16.5"
+                                            cy="15.5"
+                                            r="2"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                        />
+                                        <path
+                                            d="M5.5 10C7 10 8 4.5 14.5 4.5"
+                                            stroke="currentColor"
+                                            strokeWidth="1.4"
+                                            strokeLinecap="round"
+                                        />
+                                        <path
+                                            d="M5.5 10C7 10 8 15.5 14.5 15.5"
+                                            stroke="currentColor"
+                                            strokeWidth="1.4"
+                                            strokeLinecap="round"
+                                        />
                                     </svg>
                                 </div>
                                 <div>
                                     <div className="font-display text-[0.95rem] font-extrabold tracking-[-0.01em] text-aurora">
-                                        {isDistributing ? "Distribution en cours…" : "Répartir équitablement"}
+                                        {isDistributing
+                                            ? "Distribution en cours…"
+                                            : "Répartir équitablement"}
                                     </div>
                                     <div className="mt-0.5 text-[0.73rem] leading-snug text-mist">
                                         Distribuer automatiquement les{" "}
@@ -141,8 +171,20 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     <span className="mx-1 opacity-40">·</span>
                                     <span>~{perJury} films/juré</span>
                                 </div>
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-aurora/50">
-                                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 16 16"
+                                    fill="none"
+                                    className="text-aurora/50"
+                                >
+                                    <path
+                                        d="M3 8h10M9 4l4 4-4 4"
+                                        stroke="currentColor"
+                                        strokeWidth="1.8"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
                                 </svg>
                             </div>
                         </button>
@@ -155,7 +197,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                             <input
                                 type="text"
                                 value={search}
-                                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setCurrentPage(1);
+                                }}
                                 placeholder="Rechercher par titre, réalisateur ou pays…"
                                 className="w-full rounded-[10px] border border-white/[0.09] bg-white/[0.04] py-2 pl-9 pr-4 font-body text-[0.85rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
                             />
@@ -167,14 +212,21 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 {(
                                     [
                                         { id: "all", label: "Tous" },
-                                        { id: "unassigned", label: "Non assignés", count: unassignedCount },
+                                        {
+                                            id: "unassigned",
+                                            label: "Non assignés",
+                                            count: unassignedCount,
+                                        },
                                         { id: "assigned", label: "Assignés", count: assignedCount },
                                     ] as { id: FilterMode; label: string; count?: number }[]
                                 ).map((tab) => (
                                     <button
                                         key={tab.id}
                                         type="button"
-                                        onClick={() => { setFilter(tab.id); setCurrentPage(1); }}
+                                        onClick={() => {
+                                            setFilter(tab.id);
+                                            setCurrentPage(1);
+                                        }}
                                         className={`flex items-center gap-1.5 rounded-[8px] px-[13px] py-[7px] text-[0.78rem] font-semibold transition-all duration-150 ${
                                             filter === tab.id
                                                 ? "bg-aurora/10 text-aurora shadow-[0_1px_4px_rgba(0,0,0,0.2)]"
@@ -183,7 +235,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     >
                                         {tab.label}
                                         {tab.count !== undefined && (
-                                            <span className="text-[0.7rem] opacity-60">{tab.count}</span>
+                                            <span className="text-[0.7rem] opacity-60">
+                                                {tab.count}
+                                            </span>
                                         )}
                                     </button>
                                 ))}
@@ -209,7 +263,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 {pageFilms.map((film) => {
                                     const accent = CARD_ACCENTS[film.id % CARD_ACCENTS.length];
                                     const isAssigned = assignedFilmIds.has(film.id);
-                                    const nJury = assignments.filter((a) => a.film_id === film.id).length;
+                                    const nJury = assignments.filter(
+                                        (a) => a.film_id === film.id,
+                                    ).length;
                                     const filmAssignmentIds = new Set(
                                         assignments
                                             .filter((a) => a.film_id === film.id)
@@ -226,7 +282,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             }`}
                                         >
                                             {/* Accent bar */}
-                                            <div className="h-[3px] w-full" style={{ background: accent, opacity: 0.7 }} />
+                                            <div
+                                                className="h-[3px] w-full"
+                                                style={{ background: accent, opacity: 0.7 }}
+                                            />
 
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
@@ -260,8 +319,16 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                             className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-150 group-hover/thumb:opacity-100"
                                                         >
                                                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                                                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                                                    <path d="M6 4l9 5-9 5V4z" fill="#0A0F2E" />
+                                                                <svg
+                                                                    width="18"
+                                                                    height="18"
+                                                                    viewBox="0 0 18 18"
+                                                                    fill="none"
+                                                                >
+                                                                    <path
+                                                                        d="M6 4l9 5-9 5V4z"
+                                                                        fill="#0A0F2E"
+                                                                    />
                                                                 </svg>
                                                             </div>
                                                         </button>
@@ -280,7 +347,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     {film.original_title}
                                                 </div>
                                                 <div className="text-[0.72rem] text-mist">
-                                                    {film.first_name} {film.last_name} · {film.country}
+                                                    {film.first_name} {film.last_name} ·{" "}
+                                                    {film.country}
                                                 </div>
 
                                                 {/* Jury avatars — clic direct pour assigner */}
@@ -290,17 +358,30 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     </div>
                                                     <div className="flex flex-wrap gap-3">
                                                         {juryMembers.map((j, idx) => {
-                                                            const jAssigned = filmAssignmentIds.has(j.id);
-                                                            const initials = `${j.first_name[0]}${j.last_name[0]}`.toUpperCase();
-                                                            const grad = AVATAR_GRADIENTS[idx % AVATAR_GRADIENTS.length];
+                                                            const jAssigned = filmAssignmentIds.has(
+                                                                j.id,
+                                                            );
+                                                            const initials =
+                                                                `${j.first_name[0]}${j.last_name[0]}`.toUpperCase();
+                                                            const grad =
+                                                                AVATAR_GRADIENTS[
+                                                                    idx % AVATAR_GRADIENTS.length
+                                                                ];
 
                                                             return (
                                                                 <button
                                                                     key={j.id}
                                                                     type="button"
-                                                                    onClick={() => void toggleAssignment(j.id, film.id)}
+                                                                    onClick={() =>
+                                                                        void toggleAssignment(
+                                                                            j.id,
+                                                                            film.id,
+                                                                        )
+                                                                    }
                                                                     className={`flex cursor-pointer flex-col items-center gap-1.5 transition-all duration-150 ${
-                                                                        jAssigned ? "opacity-100" : "opacity-30 hover:opacity-70"
+                                                                        jAssigned
+                                                                            ? "opacity-100"
+                                                                            : "opacity-30 hover:opacity-70"
                                                                     }`}
                                                                 >
                                                                     <div
@@ -312,7 +393,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                     >
                                                                         {j.profil_picture ? (
                                                                             <img
-                                                                                src={j.profil_picture}
+                                                                                src={
+                                                                                    j.profil_picture
+                                                                                }
                                                                                 alt=""
                                                                                 className="h-full w-full rounded-full object-cover"
                                                                             />
@@ -326,10 +409,14 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                         )}
                                                                     </div>
                                                                     <div className="text-center">
-                                                                        <div className={`text-[0.65rem] font-semibold leading-tight ${jAssigned ? "text-white-soft" : "text-mist"}`}>
+                                                                        <div
+                                                                            className={`text-[0.65rem] font-semibold leading-tight ${jAssigned ? "text-white-soft" : "text-mist"}`}
+                                                                        >
                                                                             {j.first_name}
                                                                         </div>
-                                                                        <div className={`text-[0.65rem] leading-tight ${jAssigned ? "text-white-soft" : "text-mist"}`}>
+                                                                        <div
+                                                                            className={`text-[0.65rem] leading-tight ${jAssigned ? "text-white-soft" : "text-mist"}`}
+                                                                        >
                                                                             {j.last_name}
                                                                         </div>
                                                                     </div>
@@ -344,10 +431,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     <span className="font-mono text-[0.68rem]">
                                                         {nJury > 0 ? (
                                                             <span className="text-aurora">
-                                                                {nJury} juré{nJury > 1 ? "s" : ""} assigné{nJury > 1 ? "s" : ""}
+                                                                {nJury} juré{nJury > 1 ? "s" : ""}{" "}
+                                                                assigné{nJury > 1 ? "s" : ""}
                                                             </span>
                                                         ) : (
-                                                            <span className="text-mist">Non assigné</span>
+                                                            <span className="text-mist">
+                                                                Non assigné
+                                                            </span>
                                                         )}
                                                     </span>
                                                     <span
@@ -381,15 +471,28 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 </button>
 
                                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                                    .filter(
+                                        (p) =>
+                                            p === 1 ||
+                                            p === totalPages ||
+                                            Math.abs(p - safePage) <= 1,
+                                    )
                                     .reduce<(number | "…")[]>((acc, p, i, arr) => {
-                                        if (i > 0 && typeof arr[i - 1] === "number" && (p as number) - (arr[i - 1] as number) > 1) acc.push("…");
+                                        if (
+                                            i > 0 &&
+                                            typeof arr[i - 1] === "number" &&
+                                            (p as number) - (arr[i - 1] as number) > 1
+                                        )
+                                            acc.push("…");
                                         acc.push(p);
                                         return acc;
                                     }, [])
                                     .map((p, i) =>
                                         p === "…" ? (
-                                            <span key={`dots-${i}`} className="px-1 text-[0.75rem] text-mist opacity-40">
+                                            <span
+                                                key={`dots-${i}`}
+                                                className="px-1 text-[0.75rem] text-mist opacity-40"
+                                            >
                                                 ···
                                             </span>
                                         ) : (

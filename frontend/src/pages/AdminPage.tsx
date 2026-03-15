@@ -114,11 +114,7 @@ const AdminPage = (): React.JSX.Element => {
                         </div>
 
                         {/* Table */}
-                        <UserTable
-                            users={users}
-                            search={search}
-                            onToggleStatus={toggleStatus}
-                        />
+                        <UserTable users={users} search={search} onToggleStatus={toggleStatus} />
                     </>
                 )}
             </div>

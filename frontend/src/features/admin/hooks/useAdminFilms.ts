@@ -46,8 +46,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
                     headers: authHeader,
                 }),
             ]);
-            if (juryData.success)
-                setJuryMembers(juryData.data.filter((j) => j.role === "jury"));
+            if (juryData.success) setJuryMembers(juryData.data.filter((j) => j.role === "jury"));
             if (filmsData.success) setFilms(filmsData.data);
             if (assignData.success) setAssignments(assignData.data);
         } catch (err) {
@@ -63,9 +62,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
 
     const toggleAssignment = async (juryId: number, filmId: number): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
-        const isAssigned = assignments.some(
-            (a) => a.jury_id === juryId && a.film_id === filmId,
-        );
+        const isAssigned = assignments.some((a) => a.jury_id === juryId && a.film_id === filmId);
 
         // Optimistic update — no full reload, videos stay intact
         if (isAssigned) {

@@ -27,12 +27,10 @@ const ParticipationChart = ({ users }: ParticipationChartProps): React.JSX.Eleme
                 </div>
                 <div className="flex items-center gap-4 text-[0.65rem] text-mist">
                     <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-aurora" />
-                        ≥ 80%
+                        <span className="h-2 w-2 rounded-full bg-aurora" />≥ 80%
                     </span>
                     <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-solar" />
-                        ≥ 50%
+                        <span className="h-2 w-2 rounded-full bg-solar" />≥ 50%
                     </span>
                     <span className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-coral" />

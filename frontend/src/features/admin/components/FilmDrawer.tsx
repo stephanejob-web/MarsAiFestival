@@ -36,10 +36,7 @@ const FilmDrawer = ({
     const filteredJury = juryMembers
         .filter((j) => {
             const q = search.toLowerCase();
-            return (
-                j.first_name.toLowerCase().includes(q) ||
-                j.last_name.toLowerCase().includes(q)
-            );
+            return j.first_name.toLowerCase().includes(q) || j.last_name.toLowerCase().includes(q);
         })
         .sort((a, b) => {
             const aA = assignedJuryIds.has(a.id) ? 0 : 1;
@@ -68,9 +65,7 @@ const FilmDrawer = ({
                             {film?.original_title ?? "—"}
                         </div>
                         <div className="mt-0.5 text-[0.72rem] text-mist">
-                            {film
-                                ? `${film.first_name} ${film.last_name} · ${film.country}`
-                                : "—"}
+                            {film ? `${film.first_name} ${film.last_name} · ${film.country}` : "—"}
                         </div>
                     </div>
                     <button
