@@ -25,11 +25,8 @@ const OPINION_AVATAR_CLASS: Record<string, string> = {
 const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
     const discussFilms = panel.films.filter((f) => f.myDecision === "discuter");
 
-    const defaultFilm =
-        discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
-    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(
-        defaultFilm?.id ?? null,
-    );
+    const defaultFilm = discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
+    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(defaultFilm?.id ?? null);
     const [commentInput, setCommentInput] = useState("");
 
     const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;

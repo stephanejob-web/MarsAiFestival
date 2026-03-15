@@ -120,13 +120,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
 
     const handleUnassign = async (juryId: number, filmId: number): Promise<void> => {
         try {
-            const res = await fetch(
-                `${API}/api/assignments?juryId=${juryId}&filmId=${filmId}`,
-                {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${getToken()}` },
-                },
-            );
+            const res = await fetch(`${API}/api/assignments?juryId=${juryId}&filmId=${filmId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${getToken()}` },
+            });
             const data = (await res.json()) as { success: boolean };
             if (!data.success) {
                 showFeedback("err", "Erreur de suppression.");
@@ -192,9 +189,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                 <div className="border-b border-zinc-800 px-8 py-5">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-bold text-white">
-                                Assignation des films
-                            </h1>
+                            <h1 className="text-xl font-bold text-white">Assignation des films</h1>
                             <p className="mt-0.5 text-sm text-zinc-500">
                                 {films.length} films · {juryMembers.length} jurés ·{" "}
                                 {assignments.length} assignations
@@ -232,17 +227,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 Jurés
                             </div>
                             {juryMembers.map((j) => {
-                                const count = assignments.filter(
-                                    (a) => a.jury_id === j.id,
-                                ).length;
+                                const count = assignments.filter((a) => a.jury_id === j.id).length;
                                 const isSelected = j.id === selectedJuryId;
                                 return (
                                     <button
                                         key={j.id}
                                         type="button"
-                                        onClick={() =>
-                                            setSelectedJuryId(isSelected ? null : j.id)
-                                        }
+                                        onClick={() => setSelectedJuryId(isSelected ? null : j.id)}
                                         className={`mb-1.5 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
                                             isSelected
                                                 ? "bg-emerald-900/30 text-emerald-300"

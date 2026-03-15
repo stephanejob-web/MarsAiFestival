@@ -263,9 +263,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 if (activeFilm.myDecision === "discuter") {
                     // Toggle off — retirer de la discussion
                     setFilms((prev) =>
-                        prev.map((f) =>
-                            f.id === activeFilm.id ? { ...f, myDecision: null } : f,
-                        ),
+                        prev.map((f) => (f.id === activeFilm.id ? { ...f, myDecision: null } : f)),
                     );
                     const token = localStorage.getItem("jury_token");
                     if (token) {
@@ -329,9 +327,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const removeFromDiscussion = useCallback(
         (filmId: number): void => {
-            setFilms((prev) =>
-                prev.map((f) => (f.id === filmId ? { ...f, myDecision: null } : f)),
-            );
+            setFilms((prev) => prev.map((f) => (f.id === filmId ? { ...f, myDecision: null } : f)));
             const token = localStorage.getItem("jury_token");
             if (token) {
                 void fetch(`${API}/api/votes?filmId=${filmId}`, {
@@ -344,19 +340,16 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         [showToast],
     );
 
-    const addDiscussionComment = useCallback(
-        (filmId: number, comment: string): void => {
-            const content = comment.trim();
-            if (!content) return;
-            setFilms((prev) =>
-                prev.map((film) => {
-                    if (film.id !== filmId) return film;
-                    return { ...film, comments: [...film.comments, content] };
-                }),
-            );
-        },
-        [],
-    );
+    const addDiscussionComment = useCallback((filmId: number, comment: string): void => {
+        const content = comment.trim();
+        if (!content) return;
+        setFilms((prev) =>
+            prev.map((film) => {
+                if (film.id !== filmId) return film;
+                return { ...film, comments: [...film.comments, content] };
+            }),
+        );
+    }, []);
 
     return {
         films,
