@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { addComment, getCommentsByFilm } from "../repositories/comment.repository";
+import {
+    addComment,
+    getCommentsByFilm,
+    getMyCommentsByJury,
+} from "../repositories/comment.repository";
 
 // ── POST /api/comments — Publier un commentaire ───────────────────────────────
 export const postComment = async (req: Request, res: Response): Promise<void> => {
@@ -18,6 +22,20 @@ export const postComment = async (req: Request, res: Response): Promise<void> =>
         res.status(500).json({
             success: false,
             message: "Erreur lors de l'enregistrement du commentaire.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── GET /api/comments/mine — Tous mes commentaires (bulk, pour le panel jury) ──
+export const listMyComments = async (req: Request, res: Response): Promise<void> => {
+    const juryId = req.juryUser!.id;
+    try {
+        const data = await getMyCommentsByJury(juryId);
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
             error: err instanceof Error ? err.message : String(err),
         });
     }
