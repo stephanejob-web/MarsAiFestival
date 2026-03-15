@@ -80,12 +80,12 @@ const NotationPanel = ({
                 />
                 <DecisionButton
                     label="💬 Discuter"
-                    decision="aRevoir"
-                    isActive={false}
+                    decision="discuter"
+                    isActive={currentDecision === "discuter"}
                     baseClass="bg-lavande/8 border-lavande/28 text-lavande"
-                    activeClass=""
+                    activeClass="bg-lavande/20 -translate-y-px"
                     hoverClass="hover:bg-lavande/18"
-                    onClick={() => {}}
+                    onClick={onDecision}
                 />
             </div>
 
