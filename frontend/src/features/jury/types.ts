@@ -1,4 +1,4 @@
-export type Decision = "valide" | "aRevoir" | "refuse" | null;
+export type Decision = "valide" | "aRevoir" | "refuse" | "discuter" | null;
 
 export type ListTab = "pending" | "evaluated" | "all";
 
@@ -64,6 +64,7 @@ export interface JuryFilm {
     iaImage: string;
     iaPost: string;
     note: string;
+    videoUrl: string | null;
     myDecision: Decision;
     comments: string[];
     opinions: JuryOpinion[];
