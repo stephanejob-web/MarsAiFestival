@@ -11,9 +11,7 @@ describe("AdminSidePanel", () => {
                 <AdminSidePanel />
             </MemoryRouter>,
         );
-        expect(
-            screen.getByText((_, el) => el?.textContent === ADMIN_LABELS.TITLE),
-        ).toBeDefined();
+        expect(screen.getByText((_, el) => el?.textContent === ADMIN_LABELS.TITLE)).toBeDefined();
         expect(screen.getByText(ADMIN_LABELS.SUBTITLE)).toBeDefined();
     });
 
