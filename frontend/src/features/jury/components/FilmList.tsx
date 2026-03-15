@@ -22,19 +22,22 @@ const STATUS_DOT_CLASS: Record<string, string> = {
     valide: "bg-aurora",
     aRevoir: "bg-solar",
     refuse: "bg-coral",
-    null: "bg-solar",
+    discuter: "bg-lavande",
+    null: "bg-white/20",
 };
 
 const DECISION_BADGE_CLASS: Record<string, string> = {
     valide: "bg-aurora/10 text-aurora",
     aRevoir: "bg-solar/10 text-solar",
     refuse: "bg-coral/10 text-coral",
+    discuter: "bg-lavande/10 text-lavande",
 };
 
 const getDecisionLabel = (decision: Decision): string => {
     if (decision === "valide") return "Validé";
     if (decision === "aRevoir") return "À revoir";
     if (decision === "refuse") return "Refusé";
+    if (decision === "discuter") return "Discuter";
     return "—";
 };
 
