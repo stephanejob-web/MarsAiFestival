@@ -73,6 +73,7 @@ const AdminSidePanel = (): React.JSX.Element => {
             <div className="border-t border-white/[0.05] p-3">
                 <button
                     type="button"
+                    aria-label={ADMIN_LABELS.LOGOUT}
                     className="w-full rounded-lg px-3 py-2 text-left text-[0.82rem] text-coral/80 transition-all hover:bg-coral/[0.08] hover:text-coral"
                 >
                     🔒 {ADMIN_LABELS.LOGOUT}
