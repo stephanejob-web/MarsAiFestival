@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
+import ProfileModal from "./ProfileModal";
 
 interface JurySidebarProps {
     activeView: ActiveView;
@@ -77,8 +78,10 @@ const JurySidebar = ({
     const chat = useJuryChat(isChatOpen);
     const user = useJuryUser();
     const [avatarError, setAvatarError] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     return (
+        <>
         <aside className="flex h-screen w-[260px] min-w-[260px] flex-col border-r border-white/6 bg-surface">
             {/* Header */}
             <div className="border-b border-white/5 px-5 py-[22px] pb-[18px]">
@@ -110,7 +113,14 @@ const JurySidebar = ({
                     </div>
                     <div className="mt-px text-[0.7rem] text-mist">{user?.roleLabel ?? ""}</div>
                 </div>
-                <div className="h-[7px] w-[7px] flex-shrink-0 rounded-full bg-aurora" />
+                <button
+                    type="button"
+                    onClick={() => setIsProfileOpen(true)}
+                    className="flex-shrink-0 rounded-lg p-1.5 text-mist/50 transition-all hover:bg-white/8 hover:text-white-soft"
+                    title="Modifier mon profil"
+                >
+                    ⚙️
+                </button>
             </div>
 
             {/* Navigation */}
@@ -328,6 +338,8 @@ const JurySidebar = ({
                 </div>
             </div>
         </aside>
+        {isProfileOpen && <ProfileModal onClose={() => setIsProfileOpen(false)} />}
+        </>
     );
 };
 
