@@ -37,6 +37,7 @@ import discussionRouter from "./routes/discussion.routes";
 import commentRouter from "./routes/comment.routes";
 import phaseRouter from "./routes/phase.routes";
 import ticketRouter from "./routes/ticket.routes";
+import vocalRouter from "./routes/vocal.routes";
 
 app.use("/", homeRouter);
 app.use("/api/films", filmRouter);
@@ -49,5 +50,6 @@ app.use("/api/discussion", discussionRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/phases", phaseRouter);
 app.use("/api/tickets", ticketRouter);
+app.use("/api/vocal", vocalRouter);
 
 export default app;
