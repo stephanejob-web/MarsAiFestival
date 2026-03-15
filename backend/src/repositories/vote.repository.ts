@@ -57,10 +57,11 @@ export const getVotesByJury = async (juryId: number): Promise<RowDataPacket[]> =
     return rows;
 };
 
-// ── Supprimer le vote d'un juré sur un film ───────────────────────────────────
+// ── Supprimer le vote d'un juré sur un film (garde la ligne pour le commentaire) ─
 export const deleteVote = async (juryId: number, filmId: number): Promise<boolean> => {
     const [result] = await pool.execute<ResultSetHeader>(
-        `DELETE FROM jury_film_commentary WHERE jury_id = ? AND film_id = ?`,
+        `UPDATE jury_film_commentary SET decision = NULL, updated_at = CURRENT_TIMESTAMP
+         WHERE jury_id = ? AND film_id = ?`,
         [juryId, filmId],
     );
     return result.affectedRows > 0;
