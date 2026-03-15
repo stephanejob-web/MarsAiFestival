@@ -8,6 +8,7 @@ import {
     getAllJuryMembers,
 } from "../repositories/assignment.repository";
 import { getUnassignedFilms } from "../repositories/film.repository";
+import { getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
 
 // ── POST /api/assignments — Assigner un film à un juré (admin) ─────────────────
 export const assign = async (req: Request, res: Response): Promise<void> => {
@@ -91,7 +92,23 @@ export const listFilmsForJury = async (req: Request, res: Response): Promise<voi
         return;
     }
     try {
-        const data = await getFilmsByJury(juryId);
+        const rows = await getFilmsByJury(juryId);
+
+        // Replace raw S3 URLs with presigned URLs (1h validity)
+        const data = await Promise.all(
+            rows.map(async (row) => {
+                if (!row.video_url) return row;
+                const key = extractS3Key(row.video_url as string);
+                if (!key) return row;
+                try {
+                    const presignedUrl = await getPresignedVideoUrl(key);
+                    return { ...row, video_url: presignedUrl };
+                } catch {
+                    return row;
+                }
+            }),
+        );
+
         res.json({ success: true, data });
     } catch (err) {
         res.status(500).json({
