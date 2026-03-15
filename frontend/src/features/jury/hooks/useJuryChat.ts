@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import useJuryUser from "./useJuryUser";
 
 const SOCKET_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5500";
 
@@ -36,7 +35,6 @@ export interface UseJuryChatReturn {
 }
 
 const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
-    const user = useJuryUser();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
     const [inputValue, setInputValue] = useState("");
@@ -83,7 +81,7 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
             socket.disconnect();
             socketRef.current = null;
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (isChatOpen) setUnreadCount(0); // eslint-disable-line react-hooks/set-state-in-effect

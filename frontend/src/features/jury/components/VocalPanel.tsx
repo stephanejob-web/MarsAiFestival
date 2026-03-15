@@ -132,39 +132,10 @@ interface VocalPanelProps {
     onLeave: () => void;
 }
 
-const VocalPanel = ({ isJoined, onJoin, onLeave }: VocalPanelProps): React.JSX.Element | null => {
-    const [token, setToken] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchToken = useCallback(async (): Promise<void> => {
-        setLoading(true);
-        setError(null);
-        try {
-            const jwt = localStorage.getItem("jury_token") ?? "";
-            const res = await fetch(`${API}/api/vocal/token`, {
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-            const data = (await res.json()) as {
-                success: boolean;
-                token?: string;
-                message?: string;
-            };
-            if (data.success && data.token) {
-                setToken(data.token);
-                onJoin();
-            } else {
-                setError(data.message ?? "Erreur de connexion.");
-            }
-        } catch {
-            setError("Erreur réseau.");
-        } finally {
-            setLoading(false);
-        }
-    }, [onJoin]);
+const VocalPanel = ({ isJoined, onLeave }: VocalPanelProps): React.JSX.Element | null => {
+    const [token] = useState<string | null>(null);
 
     const handleLeave = useCallback((): void => {
-        setToken(null);
         onLeave();
     }, [onLeave]);
 
