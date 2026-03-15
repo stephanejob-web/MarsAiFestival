@@ -16,6 +16,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
         iaImage: "Runway Gen-3, Sora",
         iaPost: "MusicGen, ElevenLabs",
         note: "Film sur la memoire humaine et l apprentissage machine. Une plongee poetique dans les strates de la conscience numerique.",
+        videoUrl: null,
         myDecision: "valide",
         comments: [
             "Tres belle utilisation de l IA.",
@@ -91,6 +92,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
         iaImage: "Pika Labs 1.5",
         iaPost: "Udio, Premiere Pro",
         note: "Exploration poetique de l enfance dans un monde synthetique. Les emotions numériques rencontrent la nostalgie organique.",
+        videoUrl: null,
         myDecision: "aRevoir",
         comments: ["Tres fort esthetiquement mais fin a clarifier."],
         opinions: [
@@ -163,6 +165,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
         iaImage: "Midjourney v6",
         iaPost: "ElevenLabs, Runway",
         note: "Transposition des souvenirs humains dans une IA narrative. Une experience unique entre memoire et algorithme.",
+        videoUrl: null,
         myDecision: null,
         comments: [],
         opinions: [
@@ -234,6 +237,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
         iaImage: "Aucun",
         iaPost: "Suno AI, ElevenLabs",
         note: "Experience sonore immersive sur les frontieres culturelles. Le son comme frontiere et comme pont.",
+        videoUrl: null,
         myDecision: "refuse",
         comments: ["Ne correspond pas assez aux criteres image IA."],
         opinions: [
@@ -305,6 +309,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
         iaImage: "Pika Labs",
         iaPost: "Udio",
         note: "Un signal emerge du bruit numerique et reconstruit une ville. Architecture generative et poesie numerique.",
+        videoUrl: null,
         myDecision: null,
         comments: [],
         opinions: [
