@@ -49,12 +49,14 @@ const DECISION_BADGE_CLASS: Record<string, string> = {
     valide: "bg-aurora/10 border border-aurora/30 text-aurora",
     aRevoir: "bg-solar/10 border border-solar/30 text-solar",
     refuse: "bg-coral/10 border border-coral/25 text-coral",
+    discuter: "bg-lavande/10 border border-lavande/25 text-lavande",
 };
 
 const getDecisionBadgeLabel = (decision: JuryFilm["myDecision"]): string => {
     if (decision === "valide") return "✓ Validé";
     if (decision === "aRevoir") return "↩ À revoir";
     if (decision === "refuse") return "✕ Refusé";
+    if (decision === "discuter") return "💬 À discuter";
     return "— En attente";
 };
 
@@ -84,77 +86,27 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
             <div className="flex-1 overflow-y-auto p-5">
                 {/* Video player */}
                 <div className="mb-[18px] overflow-hidden rounded-[12px] border border-white/8 bg-black">
-                    <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
-                        <button
-                            type="button"
-                            className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border-2 border-white/20 bg-white/10 pl-1 text-[1.1rem] backdrop-blur-sm transition-all hover:border-aurora hover:bg-aurora/20"
-                        >
-                            ▶
-                        </button>
-                        <div className="absolute bottom-[42px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/75 px-3.5 py-[5px] text-[0.85rem]">
-                            {film.title} · {film.author}
-                        </div>
-                        <div className="absolute right-3 top-3 rounded bg-red-600/85 px-2 py-[3px] text-[0.65rem] font-bold tracking-[0.05em] text-white">
-                            ▶ YouTube
-                        </div>
-                    </div>
-                    <div className="bg-white/2 px-4 py-2.5">
-                        <div className="mb-2.5 flex items-center gap-2.5">
-                            <div className="h-[3px] flex-1 cursor-pointer rounded bg-white/10">
-                                <div
-                                    className="relative h-full rounded bg-gradient-to-r from-aurora to-lavande"
-                                    style={{ width: "42%" }}
-                                />
+                    {film.videoUrl ? (
+                        <video
+                            key={film.videoUrl}
+                            src={film.videoUrl}
+                            controls
+                            className="aspect-video w-full bg-black"
+                            preload="metadata"
+                        />
+                    ) : (
+                        <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
+                            <div className="text-center">
+                                <div className="mb-2 text-3xl opacity-30">🎬</div>
+                                <div className="text-[0.75rem] text-mist/50">
+                                    Vidéo non disponible
+                                </div>
                             </div>
-                            <span className="whitespace-nowrap font-mono text-[0.7rem] text-mist">
-                                0:25 / 1:00
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <button
-                                    type="button"
-                                    className="cursor-pointer text-[0.78rem] text-mist hover:text-white-soft"
-                                >
-                                    ⏮
-                                </button>
-                                <button
-                                    type="button"
-                                    className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-aurora pl-0.5 text-[0.7rem] text-deep-sky"
-                                >
-                                    ▶
-                                </button>
-                                <button
-                                    type="button"
-                                    className="cursor-pointer text-[0.78rem] text-mist hover:text-white-soft"
-                                >
-                                    ⏭
-                                </button>
-                                <button
-                                    type="button"
-                                    className="cursor-pointer text-[0.78rem] text-mist hover:text-white-soft"
-                                >
-                                    🔊
-                                </button>
-                                <span className="text-[0.75rem] text-mist">{film.title}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="flex items-center gap-1.5 text-[0.72rem] text-mist">
-                                    <span className="text-[0.8rem] text-aurora">✓</span>
-                                    Copyright OK · YouTube API
-                                </span>
-                                <span className="cursor-pointer rounded border border-aurora/20 bg-aurora/8 px-2 py-0.5 font-mono text-[0.65rem] text-aurora">
-                                    CC FR
-                                </span>
-                                <button
-                                    type="button"
-                                    className="cursor-pointer text-[0.78rem] text-mist hover:text-white-soft"
-                                >
-                                    ⛶
-                                </button>
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/75 px-3.5 py-[5px] text-[0.85rem]">
+                                {film.title} · {film.author}
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Jury opinions */}
