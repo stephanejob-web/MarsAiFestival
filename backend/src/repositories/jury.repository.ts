@@ -126,6 +126,29 @@ export const deleteJuryUser = async (id: number): Promise<boolean> => {
     return result.affectedRows > 0;
 };
 
+export const findById = async (id: number): Promise<JuryRow | null> => {
+    const [rows] = await pool.execute<JuryRow[]>(
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+         FROM jury WHERE id = ?`,
+        [id],
+    );
+    return rows[0] ?? null;
+};
+
+export const updateProfilPicture = async (id: number, profilPicture: string): Promise<void> => {
+    await pool.execute(
+        `UPDATE jury SET profil_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [profilPicture, id],
+    );
+};
+
+export const updatePassword = async (id: number, passwordHash: string): Promise<void> => {
+    await pool.execute(
+        `UPDATE jury SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [passwordHash, id],
+    );
+};
+
 export const upsertGoogleJury = async (data: {
     googleId: string;
     email: string;

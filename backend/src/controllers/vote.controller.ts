@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import nodemailer from "nodemailer";
 import {
     upsertVote,
+    deleteVote,
     getVotesByFilm,
     getVotesByJury,
     getVotesSummary,
@@ -108,6 +109,28 @@ export const listVotes = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la récupération des votes.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── DELETE /api/votes?filmId=X — Annuler son vote sur un film ─────────────────
+export const removeVote = async (req: Request, res: Response): Promise<void> => {
+    const filmId = Number(req.query.filmId);
+    const juryId = req.juryUser!.id;
+
+    if (isNaN(filmId)) {
+        res.status(400).json({ success: false, message: "filmId est obligatoire." });
+        return;
+    }
+
+    try {
+        await deleteVote(juryId, filmId);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la suppression du vote.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

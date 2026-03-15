@@ -2,7 +2,14 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import { findByEmail, insertJury, upsertGoogleJury } from "../repositories/jury.repository";
+import {
+    findByEmail,
+    insertJury,
+    upsertGoogleJury,
+    findById,
+    updateProfilPicture,
+    updatePassword,
+} from "../repositories/jury.repository";
 import { verifyInviteToken } from "../services/invite.service";
 import fs from "fs";
 import path from "path";
@@ -210,6 +217,86 @@ export const acceptInvite = async (req: Request, res: Response): Promise<void> =
         res.status(500).json({
             success: false,
             message: "Erreur lors de la création du compte.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── PUT /api/auth/profile/avatar — Changer son avatar ────────────────────────
+export const updateAvatar = async (req: Request, res: Response): Promise<void> => {
+    const juryId = req.juryUser!.id;
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const avatarFile = files?.["avatar"]?.[0] ?? null;
+
+    if (!avatarFile) {
+        res.status(400).json({ success: false, message: "Aucun fichier fourni." });
+        return;
+    }
+
+    try {
+        const ext = path.extname(avatarFile.originalname).toLowerCase() || ".jpg";
+        const avatarFilename = `${Date.now()}${ext}`;
+        fs.writeFileSync(path.join(AVATARS_DIR, avatarFilename), avatarFile.buffer);
+        const profilPicture = `http://localhost:5500/uploads/avatars/${avatarFilename}`;
+
+        await updateProfilPicture(juryId, profilPicture);
+
+        const jury = await findById(juryId);
+        if (!jury) {
+            res.status(404).json({ success: false, message: "Juré introuvable." });
+            return;
+        }
+
+        const newToken = makeToken({ ...jury, profil_picture: profilPicture });
+        res.json({ success: true, token: newToken, profilPicture });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la mise à jour de l'avatar.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── PUT /api/auth/profile/password — Changer son mot de passe ────────────────
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+    const { currentPassword, newPassword } = req.body as Record<string, string>;
+    const juryId = req.juryUser!.id;
+
+    if (!newPassword?.trim() || newPassword.length < 8) {
+        res.status(400).json({
+            success: false,
+            message: "Le nouveau mot de passe doit contenir au moins 8 caractères.",
+        });
+        return;
+    }
+
+    try {
+        const jury = await findById(juryId);
+        if (!jury) {
+            res.status(404).json({ success: false, message: "Juré introuvable." });
+            return;
+        }
+
+        if (jury.password_hash) {
+            if (!currentPassword?.trim()) {
+                res.status(400).json({ success: false, message: "Mot de passe actuel requis." });
+                return;
+            }
+            const valid = await bcrypt.compare(currentPassword, jury.password_hash);
+            if (!valid) {
+                res.status(401).json({ success: false, message: "Mot de passe actuel incorrect." });
+                return;
+            }
+        }
+
+        const newHash = await bcrypt.hash(newPassword, 12);
+        await updatePassword(juryId, newHash);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors du changement de mot de passe.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

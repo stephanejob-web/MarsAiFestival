@@ -1,3 +1,4 @@
+mysqldump: [Warning] Using a password on the command line interface can be insecure.
 -- MySQL dump 10.13  Distrib 8.0.44, for macos11.7 (x86_64)
 --
 -- Host: 127.0.0.1    Database: MarsAi
@@ -624,4 +625,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-15 14:59:16
+-- Dump completed on 2026-03-15 15:08:19
