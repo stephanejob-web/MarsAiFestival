@@ -58,16 +58,17 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
         votes: [],
     }));
 
-    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(null);
+    const firstFilmId = discussFilms[0]?.id ?? null;
+    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(firstFilmId);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Auto-sélectionner le premier film dès que la liste est disponible
+    // Auto-sélectionner le premier film quand la liste se charge (était vide)
     useEffect(() => {
-        if (selectedFilmId === null && discussFilms.length > 0) {
-            setSelectedFilmId(discussFilms[0].id);
+        if (selectedFilmId === null && firstFilmId !== null) {
+            setSelectedFilmId(firstFilmId); // eslint-disable-line react-hooks/set-state-in-effect
         }
-    }, [discussFilms, selectedFilmId]);
+    }, [firstFilmId, selectedFilmId]);
 
     const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
     const { messages, onlineUsers, sendMessage, isConnected } = useDiscussionSocket(selectedFilmId);
