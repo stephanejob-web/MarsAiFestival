@@ -207,12 +207,10 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                     if (realFilms.length > 0) setActiveFilmId(realFilms[0].id);
                 }
             })
-            .catch(() => {
-                // Keep INITIAL_FILMS on network error
-            })
+            .catch(() => {})
             .finally(() => setIsLoadingFilms(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user?.id]); // intentionally track only id to avoid re-fetch on reference change
+    }, [user?.id]);
 
     // ── Fetch all jury comments for the active film ───────────────────────────
     useEffect(() => {
