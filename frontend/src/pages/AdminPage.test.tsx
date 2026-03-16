@@ -5,32 +5,30 @@ import AdminPage from "./AdminPage";
 import { ADMIN_LABELS } from "../features/admin/constants";
 
 describe("AdminPage", () => {
-    it("affiche le titre du panneau admin", () => {
+    it("affiche le panel latéral avec le titre", () => {
         render(
             <MemoryRouter>
                 <AdminPage />
             </MemoryRouter>,
         );
-        expect(screen.getByText(ADMIN_LABELS.ADMIN_PANEL)).toBeDefined();
+        expect(screen.getByText(ADMIN_LABELS.TITLE)).toBeDefined();
     });
 
-    it("affiche le message de bienvenue", () => {
+    it("affiche la barre du haut", () => {
         render(
             <MemoryRouter>
                 <AdminPage />
             </MemoryRouter>,
         );
-        expect(screen.getByText(ADMIN_LABELS.WELCOME_MESSAGE)).toBeDefined();
+        expect(screen.getByText("Gestion des utilisateurs")).toBeDefined();
     });
 
-    it("contient un lien de retour à l'accueil", () => {
+    it("contient le composant de statistiques", () => {
         render(
             <MemoryRouter>
                 <AdminPage />
             </MemoryRouter>,
         );
-        const link = screen.getByRole("link", { name: ADMIN_LABELS.RETURN_HOME });
-        expect(link).toBeDefined();
-        expect(link.getAttribute("href")).toBe("/");
+        expect(screen.getByText(/Chargement des statistiques en cours.../i)).toBeDefined();
     });
 });
