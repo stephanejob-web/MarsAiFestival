@@ -63,8 +63,8 @@ services:
     volumes:
       # Volume persistant : les données survivent aux redémarrages
       - mysql_data:/var/lib/mysql
-      # Init SQL : chargé automatiquement au 1er démarrage
-      - ./marsai_backup.sql:/docker-entrypoint-initdb.d/marsai_backup.sql:ro
+      # Init SQL : chargé automatiquement au 1er démarrage (tables + données)
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
