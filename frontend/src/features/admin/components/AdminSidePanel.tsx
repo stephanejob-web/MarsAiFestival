@@ -5,6 +5,15 @@ import type { AdminNavCategory, AdminNavItem } from "../types";
 const AdminSidePanel = (): React.JSX.Element => {
     return (
         <div className="h-full flex flex-col bg-zinc-900 text-zinc-300 p-6 font-primary">
+            <div className="flex items-center gap-8 justify-center">
+                {/* Logo */}
+                <Link
+                    to="/"
+                    className="font-display font-black text-xl tracking-tight text-white shrink-0"
+                >
+                    mars<span className="text-aurora">AI</span>
+                </Link>
+            </div>
             <div className="mb-10 text-center">
                 <h1 className="text-xl font-bold text-white tracking-tight">
                     {ADMIN_LABELS.TITLE}
