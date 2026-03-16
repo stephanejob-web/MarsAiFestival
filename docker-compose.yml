@@ -39,19 +39,19 @@ services:
       - ./backend/tsconfig.json:/app/tsconfig.json
       # Volume anonyme : protège les node_modules du container
       - /app/node_modules
+    env_file:
+      - ./backend/.env
     environment:
-      - PORT=5500
+      # Ces 3 variables écrasent le .env pour pointer vers le MySQL Docker
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_NAME=marsaifestival
-      - DB_USER=root
-      - DB_PASSWORD=marsai_dev_2026
+      - DB_NAME=marsai
     depends_on:
       mysql:
         condition: service_healthy
 
   # ───────────────────────────────────────────
-  # MySQL 8
+  # MySQL 8 — chargement automatique de marsai_backup.sql
   # ───────────────────────────────────────────
   mysql:
     image: mysql:8.0
@@ -59,10 +59,12 @@ services:
       - "33060:3306"
     environment:
       MYSQL_ROOT_PASSWORD: marsai_dev_2026
-      MYSQL_DATABASE: marsaifestival
+      MYSQL_DATABASE: marsai
     volumes:
       # Volume persistant : les données survivent aux redémarrages
       - mysql_data:/var/lib/mysql
+      # Init SQL : chargé automatiquement au 1er démarrage
+      - ./marsai_backup.sql:/docker-entrypoint-initdb.d/marsai_backup.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
