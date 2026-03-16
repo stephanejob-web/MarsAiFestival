@@ -1,9 +1,16 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ADMIN_NAV_LINKS, ADMIN_LABELS } from "../constants";
 import type { AdminNavCategory, AdminNavItem } from "../types";
 
 const AdminSidePanel = (): React.JSX.Element => {
+    const navigate = useNavigate();
+
+    const handleLogout = (): void => {
+        localStorage.removeItem("jury_token");
+        navigate("/jury", { replace: true });
+    };
+
     return (
         <div className="flex h-full flex-col bg-surface overflow-hidden">
             {/* Logo */}
@@ -74,6 +81,7 @@ const AdminSidePanel = (): React.JSX.Element => {
                 <button
                     type="button"
                     aria-label={ADMIN_LABELS.LOGOUT}
+                    onClick={handleLogout}
                     className="w-full rounded-lg px-3 py-2 text-left text-[0.82rem] text-coral/80 transition-all hover:bg-coral/[0.08] hover:text-coral"
                 >
                     🔒 {ADMIN_LABELS.LOGOUT}
