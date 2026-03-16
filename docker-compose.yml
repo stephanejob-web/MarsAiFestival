@@ -5,7 +5,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: ../Dockerfile.frontend
+      dockerfile: frontend/Dockerfile.frontend
     ports:
       - "5173:5173"
     volumes:
@@ -30,7 +30,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: ../Dockerfile.backend
+      dockerfile: backend/Dockerfile.backend
     ports:
       - "5500:5500"
     volumes:
