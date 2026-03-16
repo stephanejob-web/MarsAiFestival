@@ -5,7 +5,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: frontend/Dockerfile.frontend
+      dockerfile: Dockerfile.frontend
     ports:
       - "5173:5173"
     volumes:
@@ -17,8 +17,8 @@ services:
       - ./frontend/tsconfig.json:/app/tsconfig.json
       - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
       - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
-      # Volume anonyme : protège les node_modules du container
-      - /app/node_modules
+      # Volume nommé : node_modules installés dans l'image, jamais écrasés
+      - frontend_node_modules:/app/node_modules
     environment:
       - VITE_API_URL=http://localhost:5500
     depends_on:
@@ -30,15 +30,15 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: backend/Dockerfile.backend
+      dockerfile: Dockerfile.backend
     ports:
       - "5500:5500"
     volumes:
       # Bind mount : ton code local est synchronisé en temps réel
       - ./backend/src:/app/src
       - ./backend/tsconfig.json:/app/tsconfig.json
-      # Volume anonyme : protège les node_modules du container
-      - /app/node_modules
+      # Volume nommé : node_modules installés dans l'image, jamais écrasés
+      - backend_node_modules:/app/node_modules
     env_file:
       - ./backend/.env
     environment:
@@ -73,3 +73,5 @@ services:
 
 volumes:
   mysql_data:
+  backend_node_modules:
+  frontend_node_modules:
