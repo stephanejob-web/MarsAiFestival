@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useDiscussionSocket from "../hooks/useDiscussionSocket";
+import useSharedDiscussion from "../hooks/useSharedDiscussion";
 import useJuryUser from "../hooks/useJuryUser";
 
 interface DiscuterViewProps {
@@ -29,17 +30,46 @@ const avatarColor = (juryId: number): string => AVATAR_COLORS[juryId % AVATAR_CO
 
 const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
     const currentUser = useJuryUser();
-    const discussFilms = panel.films.filter((f) => f.myDecision === "discuter");
+    const { films: sharedFilms } = useSharedDiscussion();
 
-    const defaultFilm = discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
-    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(
-        defaultFilm?.id ?? discussFilms[0]?.id ?? null,
-    );
+    // Convertir les films partagés au même format que JuryFilm pour la compatibilité
+    const discussFilms = sharedFilms.map((f) => ({
+        id: f.film_id,
+        title: f.original_title,
+        author: `${f.realisator_first} ${f.realisator_last}`,
+        country: f.realisator_country ?? "—",
+        year: String(f.film_year ?? 2026),
+        videoUrl: f.video_url ?? null,
+        myDecision: "discuter" as const,
+        // champs requis par JuryFilm mais non utilisés dans DiscuterView
+        duration: f.duration
+            ? `${Math.floor(f.duration / 60)}:${String(f.duration % 60).padStart(2, "0")}`
+            : "—",
+        format: f.ia_class === "full" ? "Full IA" : "Hybride",
+        subtitles: f.subtitle_fr_url ? "FR" : f.subtitle_en_url ? "EN" : "—",
+        copyright: "Vérifié",
+        tools: f.tech_stack ?? "—",
+        iaScenario: f.ia_scenario ? "Oui" : "Non",
+        iaImage: f.ia_image ? "Oui" : "Non",
+        iaPost: f.ia_post ? "Oui" : "Non",
+        note: f.creative_workflow ?? "",
+        comments: [],
+        opinions: [],
+        votes: [],
+    }));
+
+    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(null);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
+    // Auto-sélectionner le premier film dès que la liste est disponible
+    useEffect(() => {
+        if (selectedFilmId === null && discussFilms.length > 0) {
+            setSelectedFilmId(discussFilms[0].id);
+        }
+    }, [discussFilms, selectedFilmId]);
 
+    const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
     const { messages, onlineUsers, sendMessage, isConnected } = useDiscussionSocket(selectedFilmId);
 
     useEffect(() => {
