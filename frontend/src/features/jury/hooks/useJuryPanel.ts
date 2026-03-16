@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { INITIAL_FILMS } from "../../../constants/jury";
 import type {
     ActiveView,
     Decision,
@@ -265,12 +264,30 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const activeFilm = useMemo((): JuryFilm => {
         const found = films.find((film) => film.id === activeFilmId);
-        return found ?? films[0] ?? {
-            id: 0, title: "", author: "", country: "", year: "", duration: "",
-            format: "", subtitles: "", copyright: "", tools: "", iaScenario: "",
-            iaImage: "", iaPost: "", note: "", videoUrl: null,
-            myDecision: null, comments: [], opinions: [], votes: [],
-        };
+        return (
+            found ??
+            films[0] ?? {
+                id: 0,
+                title: "",
+                author: "",
+                country: "",
+                year: "",
+                duration: "",
+                format: "",
+                subtitles: "",
+                copyright: "",
+                tools: "",
+                iaScenario: "",
+                iaImage: "",
+                iaPost: "",
+                note: "",
+                videoUrl: null,
+                myDecision: null,
+                comments: [],
+                opinions: [],
+                votes: [],
+            }
+        );
     }, [films, activeFilmId]);
 
     const progress = films.length > 0 ? Math.round((evaluatedCount / films.length) * 100) : 0;
