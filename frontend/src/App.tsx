@@ -6,6 +6,7 @@ import Jury from "./pages/Jury";
 import JuryPanel from "./pages/JuryPanel";
 import AdminPage from "./pages/AdminPage";
 import AdminFilmsPage from "./pages/AdminFilmsPage";
+import AdminSelectionPage from "./pages/AdminSelectionPage";
 import Layout from "./components/ui/Layout";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedAdminRoute from "./components/ui/ProtectedAdminRoute";
@@ -30,14 +31,7 @@ const App = (): React.JSX.Element => {
                                 </div>
                             }
                         />
-                        <Route
-                            path="selection"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Sélection & Votes — en construction
-                                </div>
-                            }
-                        />
+                        <Route path="selection" element={<AdminSelectionPage />} />
                         <Route
                             path="awards"
                             element={
