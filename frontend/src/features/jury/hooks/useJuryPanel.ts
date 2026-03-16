@@ -145,9 +145,9 @@ export interface UseJuryPanelReturn {
 const useJuryPanel = (): UseJuryPanelReturn => {
     const user = useJuryUser();
 
-    const [films, setFilms] = useState<JuryFilm[]>(INITIAL_FILMS);
-    const [isLoadingFilms, setIsLoadingFilms] = useState<boolean>(false);
-    const [activeFilmId, setActiveFilmId] = useState<number>(INITIAL_FILMS[0].id);
+    const [films, setFilms] = useState<JuryFilm[]>([]);
+    const [isLoadingFilms, setIsLoadingFilms] = useState<boolean>(true);
+    const [activeFilmId, setActiveFilmId] = useState<number>(0);
     const [activeTab, setActiveTab] = useState<ListTab>("pending");
     const [commentDraft, setCommentDraft] = useState<string>("");
     const [activeView, setActiveView] = useState<ActiveView>("eval");
@@ -188,7 +188,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 .catch(() => fallbackDiscussion),
         ])
             .then(([filmsData, votesData, discussionData]) => {
-                if (filmsData.success && filmsData.data.length > 0) {
+                if (filmsData.success) {
                     const voteMap = new Map<number, Decision>(
                         (votesData.success ? votesData.data : []).map((v) => [
                             v.film_id,
@@ -205,7 +205,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                             : (voteMap.get(row.film_id) ?? null),
                     }));
                     setFilms(realFilms);
-                    setActiveFilmId(realFilms[0].id);
+                    if (realFilms.length > 0) setActiveFilmId(realFilms[0].id);
                 }
             })
             .catch(() => {
@@ -263,9 +263,14 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         return films;
     }, [films, activeTab]);
 
-    const activeFilm = useMemo(() => {
+    const activeFilm = useMemo((): JuryFilm => {
         const found = films.find((film) => film.id === activeFilmId);
-        return found ?? films[0];
+        return found ?? films[0] ?? {
+            id: 0, title: "", author: "", country: "", year: "", duration: "",
+            format: "", subtitles: "", copyright: "", tools: "", iaScenario: "",
+            iaImage: "", iaPost: "", note: "", videoUrl: null,
+            myDecision: null, comments: [], opinions: [], votes: [],
+        };
     }, [films, activeFilmId]);
 
     const progress = films.length > 0 ? Math.round((evaluatedCount / films.length) * 100) : 0;
