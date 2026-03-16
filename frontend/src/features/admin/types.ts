@@ -53,3 +53,27 @@ export interface AdminJuryMember {
     role: string;
     profil_picture: string | null;
 }
+
+export interface JuryDecision {
+    jury_id: number;
+    first_name: string;
+    last_name: string;
+    profil_picture: string | null;
+    decision: "valide" | "arevoir" | "refuse" | "in_discussion" | null;
+}
+
+export interface AdminFilmVoteSummary {
+    film_id: number;
+    original_title: string;
+    dossier_num: string;
+    statut: string;
+    total_votes: number;
+    votes_valide: number;
+    votes_arevoir: number;
+    votes_refuse: number;
+    votes_discussion: number;
+    total_assigned: number;
+    total_comments: number;
+    total_tickets: number;
+    jury_decisions: JuryDecision[] | null;
+}

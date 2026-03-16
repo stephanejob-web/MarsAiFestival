@@ -18,6 +18,9 @@ const io = new Server(httpServer, {
     cors: { origin: "*" },
 });
 
+// Expose io pour les controllers HTTP (discussion.controller.ts)
+app.locals.io = io;
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface JuryPayload {
     id: number;
