@@ -79,7 +79,24 @@ export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
             SUM(jfc.decision = 'in_discussion')                            AS votes_discussion,
             COUNT(DISTINCT jfa.jury_id)                                    AS total_assigned,
             COUNT(c.id)                                                     AS total_comments,
-            COUNT(t.id)                                                     AS total_tickets
+            COUNT(t.id)                                                     AS total_tickets,
+            (
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'jury_id',       j2.id,
+                        'first_name',    j2.first_name,
+                        'last_name',     j2.last_name,
+                        'profil_picture',j2.profil_picture,
+                        'decision',      jfc2.decision
+                    )
+                )
+                FROM jury j2
+                LEFT JOIN jury_film_commentary jfc2
+                    ON jfc2.jury_id = j2.id
+                   AND jfc2.film_id = f.id
+                   AND jfc2.decision IS NOT NULL
+                WHERE j2.role = 'jury'
+            )                                                              AS jury_decisions
          FROM film f
          LEFT JOIN jury_film_commentary jfc ON jfc.film_id = f.id AND jfc.decision IS NOT NULL
          LEFT JOIN jury_film_assignment jfa ON jfa.film_id = f.id
@@ -88,5 +105,13 @@ export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
          GROUP BY f.id
          ORDER BY total_votes DESC, votes_valide DESC`,
     );
-    return rows;
+
+    // mysql2 retourne JSON_ARRAYAGG comme une chaîne — on parse manuellement
+    return rows.map((row) => ({
+        ...row,
+        jury_decisions:
+            typeof row.jury_decisions === "string"
+                ? (JSON.parse(row.jury_decisions) as unknown)
+                : row.jury_decisions,
+    }));
 };
