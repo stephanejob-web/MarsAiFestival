@@ -6,7 +6,6 @@ const AdminUsersStats = (): React.JSX.Element => {
 
     return (
         <div className="w-full">
-
             {isLoading && (
                 <div className="p-4 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300">
                     Chargement des statistiques en cours...

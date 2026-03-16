@@ -1,3 +1,5 @@
+import React from "react";
+
 const AdminTopBar = (): React.JSX.Element => {
     return (
         <div className="flex h-2 w-full items-center gap-[10px] text-white">
