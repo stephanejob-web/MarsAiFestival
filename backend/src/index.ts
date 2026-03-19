@@ -176,6 +176,7 @@ io.on("connection", (socket: Socket) => {
                     sentAt: new Date().toISOString(),
                 };
                 io.to(`film:${fid}`).emit("discussion:message", msg);
+                io.emit("discussion:notify", { filmId: fid, author: fullName });
                 if (ack) ack(true);
             } catch {
                 if (ack) ack(false);
@@ -197,6 +198,6 @@ io.on("connection", (socket: Socket) => {
     });
 });
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`); // eslint-disable-line no-console
 });
