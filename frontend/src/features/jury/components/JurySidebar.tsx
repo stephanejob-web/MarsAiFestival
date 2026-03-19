@@ -185,13 +185,23 @@ const JurySidebar = ({
                 <div className="mx-3 border-t border-white/5">
                     <VocalJoinButton
                         isJoined={isVocalJoined}
-                        onJoin={() => { setIsVocalJoined(true); joinVocal(); }}
-                        onLeave={() => { setIsVocalJoined(false); leaveVocal(); }}
+                        onJoin={() => {
+                            setIsVocalJoined(true);
+                            joinVocal();
+                        }}
+                        onLeave={() => {
+                            setIsVocalJoined(false);
+                            leaveVocal();
+                        }}
                     />
                     {vocalUsers.length > 0 && (
                         <div className="mb-2 flex flex-wrap items-center gap-1.5 px-2.5">
                             {vocalUsers.map((u) => (
-                                <div key={u.juryId} className="flex items-center gap-1" title={u.name}>
+                                <div
+                                    key={u.juryId}
+                                    className="flex items-center gap-1"
+                                    title={u.name}
+                                >
                                     {u.profilPicture ? (
                                         <img
                                             src={u.profilPicture}
@@ -311,7 +321,9 @@ const JurySidebar = ({
                                                     <span className="flex-1 text-[0.68rem] font-semibold text-aurora">
                                                         {msg.text.replace("🎙️ ", "")}
                                                     </span>
-                                                    <span className="text-[0.55rem] text-mist/40">{time}</span>
+                                                    <span className="text-[0.55rem] text-mist/40">
+                                                        {time}
+                                                    </span>
                                                 </div>
                                             );
                                         }

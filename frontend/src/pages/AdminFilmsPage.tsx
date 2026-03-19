@@ -16,13 +16,34 @@ const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
         apiFetch<{ success: boolean; url: string }>(`/api/films/${filmId}/video-url`, {
             headers: { Authorization: `Bearer ${getToken()}` },
         })
-            .then((res) => { if (res.success) setSrc(res.url); else setError(true); })
+            .then((res) => {
+                if (res.success) setSrc(res.url);
+                else setError(true);
+            })
             .catch(() => setError(true));
     }, [filmId]);
 
-    if (error) return <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-coral">Vidéo inaccessible</div>;
-    if (!src) return <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-mist">Chargement…</div>;
-    return <video src={src} controls autoPlay preload="auto" className="aspect-video w-full object-cover" />;
+    if (error)
+        return (
+            <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-coral">
+                Vidéo inaccessible
+            </div>
+        );
+    if (!src)
+        return (
+            <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-mist">
+                Chargement…
+            </div>
+        );
+    return (
+        <video
+            src={src}
+            controls
+            autoPlay
+            preload="auto"
+            className="aspect-video w-full object-cover"
+        />
+    );
 };
 
 const CARD_ACCENTS = [
@@ -290,7 +311,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 {pageFilms.map((film) => {
                                     const accent = CARD_ACCENTS[film.id % CARD_ACCENTS.length];
                                     const isAssigned = assignedFilmIds.has(film.id);
-                                    const isSelected = film.statut === "selectionne" || film.statut === "finaliste";
+                                    const isSelected =
+                                        film.statut === "selectionne" ||
+                                        film.statut === "finaliste";
                                     const nJury = assignments.filter(
                                         (a) => a.film_id === film.id,
                                     ).length;
@@ -328,14 +351,22 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             ) : (
                                                 <div
                                                     className="group/thumb relative flex aspect-video w-full items-center justify-center overflow-hidden"
-                                                    style={{ background: isSelected ? "rgba(78,255,206,0.06)" : `${accent}11` }}
+                                                    style={{
+                                                        background: isSelected
+                                                            ? "rgba(78,255,206,0.06)"
+                                                            : `${accent}11`,
+                                                    }}
                                                 >
                                                     {/* Selected badge */}
                                                     {isSelected && (
                                                         <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">
-                                                            <span className="text-[0.65rem] text-aurora">★</span>
+                                                            <span className="text-[0.65rem] text-aurora">
+                                                                ★
+                                                            </span>
                                                             <span className="font-display text-[0.65rem] font-extrabold tracking-wide text-aurora">
-                                                                {film.statut === "finaliste" ? "Finaliste" : "Sélectionné"}
+                                                                {film.statut === "finaliste"
+                                                                    ? "Finaliste"
+                                                                    : "Sélectionné"}
                                                             </span>
                                                         </div>
                                                     )}
@@ -372,8 +403,12 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             )}
 
                                             {/* Body */}
-                                            <div className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}>
-                                                <div className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}>
+                                            <div
+                                                className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}
+                                            >
+                                                <div
+                                                    className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                >
                                                     {film.original_title}
                                                 </div>
                                                 <div className="text-[0.72rem] text-mist">
@@ -486,7 +521,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                     : "border border-white/[0.10] bg-white/[0.03] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
                                                             }`}
                                                         >
-                                                            {isSelected ? "✓ Top 50" : "★ Sélectionner"}
+                                                            {isSelected
+                                                                ? "✓ Top 50"
+                                                                : "★ Sélectionner"}
                                                         </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"

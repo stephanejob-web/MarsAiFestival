@@ -199,19 +199,35 @@ export const removeUser = async (req: Request, res: Response): Promise<void> => 
 // ── POST /api/admin/vocal/start — L'admin lance un vocal (notifie tous les jurés) ──
 export const startAdminVocal = (req: Request, res: Response): void => {
     const io = req.app.locals.io as import("socket.io").Server;
-    const vocalUsers = req.app.locals.vocalUsers as Map<string, { juryId: number; name: string; initials: string; profilPicture: string | null }>;
+    const vocalUsers = req.app.locals.vocalUsers as Map<
+        string,
+        { juryId: number; name: string; initials: string; profilPicture: string | null }
+    >;
     const admin = req.juryUser!;
     const fullName = `${admin.firstName} ${admin.lastName}`;
     const initials = `${admin.firstName[0]}${admin.lastName[0]}`.toUpperCase();
 
     const key = `admin-${admin.id}`;
     const isFirst = vocalUsers.size === 0;
-    vocalUsers.set(key, { juryId: admin.id, name: fullName, initials, profilPicture: admin.profilPicture ?? null });
+    vocalUsers.set(key, {
+        juryId: admin.id,
+        name: fullName,
+        initials,
+        profilPicture: admin.profilPicture ?? null,
+    });
 
     if (isFirst) {
-        io.emit("vocal:started", { name: fullName, initials, profilPicture: admin.profilPicture ?? null });
+        io.emit("vocal:started", {
+            name: fullName,
+            initials,
+            profilPicture: admin.profilPicture ?? null,
+        });
     } else {
-        io.emit("vocal:joined", { name: fullName, initials, profilPicture: admin.profilPicture ?? null });
+        io.emit("vocal:joined", {
+            name: fullName,
+            initials,
+            profilPicture: admin.profilPicture ?? null,
+        });
     }
     io.emit("vocal:online", Array.from(vocalUsers.values()));
     res.json({ success: true });
@@ -220,7 +236,10 @@ export const startAdminVocal = (req: Request, res: Response): void => {
 // ── POST /api/admin/vocal/stop — L'admin quitte le vocal ─────────────────────
 export const stopAdminVocal = (req: Request, res: Response): void => {
     const io = req.app.locals.io as import("socket.io").Server;
-    const vocalUsers = req.app.locals.vocalUsers as Map<string, { juryId: number; name: string; initials: string; profilPicture: string | null }>;
+    const vocalUsers = req.app.locals.vocalUsers as Map<
+        string,
+        { juryId: number; name: string; initials: string; profilPicture: string | null }
+    >;
     const admin = req.juryUser!;
     const fullName = `${admin.firstName} ${admin.lastName}`;
 

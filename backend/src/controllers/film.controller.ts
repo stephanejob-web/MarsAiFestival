@@ -1,5 +1,10 @@
 import { Request, Response } from "express";
-import { uploadFileToS3, deleteFileFromS3, extractS3Key, getPresignedVideoUrl } from "../services/s3.service";
+import {
+    uploadFileToS3,
+    deleteFileFromS3,
+    extractS3Key,
+    getPresignedVideoUrl,
+} from "../services/s3.service";
 import { sendRealisateurEmail } from "../services/realisator-email.service";
 import { uploadVideoToYoutube } from "../services/youtube.service";
 import { insertRealisator } from "../repositories/realisator.repository";
