@@ -126,7 +126,7 @@ const JurySidebar = ({
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 px-3 py-3.5">
+                <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-3.5">
                     <div className="px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Évaluation
                     </div>
@@ -318,7 +318,7 @@ const JurySidebar = ({
                                     })
                                 )}
                             </div>
-                            <div className="mt-2 flex gap-1.5">
+                            <div className="mt-2 flex items-stretch gap-1.5">
                                 <input
                                     type="text"
                                     value={chat.inputValue}
@@ -332,7 +332,7 @@ const JurySidebar = ({
                                 <button
                                     type="button"
                                     onClick={chat.sendMessage}
-                                    className="rounded-lg bg-aurora px-3 text-[0.8rem] font-bold text-deep-sky"
+                                    className="flex items-center justify-center rounded-lg bg-aurora px-3 text-[0.8rem] font-bold text-deep-sky"
                                 >
                                     ↑
                                 </button>

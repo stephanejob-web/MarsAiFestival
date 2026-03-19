@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
+import { toast } from "react-toastify";
 
 const SOCKET_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5500";
 
@@ -33,6 +34,7 @@ export interface UseJuryChatReturn {
     setInputValue: (value: string) => void;
     sendMessage: () => void;
 }
+
 
 const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -70,6 +72,16 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
         socket.on("chat:message", (msg: ChatMessage) => {
             setMessages((prev) => [...prev, msg]);
             setUnreadCount((prev) => prev + 1);
+            toast(`💬 ${msg.author} : ${msg.text}`, {
+                position: "top-center",
+                autoClose: 4000,
+                style: {
+                    background: "#facc15",
+                    color: "#1a1a2e",
+                    fontWeight: "700",
+                    fontSize: "0.95rem",
+                },
+            });
         });
 
         socket.on("chat:online", (users: ConnectedUser[]) => {

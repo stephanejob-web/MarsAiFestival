@@ -1,4 +1,6 @@
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import DelibView from "../features/jury/components/DelibView";
 import DiscuterView from "../features/jury/components/DiscuterView";
@@ -60,6 +62,7 @@ const JuryPanel = (): React.JSX.Element => {
                 onConfirm={panel.confirmRefuse}
             />
             <JuryToast message={panel.toast} />
+            <ToastContainer />
         </div>
     );
 };
