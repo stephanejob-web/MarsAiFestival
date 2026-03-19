@@ -271,8 +271,8 @@ const AdminDecision = ({
                 onClick={handleToggleTop50}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-display text-[0.72rem] font-extrabold transition-all ${
                     isTop50
-                        ? "border border-aurora/50 bg-aurora/[0.15] text-aurora shadow-[0_0_12px_rgba(78,255,206,0.15)]"
-                        : "border border-aurora/20 bg-aurora/[0.05] text-aurora hover:bg-aurora/[0.12]"
+                        ? "bg-aurora text-deep-sky shadow-[0_2px_12px_rgba(78,255,206,0.35)] hover:opacity-90"
+                        : "border border-white/[0.12] bg-white/[0.04] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
                 }`}
             >
                 {isTop50 ? (
@@ -287,7 +287,7 @@ const AdminDecision = ({
                             <path
                                 d="M2 6l3 3 5-5"
                                 stroke="currentColor"
-                                strokeWidth="1.8"
+                                strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />

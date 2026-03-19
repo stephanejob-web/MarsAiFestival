@@ -480,16 +480,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                     film.statut !== "selectionne",
                                                                 )
                                                             }
-                                                            className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[0.68rem] font-bold transition-all ${
-                                                                film.statut === "selectionne"
-                                                                    ? "border-aurora/50 bg-aurora/15 text-aurora"
-                                                                    : "border-aurora/20 bg-aurora/[0.04] text-aurora/60 hover:border-aurora/40 hover:bg-aurora/10 hover:text-aurora"
+                                                            className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[0.68rem] font-bold transition-all ${
+                                                                isSelected
+                                                                    ? "bg-aurora text-deep-sky shadow-[0_1px_8px_rgba(78,255,206,0.3)] hover:opacity-90"
+                                                                    : "border border-white/[0.10] bg-white/[0.03] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
                                                             }`}
                                                         >
-                                                            ★{" "}
-                                                            {film.statut === "selectionne"
-                                                                ? "Top 50"
-                                                                : "Sélectionner"}
+                                                            {isSelected ? "✓ Top 50" : "★ Sélectionner"}
                                                         </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
