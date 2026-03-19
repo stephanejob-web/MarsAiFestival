@@ -12,19 +12,27 @@ const useAdminVocal = (): AdminVocalReturn => {
     const [isInVocal, setIsInVocal] = useState(false);
 
     const joinVocal = (): void => {
-        void fetch("/api/admin/vocal/start", {
+        fetch("/api/admin/vocal/start", {
             method: "POST",
             headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        setIsInVocal(true);
+        })
+            .then((r) => {
+                console.log("[AdminVocal] start →", r.status); // eslint-disable-line no-console
+                if (r.ok) setIsInVocal(true);
+            })
+            .catch((e) => console.error("[AdminVocal] start error", e)); // eslint-disable-line no-console
     };
 
     const leaveVocal = (): void => {
-        void fetch("/api/admin/vocal/stop", {
+        fetch("/api/admin/vocal/stop", {
             method: "POST",
             headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        setIsInVocal(false);
+        })
+            .then((r) => {
+                console.log("[AdminVocal] stop →", r.status); // eslint-disable-line no-console
+                if (r.ok) setIsInVocal(false);
+            })
+            .catch((e) => console.error("[AdminVocal] stop error", e)); // eslint-disable-line no-console
     };
 
     return { isInVocal, joinVocal, leaveVocal };
