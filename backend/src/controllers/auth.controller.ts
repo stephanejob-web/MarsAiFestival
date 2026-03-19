@@ -75,7 +75,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const ext = path.extname(avatarFile.originalname).toLowerCase() || ".jpg";
         const avatarFilename = `${Date.now()}${ext}`;
         fs.writeFileSync(path.join(AVATARS_DIR, avatarFilename), avatarFile.buffer);
-        const profilPicture = `http://localhost:5500/uploads/avatars/${avatarFilename}`;
+        const profilPicture = `/uploads/avatars/${avatarFilename}`;
 
         const password_hash = await bcrypt.hash(password, 12);
         const jury = await insertJury({
@@ -196,7 +196,7 @@ export const acceptInvite = async (req: Request, res: Response): Promise<void> =
             const ext = path.extname(avatarFile.originalname).toLowerCase() || ".jpg";
             const avatarFilename = `${Date.now()}${ext}`;
             fs.writeFileSync(path.join(AVATARS_DIR, avatarFilename), avatarFile.buffer);
-            profilPicture = `http://localhost:5500/uploads/avatars/${avatarFilename}`;
+            profilPicture = `/uploads/avatars/${avatarFilename}`;
         }
 
         const password_hash = await bcrypt.hash(password, 12);
@@ -245,7 +245,7 @@ export const updateAvatar = async (req: Request, res: Response): Promise<void> =
         const ext = path.extname(avatarFile.originalname).toLowerCase() || ".jpg";
         const avatarFilename = `${Date.now()}${ext}`;
         fs.writeFileSync(path.join(AVATARS_DIR, avatarFilename), avatarFile.buffer);
-        const profilPicture = `http://localhost:5500/uploads/avatars/${avatarFilename}`;
+        const profilPicture = `/uploads/avatars/${avatarFilename}`;
 
         await updateProfilPicture(juryId, profilPicture);
 

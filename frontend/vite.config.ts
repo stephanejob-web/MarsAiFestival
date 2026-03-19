@@ -20,6 +20,10 @@ export default defineConfig({
         ws: true,
         secure: false,
       },
+      '/uploads': {
+        target: 'http://localhost:5500',
+        changeOrigin: true,
+      },
     },
     watch: {
       usePolling: true,
