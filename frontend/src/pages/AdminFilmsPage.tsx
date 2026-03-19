@@ -290,6 +290,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 {pageFilms.map((film) => {
                                     const accent = CARD_ACCENTS[film.id % CARD_ACCENTS.length];
                                     const isAssigned = assignedFilmIds.has(film.id);
+                                    const isSelected = film.statut === "selectionne" || film.statut === "finaliste";
                                     const nJury = assignments.filter(
                                         (a) => a.film_id === film.id,
                                     ).length;
@@ -302,16 +303,21 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     return (
                                         <div
                                             key={film.id}
-                                            className={`overflow-hidden rounded-[14px] border transition-all duration-[180ms] hover:-translate-y-[2px] hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] ${
-                                                isAssigned
-                                                    ? "border-aurora/35 bg-surface-2 shadow-[0_0_0_1px_rgba(78,255,206,0.15),0_4px_18px_rgba(0,0,0,0.25)]"
-                                                    : "border-white/[0.06] bg-surface-2"
+                                            className={`overflow-hidden rounded-[14px] border transition-all duration-[180ms] hover:-translate-y-[2px] ${
+                                                isSelected
+                                                    ? "border-aurora/60 bg-surface-2 opacity-85 shadow-[0_0_0_1px_rgba(78,255,206,0.25),0_0_24px_rgba(78,255,206,0.12),0_4px_18px_rgba(0,0,0,0.25)]"
+                                                    : isAssigned
+                                                      ? "border-aurora/35 bg-surface-2 shadow-[0_0_0_1px_rgba(78,255,206,0.15),0_4px_18px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)]"
+                                                      : "border-white/[0.06] bg-surface-2 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)]"
                                             }`}
                                         >
-                                            {/* Accent bar */}
+                                            {/* Accent bar — aurora when selected */}
                                             <div
                                                 className="h-[3px] w-full"
-                                                style={{ background: accent, opacity: 0.7 }}
+                                                style={{
+                                                    background: isSelected ? "#4effce" : accent,
+                                                    opacity: isSelected ? 1 : 0.7,
+                                                }}
                                             />
 
                                             {/* Video */}
@@ -322,14 +328,17 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             ) : (
                                                 <div
                                                     className="group/thumb relative flex aspect-video w-full items-center justify-center overflow-hidden"
-                                                    style={{ background: `${accent}11` }}
+                                                    style={{ background: isSelected ? "rgba(78,255,206,0.06)" : `${accent}11` }}
                                                 >
-                                                    <span
-                                                        className="select-none font-mono text-[3.5rem] font-black opacity-[0.07]"
-                                                        style={{ color: accent }}
-                                                    >
-                                                        {String(film.id).padStart(3, "0")}
-                                                    </span>
+                                                    {/* Selected badge */}
+                                                    {isSelected && (
+                                                        <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">
+                                                            <span className="text-[0.65rem] text-aurora">★</span>
+                                                            <span className="font-display text-[0.65rem] font-extrabold tracking-wide text-aurora">
+                                                                {film.statut === "finaliste" ? "Finaliste" : "Sélectionné"}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <div className="absolute right-2 top-2 text-[1.1rem]">
                                                         {countryFlag(film.country)}
                                                     </div>
@@ -363,8 +372,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             )}
 
                                             {/* Body */}
-                                            <div className="p-3.5">
-                                                <div className="mb-0.5 text-[0.88rem] font-bold leading-snug text-white-soft">
+                                            <div className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}>
+                                                <div className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}>
                                                     {film.original_title}
                                                 </div>
                                                 <div className="text-[0.72rem] text-mist">
