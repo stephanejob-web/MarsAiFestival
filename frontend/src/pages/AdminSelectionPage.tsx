@@ -14,6 +14,10 @@ const CONSENSUS_CONFIG: Record<string, { label: string; cls: string }> = {
         label: "✅ Unanime",
         cls: "bg-aurora/10 text-aurora border border-aurora/25",
     },
+    majorite: {
+        label: "👍 Majorité",
+        cls: "bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25",
+    },
     partage: {
         label: "⚠️ Partagé",
         cls: "bg-solar/10 text-solar border border-solar/25",
@@ -35,6 +39,7 @@ const FILTER_BUTTONS: Array<{
 }> = [
     { key: "tous", label: "Tous" },
     { key: "unanime", label: "✅ Unanimes", countKey: "unanime" },
+    { key: "majorite", label: "👍 Majorité", countKey: "majorite" },
     { key: "partage", label: "⚠️ Partagés", countKey: "partage" },
     { key: "rejete", label: "❌ Rejetés", countKey: "rejete" },
     { key: "attente", label: "⏳ En attente", countKey: "attente" },
@@ -90,11 +95,40 @@ const exportCSV = (films: AdminFilmVoteSummary[]): void => {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-// Vert = a voté, gris = pas encore voté
-const VOTED_BORDER = "#4effce"; // aurora green
-const PENDING_BORDER = "rgba(255,255,255,0.18)";
-const VOTED_BG = "rgba(78,255,206,0.15)";
-const PENDING_BG = "rgba(255,255,255,0.04)";
+const DECISION_STYLE: Record<
+    string,
+    { border: string; bg: string; label: string; labelCls: string }
+> = {
+    valide: {
+        border: "#4effce",
+        bg: "rgba(78,255,206,0.15)",
+        label: "✓ Validé",
+        labelCls: "text-aurora",
+    },
+    arevoir: {
+        border: "#f5e642",
+        bg: "rgba(245,230,66,0.12)",
+        label: "↩ À revoir",
+        labelCls: "text-solar",
+    },
+    refuse: {
+        border: "#ff6b6b",
+        bg: "rgba(255,107,107,0.12)",
+        label: "✕ Refusé",
+        labelCls: "text-coral",
+    },
+    in_discussion: {
+        border: "#c084fc",
+        bg: "rgba(192,132,252,0.12)",
+        label: "💬 Discussion",
+        labelCls: "text-lavande",
+    },
+};
+
+const PENDING_STYLE = {
+    border: "rgba(255,255,255,0.18)",
+    bg: "rgba(255,255,255,0.04)",
+};
 
 interface JuryVoteDotsProps {
     film: AdminFilmVoteSummary;
@@ -111,8 +145,9 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
         <div className="flex flex-col gap-1.5">
             {decisions.map((d: JuryDecision) => {
                 const hasVoted = d.decision !== null;
-                const borderColor = hasVoted ? VOTED_BORDER : PENDING_BORDER;
-                const bgColor = hasVoted ? VOTED_BG : PENDING_BG;
+                const style = d.decision
+                    ? (DECISION_STYLE[d.decision] ?? PENDING_STYLE)
+                    : PENDING_STYLE;
                 const initials = `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
                 const fullName = `${d.first_name} ${d.last_name}`;
 
@@ -120,12 +155,12 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                     <div
                         key={d.jury_id}
                         className="flex items-center gap-2"
-                        style={{ opacity: hasVoted ? 1 : 0.4 }}
+                        style={{ opacity: hasVoted ? 1 : 0.45 }}
                     >
                         {/* Avatar */}
                         <div
-                            className="relative inline-flex h-[42px] w-[42px] shrink-0 overflow-hidden rounded-full"
-                            style={{ border: `3px solid ${borderColor}` }}
+                            className="relative inline-flex h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full"
+                            style={{ border: `2px solid ${style.border}` }}
                         >
                             {d.profil_picture ? (
                                 <img
@@ -135,37 +170,31 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                                 />
                             ) : (
                                 <div
-                                    className="flex h-full w-full items-center justify-center font-display text-[0.75rem] font-black text-white-soft"
-                                    style={{ background: bgColor }}
+                                    className="flex h-full w-full items-center justify-center font-display text-[0.7rem] font-black text-white-soft"
+                                    style={{ background: style.bg }}
                                 >
                                     {initials}
                                 </div>
                             )}
-                            {hasVoted && (
+                        </div>
+
+                        {/* Nom + vote */}
+                        <div className="flex min-w-0 flex-col">
+                            <span className="truncate font-display text-[0.7rem] font-semibold text-white-soft">
+                                {fullName}
+                            </span>
+                            {hasVoted && d.decision ? (
                                 <span
-                                    className="absolute -bottom-[3px] -right-[3px] flex h-[14px] w-[14px] items-center justify-center rounded-full"
-                                    style={{ background: VOTED_BORDER }}
+                                    className={`text-[0.62rem] font-bold ${(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls}`}
                                 >
-                                    <svg width="8" height="8" viewBox="0 0 6 6" fill="none">
-                                        <path
-                                            d="M1 3l1.5 1.5L5 1.5"
-                                            stroke="#0a0c14"
-                                            strokeWidth="1.2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
+                                    {(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label}
+                                </span>
+                            ) : (
+                                <span className="text-[0.62rem] text-mist opacity-50">
+                                    En attente…
                                 </span>
                             )}
                         </div>
-
-                        {/* Nom complet */}
-                        <span
-                            className="font-display text-[0.72rem] font-semibold"
-                            style={{ color: hasVoted ? VOTED_BORDER : "rgba(255,255,255,0.45)" }}
-                        >
-                            {fullName}
-                        </span>
                     </div>
                 );
             })}
@@ -858,11 +887,17 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         </div>
 
                         {/* Stats */}
-                        <div className="mb-6 grid grid-cols-5 gap-3">
+                        <div className="mb-6 grid grid-cols-6 gap-3">
                             <StatCard
                                 label="Unanimes ✅"
                                 value={stats.unanime}
-                                sub="validation directe"
+                                sub="tous valident"
+                                color="aurora"
+                            />
+                            <StatCard
+                                label="Majorité 👍"
+                                value={stats.majorite}
+                                sub="+50% valident"
                                 color="aurora"
                             />
                             <StatCard
@@ -874,7 +909,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             <StatCard
                                 label="Rejetés ❌"
                                 value={stats.rejete}
-                                sub="majorité refusé"
+                                sub="majorité refuse"
                                 color="coral"
                             />
                             <StatCard
