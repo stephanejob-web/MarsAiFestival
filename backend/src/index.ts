@@ -82,7 +82,7 @@ io.use((socket: Socket, next) => {
 
 // ── Connexion ──────────────────────────────────────────────────────────────────
 io.on("connection", (socket: Socket) => {
-    void (async () => {
+    void (async (): Promise<void> => {
         const jury = socket.data.jury as JuryPayload;
         const initials = `${jury.firstName[0]}${jury.lastName[0]}`.toUpperCase();
         const fullName = `${jury.firstName} ${jury.lastName}`;
