@@ -128,6 +128,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         return;
     }
 
+    if (!jury.is_active) {
+        res.status(403).json({
+            success: false,
+            message: "Votre compte a été désactivé. Veuillez contacter l'administrateur.",
+        });
+        return;
+    }
+
     res.json({
         success: true,
         token: makeToken(jury),
@@ -336,6 +344,14 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
             lastName: payload.family_name ?? "",
             picture: payload.picture ?? null,
         });
+
+        if (!jury.is_active) {
+            res.status(403).json({
+                success: false,
+                message: "Votre compte a été désactivé. Veuillez contacter l'administrateur.",
+            });
+            return;
+        }
 
         res.status(isNew ? 201 : 200).json({
             success: true,
