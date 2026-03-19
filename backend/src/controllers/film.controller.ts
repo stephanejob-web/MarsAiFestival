@@ -165,6 +165,9 @@ export const patchFilm = async (req: Request, res: Response): Promise<void> => {
         "refuse",
         "in_discussion",
         "asked_to_modify",
+        "soumis",
+        "selectionne",
+        "finaliste",
     ] as const;
 
     if (isNaN(id)) {
