@@ -132,17 +132,30 @@ io.on("connection", (socket: Socket) => {
     // ── Vocal (vocal:*) ───────────────────────────────────────────────────────
 
     socket.on("vocal:join", () => {
+        const isFirst = vocalUsers.size === 0;
         vocalUsers.set(socket.id, {
             juryId: jury.id,
             name: fullName,
             initials,
             profilPicture: jury.profilPicture ?? null,
         });
-        socket.broadcast.emit("vocal:joined", {
-            name: fullName,
-            initials,
-            profilPicture: jury.profilPicture ?? null,
-        });
+
+        if (isFirst) {
+            // Premier participant — notifier tout le monde avec un message système
+            io.emit("vocal:started", {
+                name: fullName,
+                initials,
+                profilPicture: jury.profilPicture ?? null,
+            });
+        } else {
+            // Quelqu'un rejoint un vocal déjà ouvert
+            socket.broadcast.emit("vocal:joined", {
+                name: fullName,
+                initials,
+                profilPicture: jury.profilPicture ?? null,
+            });
+        }
+
         io.emit("vocal:online", Array.from(vocalUsers.values()));
     });
 
