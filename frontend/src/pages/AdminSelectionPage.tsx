@@ -318,8 +318,8 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                                         className={`h-full rounded-full ${color.replace("text-", "bg-")}`}
                                         style={{
                                             width:
-                                                film.total_assigned > 0
-                                                    ? `${(count / film.total_assigned) * 100}%`
+                                                (film.total_jury ?? film.total_assigned) > 0
+                                                    ? `${(count / (film.total_jury ?? film.total_assigned)) * 100}%`
                                                     : "0%",
                                         }}
                                     />
@@ -340,7 +340,7 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                         <div className="flex gap-2 text-[0.75rem]">
                             <span className="text-mist">Jurés ayant voté :</span>
                             <span className="font-semibold text-white-soft">
-                                {film.total_votes} / {film.total_assigned}
+                                {film.total_votes} / {film.total_jury ?? film.total_assigned}
                             </span>
                         </div>
                         <div className="flex gap-2 text-[0.75rem]">
