@@ -103,6 +103,37 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
             setVocalUsers(users);
         });
 
+        socket.on("vocal:started", (user: { name: string; initials: string; profilPicture: string | null }) => {
+            // Message système dans le chat
+            const systemMsg: ChatMessage = {
+                id: `vocal-started-${Date.now()}`,
+                juryId: null,
+                author: "Système",
+                initials: "🎙️",
+                profilPicture: null,
+                text: `🎙️ ${user.name} a lancé un vocal — rejoins le salon vocal !`,
+                timestamp: Date.now(),
+                senderId: null,
+            };
+            setMessages((prev) => [...prev, systemMsg]);
+
+            // Notification proéminente
+            toast(`🎙️ Vocal lancé ! ${user.name} a ouvert le salon vocal`, {
+                position: "top-center",
+                autoClose: 6000,
+                style: {
+                    background: "#0d1117",
+                    color: "#4effce",
+                    fontWeight: "800",
+                    fontSize: "0.88rem",
+                    border: "1.5px solid rgba(78,255,206,0.4)",
+                    boxShadow: "0 0 24px rgba(78,255,206,0.15)",
+                    borderRadius: "12px",
+                    padding: "12px 16px",
+                },
+            });
+        });
+
         socket.on("vocal:joined", (user: { name: string; initials: string; profilPicture: string | null }) => {
             toast(`🎙️ ${user.name} a rejoint le vocal`, {
                 position: "top-center",
