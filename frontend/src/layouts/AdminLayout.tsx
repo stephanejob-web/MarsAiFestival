@@ -1,5 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import AdminSidePanel from "../features/admin/components/AdminSidePanel";
 
 const AdminLayout = (): React.JSX.Element => {
@@ -11,6 +13,7 @@ const AdminLayout = (): React.JSX.Element => {
             <main className="flex flex-1 flex-col overflow-hidden">
                 <Outlet />
             </main>
+            <ToastContainer />
         </div>
     );
 };
