@@ -29,6 +29,7 @@ export interface AdminFilm {
     dossier_num: string;
     original_title: string;
     statut: string;
+    poster_img: string | null;
     duration: number | null;
     first_name: string;
     last_name: string;

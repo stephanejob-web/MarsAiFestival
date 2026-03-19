@@ -34,6 +34,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
         toggleAssignment,
         autoDistribute,
         deleteFilm,
+        selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
@@ -443,6 +444,26 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         )}
                                                     </span>
                                                     <div className="flex items-center gap-2">
+                                                        {/* Bouton Top 50 */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                void selectFilm(
+                                                                    film.id,
+                                                                    film.statut !== "selectionne",
+                                                                )
+                                                            }
+                                                            className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[0.68rem] font-bold transition-all ${
+                                                                film.statut === "selectionne"
+                                                                    ? "border-aurora/50 bg-aurora/15 text-aurora"
+                                                                    : "border-aurora/20 bg-aurora/[0.04] text-aurora/60 hover:border-aurora/40 hover:bg-aurora/10 hover:text-aurora"
+                                                            }`}
+                                                        >
+                                                            ★{" "}
+                                                            {film.statut === "selectionne"
+                                                                ? "Top 50"
+                                                                : "Sélectionner"}
+                                                        </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
                                                             style={{
