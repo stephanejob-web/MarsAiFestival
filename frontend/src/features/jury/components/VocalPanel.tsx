@@ -4,86 +4,134 @@ import {
     RoomAudioRenderer,
     useIsSpeaking,
     useLocalParticipant,
+    useParticipantInfo,
     useParticipants,
+    useTracks,
+    VideoTrack,
 } from "@livekit/components-react";
-import type { Participant } from "livekit-client";
+import { Track } from "livekit-client";
+import type { Participant, TrackPublication } from "livekit-client";
 
 const API = import.meta.env.VITE_API_URL as string;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL as string;
 
-// ── Participant card ───────────────────────────────────────────────────────────
-const ParticipantCard = ({ participant }: { participant: Participant }): React.JSX.Element => {
+// ── Tuile participant (avatar ou caméra) ──────────────────────────────────────
+const ParticipantTile = ({ participant }: { participant: Participant }): React.JSX.Element => {
     const isSpeaking = useIsSpeaking(participant);
     const isMuted = !participant.isMicrophoneEnabled;
+    const isCameraOn = participant.isCameraEnabled;
+    const { name } = useParticipantInfo({ participant });
 
     const meta = participant.metadata
         ? (JSON.parse(participant.metadata) as { profilPicture?: string | null })
         : null;
     const profilPicture = meta?.profilPicture ?? null;
-    const name = participant.name ?? participant.identity;
-    const initials = name
+    const displayName = name ?? participant.identity;
+    const initials = displayName
         .split(" ")
-        .map((p) => p[0])
+        .map((p: string) => p[0])
         .join("")
         .slice(0, 2)
         .toUpperCase();
 
+    const cameraPub = participant.getTrackPublication(Track.Source.Camera) as
+        | TrackPublication
+        | undefined;
+
     return (
-        <div className="flex flex-col items-center gap-1.5">
-            <div
-                className={`relative rounded-full transition-all duration-150 ${
-                    isSpeaking ? "ring-2 ring-aurora ring-offset-2 ring-offset-[#0d1117]" : ""
-                }`}
-            >
-                {profilPicture ? (
-                    <img
-                        src={profilPicture}
-                        alt={initials}
-                        className="h-12 w-12 rounded-full object-cover"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                    />
-                ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.8rem] font-extrabold text-deep-sky">
-                        {initials}
-                    </div>
-                )}
-                {isMuted && (
-                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-coral text-[0.55rem]">
-                        🔇
-                    </span>
-                )}
-                {isSpeaking && (
-                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-aurora text-[0.55rem]">
-                        🔊
-                    </span>
-                )}
+        <div
+            className={`relative flex flex-col overflow-hidden rounded-2xl border bg-[#0d1117] transition-all duration-150 ${
+                isSpeaking
+                    ? "border-aurora shadow-[0_0_16px_rgba(78,255,206,0.3)]"
+                    : "border-white/[0.08]"
+            }`}
+            style={{ width: 180, height: 135 }}
+        >
+            {isCameraOn && cameraPub ? (
+                <VideoTrack
+                    trackRef={{
+                        participant,
+                        publication: cameraPub,
+                        source: Track.Source.Camera,
+                    }}
+                    className="h-full w-full object-cover"
+                />
+            ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+                    {profilPicture ? (
+                        <img
+                            src={profilPicture}
+                            alt={initials}
+                            className="h-14 w-14 rounded-full object-cover"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                        />
+                    ) : (
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.9rem] font-extrabold text-deep-sky">
+                            {initials}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Bandeau bas */}
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/50 px-2 py-1 backdrop-blur-sm">
+                <span className="max-w-[120px] truncate text-[0.65rem] font-semibold text-white-soft">
+                    {displayName}
+                </span>
+                <div className="flex items-center gap-1">
+                    {isMuted && <span className="text-[0.6rem]">🔇</span>}
+                    {isSpeaking && !isMuted && (
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aurora" />
+                    )}
+                </div>
             </div>
-            <span className="max-w-[72px] truncate text-center text-[0.65rem] text-white-soft/80">
-                {name}
-            </span>
         </div>
     );
 };
 
-// ── Room controls (inside LiveKitRoom context) ─────────────────────────────────
+// ── Contrôles (micro, caméra, écran, quitter) ─────────────────────────────────
 const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element => {
     const participants = useParticipants();
     const { localParticipant } = useLocalParticipant();
     const isMuted = !localParticipant.isMicrophoneEnabled;
+    const isCameraOn = localParticipant.isCameraEnabled;
+    const isScreenSharing = localParticipant.isScreenShareEnabled;
+
+    // Toutes les tracks de partage d'écran dans la salle
+    const screenTracks = useTracks([Track.Source.ScreenShare]);
 
     const toggleMic = (): void => {
         void localParticipant.setMicrophoneEnabled(isMuted);
     };
+    const toggleCamera = (): void => {
+        void localParticipant.setCameraEnabled(!isCameraOn);
+    };
+    const toggleScreen = (): void => {
+        void localParticipant.setScreenShareEnabled(!isScreenSharing);
+    };
 
     return (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0d1117]/95 p-4 shadow-2xl backdrop-blur-md">
-                {/* Participants */}
-                <div className="flex items-end justify-center gap-4">
+            <div className="flex w-max flex-col gap-4 rounded-2xl border border-white/10 bg-[#0d1117]/95 p-5 shadow-2xl backdrop-blur-md">
+                {/* Partage d'écran actif */}
+                {screenTracks.length > 0 && (
+                    <div className="relative overflow-hidden rounded-xl border border-aurora/30">
+                        <VideoTrack
+                            trackRef={screenTracks[0]}
+                            className="max-h-[320px] w-full rounded-xl object-contain"
+                        />
+                        <div className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[0.65rem] text-aurora backdrop-blur-sm">
+                            🖥️ Partage d&apos;écran
+                        </div>
+                    </div>
+                )}
+
+                {/* Grille participants */}
+                <div className="flex flex-wrap items-end justify-center gap-3">
                     {participants.map((p) => (
-                        <ParticipantCard key={p.identity} participant={p} />
+                        <ParticipantTile key={p.identity} participant={p} />
                     ))}
                     {participants.length === 0 && (
                         <span className="text-[0.75rem] text-mist/50">
@@ -92,8 +140,9 @@ const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =
                     )}
                 </div>
 
-                {/* Controls */}
+                {/* Boutons */}
                 <div className="flex items-center justify-center gap-3">
+                    {/* Micro */}
                     <button
                         type="button"
                         onClick={toggleMic}
@@ -107,6 +156,35 @@ const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =
                         {isMuted ? "🔇" : "🎙️"}
                     </button>
 
+                    {/* Caméra */}
+                    <button
+                        type="button"
+                        onClick={toggleCamera}
+                        className={`flex h-11 w-11 items-center justify-center rounded-full text-lg transition-all ${
+                            isCameraOn
+                                ? "bg-aurora/20 text-aurora hover:bg-aurora/30"
+                                : "bg-white/[0.06] text-mist hover:bg-white/[0.12]"
+                        }`}
+                        title={isCameraOn ? "Éteindre la caméra" : "Activer la caméra"}
+                    >
+                        {isCameraOn ? "📹" : "📷"}
+                    </button>
+
+                    {/* Partage d'écran */}
+                    <button
+                        type="button"
+                        onClick={toggleScreen}
+                        className={`flex h-11 w-11 items-center justify-center rounded-full text-lg transition-all ${
+                            isScreenSharing
+                                ? "bg-solar/20 text-solar hover:bg-solar/30"
+                                : "bg-white/[0.06] text-mist hover:bg-white/[0.12]"
+                        }`}
+                        title={isScreenSharing ? "Arrêter le partage" : "Partager l'écran"}
+                    >
+                        🖥️
+                    </button>
+
+                    {/* Quitter */}
                     <button
                         type="button"
                         onClick={onLeave}
@@ -118,45 +196,20 @@ const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =
 
                 <div className="text-center text-[0.62rem] text-mist/40">
                     {participants.length} participant{participants.length > 1 ? "s" : ""} · Salon
-                    vocal jury
+                    jury
                 </div>
             </div>
         </div>
     );
 };
 
-// ── Main VocalPanel ────────────────────────────────────────────────────────────
+// ── Bouton rejoindre (utilisé dans la sidebar) ────────────────────────────────
 interface VocalPanelProps {
     isJoined: boolean;
     onJoin: () => void;
     onLeave: () => void;
 }
 
-const VocalPanel = ({ isJoined, onLeave }: VocalPanelProps): React.JSX.Element | null => {
-    const [token] = useState<string | null>(null);
-
-    const handleLeave = useCallback((): void => {
-        onLeave();
-    }, [onLeave]);
-
-    if (!isJoined || !token) return null;
-
-    return (
-        <LiveKitRoom
-            token={token}
-            serverUrl={LIVEKIT_URL}
-            connect={true}
-            audio={true}
-            video={false}
-            onDisconnected={handleLeave}
-        >
-            <RoomAudioRenderer />
-            <RoomControls onLeave={handleLeave} />
-        </LiveKitRoom>
-    );
-};
-
-// ── Join button (used in sidebar) ─────────────────────────────────────────────
 export const VocalJoinButton = ({
     isJoined,
     onJoin,
@@ -215,7 +268,9 @@ export const VocalJoinButton = ({
                 }`}
             >
                 <span className="mr-1.5">{isJoined ? "🔴" : "🎙️"}</span>
-                <span>{loading ? "Connexion…" : isJoined ? "Vocal actif" : "Vocal jury"}</span>
+                <span>
+                    {loading ? "Connexion…" : isJoined ? "Vocal/Vidéo actif" : "Vocal & Vidéo"}
+                </span>
                 {isJoined && (
                     <span className="ml-1.5 h-[5px] w-[5px] animate-pulse rounded-full bg-aurora" />
                 )}
@@ -228,7 +283,7 @@ export const VocalJoinButton = ({
                     serverUrl={LIVEKIT_URL}
                     connect={true}
                     audio={true}
-                    video={false}
+                    video={true}
                     onDisconnected={handleLeave}
                 >
                     <RoomAudioRenderer />
@@ -239,4 +294,4 @@ export const VocalJoinButton = ({
     );
 };
 
-export default VocalPanel;
+export default VocalJoinButton;
