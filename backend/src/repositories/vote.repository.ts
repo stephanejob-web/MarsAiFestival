@@ -72,6 +72,10 @@ export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
             f.id AS film_id, f.original_title, f.dossier_num, f.statut, f.poster_img,
+            f.video_url,
+            r.email   AS realisator_email,
+            r.first_name AS realisator_first_name,
+            r.last_name  AS realisator_last_name,
             (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision IS NOT NULL)                AS total_votes,
             (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'valide')                 AS votes_valide,
             (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'arevoir')                AS votes_arevoir,
@@ -99,6 +103,7 @@ export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
                 WHERE j2.role = 'jury'
             )                                                                                                                       AS jury_decisions
          FROM film f
+         JOIN realisator r ON r.id = f.realisator_id
          ORDER BY total_votes DESC, votes_valide DESC`,
     );
 
