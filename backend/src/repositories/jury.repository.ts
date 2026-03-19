@@ -11,6 +11,7 @@ export interface JuryRow extends RowDataPacket {
     google_id: string | null;
     profil_picture: string | null;
     jury_description: string | null;
+    is_active: boolean;
 }
 
 export interface JuryInsert {
@@ -24,7 +25,7 @@ export interface JuryInsert {
 
 export const findByEmail = async (email: string): Promise<JuryRow | null> => {
     const [rows] = await pool.execute<JuryRow[]>(
-        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture, is_active
          FROM jury WHERE email = ?`,
         [email],
     );
@@ -33,7 +34,7 @@ export const findByEmail = async (email: string): Promise<JuryRow | null> => {
 
 export const findByGoogleId = async (googleId: string): Promise<JuryRow | null> => {
     const [rows] = await pool.execute<JuryRow[]>(
-        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture, is_active
          FROM jury WHERE google_id = ?`,
         [googleId],
     );
