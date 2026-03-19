@@ -19,6 +19,7 @@ export interface UseAdminFilmsReturn {
     isDistributing: boolean;
     toggleAssignment: (juryId: number, filmId: number) => Promise<void>;
     autoDistribute: () => Promise<void>;
+    deleteFilm: (filmId: number) => Promise<void>;
     reload: () => void;
 }
 
@@ -121,6 +122,21 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         }
     };
 
+    const deleteFilm = async (filmId: number): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        setFilms((prev) => prev.filter((f) => f.id !== filmId));
+        setAssignments((prev) => prev.filter((a) => a.film_id !== filmId));
+        try {
+            await apiFetch<{ success: boolean }>(`/api/films/${filmId}`, {
+                method: "DELETE",
+                headers: authHeader,
+            });
+        } catch (err) {
+            await load();
+            setError(err instanceof Error ? err.message : "Erreur de suppression");
+        }
+    };
+
     return {
         films,
         juryMembers,
@@ -130,6 +146,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         isDistributing,
         toggleAssignment,
         autoDistribute,
+        deleteFilm,
         reload: load,
     };
 };
