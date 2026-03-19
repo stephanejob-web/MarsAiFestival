@@ -35,7 +35,6 @@ export interface UseJuryChatReturn {
     sendMessage: () => void;
 }
 
-
 const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);

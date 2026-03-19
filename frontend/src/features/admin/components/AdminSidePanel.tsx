@@ -109,15 +109,20 @@ const AdminSidePanel = (): React.JSX.Element => {
                     <span className="mr-1.5">💬</span>
                     <span>Chat jury</span>
                     <span className="ml-1.5 flex items-center gap-1 text-[0.65rem] text-mist/70">
-                        <span className={`h-[5px] w-[5px] rounded-full ${chat.isConnected ? "bg-aurora" : "bg-coral"}`} />
-                        {chat.onlineCount > 0 && `${chat.onlineCount} connecté${chat.onlineCount > 1 ? "s" : ""}`}
+                        <span
+                            className={`h-[5px] w-[5px] rounded-full ${chat.isConnected ? "bg-aurora" : "bg-coral"}`}
+                        />
+                        {chat.onlineCount > 0 &&
+                            `${chat.onlineCount} connecté${chat.onlineCount > 1 ? "s" : ""}`}
                     </span>
                     {chat.unreadCount > 0 && (
                         <span className="ml-1 rounded-full bg-coral/15 px-1.5 font-mono text-[0.62rem] font-semibold text-coral">
                             {chat.unreadCount}
                         </span>
                     )}
-                    <span className="ml-auto text-[0.65rem] text-mist">{isChatOpen ? "▲" : "▼"}</span>
+                    <span className="ml-auto text-[0.65rem] text-mist">
+                        {isChatOpen ? "▲" : "▼"}
+                    </span>
                 </button>
 
                 {isChatOpen && (
@@ -132,10 +137,16 @@ const AdminSidePanel = (): React.JSX.Element => {
                                                     src={u.profilPicture}
                                                     alt={u.initials}
                                                     className="h-[24px] w-[24px] rounded-full object-cover ring-2 ring-[rgba(12,18,48,0.95)]"
-                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                                    onError={(e) => {
+                                                        (
+                                                            e.target as HTMLImageElement
+                                                        ).style.display = "none";
+                                                    }}
                                                 />
                                             ) : (
-                                                <div className={`flex h-[24px] w-[24px] items-center justify-center rounded-full bg-gradient-to-br text-[0.55rem] font-bold text-deep-sky ring-2 ring-[rgba(12,18,48,0.95)] ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>
+                                                <div
+                                                    className={`flex h-[24px] w-[24px] items-center justify-center rounded-full bg-gradient-to-br text-[0.55rem] font-bold text-deep-sky ring-2 ring-[rgba(12,18,48,0.95)] ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}
+                                                >
                                                     {u.initials}
                                                 </div>
                                             )}
@@ -150,7 +161,9 @@ const AdminSidePanel = (): React.JSX.Element => {
                         )}
                         <div
                             className="flex h-[180px] flex-col gap-2.5 overflow-y-auto pr-0.5"
-                            ref={(el) => { if (el) el.scrollTop = el.scrollHeight; }}
+                            ref={(el) => {
+                                if (el) el.scrollTop = el.scrollHeight;
+                            }}
                         >
                             {chat.messages.length === 0 ? (
                                 <div className="flex h-full items-center justify-center text-[0.7rem] text-mist/50">
@@ -158,16 +171,29 @@ const AdminSidePanel = (): React.JSX.Element => {
                                 </div>
                             ) : (
                                 chat.messages.map((msg) => {
-                                    const isMe = msg.senderId !== null ? msg.senderId === chat.mySocketId : msg.juryId === user?.id;
-                                    const time = new Date(msg.timestamp).toLocaleTimeString("fr", { hour: "2-digit", minute: "2-digit" });
+                                    const isMe =
+                                        msg.senderId !== null
+                                            ? msg.senderId === chat.mySocketId
+                                            : msg.juryId === user?.id;
+                                    const time = new Date(msg.timestamp).toLocaleTimeString("fr", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    });
                                     return (
-                                        <div key={msg.id} className={`flex items-start gap-2 ${isMe ? "bg-solar/5" : ""} rounded-lg px-1 py-0.5`}>
+                                        <div
+                                            key={msg.id}
+                                            className={`flex items-start gap-2 ${isMe ? "bg-solar/5" : ""} rounded-lg px-1 py-0.5`}
+                                        >
                                             {msg.profilPicture ? (
                                                 <img
                                                     src={msg.profilPicture}
                                                     alt={msg.initials}
                                                     className="mt-0.5 h-[26px] w-[26px] flex-shrink-0 rounded-full object-cover"
-                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                                    onError={(e) => {
+                                                        (
+                                                            e.target as HTMLImageElement
+                                                        ).style.display = "none";
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="mt-0.5 flex h-[26px] w-[26px] flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-solar/60 to-aurora/60 text-[0.55rem] font-bold text-deep-sky">
@@ -176,10 +202,14 @@ const AdminSidePanel = (): React.JSX.Element => {
                                             )}
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-baseline gap-1.5">
-                                                    <span className={`text-[0.7rem] font-semibold ${isMe ? "text-solar" : "text-white-soft"}`}>
+                                                    <span
+                                                        className={`text-[0.7rem] font-semibold ${isMe ? "text-solar" : "text-white-soft"}`}
+                                                    >
                                                         {msg.author}
                                                     </span>
-                                                    <span className="text-[0.55rem] text-mist/40">{time}</span>
+                                                    <span className="text-[0.55rem] text-mist/40">
+                                                        {time}
+                                                    </span>
                                                 </div>
                                                 <p className="break-words text-[0.7rem] leading-snug text-white-soft/80">
                                                     {msg.text}
@@ -195,7 +225,9 @@ const AdminSidePanel = (): React.JSX.Element => {
                                 type="text"
                                 value={chat.inputValue}
                                 onChange={(e) => chat.setInputValue(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") chat.sendMessage(); }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") chat.sendMessage();
+                                }}
                                 placeholder="Écrire…"
                                 className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[0.75rem] text-white-soft outline-none placeholder:text-mist/40"
                             />

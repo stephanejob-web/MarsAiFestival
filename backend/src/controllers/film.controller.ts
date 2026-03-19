@@ -33,7 +33,7 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
 
     // ── Étape 1 : Upload S3 (bloquant) ────────────────────────────────────────
     const sanitizeName = (name: string): string =>
-        name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._\-]/g, "");
+        name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
 
     try {
         for (const field of ["video", "subtitleFR", "subtitleEN"]) {

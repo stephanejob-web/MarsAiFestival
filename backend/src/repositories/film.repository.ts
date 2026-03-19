@@ -92,10 +92,7 @@ export const getUnassignedFilms = async (): Promise<RowDataPacket[]> => {
 };
 
 export const deleteFilm = async (id: number): Promise<boolean> => {
-    const [result] = await pool.execute<ResultSetHeader>(
-        `DELETE FROM film WHERE id = ?`,
-        [id],
-    );
+    const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM film WHERE id = ?`, [id]);
     return result.affectedRows > 0;
 };
 

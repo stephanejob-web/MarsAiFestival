@@ -198,6 +198,6 @@ io.on("connection", (socket: Socket) => {
     });
 });
 
-httpServer.listen(PORT, '0.0.0.0', () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`); // eslint-disable-line no-console
 });

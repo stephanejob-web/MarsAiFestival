@@ -3,7 +3,9 @@ import { io, Socket } from "socket.io-client";
 
 const API = import.meta.env.VITE_API_URL as string;
 
-const useDiscussionNotify = (selectedFilmId: number | null): {
+const useDiscussionNotify = (
+    selectedFilmId: number | null,
+): {
     unreadCounts: Record<number, number>;
     clearUnread: (filmId: number) => void;
 } => {

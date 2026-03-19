@@ -21,109 +21,113 @@ const AdminPage = (): React.JSX.Element => {
 
     return (
         <>
-        <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Topbar */}
-            <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
-                    Gestion des utilisateurs
-                </span>
-                <div className="h-[18px] w-px bg-white/[0.08]" />
-                <span className="text-[0.75rem] text-mist">
-                    Jurys et modérateurs — accès par login/mot de passe ou Gmail
-                </span>
-                <div className="ml-auto">
-                    <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                        🛡️ Admin
+            <div className="flex flex-1 flex-col overflow-hidden">
+                {/* Topbar */}
+                <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
+                    <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+                        Gestion des utilisateurs
                     </span>
+                    <div className="h-[18px] w-px bg-white/[0.08]" />
+                    <span className="text-[0.75rem] text-mist">
+                        Jurys et modérateurs — accès par login/mot de passe ou Gmail
+                    </span>
+                    <div className="ml-auto">
+                        <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
+                            🛡️ Admin
+                        </span>
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    {error && (
+                        <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
+                            {error}
+                        </div>
+                    )}
+
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-20 text-[0.82rem] text-mist">
+                            Chargement…
+                        </div>
+                    ) : (
+                        <>
+                            {/* Stats */}
+                            <div className="stats-row mb-6 grid grid-cols-4 gap-3">
+                                <StatCard
+                                    label="Jurys"
+                                    value={juryCount}
+                                    sub="membres actifs"
+                                    color="aurora"
+                                />
+                                <StatCard
+                                    label="Admins"
+                                    value={adminCount}
+                                    sub="comptes actifs"
+                                    color="lavande"
+                                />
+                                <StatCard
+                                    label="Comptes désactivés"
+                                    value={disabledCount}
+                                    sub="accès révoqué"
+                                    color="coral"
+                                />
+                                <StatCard
+                                    label="Comptes créés"
+                                    value={totalCount}
+                                    sub="invitations envoyées"
+                                    color="solar"
+                                />
+                            </div>
+
+                            {/* Participation chart */}
+                            <ParticipationChart users={users} />
+
+                            {/* Section head */}
+                            <div className="mb-3 flex items-center justify-between">
+                                <div>
+                                    <h2 className="font-display text-[0.95rem] font-extrabold text-white-soft">
+                                        Comptes jury &amp; modérateurs
+                                    </h2>
+                                    <p className="mt-0.5 text-[0.72rem] text-mist">
+                                        L'administrateur est le seul habilité à créer et gérer les
+                                        accès.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsInviteOpen(true)}
+                                    className="flex items-center gap-2 rounded-[9px] bg-aurora px-[18px] py-2.5 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
+                                >
+                                    ✉ Inviter un membre
+                                </button>
+                            </div>
+
+                            {/* Search */}
+                            <div className="relative mb-3.5">
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.85rem] opacity-40">
+                                    🔍
+                                </span>
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={handleSearchChange}
+                                    placeholder="Rechercher par nom, email ou rôle…"
+                                    className="w-full rounded-[10px] border border-white/[0.09] bg-white/[0.04] py-2 pl-9 pr-4 font-body text-[0.85rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
+                                />
+                            </div>
+
+                            {/* Table */}
+                            <UserTable
+                                users={users}
+                                search={search}
+                                onToggleStatus={toggleStatus}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-                {error && (
-                    <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
-                        {error}
-                    </div>
-                )}
-
-                {isLoading ? (
-                    <div className="flex items-center justify-center py-20 text-[0.82rem] text-mist">
-                        Chargement…
-                    </div>
-                ) : (
-                    <>
-                        {/* Stats */}
-                        <div className="stats-row mb-6 grid grid-cols-4 gap-3">
-                            <StatCard
-                                label="Jurys"
-                                value={juryCount}
-                                sub="membres actifs"
-                                color="aurora"
-                            />
-                            <StatCard
-                                label="Admins"
-                                value={adminCount}
-                                sub="comptes actifs"
-                                color="lavande"
-                            />
-                            <StatCard
-                                label="Comptes désactivés"
-                                value={disabledCount}
-                                sub="accès révoqué"
-                                color="coral"
-                            />
-                            <StatCard
-                                label="Comptes créés"
-                                value={totalCount}
-                                sub="invitations envoyées"
-                                color="solar"
-                            />
-                        </div>
-
-                        {/* Participation chart */}
-                        <ParticipationChart users={users} />
-
-                        {/* Section head */}
-                        <div className="mb-3 flex items-center justify-between">
-                            <div>
-                                <h2 className="font-display text-[0.95rem] font-extrabold text-white-soft">
-                                    Comptes jury &amp; modérateurs
-                                </h2>
-                                <p className="mt-0.5 text-[0.72rem] text-mist">
-                                    L'administrateur est le seul habilité à créer et gérer les
-                                    accès.
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setIsInviteOpen(true)}
-                                className="flex items-center gap-2 rounded-[9px] bg-aurora px-[18px] py-2.5 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
-                            >
-                                ✉ Inviter un membre
-                            </button>
-                        </div>
-
-                        {/* Search */}
-                        <div className="relative mb-3.5">
-                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.85rem] opacity-40">
-                                🔍
-                            </span>
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={handleSearchChange}
-                                placeholder="Rechercher par nom, email ou rôle…"
-                                className="w-full rounded-[10px] border border-white/[0.09] bg-white/[0.04] py-2 pl-9 pr-4 font-body text-[0.85rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
-                            />
-                        </div>
-
-                        {/* Table */}
-                        <UserTable users={users} search={search} onToggleStatus={toggleStatus} />
-                    </>
-                )}
-            </div>
-        </div>
-        {isInviteOpen && <InviteModal onClose={() => setIsInviteOpen(false)} />}
+            {isInviteOpen && <InviteModal onClose={() => setIsInviteOpen(false)} />}
         </>
     );
 };

@@ -84,7 +84,9 @@ const InviteModal = ({ onClose }: InviteModalProps): React.JSX.Element => {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") void handleSend(); }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") void handleSend();
+                                }}
                                 placeholder="prenom.nom@email.com"
                                 className="w-full rounded-[10px] border border-white/10 bg-white/5 px-3 py-2.5 text-[0.88rem] text-white-soft outline-none placeholder:text-mist/40 focus:border-aurora/40"
                                 autoFocus

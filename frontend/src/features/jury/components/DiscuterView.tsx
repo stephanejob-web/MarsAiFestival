@@ -123,7 +123,10 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                         >
                             <button
                                 type="button"
-                                onClick={() => { setSelectedFilmId(film.id); clearUnread(film.id); }}
+                                onClick={() => {
+                                    setSelectedFilmId(film.id);
+                                    clearUnread(film.id);
+                                }}
                                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
                             >
                                 <div
