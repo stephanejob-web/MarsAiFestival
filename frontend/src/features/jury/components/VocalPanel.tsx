@@ -115,7 +115,6 @@ const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =
     return (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
             <div className="flex w-max flex-col gap-4 rounded-2xl border border-white/10 bg-[#0d1117]/95 p-5 shadow-2xl backdrop-blur-md">
-
                 {/* Partage d'écran actif */}
                 {screenTracks.length > 0 && (
                     <div className="relative overflow-hidden rounded-xl border border-aurora/30">
