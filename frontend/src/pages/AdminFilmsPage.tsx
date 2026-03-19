@@ -33,7 +33,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
         isDistributing,
         toggleAssignment,
         autoDistribute,
+        deleteFilm,
     } = useAdminFilms();
+    const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<FilterMode>("all");
@@ -440,16 +442,55 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                             </span>
                                                         )}
                                                     </span>
-                                                    <span
-                                                        className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
-                                                        style={{
-                                                            borderColor: `${accent}30`,
-                                                            color: accent,
-                                                            background: `${accent}10`,
-                                                        }}
-                                                    >
-                                                        {film.dossier_num}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span
+                                                            className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
+                                                            style={{
+                                                                borderColor: `${accent}30`,
+                                                                color: accent,
+                                                                background: `${accent}10`,
+                                                            }}
+                                                        >
+                                                            {film.dossier_num}
+                                                        </span>
+                                                        {confirmDelete === film.id ? (
+                                                            <div className="flex items-center gap-1.5">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        void deleteFilm(film.id);
+                                                                        setConfirmDelete(null);
+                                                                    }}
+                                                                    className="flex items-center gap-1 rounded-lg border border-coral/30 bg-coral/15 px-2.5 py-1 text-[0.68rem] font-bold text-coral transition-all hover:border-coral/50 hover:bg-coral/25"
+                                                                >
+                                                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                                                        <path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                    </svg>
+                                                                    Supprimer
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setConfirmDelete(null)}
+                                                                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[0.68rem] text-mist transition-all hover:bg-white/10 hover:text-white-soft"
+                                                                >
+                                                                    Annuler
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setConfirmDelete(film.id)}
+                                                                title="Supprimer le film"
+                                                                className="group/del flex items-center gap-1.5 rounded-lg border border-transparent px-2 py-1 text-[0.68rem] font-medium text-mist/40 transition-all hover:border-coral/20 hover:bg-coral/8 hover:text-coral"
+                                                            >
+                                                                <svg width="11" height="12" viewBox="0 0 11 12" fill="none">
+                                                                    <path d="M1 3h9M4 3V2h3v1M2 3l.5 7h6L9 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                    <path d="M4.5 5.5v3M6.5 5.5v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                                                                </svg>
+                                                                Supprimer
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
