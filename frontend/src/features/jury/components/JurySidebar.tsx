@@ -77,6 +77,7 @@ const JurySidebar = ({
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
+    const { joinVocal, leaveVocal, vocalUsers } = chat;
     const user = useJuryUser();
     const [avatarError, setAvatarError] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -184,9 +185,31 @@ const JurySidebar = ({
                 <div className="mx-3 border-t border-white/5">
                     <VocalJoinButton
                         isJoined={isVocalJoined}
-                        onJoin={() => setIsVocalJoined(true)}
-                        onLeave={() => setIsVocalJoined(false)}
+                        onJoin={() => { setIsVocalJoined(true); joinVocal(); }}
+                        onLeave={() => { setIsVocalJoined(false); leaveVocal(); }}
                     />
+                    {vocalUsers.length > 0 && (
+                        <div className="mb-2 flex flex-wrap items-center gap-1.5 px-2.5">
+                            {vocalUsers.map((u) => (
+                                <div key={u.juryId} className="flex items-center gap-1" title={u.name}>
+                                    {u.profilPicture ? (
+                                        <img
+                                            src={u.profilPicture}
+                                            alt={u.initials}
+                                            className="h-[20px] w-[20px] rounded-full object-cover ring-1 ring-aurora/40"
+                                        />
+                                    ) : (
+                                        <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-aurora/20 text-[0.5rem] font-bold text-aurora ring-1 ring-aurora/40">
+                                            {u.initials}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            <span className="text-[0.6rem] text-aurora/60">
+                                {vocalUsers.length} en vocal
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Chat */}
