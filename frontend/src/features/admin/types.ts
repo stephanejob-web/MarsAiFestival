@@ -68,6 +68,10 @@ export interface AdminFilmVoteSummary {
     original_title: string;
     dossier_num: string;
     statut: string;
+    video_url: string | null;
+    realisator_email: string | null;
+    realisator_first_name: string | null;
+    realisator_last_name: string | null;
     total_votes: number;
     votes_valide: number;
     votes_arevoir: number;
