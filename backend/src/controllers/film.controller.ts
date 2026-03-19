@@ -7,6 +7,7 @@ import {
     getFilms,
     getFilmById,
     updateFilmStatut,
+    deleteFilm,
 } from "../repositories/film.repository";
 import { getVotesSummary } from "../repositories/vote.repository";
 
@@ -31,12 +32,15 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
     );
 
     // ── Étape 1 : Upload S3 (bloquant) ────────────────────────────────────────
+    const sanitizeName = (name: string): string =>
+        name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._\-]/g, "");
+
     try {
         for (const field of ["video", "subtitleFR", "subtitleEN"]) {
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
                 const file = fileArr[0];
-                const filename = `${dossierNum}/${field}-${file.originalname}`;
+                const filename = `${dossierNum}/${field}-${sanitizeName(file.originalname)}`;
                 urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
             }
         }
@@ -186,6 +190,29 @@ export const patchFilm = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la mise à jour du film.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── DELETE /api/films/:id ──────────────────────────────────────────────────────
+export const deleteFilmById = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        const deleted = await deleteFilm(id);
+        if (!deleted) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la suppression du film.",
             error: err instanceof Error ? err.message : String(err),
         });
     }
