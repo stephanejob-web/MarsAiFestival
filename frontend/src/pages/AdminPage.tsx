@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import useAdminUsers from "../features/admin/hooks/useAdminUsers";
+import InviteModal from "../features/admin/components/InviteModal";
 import StatCard from "../features/admin/components/StatCard";
 import ParticipationChart from "../features/admin/components/ParticipationChart";
 import UserTable from "../features/admin/components/UserTable";
@@ -7,6 +8,7 @@ import UserTable from "../features/admin/components/UserTable";
 const AdminPage = (): React.JSX.Element => {
     const { users, isLoading, error, toggleStatus } = useAdminUsers();
     const [search, setSearch] = useState<string>("");
+    const [isInviteOpen, setIsInviteOpen] = useState(false);
 
     const juryCount = users.filter((u) => u.role === "jury" && u.is_active).length;
     const adminCount = users.filter((u) => u.role === "admin" && u.is_active).length;
@@ -18,6 +20,7 @@ const AdminPage = (): React.JSX.Element => {
     };
 
     return (
+        <>
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Topbar */}
             <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
@@ -93,6 +96,7 @@ const AdminPage = (): React.JSX.Element => {
                             </div>
                             <button
                                 type="button"
+                                onClick={() => setIsInviteOpen(true)}
                                 className="flex items-center gap-2 rounded-[9px] bg-aurora px-[18px] py-2.5 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
                             >
                                 ✉ Inviter un membre
@@ -119,6 +123,8 @@ const AdminPage = (): React.JSX.Element => {
                 )}
             </div>
         </div>
+        {isInviteOpen && <InviteModal onClose={() => setIsInviteOpen(false)} />}
+        </>
     );
 };
 
