@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
     LiveKitRoom,
     RoomAudioRenderer,
@@ -169,18 +169,14 @@ const FullTile = ({ participant }: { participant: Participant }): React.JSX.Elem
 const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element => {
     const [expanded, setExpanded] = useState(false);
 
-    // Position initiale : coin bas-droit
-    const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+    // Position initiale : coin bas-droit (lazy init pour accéder à window dès le premier rendu)
+    const [pos, setPos] = useState<{ x: number; y: number }>(() => ({
+        x: window.innerWidth - 320,
+        y: window.innerHeight - 280,
+    }));
     const panelRef = useRef<HTMLDivElement>(null);
     const dragging = useRef(false);
     const dragOffset = useRef({ x: 0, y: 0 });
-
-    // Initialiser la position après le premier rendu (on connaît la taille de la fenêtre)
-    useEffect(() => {
-        if (pos === null) {
-            setPos({ x: window.innerWidth - 320, y: window.innerHeight - 280 });
-        }
-    }, [pos]);
 
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
         // Ne pas déclencher le drag sur les boutons
@@ -221,8 +217,6 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
     const toggleScreen = (): void => {
         void localParticipant.setScreenShareEnabled(!isScreenSharing);
     };
-
-    if (pos === null) return <></>;
 
     return (
         <div
