@@ -22,7 +22,7 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
     },
     {
         category: "Site",
-        items: [{ label: "Administration site", to: "/admin/site", icon: "🌐" }],
+        items: [{ label: "Administration site", to: "/admin/cms", icon: "🌐" }],
     },
 ];
 

@@ -10,6 +10,7 @@ import AdminSelectionPage from "./pages/AdminSelectionPage";
 import Layout from "./components/ui/Layout";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedAdminRoute from "./components/ui/ProtectedAdminRoute";
+import AdminCmsPage from "./pages/AdminCmsPage";
 
 const App = (): React.JSX.Element => {
     return (
@@ -40,14 +41,7 @@ const App = (): React.JSX.Element => {
                                 </div>
                             }
                         />
-                        <Route
-                            path="site"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Administration site — en construction
-                                </div>
-                            }
-                        />
+                        <Route path="/admin/cms" element={<AdminCmsPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />
