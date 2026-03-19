@@ -50,6 +50,7 @@ export interface VoteRow {
 }
 
 export interface JuryComment {
+    id: number;
     juryId: number;
     name: string;
     initials: string;
