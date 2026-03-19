@@ -11,11 +11,11 @@ export default defineConfig({
     https: true,
     proxy: {
       '/api': {
-        target: 'http://192.168.10.140:5500',
+        target: 'http://localhost:5500',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://192.168.10.140:5500',
+        target: 'http://localhost:5500',
         changeOrigin: true,
         ws: true,
       },
