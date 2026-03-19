@@ -287,10 +287,12 @@ const JurySidebar = ({
                                     </div>
                                 ) : (
                                     chat.messages.map((msg) => {
+                                        const isSystem = msg.id.startsWith("vocal-");
                                         const isMe =
-                                            msg.senderId !== null
+                                            !isSystem &&
+                                            (msg.senderId !== null
                                                 ? msg.senderId === chat.mySocketId
-                                                : msg.juryId === user?.id;
+                                                : msg.juryId === user?.id);
                                         const time = new Date(msg.timestamp).toLocaleTimeString(
                                             "fr",
                                             {
@@ -298,6 +300,22 @@ const JurySidebar = ({
                                                 minute: "2-digit",
                                             },
                                         );
+
+                                        if (isSystem) {
+                                            return (
+                                                <div
+                                                    key={msg.id}
+                                                    className="flex items-center gap-1.5 rounded-lg border border-aurora/20 bg-aurora/[0.07] px-2 py-1.5"
+                                                >
+                                                    <span className="text-[0.75rem]">🎙️</span>
+                                                    <span className="flex-1 text-[0.68rem] font-semibold text-aurora">
+                                                        {msg.text.replace("🎙️ ", "")}
+                                                    </span>
+                                                    <span className="text-[0.55rem] text-mist/40">{time}</span>
+                                                </div>
+                                            );
+                                        }
+
                                         return (
                                             <div
                                                 key={msg.id}
