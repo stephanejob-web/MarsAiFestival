@@ -1,5 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
+import { apiFetch } from "../services/api";
+
+const getToken = (): string => localStorage.getItem("jury_token") ?? "";
+
+interface PresignedVideoProps {
+    filmId: number;
+}
+
+const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
+    const [src, setSrc] = useState<string | null>(null);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        apiFetch<{ success: boolean; url: string }>(`/api/films/${filmId}/video-url`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
+            .then((res) => {
+                if (res.success) setSrc(res.url);
+                else setError(true);
+            })
+            .catch(() => setError(true));
+    }, [filmId]);
+
+    if (error)
+        return (
+            <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-coral">
+                Vidéo inaccessible
+            </div>
+        );
+    if (!src)
+        return (
+            <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-mist">
+                Chargement…
+            </div>
+        );
+    return (
+        <video
+            src={src}
+            controls
+            autoPlay
+            preload="auto"
+            className="aspect-video w-full object-cover"
+        />
+    );
+};
 
 const CARD_ACCENTS = [
     "#4effce",
@@ -34,6 +79,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
         toggleAssignment,
         autoDistribute,
         deleteFilm,
+        selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
@@ -265,6 +311,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 {pageFilms.map((film) => {
                                     const accent = CARD_ACCENTS[film.id % CARD_ACCENTS.length];
                                     const isAssigned = assignedFilmIds.has(film.id);
+                                    const isSelected =
+                                        film.statut === "selectionne" ||
+                                        film.statut === "finaliste";
                                     const nJury = assignments.filter(
                                         (a) => a.film_id === film.id,
                                     ).length;
@@ -277,40 +326,50 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     return (
                                         <div
                                             key={film.id}
-                                            className={`overflow-hidden rounded-[14px] border transition-all duration-[180ms] hover:-translate-y-[2px] hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)] ${
-                                                isAssigned
-                                                    ? "border-aurora/35 bg-surface-2 shadow-[0_0_0_1px_rgba(78,255,206,0.15),0_4px_18px_rgba(0,0,0,0.25)]"
-                                                    : "border-white/[0.06] bg-surface-2"
+                                            className={`overflow-hidden rounded-[14px] border transition-all duration-[180ms] hover:-translate-y-[2px] ${
+                                                isSelected
+                                                    ? "border-aurora/60 bg-surface-2 opacity-85 shadow-[0_0_0_1px_rgba(78,255,206,0.25),0_0_24px_rgba(78,255,206,0.12),0_4px_18px_rgba(0,0,0,0.25)]"
+                                                    : isAssigned
+                                                      ? "border-aurora/35 bg-surface-2 shadow-[0_0_0_1px_rgba(78,255,206,0.15),0_4px_18px_rgba(0,0,0,0.25)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)]"
+                                                      : "border-white/[0.06] bg-surface-2 hover:shadow-[0_8px_28px_rgba(0,0,0,0.35)]"
                                             }`}
                                         >
-                                            {/* Accent bar */}
+                                            {/* Accent bar — aurora when selected */}
                                             <div
                                                 className="h-[3px] w-full"
-                                                style={{ background: accent, opacity: 0.7 }}
+                                                style={{
+                                                    background: isSelected ? "#4effce" : accent,
+                                                    opacity: isSelected ? 1 : 0.7,
+                                                }}
                                             />
 
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
                                                 <div className="bg-black">
-                                                    <video
-                                                        src={film.video_url}
-                                                        controls
-                                                        autoPlay
-                                                        preload="auto"
-                                                        className="aspect-video w-full object-cover"
-                                                    />
+                                                    <PresignedVideo filmId={film.id} />
                                                 </div>
                                             ) : (
                                                 <div
                                                     className="group/thumb relative flex aspect-video w-full items-center justify-center overflow-hidden"
-                                                    style={{ background: `${accent}11` }}
+                                                    style={{
+                                                        background: isSelected
+                                                            ? "rgba(78,255,206,0.06)"
+                                                            : `${accent}11`,
+                                                    }}
                                                 >
-                                                    <span
-                                                        className="select-none font-mono text-[3.5rem] font-black opacity-[0.07]"
-                                                        style={{ color: accent }}
-                                                    >
-                                                        {String(film.id).padStart(3, "0")}
-                                                    </span>
+                                                    {/* Selected badge */}
+                                                    {isSelected && (
+                                                        <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">
+                                                            <span className="text-[0.65rem] text-aurora">
+                                                                ★
+                                                            </span>
+                                                            <span className="font-display text-[0.65rem] font-extrabold tracking-wide text-aurora">
+                                                                {film.statut === "finaliste"
+                                                                    ? "Finaliste"
+                                                                    : "Sélectionné"}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <div className="absolute right-2 top-2 text-[1.1rem]">
                                                         {countryFlag(film.country)}
                                                     </div>
@@ -344,8 +403,12 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             )}
 
                                             {/* Body */}
-                                            <div className="p-3.5">
-                                                <div className="mb-0.5 text-[0.88rem] font-bold leading-snug text-white-soft">
+                                            <div
+                                                className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}
+                                            >
+                                                <div
+                                                    className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                >
                                                     {film.original_title}
                                                 </div>
                                                 <div className="text-[0.72rem] text-mist">
@@ -443,6 +506,25 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         )}
                                                     </span>
                                                     <div className="flex items-center gap-2">
+                                                        {/* Bouton Top 50 */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                void selectFilm(
+                                                                    film.id,
+                                                                    film.statut !== "selectionne",
+                                                                )
+                                                            }
+                                                            className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[0.68rem] font-bold transition-all ${
+                                                                isSelected
+                                                                    ? "bg-aurora text-deep-sky shadow-[0_1px_8px_rgba(78,255,206,0.3)] hover:opacity-90"
+                                                                    : "border border-white/[0.10] bg-white/[0.03] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
+                                                            }`}
+                                                        >
+                                                            {isSelected
+                                                                ? "✓ Top 50"
+                                                                : "★ Sélectionner"}
+                                                        </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
                                                             style={{

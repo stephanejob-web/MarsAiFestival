@@ -23,6 +23,13 @@ export interface ConnectedUser {
     profilPicture: string | null;
 }
 
+export interface VocalUser {
+    juryId: number;
+    name: string;
+    initials: string;
+    profilPicture: string | null;
+}
+
 export interface UseJuryChatReturn {
     messages: ChatMessage[];
     connectedUsers: ConnectedUser[];
@@ -31,8 +38,11 @@ export interface UseJuryChatReturn {
     isConnected: boolean;
     onlineCount: number;
     mySocketId: string | null;
+    vocalUsers: VocalUser[];
     setInputValue: (value: string) => void;
     sendMessage: () => void;
+    joinVocal: () => void;
+    leaveVocal: () => void;
 }
 
 const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
@@ -43,6 +53,7 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
     const [isConnected, setIsConnected] = useState(false);
     const [onlineCount, setOnlineCount] = useState(0);
     const [mySocketId, setMySocketId] = useState<string | null>(null);
+    const [vocalUsers, setVocalUsers] = useState<VocalUser[]>([]);
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
@@ -88,6 +99,75 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
             setOnlineCount(users.length);
         });
 
+        socket.on("vocal:online", (users: VocalUser[]) => {
+            setVocalUsers(users);
+        });
+
+        socket.on(
+            "vocal:started",
+            (user: { name: string; initials: string; profilPicture: string | null }) => {
+                // Message système dans le chat
+                const systemMsg: ChatMessage = {
+                    id: `vocal-started-${Date.now()}`,
+                    juryId: null,
+                    author: "Système",
+                    initials: "🎙️",
+                    profilPicture: null,
+                    text: `🎙️ ${user.name} a lancé un vocal — rejoins le salon vocal !`,
+                    timestamp: Date.now(),
+                    senderId: null,
+                };
+                setMessages((prev) => [...prev, systemMsg]);
+
+                // Notification proéminente
+                toast(`🎙️ Vocal lancé ! ${user.name} a ouvert le salon vocal`, {
+                    position: "top-center",
+                    autoClose: 6000,
+                    style: {
+                        background: "#0d1117",
+                        color: "#4effce",
+                        fontWeight: "800",
+                        fontSize: "0.88rem",
+                        border: "1.5px solid rgba(78,255,206,0.4)",
+                        boxShadow: "0 0 24px rgba(78,255,206,0.15)",
+                        borderRadius: "12px",
+                        padding: "12px 16px",
+                    },
+                });
+            },
+        );
+
+        socket.on(
+            "vocal:joined",
+            (user: { name: string; initials: string; profilPicture: string | null }) => {
+                toast(`🎙️ ${user.name} a rejoint le vocal`, {
+                    position: "top-center",
+                    autoClose: 4000,
+                    style: {
+                        background: "#0d1117",
+                        color: "#4effce",
+                        fontWeight: "700",
+                        fontSize: "0.88rem",
+                        border: "1px solid rgba(78,255,206,0.25)",
+                    },
+                });
+            },
+        );
+
+        socket.on("vocal:left", (user: { name: string }) => {
+            toast(`📵 ${user.name} a quitté le vocal`, {
+                position: "top-center",
+                autoClose: 3000,
+                style: {
+                    background: "#0d1117",
+                    color: "#94a3b8",
+                    fontWeight: "600",
+                    fontSize: "0.88rem",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                },
+            });
+        });
+
         return () => {
             socket.disconnect();
             socketRef.current = null;
@@ -105,6 +185,14 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
         setInputValue("");
     };
 
+    const joinVocal = (): void => {
+        socketRef.current?.emit("vocal:join");
+    };
+
+    const leaveVocal = (): void => {
+        socketRef.current?.emit("vocal:leave");
+    };
+
     return {
         messages,
         connectedUsers,
@@ -113,8 +201,11 @@ const useJuryChat = (isChatOpen: boolean): UseJuryChatReturn => {
         isConnected,
         onlineCount,
         mySocketId,
+        vocalUsers,
         setInputValue,
         sendMessage,
+        joinVocal,
+        leaveVocal,
     };
 };
 

@@ -13,6 +13,7 @@ interface ApiResponse<T> {
 export type FilterKey =
     | "tous"
     | "unanime"
+    | "majorite"
     | "partage"
     | "rejete"
     | "attente"
@@ -22,10 +23,11 @@ export type FilterKey =
 
 export type SortKey = "score" | "title" | "comments";
 
-export type Consensus = "unanime" | "partage" | "rejete" | "attente";
+export type Consensus = "unanime" | "majorite" | "partage" | "rejete" | "attente";
 
 export interface SelectionStats {
     unanime: number;
+    majorite: number;
     partage: number;
     rejete: number;
     attente: number;
@@ -53,11 +55,16 @@ export interface UseAdminSelectionReturn {
     reload: () => void;
 }
 
-// Maquette formula: unanime if valide > voted/2, rejete if refuse > voted/2
 export const getConsensus = (film: AdminFilmVoteSummary): Consensus => {
+    const totalJury = film.total_jury ?? film.total_assigned;
     if (film.total_votes === 0) return "attente";
-    if (film.votes_valide > film.total_votes / 2) return "unanime";
-    if (film.votes_refuse > film.total_votes / 2) return "rejete";
+    // Pas encore tous votés → en attente
+    if (film.total_votes < totalJury) return "attente";
+    // Tous les jurés ont voté
+    if (film.votes_valide === totalJury) return "unanime"; // unanimité valide
+    if (film.votes_refuse === totalJury) return "rejete"; // unanimité refuse
+    if (film.votes_valide > totalJury / 2) return "majorite"; // majorité valide
+    if (film.votes_refuse > totalJury / 2) return "rejete"; // majorité refuse
     return "partage";
 };
 
@@ -130,6 +137,7 @@ const useAdminSelection = (): UseAdminSelectionReturn => {
     const stats = useMemo(
         (): SelectionStats => ({
             unanime: allFilms.filter((f) => getConsensus(f) === "unanime").length,
+            majorite: allFilms.filter((f) => getConsensus(f) === "majorite").length,
             partage: allFilms.filter((f) => getConsensus(f) === "partage").length,
             rejete: allFilms.filter((f) => getConsensus(f) === "rejete").length,
             attente: allFilms.filter((f) => getConsensus(f) === "attente").length,
@@ -153,6 +161,8 @@ const useAdminSelection = (): UseAdminSelectionReturn => {
         }
 
         if (filter === "unanime") result = result.filter((f) => getConsensus(f) === "unanime");
+        else if (filter === "majorite")
+            result = result.filter((f) => getConsensus(f) === "majorite");
         else if (filter === "partage") result = result.filter((f) => getConsensus(f) === "partage");
         else if (filter === "rejete") result = result.filter((f) => getConsensus(f) === "rejete");
         else if (filter === "attente") result = result.filter((f) => getConsensus(f) === "attente");

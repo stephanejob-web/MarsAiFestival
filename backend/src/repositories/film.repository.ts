@@ -74,7 +74,16 @@ export const getFilms = async (): Promise<RowDataPacket[]> => {
 
 export const updateFilmStatut = async (
     id: number,
-    statut: "to_review" | "valide" | "arevoir" | "refuse" | "in_discussion" | "asked_to_modify",
+    statut:
+        | "to_review"
+        | "valide"
+        | "arevoir"
+        | "refuse"
+        | "in_discussion"
+        | "asked_to_modify"
+        | "soumis"
+        | "selectionne"
+        | "finaliste",
 ): Promise<boolean> => {
     const [result] = await pool.execute<ResultSetHeader>(
         `UPDATE film SET statut = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,

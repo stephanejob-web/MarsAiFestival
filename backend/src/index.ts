@@ -9,7 +9,7 @@ import {
     getRecentGlobalMessages,
 } from "./repositories/globalMessage.repository";
 
-const PORT = process.env.PORT || 5500;
+const PORT = Number(process.env.PORT) || 5500;
 const JWT_SECRET = process.env.JWT_SECRET ?? "secret";
 
 const httpServer = http.createServer(app);
@@ -49,6 +49,17 @@ interface OnlineUser {
 // ── State en mémoire ───────────────────────────────────────────────────────────
 const globalUsers = new Map<string, GlobalConnectedUser>();
 const onlineByFilm = new Map<number, Map<string, OnlineUser>>();
+
+interface VocalUser {
+    juryId: number;
+    name: string;
+    initials: string;
+    profilPicture: string | null;
+}
+const vocalUsers = new Map<string, VocalUser>();
+
+// Expose vocalUsers pour les routes HTTP admin
+app.locals.vocalUsers = vocalUsers;
 
 const broadcastOnline = (filmId: number): void => {
     const users = Array.from(onlineByFilm.get(filmId)?.values() ?? []);
@@ -121,6 +132,43 @@ io.on("connection", (socket: Socket) => {
         io.emit("chat:message", message);
     });
 
+    // ── Vocal (vocal:*) ───────────────────────────────────────────────────────
+
+    socket.on("vocal:join", () => {
+        const isFirst = vocalUsers.size === 0;
+        vocalUsers.set(socket.id, {
+            juryId: jury.id,
+            name: fullName,
+            initials,
+            profilPicture: jury.profilPicture ?? null,
+        });
+
+        if (isFirst) {
+            // Premier participant — notifier tout le monde avec un message système
+            io.emit("vocal:started", {
+                name: fullName,
+                initials,
+                profilPicture: jury.profilPicture ?? null,
+            });
+        } else {
+            // Quelqu'un rejoint un vocal déjà ouvert
+            socket.broadcast.emit("vocal:joined", {
+                name: fullName,
+                initials,
+                profilPicture: jury.profilPicture ?? null,
+            });
+        }
+
+        io.emit("vocal:online", Array.from(vocalUsers.values()));
+    });
+
+    socket.on("vocal:leave", () => {
+        if (!vocalUsers.has(socket.id)) return;
+        vocalUsers.delete(socket.id);
+        socket.broadcast.emit("vocal:left", { name: fullName });
+        io.emit("vocal:online", Array.from(vocalUsers.values()));
+    });
+
     // ── Discussion par film (discussion:*) ────────────────────────────────────
 
     socket.on("discussion:join", async (filmId: number) => {
@@ -188,6 +236,12 @@ io.on("connection", (socket: Socket) => {
     socket.on("disconnect", () => {
         globalUsers.delete(socket.id);
         io.emit("chat:online", Array.from(globalUsers.values()));
+
+        if (vocalUsers.has(socket.id)) {
+            vocalUsers.delete(socket.id);
+            socket.broadcast.emit("vocal:left", { name: fullName });
+            io.emit("vocal:online", Array.from(vocalUsers.values()));
+        }
 
         for (const [filmId, users] of onlineByFilm.entries()) {
             if (users.has(socket.id)) {

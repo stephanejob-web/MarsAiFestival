@@ -6,6 +6,7 @@ import {
     getDiscussionFilmIds,
     getDiscussionFilms,
 } from "../repositories/discussion.repository";
+import { getMessagesByFilm } from "../repositories/message.repository";
 import { getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
 
 // GET /api/discussion — liste partagée des film_ids en discussion
@@ -62,6 +63,24 @@ export const addToDiscussion = async (req: Request, res: Response): Promise<void
         const films = await getDiscussionFilms();
         (req.app.locals.io as Server | undefined)?.emit("discussion-list:updated", films);
         res.status(201).json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// GET /api/discussion/messages/:filmId — historique messages d'un film (admin)
+export const getFilmMessages = async (req: Request, res: Response): Promise<void> => {
+    const filmId = Number(req.params.filmId);
+    if (isNaN(filmId)) {
+        res.status(400).json({ success: false, message: "filmId invalide." });
+        return;
+    }
+    try {
+        const messages = await getMessagesByFilm(filmId);
+        res.json({ success: true, data: messages });
     } catch (err) {
         res.status(500).json({
             success: false,

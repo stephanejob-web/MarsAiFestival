@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import useAdminUsers from "../features/admin/hooks/useAdminUsers";
+import useAdminVocal from "../features/admin/hooks/useAdminVocal";
 import InviteModal from "../features/admin/components/InviteModal";
 import StatCard from "../features/admin/components/StatCard";
 import ParticipationChart from "../features/admin/components/ParticipationChart";
@@ -7,6 +8,7 @@ import UserTable from "../features/admin/components/UserTable";
 
 const AdminPage = (): React.JSX.Element => {
     const { users, isLoading, error, toggleStatus } = useAdminUsers();
+    const { isInVocal, joinVocal, leaveVocal } = useAdminVocal();
     const [search, setSearch] = useState<string>("");
     const [isInviteOpen, setIsInviteOpen] = useState(false);
 
@@ -31,7 +33,19 @@ const AdminPage = (): React.JSX.Element => {
                     <span className="text-[0.75rem] text-mist">
                         Jurys et modérateurs — accès par login/mot de passe ou Gmail
                     </span>
-                    <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={isInVocal ? leaveVocal : joinVocal}
+                            className={
+                                isInVocal
+                                    ? "flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/10 px-3.5 py-1.5 font-display text-[0.78rem] font-extrabold text-coral transition-all hover:bg-coral/20"
+                                    : "flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.07] px-3.5 py-1.5 font-display text-[0.78rem] font-extrabold text-aurora transition-all hover:bg-aurora/[0.14] hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
+                            }
+                        >
+                            <span>{isInVocal ? "📵" : "🎙️"}</span>
+                            {isInVocal ? "Quitter le vocal" : "Lancer un vocal"}
+                        </button>
                         <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
                             🛡️ Admin
                         </span>

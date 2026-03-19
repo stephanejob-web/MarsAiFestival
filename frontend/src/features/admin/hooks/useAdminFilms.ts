@@ -20,6 +20,7 @@ export interface UseAdminFilmsReturn {
     toggleAssignment: (juryId: number, filmId: number) => Promise<void>;
     autoDistribute: () => Promise<void>;
     deleteFilm: (filmId: number) => Promise<void>;
+    selectFilm: (filmId: number, selected: boolean) => Promise<void>;
     reload: () => void;
 }
 
@@ -122,6 +123,21 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         }
     };
 
+    const selectFilm = async (filmId: number, selected: boolean): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        const statut = selected ? "selectionne" : "soumis";
+        setFilms((prev) => prev.map((f) => (f.id === filmId ? { ...f, statut } : f)));
+        try {
+            await apiFetch<{ success: boolean }>(`/api/films/${filmId}`, {
+                method: "PATCH",
+                headers: authHeader,
+                body: JSON.stringify({ statut }),
+            });
+        } catch {
+            await load();
+        }
+    };
+
     const deleteFilm = async (filmId: number): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
         setFilms((prev) => prev.filter((f) => f.id !== filmId));
@@ -147,6 +163,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         toggleAssignment,
         autoDistribute,
         deleteFilm,
+        selectFilm,
         reload: load,
     };
 };
