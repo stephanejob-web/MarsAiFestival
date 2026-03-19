@@ -50,6 +50,14 @@ interface OnlineUser {
 const globalUsers = new Map<string, GlobalConnectedUser>();
 const onlineByFilm = new Map<number, Map<string, OnlineUser>>();
 
+interface VocalUser {
+    juryId: number;
+    name: string;
+    initials: string;
+    profilPicture: string | null;
+}
+const vocalUsers = new Map<string, VocalUser>();
+
 const broadcastOnline = (filmId: number): void => {
     const users = Array.from(onlineByFilm.get(filmId)?.values() ?? []);
     io.to(`film:${filmId}`).emit("discussion:online", users);
@@ -121,6 +129,30 @@ io.on("connection", (socket: Socket) => {
         io.emit("chat:message", message);
     });
 
+    // ── Vocal (vocal:*) ───────────────────────────────────────────────────────
+
+    socket.on("vocal:join", () => {
+        vocalUsers.set(socket.id, {
+            juryId: jury.id,
+            name: fullName,
+            initials,
+            profilPicture: jury.profilPicture ?? null,
+        });
+        socket.broadcast.emit("vocal:joined", {
+            name: fullName,
+            initials,
+            profilPicture: jury.profilPicture ?? null,
+        });
+        io.emit("vocal:online", Array.from(vocalUsers.values()));
+    });
+
+    socket.on("vocal:leave", () => {
+        if (!vocalUsers.has(socket.id)) return;
+        vocalUsers.delete(socket.id);
+        socket.broadcast.emit("vocal:left", { name: fullName });
+        io.emit("vocal:online", Array.from(vocalUsers.values()));
+    });
+
     // ── Discussion par film (discussion:*) ────────────────────────────────────
 
     socket.on("discussion:join", async (filmId: number) => {
@@ -188,6 +220,12 @@ io.on("connection", (socket: Socket) => {
     socket.on("disconnect", () => {
         globalUsers.delete(socket.id);
         io.emit("chat:online", Array.from(globalUsers.values()));
+
+        if (vocalUsers.has(socket.id)) {
+            vocalUsers.delete(socket.id);
+            socket.broadcast.emit("vocal:left", { name: fullName });
+            io.emit("vocal:online", Array.from(vocalUsers.values()));
+        }
 
         for (const [filmId, users] of onlineByFilm.entries()) {
             if (users.has(socket.id)) {
