@@ -91,6 +91,14 @@ export const getUnassignedFilms = async (): Promise<RowDataPacket[]> => {
     return rows;
 };
 
+export const deleteFilm = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `DELETE FROM film WHERE id = ?`,
+        [id],
+    );
+    return result.affectedRows > 0;
+};
+
 export const getFilmById = async (id: number): Promise<RowDataPacket | null> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
