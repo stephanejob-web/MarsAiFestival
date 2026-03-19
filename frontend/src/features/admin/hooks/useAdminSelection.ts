@@ -56,14 +56,15 @@ export interface UseAdminSelectionReturn {
 }
 
 export const getConsensus = (film: AdminFilmVoteSummary): Consensus => {
+    const totalJury = film.total_jury ?? film.total_assigned;
     if (film.total_votes === 0) return "attente";
-    // Tant que tous les jurés assignés n'ont pas voté → en attente
-    if (film.total_assigned > 0 && film.total_votes < film.total_assigned) return "attente";
-    // Tous ont voté
-    if (film.votes_valide === film.total_votes) return "unanime"; // unanimité valide
-    if (film.votes_refuse === film.total_votes) return "rejete"; // unanimité refuse
-    if (film.votes_valide > film.total_votes / 2) return "majorite"; // majorité valide
-    if (film.votes_refuse > film.total_votes / 2) return "rejete"; // majorité refuse
+    // Pas encore tous votés → en attente
+    if (film.total_votes < totalJury) return "attente";
+    // Tous les jurés ont voté
+    if (film.votes_valide === totalJury) return "unanime"; // unanimité valide
+    if (film.votes_refuse === totalJury) return "rejete"; // unanimité refuse
+    if (film.votes_valide > totalJury / 2) return "majorite"; // majorité valide
+    if (film.votes_refuse > totalJury / 2) return "rejete"; // majorité refuse
     return "partage";
 };
 
