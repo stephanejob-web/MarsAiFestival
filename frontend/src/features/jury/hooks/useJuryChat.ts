@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:5500";
+const SOCKET_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 export interface ChatMessage {
     id: string;
