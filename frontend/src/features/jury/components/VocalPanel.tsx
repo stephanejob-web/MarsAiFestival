@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     LiveKitRoom,
     RoomAudioRenderer,
@@ -165,9 +165,46 @@ const FullTile = ({ participant }: { participant: Participant }): React.JSX.Elem
     );
 };
 
-// ── Mini-panel flottant (coin bas-droit) ──────────────────────────────────────
+// ── Mini-panel flottant déplaçable ────────────────────────────────────────────
 const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element => {
     const [expanded, setExpanded] = useState(false);
+
+    // Position initiale : coin bas-droit
+    const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const dragging = useRef(false);
+    const dragOffset = useRef({ x: 0, y: 0 });
+
+    // Initialiser la position après le premier rendu (on connaît la taille de la fenêtre)
+    useEffect(() => {
+        if (pos === null) {
+            setPos({ x: window.innerWidth - 320, y: window.innerHeight - 280 });
+        }
+    }, [pos]);
+
+    const onPointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
+        // Ne pas déclencher le drag sur les boutons
+        if ((e.target as HTMLElement).closest("button")) return;
+        dragging.current = true;
+        dragOffset.current = {
+            x: e.clientX - (pos?.x ?? 0),
+            y: e.clientY - (pos?.y ?? 0),
+        };
+        (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    };
+
+    const onPointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+        if (!dragging.current || !panelRef.current) return;
+        const pw = panelRef.current.offsetWidth;
+        const ph = panelRef.current.offsetHeight;
+        const x = Math.min(Math.max(0, e.clientX - dragOffset.current.x), window.innerWidth - pw);
+        const y = Math.min(Math.max(0, e.clientY - dragOffset.current.y), window.innerHeight - ph);
+        setPos({ x, y });
+    };
+
+    const onPointerUp = (): void => {
+        dragging.current = false;
+    };
     const participants = useParticipants();
     const { localParticipant } = useLocalParticipant();
     const isMuted = !localParticipant.isMicrophoneEnabled;
@@ -185,12 +222,24 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
         void localParticipant.setScreenShareEnabled(!isScreenSharing);
     };
 
+    if (pos === null) return <></>;
+
     return (
-        <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
+        <div
+            ref={panelRef}
+            className="fixed z-50"
+            style={{ left: pos.x, top: pos.y }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+        >
             {/* Panel principal */}
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1117]/95 shadow-2xl backdrop-blur-md">
-                {/* Header : titre + toggle expand */}
-                <div className="flex items-center justify-between border-b border-white/[0.06] px-3 py-2">
+                {/* Header draggable */}
+                <div
+                    className="flex cursor-grab items-center justify-between border-b border-white/[0.06] px-3 py-2 active:cursor-grabbing"
+                    style={{ userSelect: "none" }}
+                >
                     <div className="flex items-center gap-2">
                         <span className="h-2 w-2 animate-pulse rounded-full bg-aurora" />
                         <span className="font-display text-[0.72rem] font-extrabold text-white-soft">
