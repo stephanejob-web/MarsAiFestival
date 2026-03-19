@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { uploadFileToS3 } from "../services/s3.service";
+import { uploadFileToS3, deleteFileFromS3, extractS3Key } from "../services/s3.service";
 import { uploadVideoToYoutube } from "../services/youtube.service";
 import { insertRealisator } from "../repositories/realisator.repository";
 import {
@@ -203,6 +203,24 @@ export const deleteFilmById = async (req: Request, res: Response): Promise<void>
         return;
     }
     try {
+        const film = await getFilmById(id);
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+
+        // Delete S3 files (non-blocking errors — DB deletion takes priority)
+        const s3Fields = ["video_url", "subtitle_fr_url", "subtitle_en_url"] as const;
+        await Promise.allSettled(
+            s3Fields
+                .map((field) => film[field] as string | null)
+                .filter((url): url is string => !!url)
+                .map((url) => {
+                    const key = extractS3Key(url);
+                    return key ? deleteFileFromS3(key) : Promise.resolve();
+                }),
+        );
+
         const deleted = await deleteFilm(id);
         if (!deleted) {
             res.status(404).json({ success: false, message: "Film introuvable." });
