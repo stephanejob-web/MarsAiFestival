@@ -73,6 +73,7 @@ export interface AdminFilmVoteSummary {
     votes_refuse: number;
     votes_discussion: number;
     total_assigned: number;
+    total_jury: number;
     total_comments: number;
     total_tickets: number;
     jury_decisions: JuryDecision[] | null;
