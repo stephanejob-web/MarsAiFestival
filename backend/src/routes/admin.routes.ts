@@ -9,6 +9,8 @@ import {
     editUser,
     toggleUserStatus,
     removeUser,
+    startAdminVocal,
+    stopAdminVocal,
 } from "../controllers/admin.controller";
 
 const router = Router();
@@ -36,5 +38,11 @@ router.patch("/users/:id", requireAdmin, editUser);
 router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
 // DELETE /api/admin/users/:id
 router.delete("/users/:id", requireAdmin, removeUser);
+
+// ── Vocal admin ───────────────────────────────────────────────────────────────
+// POST /api/admin/vocal/start
+router.post("/vocal/start", requireAdmin, startAdminVocal);
+// POST /api/admin/vocal/stop
+router.post("/vocal/stop", requireAdmin, stopAdminVocal);
 
 export default router;

@@ -9,7 +9,7 @@ import {
     getRecentGlobalMessages,
 } from "./repositories/globalMessage.repository";
 
-const PORT = process.env.PORT || 5500;
+const PORT = Number(process.env.PORT) || 5500;
 const JWT_SECRET = process.env.JWT_SECRET ?? "secret";
 
 const httpServer = http.createServer(app);
@@ -57,6 +57,9 @@ interface VocalUser {
     profilPicture: string | null;
 }
 const vocalUsers = new Map<string, VocalUser>();
+
+// Expose vocalUsers pour les routes HTTP admin
+app.locals.vocalUsers = vocalUsers;
 
 const broadcastOnline = (filmId: number): void => {
     const users = Array.from(onlineByFilm.get(filmId)?.values() ?? []);
