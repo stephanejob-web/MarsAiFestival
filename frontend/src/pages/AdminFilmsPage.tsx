@@ -1,5 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
+import { apiFetch } from "../services/api";
+
+const getToken = (): string => localStorage.getItem("jury_token") ?? "";
+
+interface PresignedVideoProps {
+    filmId: number;
+}
+
+const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
+    const [src, setSrc] = useState<string | null>(null);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        apiFetch<{ success: boolean; url: string }>(`/api/films/${filmId}/video-url`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
+            .then((res) => { if (res.success) setSrc(res.url); else setError(true); })
+            .catch(() => setError(true));
+    }, [filmId]);
+
+    if (error) return <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-coral">Vidéo inaccessible</div>;
+    if (!src) return <div className="flex aspect-video w-full items-center justify-center bg-black text-[0.78rem] text-mist">Chargement…</div>;
+    return <video src={src} controls autoPlay preload="auto" className="aspect-video w-full object-cover" />;
+};
 
 const CARD_ACCENTS = [
     "#4effce",
@@ -293,13 +317,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
                                                 <div className="bg-black">
-                                                    <video
-                                                        src={film.video_url}
-                                                        controls
-                                                        autoPlay
-                                                        preload="auto"
-                                                        className="aspect-video w-full object-cover"
-                                                    />
+                                                    <PresignedVideo filmId={film.id} />
                                                 </div>
                                             ) : (
                                                 <div
