@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useDiscussionSocket from "../hooks/useDiscussionSocket";
+import useDiscussionNotify from "../hooks/useDiscussionNotify";
+import useSharedDiscussion from "../hooks/useSharedDiscussion";
 import useJuryUser from "../hooks/useJuryUser";
 
 interface DiscuterViewProps {
@@ -29,17 +31,48 @@ const avatarColor = (juryId: number): string => AVATAR_COLORS[juryId % AVATAR_CO
 
 const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
     const currentUser = useJuryUser();
-    const discussFilms = panel.films.filter((f) => f.myDecision === "discuter");
+    const { films: sharedFilms } = useSharedDiscussion();
 
-    const defaultFilm = discussFilms.find((f) => f.id === panel.activeFilmId) ?? discussFilms[0];
-    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(
-        defaultFilm?.id ?? discussFilms[0]?.id ?? null,
-    );
+    // Convertir les films partagés au même format que JuryFilm pour la compatibilité
+    const discussFilms = sharedFilms.map((f) => ({
+        id: f.film_id,
+        title: f.original_title,
+        author: `${f.realisator_first} ${f.realisator_last}`,
+        country: f.realisator_country ?? "—",
+        year: String(f.film_year ?? 2026),
+        videoUrl: f.video_url ?? null,
+        myDecision: "discuter" as const,
+        // champs requis par JuryFilm mais non utilisés dans DiscuterView
+        duration: f.duration
+            ? `${Math.floor(f.duration / 60)}:${String(f.duration % 60).padStart(2, "0")}`
+            : "—",
+        format: f.ia_class === "full" ? "Full IA" : "Hybride",
+        subtitles: f.subtitle_fr_url ? "FR" : f.subtitle_en_url ? "EN" : "—",
+        copyright: "Vérifié",
+        tools: f.tech_stack ?? "—",
+        iaScenario: f.ia_scenario ? "Oui" : "Non",
+        iaImage: f.ia_image ? "Oui" : "Non",
+        iaPost: f.ia_post ? "Oui" : "Non",
+        note: f.creative_workflow ?? "",
+        comments: [],
+        opinions: [],
+        votes: [],
+    }));
+
+    const firstFilmId = discussFilms[0]?.id ?? null;
+    const [selectedFilmId, setSelectedFilmId] = useState<number | null>(firstFilmId);
+    const { unreadCounts, clearUnread } = useDiscussionNotify(selectedFilmId);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
+    // Auto-sélectionner le premier film quand la liste se charge (était vide)
+    useEffect(() => {
+        if (selectedFilmId === null && firstFilmId !== null) {
+            setSelectedFilmId(firstFilmId); // eslint-disable-line react-hooks/set-state-in-effect
+        }
+    }, [firstFilmId, selectedFilmId]);
 
+    const selectedFilm = discussFilms.find((f) => f.id === selectedFilmId) ?? null;
     const { messages, onlineUsers, sendMessage, isConnected } = useDiscussionSocket(selectedFilmId);
 
     useEffect(() => {
@@ -90,7 +123,10 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                         >
                             <button
                                 type="button"
-                                onClick={() => setSelectedFilmId(film.id)}
+                                onClick={() => {
+                                    setSelectedFilmId(film.id);
+                                    clearUnread(film.id);
+                                }}
                                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
                             >
                                 <div
@@ -99,8 +135,15 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                     {emoji}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <div className="truncate text-[0.78rem] font-semibold">
-                                        {film.title}
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="truncate text-[0.78rem] font-semibold">
+                                            {film.title}
+                                        </span>
+                                        {(unreadCounts[film.id] ?? 0) > 0 && (
+                                            <span className="flex-shrink-0 rounded-full bg-yellow-400 px-1.5 font-mono text-[0.6rem] font-bold text-deep-sky">
+                                                {unreadCounts[film.id]}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="mt-0.5 text-[0.65rem] text-mist">
                                         {film.author}

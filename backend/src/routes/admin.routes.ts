@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAdmin } from "../middlewares/auth.middleware";
 import {
+    listAdminFilms,
     listS3Videos,
     sendInvite,
     verifyInvite,
@@ -8,9 +9,17 @@ import {
     editUser,
     toggleUserStatus,
     removeUser,
+    banUser,
+    unbanUser,
+    startAdminVocal,
+    stopAdminVocal,
 } from "../controllers/admin.controller";
 
 const router = Router();
+
+// ── Films (avec URLs pré-signées) ─────────────────────────────────────────────
+// GET  /api/admin/films
+router.get("/films", requireAdmin, listAdminFilms);
 
 // ── Vidéos S3 ────────────────────────────────────────────────────────────────
 // GET  /api/admin/videos
@@ -29,7 +38,17 @@ router.get("/users", requireAdmin, listUsers);
 router.patch("/users/:id", requireAdmin, editUser);
 // PATCH  /api/admin/users/:id/status
 router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
+// POST   /api/admin/users/:id/ban
+router.post("/users/:id/ban", requireAdmin, banUser);
+// POST   /api/admin/users/:id/unban
+router.post("/users/:id/unban", requireAdmin, unbanUser);
 // DELETE /api/admin/users/:id
 router.delete("/users/:id", requireAdmin, removeUser);
+
+// ── Vocal admin ───────────────────────────────────────────────────────────────
+// POST /api/admin/vocal/start
+router.post("/vocal/start", requireAdmin, startAdminVocal);
+// POST /api/admin/vocal/stop
+router.post("/vocal/stop", requireAdmin, stopAdminVocal);
 
 export default router;

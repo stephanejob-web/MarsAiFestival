@@ -264,7 +264,7 @@ CREATE TABLE jury (
   last_name        VARCHAR(255) NOT NULL,
   email            VARCHAR(255) NOT NULL,
   password_hash    VARCHAR(255) NOT NULL,
-  role             ENUM('jury', 'admin') NOT NULL DEFAULT 'jury',
+  role             ENUM('jury', 'admin', 'moderateur') NOT NULL DEFAULT 'jury',
   is_active        BOOLEAN NOT NULL DEFAULT TRUE,
   google_id        VARCHAR(255) DEFAULT NULL,
   profil_picture   VARCHAR(500) DEFAULT NULL,

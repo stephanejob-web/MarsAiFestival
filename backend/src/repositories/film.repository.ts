@@ -63,7 +63,7 @@ export const getFilms = async (): Promise<RowDataPacket[]> => {
             f.id, f.dossier_num, f.original_title, f.english_title,
             f.language, f.tags, f.original_synopsis, f.poster_img,
             f.duration, f.ia_class, f.ia_image, f.ia_son, f.ia_scenario, f.ia_post,
-            f.statut, f.created_at,
+            f.statut, f.video_url, f.created_at,
             r.first_name, r.last_name, r.email AS realisator_email, r.country
          FROM film f
          JOIN realisator r ON r.id = f.realisator_id
@@ -74,7 +74,16 @@ export const getFilms = async (): Promise<RowDataPacket[]> => {
 
 export const updateFilmStatut = async (
     id: number,
-    statut: "to_review" | "valide" | "arevoir" | "refuse" | "in_discussion" | "asked_to_modify",
+    statut:
+        | "to_review"
+        | "valide"
+        | "arevoir"
+        | "refuse"
+        | "in_discussion"
+        | "asked_to_modify"
+        | "soumis"
+        | "selectionne"
+        | "finaliste",
 ): Promise<boolean> => {
     const [result] = await pool.execute<ResultSetHeader>(
         `UPDATE film SET statut = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
@@ -89,6 +98,11 @@ export const getUnassignedFilms = async (): Promise<RowDataPacket[]> => {
          WHERE f.id NOT IN (SELECT DISTINCT film_id FROM jury_film_assignment)`,
     );
     return rows;
+};
+
+export const deleteFilm = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM film WHERE id = ?`, [id]);
+    return result.affectedRows > 0;
 };
 
 export const getFilmById = async (id: number): Promise<RowDataPacket | null> => {

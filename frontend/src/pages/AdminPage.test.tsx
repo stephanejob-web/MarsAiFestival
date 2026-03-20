@@ -1,36 +1,51 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import AdminPage from "./AdminPage";
-import { ADMIN_LABELS } from "../features/admin/constants";
+import * as useAdminUsersModule from "../features/admin/hooks/useAdminUsers";
+
+const mockUseAdminUsers = vi.spyOn(useAdminUsersModule, "default");
 
 describe("AdminPage", () => {
-    it("affiche le titre du panneau admin", () => {
-        render(
-            <MemoryRouter>
-                <AdminPage />
-            </MemoryRouter>,
-        );
-        expect(screen.getByText(ADMIN_LABELS.ADMIN_PANEL)).toBeDefined();
+    beforeEach(() => {
+        mockUseAdminUsers.mockReturnValue({
+            users: [],
+            isLoading: false,
+            error: null,
+            toggleStatus: vi.fn(),
+        });
     });
 
-    it("affiche le message de bienvenue", () => {
+    it("affiche le titre de la vue utilisateurs", () => {
         render(
             <MemoryRouter>
                 <AdminPage />
             </MemoryRouter>,
         );
-        expect(screen.getByText(ADMIN_LABELS.WELCOME_MESSAGE)).toBeDefined();
+        expect(screen.getByRole("heading")).toBeDefined();
     });
 
-    it("contient un lien de retour à l'accueil", () => {
+    it("affiche le bouton d'invitation", () => {
         render(
             <MemoryRouter>
                 <AdminPage />
             </MemoryRouter>,
         );
-        const link = screen.getByRole("link", { name: ADMIN_LABELS.RETURN_HOME });
-        expect(link).toBeDefined();
-        expect(link.getAttribute("href")).toBe("/");
+        expect(screen.getByRole("button", { name: /Inviter un membre/i })).toBeDefined();
+    });
+
+    it("affiche l'état de chargement au montage", () => {
+        mockUseAdminUsers.mockReturnValue({
+            users: [],
+            isLoading: true,
+            error: null,
+            toggleStatus: vi.fn(),
+        });
+        render(
+            <MemoryRouter>
+                <AdminPage />
+            </MemoryRouter>,
+        );
+        expect(screen.getByText("Chargement…")).toBeDefined();
     });
 });

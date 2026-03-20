@@ -72,24 +72,61 @@ info:
 
     ---
 
-    ## Chat jury (Socket.IO)
+    ## Temps réel — Socket.IO
 
-    Le chat en temps réel entre jurés utilise **Socket.IO** (non documenté ici car hors REST).
-    Le serveur écoute sur le même port que l'API.
+    Toutes les fonctionnalités temps réel utilisent **Socket.IO** sur le même port que l'API.
+    L'authentification se fait via `socket.handshake.auth.token` (JWT juré ou admin).
 
-    | Événement émis | Description |
-    |---|---|
-    | `chat:join` | Rejoindre le chat avec `{ author, initials, profilPicture }` |
-    | `chat:send` | Envoyer un message avec `{ author, initials, profilPicture, text }` |
+    ---
 
-    | Événement reçu | Description |
-    |---|---|
-    | `chat:history` | Historique des 100 derniers messages (à la connexion) |
-    | `chat:message` | Nouveau message diffusé à tous |
-    | `chat:online` | Liste des jurés connectés (mise à jour en temps réel) |
+    ### Chat global (`chat:*`) — persisté en base
 
-    > Le chat est **éphémère** : les messages sont en mémoire et perdus au redémarrage du serveur.
-    > Les commentaires sur les films, eux, sont persistants en base de données.
+    | Événement **émis** (client → serveur) | Payload | Description |
+    |---|---|---|
+    | `chat:join` | — | Rejoindre le chat global (apparaît dans `chat:online`) |
+    | `chat:send` | `{ text: string }` | Envoyer un message |
+
+    | Événement **reçu** (serveur → client) | Payload | Description |
+    |---|---|---|
+    | `chat:history` | `ChatMessage[]` | 100 derniers messages (à la connexion) |
+    | `chat:message` | `ChatMessage` | Nouveau message diffusé à tous |
+    | `chat:online` | `ConnectedUser[]` | Liste mise à jour des jurés connectés |
+
+    ---
+
+    ### Vocal jury (`vocal:*`) — état en mémoire
+
+    | Événement **émis** (client → serveur) | Payload | Description |
+    |---|---|---|
+    | `vocal:join` | — | Rejoindre le salon vocal LiveKit |
+    | `vocal:leave` | — | Quitter le salon vocal |
+
+    | Événement **reçu** (serveur → client) | Payload | Description |
+    |---|---|---|
+    | `vocal:started` | `{ name, initials, profilPicture }` | Premier participant — salon ouvert |
+    | `vocal:joined` | `{ name, initials, profilPicture }` | Quelqu'un rejoint un vocal déjà actif |
+    | `vocal:left` | `{ name }` | Un participant a quitté le vocal |
+    | `vocal:online` | `VocalUser[]` | Liste complète des participants en temps réel |
+
+    > L'admin peut rejoindre/quitter via `POST /api/admin/vocal/start` et `stop` (HTTP, pas socket).
+
+    ---
+
+    ### Discussion par film (`discussion:*`) — persisté en base
+
+    | Événement **émis** (client → serveur) | Payload | Description |
+    |---|---|---|
+    | `discussion:join` | `filmId: number` | Rejoindre la salle de discussion d'un film |
+    | `discussion:leave` | `filmId: number` | Quitter la salle de discussion |
+    | `discussion:send` | `{ filmId, message }` | Envoyer un message dans la discussion |
+
+    | Événement **reçu** (serveur → client) | Payload | Description |
+    |---|---|---|
+    | `discussion:history` | `MessageRow[]` | Historique des messages du film (à `discussion:join`) |
+    | `discussion:message` | `MessageRow` | Nouveau message diffusé aux membres de la salle |
+    | `discussion:online` | `OnlineUser[]` | Jurés actuellement dans la salle du film |
+    | `discussion:notify` | `{ filmId, author }` | Notification de nouveau message (diffusé à tous) |
+    | `discussion-list:updated` | `DiscussionFilm[]` | Liste partagée mise à jour (ajout/retrait d'un film) |
 
   version: 1.0.0
   contact:
@@ -114,8 +151,13 @@ tags:
       Un vote `arevoir` ou `refuse` avec un message envoie automatiquement un email au réalisateur.
   - name: Commentaires
     description: |
-      Commentaires persistants des jurés sur les films, visibles par tous les membres du jury.
-      Un juré a un seul commentaire par film (modifiable).
+      Deux systèmes de commentaires coexistent :
+
+      **Commentaire d'évaluation** (`/api/comments`) — upsert, **un seul par juré par film**, lié au vote.
+      Modifiable à tout moment. Stocké dans `jury_film_commentary`.
+
+      **Commentaires libres** (`/api/comments/film`) — **plusieurs par juré par film**, sans limite.
+      Chaque envoi crée une nouvelle entrée. Stocké dans `jury_film_comment`.
   - name: Discussion
     description: |
       Liste partagée des films mis en discussion par les jurés.
@@ -138,6 +180,11 @@ tags:
     description: |
       Routes réservées à l'admin : gestion des utilisateurs (jurés/admins),
       visualisation des vidéos S3, envoi d'invitations par email.
+  - name: Étiquettes
+    description: |
+      Étiquettes (tags) affichées dans les popups « À revoir » et « Refuser » du jury.
+      Gérées par l'admin depuis `/admin/tags`. Les jurés voient uniquement les étiquettes actives.
+      Stockées dans la table `vote_tags`.
 
 components:
   securitySchemes:
@@ -171,6 +218,48 @@ components:
           type: string
           description: Détail technique (présent en cas d'erreur serveur 500)
 
+    VoteTag:
+      type: object
+      description: Étiquette de décision affichée dans les popups jury
+      properties:
+        id:
+          type: integer
+          example: 1
+        key:
+          type: string
+          description: Identifiant unique, immuable après création
+          example: "rights"
+        label:
+          type: string
+          description: Texte affiché sur l'étiquette
+          example: "Droits musicaux"
+        icon:
+          type: string
+          description: Emoji de l'étiquette
+          example: "🎵"
+        color:
+          type: string
+          description: Classe de couleur Tailwind CSS utilisée dans l'interface
+          enum: [aurora, solar, coral, lavande, mist]
+          example: "aurora"
+        message_template:
+          type: string
+          nullable: true
+          description: Texte pré-rempli automatiquement dans la zone de message lorsque ce tag est sélectionné
+          example: "Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux.\n\nCordialement,\nLe jury marsAI Festival 2026"
+        is_active:
+          type: boolean
+          description: Si false, l'étiquette n'apparaît pas pour les jurés
+          example: true
+        sort_order:
+          type: integer
+          description: Ordre d'affichage (croissant)
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-20T13:16:02.000Z"
+
     JuryUser:
       type: object
       description: Profil d'un juré ou admin connecté (contenu du token JWT)
@@ -190,7 +279,7 @@ components:
           example: Martin
         role:
           type: string
-          enum: [jury, admin]
+          enum: [jury, admin, moderateur]
           description: "`jury` = évaluateur | `admin` = accès complet"
           example: jury
         profilPicture:
@@ -299,7 +388,7 @@ components:
 
     Comment:
       type: object
-      description: Commentaire d'un juré sur un film (persistant en BDD, visible par tout le jury)
+      description: Commentaire d'évaluation d'un juré (upsert — un seul par juré par film, lié au vote)
       properties:
         comment_id:
           type: integer
@@ -322,6 +411,31 @@ components:
           type: string
           nullable: true
           description: Vote associé du juré sur ce film (si renseigné)
+
+    FilmComment:
+      type: object
+      description: Commentaire libre d'un juré sur un film (plusieurs par juré par film)
+      properties:
+        id:
+          type: integer
+          description: Identifiant unique du commentaire
+        jury_id:
+          type: integer
+        film_id:
+          type: integer
+        text:
+          type: string
+          description: Texte du commentaire
+        created_at:
+          type: string
+          format: date-time
+        first_name:
+          type: string
+        last_name:
+          type: string
+        profil_picture:
+          type: string
+          nullable: true
 
     Ticket:
       type: object
@@ -1220,6 +1334,53 @@ paths:
   # ════════════════════════════════════════════════════════════════
   # VOTES
   # ════════════════════════════════════════════════════════════════
+  /api/films/{id}/email:
+    post:
+      tags: [Films]
+      summary: Envoyer un email au réalisateur d'un film 🛡️
+      description: |
+        Permet à l'admin d'envoyer un email personnalisé au réalisateur d'un film
+        directement depuis le panneau de détail du film.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, message]
+              properties:
+                subject:
+                  type: string
+                  example: "Votre film au Mars AI Festival"
+                message:
+                  type: string
+                  example: "Bonjour, nous avons bien reçu votre film..."
+      responses:
+        "200":
+          description: Email envoyé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Sujet ou message manquant
+        "404":
+          description: Film introuvable ou réalisateur sans email
+
   /api/votes:
     post:
       tags: [Votes]
@@ -1486,16 +1647,16 @@ paths:
   /api/comments/mine:
     get:
       tags: [Commentaires]
-      summary: Tous mes commentaires (bulk) 🔒
+      summary: Tous mes commentaires d'évaluation (bulk) 🔒
       description: |
-        Retourne en une seule requête tous les commentaires rédigés par le juré connecté,
-        indexés par `film_id`. Utilisé au chargement du panel jury pour pré-remplir
+        Retourne en une seule requête tous les commentaires d'évaluation rédigés par le juré connecté
+        (upsert — un par film). Utilisé au chargement du panel jury pour pré-remplir
         les zones de texte de chaque film sans multiplier les requêtes.
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Liste des commentaires du juré connecté
+          description: Liste des commentaires d'évaluation du juré connecté
           content:
             application/json:
               schema:
@@ -1514,6 +1675,129 @@ paths:
                         text:
                           type: string
                           description: Texte du commentaire
+        "401":
+          description: Token manquant ou invalide
+
+  /api/comments/film:
+    post:
+      tags: [Commentaires]
+      summary: Ajouter un commentaire libre sur un film 🔒
+      description: |
+        Un juré publie un commentaire libre sur un film.
+        Contrairement à `POST /api/comments`, **il n'y a pas de limite** : le même juré peut
+        poster autant de commentaires qu'il le souhaite sur le même film.
+        Chaque envoi crée une nouvelle entrée dans `jury_film_comment`.
+
+        Les commentaires sont visibles par tous les membres du jury et par l'admin.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filmId, text]
+              properties:
+                filmId:
+                  type: integer
+                  description: ID du film commenté
+                  example: 5
+                text:
+                  type: string
+                  description: Texte du commentaire (non vide)
+                  example: La scène d'introduction est vraiment remarquable, l'IA est utilisée de façon très naturelle.
+      responses:
+        "201":
+          description: Commentaire ajouté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID du nouveau commentaire créé
+        "400":
+          description: filmId ou text manquants / text vide
+        "401":
+          description: Token manquant ou invalide
+
+    get:
+      tags: [Commentaires]
+      summary: Commentaires libres d'un film 🔒
+      description: |
+        Retourne tous les commentaires libres publiés sur un film par les jurés,
+        avec les informations du juré (nom, photo de profil).
+        Triés par date de création croissante (du plus ancien au plus récent).
+
+        Inclut potentiellement plusieurs commentaires du même juré.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: ID du film dont on veut les commentaires
+      responses:
+        "200":
+          description: Liste des commentaires libres avec infos juré
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FilmComment"
+        "400":
+          description: filmId manquant ou invalide
+        "401":
+          description: Token manquant ou invalide
+
+  /api/comments/film/mine:
+    get:
+      tags: [Commentaires]
+      summary: Mes commentaires libres (tous films) 🔒
+      description: |
+        Retourne tous les commentaires libres postés par le juré connecté,
+        sur tous ses films, triés par date de création croissante.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des commentaires libres du juré connecté
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        film_id:
+                          type: integer
+                        text:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
         "401":
           description: Token manquant ou invalide
 
@@ -1619,6 +1903,139 @@ paths:
           description: Film non trouvé dans la liste de discussion
         "401":
           description: Token manquant ou invalide
+
+  /api/discussion/films:
+    get:
+      tags: [Discussion]
+      summary: Films complets de la liste de discussion 🔒
+      description: |
+        Retourne les détails complets (titre, réalisateur, vidéo, durée, etc.) de tous les films
+        dans la liste de discussion partagée.
+
+        Les URLs vidéo S3 sont remplacées par des **URLs présignées** (valables 1 heure)
+        permettant la lecture directe sans authentification S3.
+
+        Cette route est utilisée par la vue « À discuter » du panel juré pour afficher
+        la liste commune à tous les jurés en temps réel.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Films complets avec URLs présignées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        film_id:
+                          type: integer
+                          example: 12
+                        original_title:
+                          type: string
+                          example: "La Ultima Conexion"
+                        dossier_num:
+                          type: string
+                          example: "MAI-2026-10012"
+                        video_url:
+                          type: string
+                          nullable: true
+                          description: URL présignée S3 (1h) ou null si pas de vidéo
+                          example: "https://s3.fr-par.scw.cloud/tln/grp1/...?X-Amz-Signature=..."
+                        duration:
+                          type: integer
+                          nullable: true
+                          description: Durée en secondes
+                        ia_class:
+                          type: string
+                          enum: [full, hybrid]
+                          nullable: true
+                        film_year:
+                          type: integer
+                          nullable: true
+                        realisator_first:
+                          type: string
+                        realisator_last:
+                          type: string
+                        realisator_country:
+                          type: string
+                          nullable: true
+                        added_by_first:
+                          type: string
+                          description: Prénom du juré qui a ajouté le film
+                        added_by_last:
+                          type: string
+                          description: Nom du juré qui a ajouté le film
+        "401":
+          description: Token manquant ou invalide
+
+  /api/discussion/messages/{filmId}:
+    get:
+      tags: [Discussion]
+      summary: Historique des messages de discussion d'un film 🛡️
+      description: |
+        Retourne tous les messages de discussion (Socket.IO `discussion:send`) enregistrés
+        en base pour un film donné. Triés par date croissante.
+
+        Utilisé par l'admin dans la vue « Sélection & Votes » pour voir les échanges du jury
+        sur chaque film, sans avoir à rejoindre la session Socket.IO.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filmId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      responses:
+        "200":
+          description: Liste des messages de discussion du film
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        film_id:
+                          type: integer
+                        jury_id:
+                          type: integer
+                        jury_name:
+                          type: string
+                        jury_initials:
+                          type: string
+                        profil_picture:
+                          type: string
+                          nullable: true
+                        message:
+                          type: string
+                        sent_at:
+                          type: string
+                          format: date-time
+        "400":
+          description: filmId invalide
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle admin requis
 
   # ════════════════════════════════════════════════════════════════
   # ATTRIBUTIONS
@@ -1738,6 +2155,97 @@ paths:
                     example: "12 film(s) réparti(s) entre 4 juré(s)."
         "400":
           description: Aucun juré actif disponible pour l'attribution
+
+  /api/assignments/assign-all:
+    post:
+      tags: [Attributions]
+      summary: Assigner tous les films à tous les jurés 🛡️
+      description: |
+        Crée une assignation entre **chaque film** et **chaque juré actif**.
+        Les doublons (paires déjà existantes) sont silencieusement ignorés.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Assignations créées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  assigned:
+                    type: integer
+                    description: Nombre d'assignations nouvellement créées
+                    example: 48
+                  pairs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        juryId:
+                          type: integer
+                        filmId:
+                          type: integer
+                  message:
+                    type: string
+                    example: "48 assignation(s) créée(s) pour 6 juré(s)."
+        "400":
+          description: Aucun juré actif disponible
+
+  /api/assignments/batch:
+    delete:
+      tags: [Attributions]
+      summary: Supprimer plusieurs assignations en une fois 🛡️
+      description: |
+        Annule un ensemble de paires jury/film en une seule requête.
+        Utilisé notamment pour annuler une répartition automatique.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pairs]
+              properties:
+                pairs:
+                  type: array
+                  items:
+                    type: object
+                    required: [juryId, filmId]
+                    properties:
+                      juryId:
+                        type: integer
+                      filmId:
+                        type: integer
+            example:
+              pairs:
+                - juryId: 2
+                  filmId: 10
+                - juryId: 3
+                  filmId: 11
+      responses:
+        "200":
+          description: Assignations supprimées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  removed:
+                    type: integer
+                    example: 2
+        "400":
+          description: Aucune paire fournie
 
   /api/assignments/jury-members:
     get:
@@ -2125,6 +2633,88 @@ paths:
   # ════════════════════════════════════════════════════════════════
   # ADMINISTRATION
   # ════════════════════════════════════════════════════════════════
+  /api/admin/films:
+    get:
+      tags: [Administration]
+      summary: Lister tous les films avec URLs vidéo pré-signées 🛡️
+      description: |
+        Retourne la liste complète des films soumis, enrichie d'URLs vidéo **pré-signées Scaleway S3**
+        valables **1 heure**.
+
+        Contrairement à `GET /api/films` (usage public), cet endpoint :
+        - Inclut le champ `video_url` avec une URL pré-signée (lecture directe sans credentials)
+        - Est réservé aux admins (token JWT requis avec `role: "admin"`)
+
+        Si la génération d'URL pré-signée échoue pour un film, l'URL brute S3 est conservée
+        en fallback (pas d'erreur bloquante).
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des films avec URLs pré-signées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        dossier_num:
+                          type: string
+                          example: MAI-2026-00012
+                        original_title:
+                          type: string
+                          example: Lumières Artificielles
+                        english_title:
+                          type: string
+                          nullable: true
+                          example: Artificial Lights
+                        statut:
+                          type: string
+                          enum: [to_review, valide, arevoir, refuse, in_discussion, asked_to_modify]
+                          example: to_review
+                        duration:
+                          type: integer
+                          nullable: true
+                          description: Durée en secondes
+                          example: 483
+                        video_url:
+                          type: string
+                          nullable: true
+                          description: URL pré-signée S3 valable 1 heure (null si pas de vidéo uploadée)
+                          example: https://s3.fr-par.scw.cloud/tln/grp1/MAI-2026-00012/video-film.mp4?X-Amz-Signature=...
+                        first_name:
+                          type: string
+                          description: Prénom du réalisateur
+                          example: Jean
+                        last_name:
+                          type: string
+                          description: Nom du réalisateur
+                          example: Dupont
+                        country:
+                          type: string
+                          example: France
+                        created_at:
+                          type: string
+                          format: date-time
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant (admin requis)
+        "500":
+          description: Erreur serveur
+
   /api/admin/users:
     get:
       tags: [Administration]
@@ -2164,7 +2754,7 @@ paths:
                           type: string
                         role:
                           type: string
-                          enum: [jury, admin]
+                          enum: [jury, admin, moderateur]
                         is_active:
                           type: boolean
                           description: Compte actif ou désactivé
@@ -2217,7 +2807,7 @@ paths:
                   example: Martin
                 role:
                   type: string
-                  enum: [jury, admin]
+                  enum: [jury, admin, moderateur]
                   description: Changer le rôle (jury ↔ admin)
                 juryDescription:
                   type: string
@@ -2310,6 +2900,44 @@ paths:
         "404":
           description: Utilisateur introuvable
 
+  /api/admin/users/{id}/ban:
+    post:
+      tags: [Administration]
+      summary: Bannir un utilisateur en temps réel 🛡️
+      description: |
+        Désactive immédiatement le compte de l'utilisateur **et** envoie un événement
+        Socket.IO `user:banned` à tous ses sockets actifs.
+
+        L'utilisateur reçoit une modale "Accès suspendu" instantanément, son token
+        est supprimé côté client et il est redirigé vers la page d'accueil.
+
+        > Fonctionne même si l'utilisateur est en train de naviguer ou de regarder une vidéo.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur à bannir
+      responses:
+        "200":
+          description: Utilisateur banni — événement socket émis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: ID invalide
+        "500":
+          description: Erreur serveur
+
   /api/admin/invite:
     post:
       tags: [Administration]
@@ -2343,7 +2971,7 @@ paths:
                   example: pierre.dupont@email.com
                 role:
                   type: string
-                  enum: [jury, admin]
+                  enum: [jury, admin, moderateur]
                   description: Rôle qui sera attribué lors de la création du compte
             examples:
               invite_jury:
@@ -2398,10 +3026,71 @@ paths:
                     example: pierre.dupont@email.com
                   role:
                     type: string
-                    enum: [jury, admin]
+                    enum: [jury, admin, moderateur]
                     description: Rôle qui sera attribué au compte
         "401":
           description: Token invalide, malformé ou expiré (après 48h)
+
+  /api/admin/vocal/start:
+    post:
+      tags: [Administration]
+      summary: Lancer un vocal depuis l'interface admin 🛡️
+      description: |
+        Permet à l'admin de rejoindre le salon vocal et de notifier tous les jurés connectés.
+
+        Contrairement aux jurés (qui utilisent Socket.IO `vocal:join`), l'admin utilise cette route HTTP
+        car sa connexion Socket.IO n'est pas toujours établie.
+
+        **Comportement :**
+        - Si le salon vocal est vide → émet `vocal:started` à tous les sockets (notification de lancement)
+        - Si le salon vocal a déjà des participants → émet `vocal:joined` (notification de participation)
+        - Dans les deux cas → émet `vocal:online` avec la liste des participants mise à jour
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Admin ajouté au salon vocal, jurés notifiés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle admin requis
+
+  /api/admin/vocal/stop:
+    post:
+      tags: [Administration]
+      summary: Quitter le vocal depuis l'interface admin 🛡️
+      description: |
+        Retire l'admin du salon vocal et notifie tous les jurés connectés.
+        Émet `vocal:left` puis `vocal:online` à tous les sockets.
+
+        > Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Admin retiré du salon vocal, jurés notifiés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle admin requis
 
   /api/admin/videos:
     get:
@@ -2468,3 +3157,209 @@ paths:
                           description: Date de dernier upload sur S3
         "500":
           description: Impossible de contacter le bucket S3 (credentials manquants ou réseau)
+
+  # ── Étiquettes jury (/api/vote-tags) ──────────────────────────────────────
+  /api/vote-tags:
+    get:
+      tags: [Étiquettes]
+      summary: Lister les étiquettes actives 🔒
+      description: |
+        Retourne la liste des étiquettes actives (`is_active = true`) triées par `sort_order`.
+        Utilisé par le jury dans les popups « À revoir » et « Refuser ».
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des étiquettes actives
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoteTag"
+        "401":
+          description: Token manquant ou invalide
+
+    post:
+      tags: [Étiquettes]
+      summary: Créer une étiquette 🛡️
+      description: Crée une nouvelle étiquette de décision. Nécessite le rôle `admin`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, label, icon, color]
+              properties:
+                key:
+                  type: string
+                  description: Identifiant unique (sans espace, snake_case)
+                  example: "sous_titres"
+                label:
+                  type: string
+                  description: Texte affiché sur l'étiquette
+                  example: "Sous-titres manquants"
+                icon:
+                  type: string
+                  description: Emoji de l'étiquette
+                  example: "💬"
+                color:
+                  type: string
+                  enum: [aurora, solar, coral, lavande, mist]
+                  example: "solar"
+                sortOrder:
+                  type: integer
+                  description: Ordre d'affichage (0 = premier)
+                  example: 5
+                messageTemplate:
+                  type: string
+                  nullable: true
+                  description: Texte pré-rempli automatiquement lorsque ce tag est sélectionné
+                  example: "Bonjour,\n\nVotre film présente un problème de sous-titres.\n\nCordialement,\nLe jury marsAI Festival 2026"
+      responses:
+        "201":
+          description: Étiquette créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 6
+        "400":
+          description: Champs manquants
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/vote-tags/all:
+    get:
+      tags: [Étiquettes]
+      summary: Lister toutes les étiquettes (actives + inactives) 🛡️
+      description: |
+        Retourne toutes les étiquettes, y compris les inactives.
+        Réservé à l'admin pour la gestion depuis `/admin/tags`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Toutes les étiquettes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VoteTag"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/vote-tags/{id}:
+    patch:
+      tags: [Étiquettes]
+      summary: Modifier une étiquette 🛡️
+      description: |
+        Modifie le label, l'icône, la couleur, le statut actif et l'ordre d'une étiquette.
+        Pour désactiver sans supprimer, passer `isActive: false`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [label, icon, color]
+              properties:
+                label:
+                  type: string
+                  example: "Droits musicaux"
+                icon:
+                  type: string
+                  example: "🎵"
+                color:
+                  type: string
+                  enum: [aurora, solar, coral, lavande, mist]
+                  example: "aurora"
+                isActive:
+                  type: boolean
+                  example: true
+                sortOrder:
+                  type: integer
+                  example: 0
+                messageTemplate:
+                  type: string
+                  nullable: true
+                  description: Texte pré-rempli automatiquement lorsque ce tag est sélectionné
+                  example: "Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux.\n\nCordialement,\nLe jury marsAI Festival 2026"
+      responses:
+        "200":
+          description: Étiquette modifiée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Champs manquants
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    delete:
+      tags: [Étiquettes]
+      summary: Supprimer une étiquette 🛡️
+      description: |
+        Supprime définitivement une étiquette. Pour la désactiver temporairement,
+        préférer `PATCH` avec `isActive: false`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Étiquette supprimée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant

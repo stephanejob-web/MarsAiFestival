@@ -34,7 +34,9 @@ export interface UseJuryAuthReturn {
 }
 
 const redirectByRole = (role: string, navigate: ReturnType<typeof useNavigate>): void => {
-    navigate(role === "admin" ? "/admin" : "/jury/panel", { replace: true });
+    navigate(role === "admin" || role === "moderateur" ? "/admin" : "/jury/panel", {
+        replace: true,
+    });
 };
 
 const useJuryAuth = (): UseJuryAuthReturn => {

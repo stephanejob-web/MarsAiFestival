@@ -5,7 +5,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: ../Dockerfile.frontend
+      dockerfile: Dockerfile.frontend
     ports:
       - "5173:5173"
     volumes:
@@ -17,8 +17,8 @@ services:
       - ./frontend/tsconfig.json:/app/tsconfig.json
       - ./frontend/tsconfig.app.json:/app/tsconfig.app.json
       - ./frontend/tsconfig.node.json:/app/tsconfig.node.json
-      # Volume anonyme : protège les node_modules du container
-      - /app/node_modules
+      # Volume nommé : node_modules installés dans l'image, jamais écrasés
+      - frontend_node_modules:/app/node_modules
     environment:
       - VITE_API_URL=http://localhost:5500
     depends_on:
@@ -30,28 +30,36 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: ../Dockerfile.backend
+      dockerfile: Dockerfile.backend
     ports:
       - "5500:5500"
     volumes:
       # Bind mount : ton code local est synchronisé en temps réel
       - ./backend/src:/app/src
       - ./backend/tsconfig.json:/app/tsconfig.json
-      # Volume anonyme : protège les node_modules du container
-      - /app/node_modules
+      # Volume nommé : node_modules installés dans l'image, jamais écrasés
+      - backend_node_modules:/app/node_modules
+    env_file:
+      - path: ./backend/.env
+        required: false
     environment:
-      - PORT=5500
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_NAME=marsaifestival
+      - DB_NAME=marsai
       - DB_USER=root
       - DB_PASSWORD=marsai_dev_2026
+      - SCALEWAY_ACCESS_KEY=SCW3MFQBR803FXZS4N33
+      - SCALEWAY_SECRET_KEY=c64db8bf-f541-478d-aa6a-cbcb8c7be2ae
+      - SCALEWAY_ENDPOINT=https://s3.fr-par.scw.cloud
+      - SCALEWAY_BUCKET_NAME=tln
+      - SCALEWAY_REGION=fr-par
+      - SCALEWAY_FOLDER=grp1
     depends_on:
       mysql:
         condition: service_healthy
 
   # ───────────────────────────────────────────
-  # MySQL 8
+  # MySQL 8 — chargement automatique de marsai_backup.sql
   # ───────────────────────────────────────────
   mysql:
     image: mysql:8.0
@@ -59,10 +67,12 @@ services:
       - "33060:3306"
     environment:
       MYSQL_ROOT_PASSWORD: marsai_dev_2026
-      MYSQL_DATABASE: marsaifestival
+      MYSQL_DATABASE: marsai
     volumes:
       # Volume persistant : les données survivent aux redémarrages
       - mysql_data:/var/lib/mysql
+      # Init SQL : chargé automatiquement au 1er démarrage (tables + données)
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 5s
@@ -71,3 +81,5 @@ services:
 
 volumes:
   mysql_data:
+  backend_node_modules:
+  frontend_node_modules:

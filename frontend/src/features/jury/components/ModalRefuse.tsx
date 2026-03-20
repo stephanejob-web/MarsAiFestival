@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import type { ReasonTag } from "../types";
+import useVoteTags from "../hooks/useVoteTags";
 
 interface ModalRefuseProps {
     isOpen: boolean;
@@ -13,19 +14,6 @@ interface ModalRefuseProps {
     onConfirm: () => void;
 }
 
-interface ReasonOption {
-    tag: ReasonTag;
-    label: string;
-}
-
-const REASON_OPTIONS: ReasonOption[] = [
-    { tag: "rights", label: "Droits musicaux" },
-    { tag: "quality", label: "Qualité" },
-    { tag: "content", label: "Contenu" },
-    { tag: "tech", label: "YouTube" },
-    { tag: "other", label: "Autre" },
-];
-
 const ModalRefuse = ({
     isOpen,
     filmTitle,
@@ -37,6 +25,7 @@ const ModalRefuse = ({
     onConfirm,
 }: ModalRefuseProps): React.JSX.Element | null => {
     const [showError, setShowError] = useState<boolean>(false);
+    const tags = useVoteTags();
 
     if (!isOpen) return null;
 
@@ -49,8 +38,13 @@ const ModalRefuse = ({
         onConfirm();
     };
 
-    const handleReasonClick = (tag: ReasonTag): void => {
-        onReasonSelect(selectedReason === tag ? null : tag);
+    const handleReasonClick = (key: string): void => {
+        const isDeselect = selectedReason === key;
+        onReasonSelect(isDeselect ? null : key);
+        if (!isDeselect) {
+            const tag = tags.find((t) => t.key === key);
+            if (tag?.message_template) onMessageChange(tag.message_template);
+        }
     };
 
     return (
@@ -61,7 +55,8 @@ const ModalRefuse = ({
                     Notification de refus
                 </div>
                 <div className="mb-4 text-center text-[0.8rem] leading-relaxed text-mist">
-                    Ce message sera envoyé au réalisateur.
+                    Ce message sera envoyé au réalisateur. Vous pouvez le personnaliser avant
+                    l&apos;envoi.
                 </div>
                 <div className="mx-auto mb-4 block rounded-full border border-aurora/20 bg-aurora/10 px-3 py-1 text-center text-[0.78rem] font-semibold text-aurora">
                     {filmTitle}
@@ -71,20 +66,27 @@ const ModalRefuse = ({
                     Raison
                 </div>
                 <div className="mb-2 flex flex-wrap gap-2">
-                    {REASON_OPTIONS.map((option) => (
-                        <button
-                            key={option.tag}
-                            type="button"
-                            onClick={() => handleReasonClick(option.tag)}
-                            className={`flex cursor-pointer items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[0.78rem] transition-all ${
-                                selectedReason === option.tag
-                                    ? "border-aurora/30 bg-aurora/10 text-aurora"
-                                    : "border-white/10 bg-white/4 text-mist hover:border-white/20 hover:text-white-soft"
-                            }`}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
+                    {tags.map((tag) => {
+                        const isActive = selectedReason === tag.key;
+                        return (
+                            <button
+                                key={tag.key}
+                                type="button"
+                                onClick={() => handleReasonClick(tag.key)}
+                                className={`flex cursor-pointer items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[0.78rem] transition-all ${
+                                    isActive
+                                        ? `border-${tag.color}/30 bg-${tag.color}/10 text-${tag.color}`
+                                        : "border-white/10 bg-white/[0.04] text-mist hover:border-white/20 hover:text-white-soft"
+                                }`}
+                            >
+                                <span
+                                    className={`h-[6px] w-[6px] shrink-0 rounded-full bg-${tag.color}`}
+                                />
+                                <span>{tag.icon}</span>
+                                {tag.label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 <div className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
@@ -94,12 +96,12 @@ const ModalRefuse = ({
                     value={message}
                     onChange={(e) => onMessageChange(e.target.value)}
                     placeholder="Expliquez pourquoi ce film est refusé..."
-                    rows={3}
-                    className="mt-2 w-full resize-none rounded-[10px] border border-white/10 bg-white/4 px-3 py-2.5 text-[0.82rem] text-white-soft outline-none focus:border-aurora/35 min-h-[80px]"
+                    rows={4}
+                    className="mt-2 w-full resize-none rounded-[10px] border border-white/10 bg-white/4 px-3 py-2.5 text-[0.82rem] text-white-soft outline-none focus:border-aurora/35 min-h-[100px]"
                 />
                 {showError && (
-                    <div className="mt-1 text-[0.72rem] text-coral">
-                        Veuillez saisir un message pour le réalisateur.
+                    <div className="mt-1.5 text-[0.72rem] text-coral">
+                        ⚠ Veuillez écrire un message avant de continuer.
                     </div>
                 )}
 

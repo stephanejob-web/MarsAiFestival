@@ -31,7 +31,8 @@ export const insertRealisator = async (data: RealisatorInsert): Promise<number> 
             street, postal_code, city, country,
             youtube, instagram, linkedin, facebook, xtwitter,
             how_did_you_know_us, newsletter
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`,
         [
             data.gender,
             data.first_name,

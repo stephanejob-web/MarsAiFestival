@@ -7,10 +7,11 @@ export interface JuryRow extends RowDataPacket {
     last_name: string;
     email: string;
     password_hash: string;
-    role: "jury" | "admin";
+    role: "jury" | "admin" | "moderateur";
     google_id: string | null;
     profil_picture: string | null;
     jury_description: string | null;
+    is_active: boolean;
 }
 
 export interface JuryInsert {
@@ -24,7 +25,7 @@ export interface JuryInsert {
 
 export const findByEmail = async (email: string): Promise<JuryRow | null> => {
     const [rows] = await pool.execute<JuryRow[]>(
-        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture, is_active
          FROM jury WHERE email = ?`,
         [email],
     );
@@ -33,7 +34,7 @@ export const findByEmail = async (email: string): Promise<JuryRow | null> => {
 
 export const findByGoogleId = async (googleId: string): Promise<JuryRow | null> => {
     const [rows] = await pool.execute<JuryRow[]>(
-        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture, is_active
          FROM jury WHERE google_id = ?`,
         [googleId],
     );
@@ -64,7 +65,7 @@ export const insertJury = async (data: JuryInsert): Promise<JuryRow> => {
 export const getAllJury = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
-            j.id, j.first_name, j.last_name, j.email, j.role, j.is_active,
+            j.id, j.first_name, j.last_name, j.email, j.role, j.is_active, j.is_banned,
             j.profil_picture, j.jury_description, j.created_at,
             COUNT(DISTINCT jfa.film_id) AS films_assigned,
             COUNT(DISTINCT jfc.film_id) AS films_evaluated
@@ -82,7 +83,7 @@ export const updateJuryUser = async (
     data: Partial<{
         first_name: string;
         last_name: string;
-        role: "jury" | "admin";
+        role: "jury" | "admin" | "moderateur";
         jury_description: string;
     }>,
 ): Promise<boolean> => {
@@ -117,6 +118,22 @@ export const toggleJuryActive = async (id: number, isActive: boolean): Promise<b
     const [result] = await pool.execute<ResultSetHeader>(
         `UPDATE jury SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [isActive, id],
+    );
+    return result.affectedRows > 0;
+};
+
+export const banJuryUser = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET is_banned = 1, is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [id],
+    );
+    return result.affectedRows > 0;
+};
+
+export const unbanJuryUser = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET is_banned = 0, is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [id],
     );
     return result.affectedRows > 0;
 };

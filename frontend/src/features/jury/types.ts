@@ -12,7 +12,7 @@ export type ActiveView = "eval" | "listes" | "discuter" | "delib";
 
 export type ModalType = "arevoir" | "refuse" | null;
 
-export type ReasonTag = "rights" | "quality" | "content" | "tech" | "other";
+export type ReasonTag = string;
 
 export interface FeedbackMessage {
     type: FeedbackType;
@@ -50,6 +50,7 @@ export interface VoteRow {
 }
 
 export interface JuryComment {
+    id: number;
     juryId: number;
     name: string;
     initials: string;

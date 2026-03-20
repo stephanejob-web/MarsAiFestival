@@ -6,6 +6,9 @@ import {
     showFilm,
     patchFilm,
     filmsStats,
+    deleteFilmById,
+    emailRealisateur,
+    getVideoUrl,
 } from "../controllers/film.controller";
 import { requireAdmin } from "../middlewares/auth.middleware";
 
@@ -19,6 +22,9 @@ router.get("/", listFilms);
 router.get("/stats", requireAdmin, filmsStats);
 router.get("/:id", showFilm);
 router.patch("/:id", requireAdmin, patchFilm);
+router.post("/:id/email", requireAdmin, emailRealisateur);
+router.get("/:id/video-url", requireAdmin, getVideoUrl);
+router.delete("/:id", requireAdmin, deleteFilmById);
 router.post(
     "/",
     upload.fields([
