@@ -256,8 +256,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                 {lastDistribution.assigned > 1 ? "s" : ""}
                                             </span>{" "}
                                             réparti
-                                            {lastDistribution.assigned > 1 ? "s" : ""}{" "}
-                                            équitablement entre les jurés.
+                                            {lastDistribution.assigned > 1 ? "s" : ""} équitablement
+                                            entre les jurés.
                                         </>
                                     ) : (
                                         "Tous les films sont déjà assignés."
