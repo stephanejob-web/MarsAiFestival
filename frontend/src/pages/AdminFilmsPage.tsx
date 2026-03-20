@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
+import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -82,6 +83,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
         selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+    const [detailFilmId, setDetailFilmId] = useState<number | null>(null);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<FilterMode>("all");
@@ -406,11 +408,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             <div
                                                 className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}
                                             >
-                                                <div
-                                                    className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDetailFilmId(film.id)}
+                                                    className={`mb-0.5 w-full text-left text-[0.88rem] font-bold leading-snug transition-opacity hover:opacity-75 ${isSelected ? "text-aurora" : "text-white-soft"}`}
                                                 >
                                                     {film.original_title}
-                                                </div>
+                                                </button>
                                                 <div className="text-[0.72rem] text-mist">
                                                     {film.first_name} {film.last_name} ·{" "}
                                                     {film.country}
@@ -681,6 +685,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     </>
                 )}
             </div>
+
+            <FilmDetailDrawer filmId={detailFilmId} onClose={() => setDetailFilmId(null)} />
         </div>
     );
 };
