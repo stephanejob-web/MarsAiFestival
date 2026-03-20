@@ -179,36 +179,40 @@ const UserTable = ({
 
                                 {/* Statut */}
                                 <td className="px-4 py-3 align-middle">
-                                    <div className="flex flex-col gap-1.5">
+                                    <div className="flex items-center gap-2.5">
                                         <StatusToggle
                                             isActive={u.is_active}
                                             onToggle={() => void onToggleStatus(u.id, !u.is_active)}
                                         />
                                         {u.role !== "admin" &&
                                             (confirmBanId === u.id ? (
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1.5">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             void onBan(u.id);
                                                             setConfirmBanId(null);
                                                         }}
-                                                        className="text-[0.62rem] font-bold text-coral hover:underline"
+                                                        className="rounded-[6px] border border-coral/35 bg-coral/10 px-2 py-[3px] text-[0.62rem] font-bold text-coral transition-all hover:bg-coral/20"
                                                     >
                                                         Confirmer
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => setConfirmBanId(null)}
-                                                        className="text-[0.62rem] text-mist hover:underline"
+                                                        className="rounded-[6px] border border-white/[0.08] bg-white/[0.03] px-2 py-[3px] text-[0.62rem] text-mist transition-all hover:border-white/[0.14] hover:text-white-soft"
                                                     >
-                                                        Annuler
+                                                        ✕
                                                     </button>
                                                 </div>
                                             ) : (
                                                 <button
+                                                    type="button"
                                                     onClick={() => setConfirmBanId(u.id)}
-                                                    className="text-[0.62rem] text-mist/40 transition-colors hover:text-coral"
+                                                    title="Bannir ce compte"
+                                                    className="rounded-[6px] border border-white/[0.05] bg-white/[0.02] px-2 py-[3px] text-[0.62rem] text-mist/35 transition-all hover:border-coral/25 hover:bg-coral/[0.07] hover:text-coral"
                                                 >
-                                                    🚫 Bannir
+                                                    ⊘ Bannir
                                                 </button>
                                             ))}
                                     </div>
