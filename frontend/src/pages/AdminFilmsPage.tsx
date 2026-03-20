@@ -377,7 +377,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         <button
                                                             type="button"
                                                             onClick={() => activateVideo(film.id)}
-                                                            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-150 group-hover/thumb:opacity-100"
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-100"
                                                         >
                                                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
                                                                 <svg
@@ -414,6 +414,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                 <div className="text-[0.72rem] text-mist">
                                                     {film.first_name} {film.last_name} ·{" "}
                                                     {film.country}
+                                                </div>
+                                                <div className="mt-0.5 font-mono text-[0.75rem] font-bold text-mist opacity-60">
+                                                    #{film.id}
                                                 </div>
 
                                                 {/* Jury avatars — clic direct pour assigner */}
