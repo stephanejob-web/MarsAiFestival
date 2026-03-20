@@ -17,6 +17,10 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
         items: [{ label: "Sélection & Votes", to: "/admin/selection", icon: "🏅" }],
     },
     {
+        category: "Configuration",
+        items: [{ label: "Étiquettes jury", to: "/admin/tags", icon: "🏷️" }],
+    },
+    {
         category: "Festival",
         items: [{ label: "Awards & Sponsors", to: "/admin/awards", icon: "🏆" }],
     },
