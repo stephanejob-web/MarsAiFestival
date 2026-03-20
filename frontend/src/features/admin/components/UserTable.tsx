@@ -7,6 +7,7 @@ interface UserTableProps {
     onToggleStatus: (id: number, isActive: boolean) => Promise<void>;
     onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     onBan: (id: number) => Promise<void>;
+    onUnban: (id: number) => Promise<void>;
 }
 
 const AVATAR_GRADIENTS = [
@@ -55,8 +56,10 @@ const UserTable = ({
     onToggleStatus,
     onChangeRole,
     onBan,
+    onUnban,
 }: UserTableProps): React.JSX.Element => {
     const [confirmBanId, setConfirmBanId] = useState<number | null>(null);
+    const [confirmUnbanId, setConfirmUnbanId] = useState<number | null>(null);
 
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
@@ -204,21 +207,55 @@ const UserTable = ({
                                                 Actif
                                             </span>
                                         ) : u.is_banned ? (
-                                            <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
-                                                <svg
-                                                    width="10"
-                                                    height="10"
-                                                    viewBox="0 0 10 10"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="1.6"
-                                                    strokeLinecap="round"
-                                                >
-                                                    <circle cx="5" cy="5" r="4" />
-                                                    <line x1="2" y1="8" x2="8" y2="2" />
-                                                </svg>
-                                                Banni
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
+                                                    <svg
+                                                        width="10"
+                                                        height="10"
+                                                        viewBox="0 0 10 10"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1.6"
+                                                        strokeLinecap="round"
+                                                    >
+                                                        <circle cx="5" cy="5" r="4" />
+                                                        <line x1="2" y1="8" x2="8" y2="2" />
+                                                    </svg>
+                                                    Banni
+                                                </span>
+                                                {confirmUnbanId === u.id ? (
+                                                    <div className="flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.08] px-2 py-1">
+                                                        <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-aurora/80">
+                                                            Réactiver ?
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                void onUnban(u.id);
+                                                                setConfirmUnbanId(null);
+                                                            }}
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-aurora text-[0.65rem] font-black text-deep-sky shadow-[0_2px_10px_rgba(78,255,206,0.4)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(78,255,206,0.6)]"
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setConfirmUnbanId(null)}
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-[0.65rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setConfirmUnbanId(u.id)}
+                                                        className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-aurora/20 bg-aurora/[0.06] px-2.5 text-[0.62rem] font-semibold text-aurora/60 transition-all duration-200 hover:border-aurora/50 hover:bg-aurora/[0.14] hover:text-aurora hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
+                                                    >
+                                                        ↺ Réactiver
+                                                    </button>
+                                                )}
+                                            </div>
                                         ) : (
                                             <StatusToggle
                                                 isActive={u.is_active}
