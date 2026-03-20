@@ -411,9 +411,14 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                 <button
                                                     type="button"
                                                     onClick={() => setDetailFilmId(film.id)}
-                                                    className={`mb-0.5 w-full text-left text-[0.88rem] font-bold leading-snug transition-opacity hover:opacity-75 ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                    className={`group/title mb-0.5 flex w-full items-start gap-1.5 text-left text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
                                                 >
-                                                    {film.original_title}
+                                                    <span className="group-hover/title:underline">
+                                                        {film.original_title}
+                                                    </span>
+                                                    <span className="mt-0.5 shrink-0 rounded border border-white/[0.12] bg-white/[0.06] px-1 py-[1px] font-mono text-[0.52rem] font-normal text-mist opacity-0 transition-opacity group-hover/title:opacity-100">
+                                                        détails
+                                                    </span>
                                                 </button>
                                                 <div className="text-[0.72rem] text-mist">
                                                     {film.first_name} {film.last_name} ·{" "}

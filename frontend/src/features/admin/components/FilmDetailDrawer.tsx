@@ -126,10 +126,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!filmId) {
-            setFilm(null);
-            return;
-        }
+        if (!filmId) return;
         setLoading(true);
         apiFetch<{ success: boolean; data: FilmDetail }>(`/api/films/${filmId}`, {
             headers: { Authorization: `Bearer ${getToken()}` },
