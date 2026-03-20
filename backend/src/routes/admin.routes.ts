@@ -10,6 +10,7 @@ import {
     toggleUserStatus,
     removeUser,
     banUser,
+    unbanUser,
     startAdminVocal,
     stopAdminVocal,
 } from "../controllers/admin.controller";
@@ -39,6 +40,8 @@ router.patch("/users/:id", requireAdmin, editUser);
 router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
 // POST   /api/admin/users/:id/ban
 router.post("/users/:id/ban", requireAdmin, banUser);
+// POST   /api/admin/users/:id/unban
+router.post("/users/:id/unban", requireAdmin, unbanUser);
 // DELETE /api/admin/users/:id
 router.delete("/users/:id", requireAdmin, removeUser);
 
