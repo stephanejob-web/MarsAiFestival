@@ -12,6 +12,7 @@ import {
     updateJuryUser,
     toggleJuryActive,
     banJuryUser,
+    unbanJuryUser,
     deleteJuryUser,
 } from "../repositories/jury.repository";
 
@@ -283,6 +284,29 @@ export const banUser = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors du bannissement.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/users/:id/unban — Réactiver un utilisateur banni ──────────
+export const unbanUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        const updated = await unbanJuryUser(id);
+        if (!updated) {
+            res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+            return;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la réactivation.",
             error: err instanceof Error ? err.message : String(err),
         });
     }
