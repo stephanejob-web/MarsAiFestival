@@ -232,7 +232,7 @@ components:
           example: Martin
         role:
           type: string
-          enum: [jury, admin]
+          enum: [jury, admin, moderateur]
           description: "`jury` = évaluateur | `admin` = accès complet"
           example: jury
         profilPicture:
@@ -1287,6 +1287,53 @@ paths:
   # ════════════════════════════════════════════════════════════════
   # VOTES
   # ════════════════════════════════════════════════════════════════
+  /api/films/{id}/email:
+    post:
+      tags: [Films]
+      summary: Envoyer un email au réalisateur d'un film 🛡️
+      description: |
+        Permet à l'admin d'envoyer un email personnalisé au réalisateur d'un film
+        directement depuis le panneau de détail du film.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, message]
+              properties:
+                subject:
+                  type: string
+                  example: "Votre film au Mars AI Festival"
+                message:
+                  type: string
+                  example: "Bonjour, nous avons bien reçu votre film..."
+      responses:
+        "200":
+          description: Email envoyé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Sujet ou message manquant
+        "404":
+          description: Film introuvable ou réalisateur sans email
+
   /api/votes:
     post:
       tags: [Votes]
@@ -2062,6 +2109,97 @@ paths:
         "400":
           description: Aucun juré actif disponible pour l'attribution
 
+  /api/assignments/assign-all:
+    post:
+      tags: [Attributions]
+      summary: Assigner tous les films à tous les jurés 🛡️
+      description: |
+        Crée une assignation entre **chaque film** et **chaque juré actif**.
+        Les doublons (paires déjà existantes) sont silencieusement ignorés.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Assignations créées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  assigned:
+                    type: integer
+                    description: Nombre d'assignations nouvellement créées
+                    example: 48
+                  pairs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        juryId:
+                          type: integer
+                        filmId:
+                          type: integer
+                  message:
+                    type: string
+                    example: "48 assignation(s) créée(s) pour 6 juré(s)."
+        "400":
+          description: Aucun juré actif disponible
+
+  /api/assignments/batch:
+    delete:
+      tags: [Attributions]
+      summary: Supprimer plusieurs assignations en une fois 🛡️
+      description: |
+        Annule un ensemble de paires jury/film en une seule requête.
+        Utilisé notamment pour annuler une répartition automatique.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pairs]
+              properties:
+                pairs:
+                  type: array
+                  items:
+                    type: object
+                    required: [juryId, filmId]
+                    properties:
+                      juryId:
+                        type: integer
+                      filmId:
+                        type: integer
+            example:
+              pairs:
+                - juryId: 2
+                  filmId: 10
+                - juryId: 3
+                  filmId: 11
+      responses:
+        "200":
+          description: Assignations supprimées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  removed:
+                    type: integer
+                    example: 2
+        "400":
+          description: Aucune paire fournie
+
   /api/assignments/jury-members:
     get:
       tags: [Attributions]
@@ -2569,7 +2707,7 @@ paths:
                           type: string
                         role:
                           type: string
-                          enum: [jury, admin]
+                          enum: [jury, admin, moderateur]
                         is_active:
                           type: boolean
                           description: Compte actif ou désactivé
@@ -2622,7 +2760,7 @@ paths:
                   example: Martin
                 role:
                   type: string
-                  enum: [jury, admin]
+                  enum: [jury, admin, moderateur]
                   description: Changer le rôle (jury ↔ admin)
                 juryDescription:
                   type: string
@@ -2748,7 +2886,7 @@ paths:
                   example: pierre.dupont@email.com
                 role:
                   type: string
-                  enum: [jury, admin]
+                  enum: [jury, admin, moderateur]
                   description: Rôle qui sera attribué lors de la création du compte
             examples:
               invite_jury:
@@ -2803,7 +2941,7 @@ paths:
                     example: pierre.dupont@email.com
                   role:
                     type: string
-                    enum: [jury, admin]
+                    enum: [jury, admin, moderateur]
                     description: Rôle qui sera attribué au compte
         "401":
           description: Token invalide, malformé ou expiré (après 48h)
