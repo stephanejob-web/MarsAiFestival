@@ -11,6 +11,7 @@ import {
     getAllJury,
     updateJuryUser,
     toggleJuryActive,
+    banJuryUser,
     deleteJuryUser,
 } from "../repositories/jury.repository";
 
@@ -260,8 +261,8 @@ export const banUser = async (req: Request, res: Response): Promise<void> => {
         return;
     }
     try {
-        // Désactiver en base
-        const updated = await toggleJuryActive(id, false);
+        // Bannir en base (is_banned = 1, is_active = 0)
+        const updated = await banJuryUser(id);
         if (!updated) {
             res.status(404).json({ success: false, message: "Utilisateur introuvable." });
             return;
