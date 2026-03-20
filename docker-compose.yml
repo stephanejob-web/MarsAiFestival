@@ -21,8 +21,10 @@ services:
       - frontend_node_modules:/app/node_modules
     environment:
       - VITE_API_URL=http://localhost:5500
+      - BACKEND_URL=http://backend:5500
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
   # ───────────────────────────────────────────
   # Backend — Express + ts-node-dev (auto-restart)
@@ -37,6 +39,8 @@ services:
       # Bind mount : ton code local est synchronisé en temps réel
       - ./backend/src:/app/src
       - ./backend/tsconfig.json:/app/tsconfig.json
+      # Uploads persistés entre les redémarrages
+      - ./backend/uploads:/app/uploads
       # Volume nommé : node_modules installés dans l'image, jamais écrasés
       - backend_node_modules:/app/node_modules
     env_file:
@@ -54,6 +58,7 @@ services:
       - SCALEWAY_BUCKET_NAME=tln
       - SCALEWAY_REGION=fr-par
       - SCALEWAY_FOLDER=grp1
+      - JWT_SECRET=mars-ai-dev-secret-2026
     depends_on:
       mysql:
         condition: service_healthy
