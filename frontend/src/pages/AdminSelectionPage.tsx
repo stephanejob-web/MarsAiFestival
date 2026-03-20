@@ -361,7 +361,6 @@ const AdminDecision = ({
 interface FilmInsightDrawerProps {
     film: AdminFilmVoteSummary | null;
     onClose: () => void;
-    onOpenVideo: (film: AdminFilmVoteSummary) => void;
     onOpenEmail: (film: AdminFilmVoteSummary) => void;
 }
 
@@ -385,7 +384,6 @@ const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
 const FilmInsightDrawer = ({
     film,
     onClose,
-    onOpenVideo,
     onOpenEmail,
 }: FilmInsightDrawerProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
@@ -393,6 +391,7 @@ const FilmInsightDrawer = ({
     const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
     const [activeTab, setActiveTab] = useState<InsightTab>("votes");
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (!film) return;
@@ -400,9 +399,20 @@ const FilmInsightDrawer = ({
 
         setMessages([]);
         setFilmComments([]);
+        setVideoUrl(null);
         setActiveTab("votes");
         setLoadingMessages(true);
         setLoadingComments(true);
+
+        if (film.video_url) {
+            apiFetch<{ success: boolean; url: string }>(`/api/films/${filmId}/video-url`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+            })
+                .then((res) => {
+                    if (!cancelled && res.success) setVideoUrl(res.url);
+                })
+                .catch(() => undefined);
+        }
 
         let cancelled = false;
 
@@ -524,15 +534,6 @@ const FilmInsightDrawer = ({
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {film?.video_url && (
-                            <button
-                                type="button"
-                                onClick={() => film && onOpenVideo(film)}
-                                className="rounded-lg border border-aurora/25 bg-aurora/[0.07] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/[0.12]"
-                            >
-                                ▶ Vidéo
-                            </button>
-                        )}
                         {film?.realisator_email && (
                             <button
                                 type="button"
@@ -551,6 +552,24 @@ const FilmInsightDrawer = ({
                         </button>
                     </div>
                 </div>
+
+                {/* Video player */}
+                {film?.video_url && (
+                    <div className="shrink-0 bg-black">
+                        {videoUrl ? (
+                            <video
+                                key={videoUrl}
+                                src={videoUrl}
+                                controls
+                                className="aspect-video w-full"
+                            />
+                        ) : (
+                            <div className="flex aspect-video w-full items-center justify-center text-[0.78rem] text-mist opacity-50">
+                                Chargement de la vidéo…
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Tabs */}
                 <div className="flex shrink-0 border-b border-white/[0.06] px-6">
@@ -1717,7 +1736,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
             <FilmInsightDrawer
                 film={expandedFilm}
                 onClose={() => setExpandedId(null)}
-                onOpenVideo={setVideoFilm}
                 onOpenEmail={setEmailFilm}
             />
         </div>
