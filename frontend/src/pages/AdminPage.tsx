@@ -7,7 +7,7 @@ import ParticipationChart from "../features/admin/components/ParticipationChart"
 import UserTable from "../features/admin/components/UserTable";
 
 const AdminPage = (): React.JSX.Element => {
-    const { users, isLoading, error, toggleStatus } = useAdminUsers();
+    const { users, isLoading, error, toggleStatus, changeRole } = useAdminUsers();
     const { isInVocal, joinVocal, leaveVocal } = useAdminVocal();
     const [search, setSearch] = useState<string>("");
     const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -136,6 +136,7 @@ const AdminPage = (): React.JSX.Element => {
                                 users={users}
                                 search={search}
                                 onToggleStatus={toggleStatus}
+                                onChangeRole={changeRole}
                             />
                         </>
                     )}

@@ -24,6 +24,10 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
         category: "Site",
         items: [{ label: "Administration site", to: "/admin/site", icon: "🌐" }],
     },
+    {
+        category: "Développement",
+        items: [{ label: "Documentation API", to: "/api/docs", icon: "📖", external: true }],
+    },
 ];
 
 export const ADMIN_LABELS = {

@@ -5,6 +5,7 @@ interface UserTableProps {
     users: AdminUser[];
     search: string;
     onToggleStatus: (id: number, isActive: boolean) => Promise<void>;
+    onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
 }
 
 const AVATAR_GRADIENTS = [
@@ -41,7 +42,36 @@ const StatusToggle = ({ isActive, onToggle }: StatusToggleProps): React.JSX.Elem
     </button>
 );
 
-const UserTable = ({ users, search, onToggleStatus }: UserTableProps): React.JSX.Element => {
+const ROLE_CONFIG: Record<
+    "jury" | "admin" | "moderateur",
+    { label: string; cls: string; next: "jury" | "admin" | "moderateur"; nextLabel: string }
+> = {
+    jury: {
+        label: "Jury",
+        cls: "border-aurora/20 bg-aurora/10 text-aurora",
+        next: "moderateur",
+        nextLabel: "Passer Modérateur",
+    },
+    moderateur: {
+        label: "Modérateur",
+        cls: "border-solar/20 bg-solar/10 text-solar",
+        next: "jury",
+        nextLabel: "Repasser Jury",
+    },
+    admin: {
+        label: "Admin",
+        cls: "border-lavande/20 bg-lavande/10 text-lavande",
+        next: "admin",
+        nextLabel: "",
+    },
+};
+
+const UserTable = ({
+    users,
+    search,
+    onToggleStatus,
+    onChangeRole,
+}: UserTableProps): React.JSX.Element => {
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
         return (
@@ -113,15 +143,29 @@ const UserTable = ({ users, search, onToggleStatus }: UserTableProps): React.JSX
 
                                 {/* Rôle */}
                                 <td className="px-4 py-3 align-middle">
-                                    <span
-                                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] ${
-                                            u.role === "jury"
-                                                ? "border-aurora/20 bg-aurora/10 text-aurora"
-                                                : "border-lavande/20 bg-lavande/10 text-lavande"
-                                        }`}
-                                    >
-                                        {u.role === "jury" ? "Jury" : "Admin"}
-                                    </span>
+                                    {(() => {
+                                        const cfg = ROLE_CONFIG[u.role] ?? ROLE_CONFIG.jury;
+                                        return (
+                                            <div className="flex flex-col gap-1">
+                                                <span
+                                                    className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] ${cfg.cls}`}
+                                                >
+                                                    {cfg.label}
+                                                </span>
+                                                {u.role !== "admin" && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            void onChangeRole(u.id, cfg.next)
+                                                        }
+                                                        className="w-fit text-[0.62rem] text-mist underline-offset-2 transition-colors hover:text-white-soft hover:underline"
+                                                    >
+                                                        {cfg.nextLabel}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </td>
 
                                 {/* Films assignés */}

@@ -13,7 +13,7 @@ const ProtectedAdminRoute = (): React.JSX.Element => {
     const token = localStorage.getItem("jury_token");
     const payload = token ? decodeJwt(token) : null;
 
-    if (!payload || payload.role !== "admin") {
+    if (!payload || (payload.role !== "admin" && payload.role !== "moderateur")) {
         return <Navigate to="/jury" replace />;
     }
 

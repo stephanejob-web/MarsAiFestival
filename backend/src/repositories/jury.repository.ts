@@ -7,7 +7,7 @@ export interface JuryRow extends RowDataPacket {
     last_name: string;
     email: string;
     password_hash: string;
-    role: "jury" | "admin";
+    role: "jury" | "admin" | "moderateur";
     google_id: string | null;
     profil_picture: string | null;
     jury_description: string | null;
@@ -83,7 +83,7 @@ export const updateJuryUser = async (
     data: Partial<{
         first_name: string;
         last_name: string;
-        role: "jury" | "admin";
+        role: "jury" | "admin" | "moderateur";
         jury_description: string;
     }>,
 ): Promise<boolean> => {

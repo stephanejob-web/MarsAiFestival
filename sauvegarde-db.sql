@@ -384,7 +384,7 @@ CREATE TABLE `jury` (
   `last_name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
-  `role` enum('jury','admin') NOT NULL DEFAULT 'jury',
+  `role` enum('jury','admin','moderateur') NOT NULL DEFAULT 'jury',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `google_id` varchar(255) DEFAULT NULL,
   `profil_picture` varchar(500) DEFAULT NULL,
