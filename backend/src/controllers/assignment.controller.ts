@@ -163,7 +163,7 @@ export const autoDistribute = async (req: Request, res: Response): Promise<void>
         }
 
         let assigned = 0;
-        const errors: number[] = [];
+        const pairs: { juryId: number; filmId: number }[] = [];
 
         for (let i = 0; i < unassigned.length; i++) {
             const filmId = (unassigned[i] as { id: number }).id;
@@ -171,21 +171,43 @@ export const autoDistribute = async (req: Request, res: Response): Promise<void>
             try {
                 await assignFilmToJury(juryId, filmId, adminId);
                 assigned++;
+                pairs.push({ juryId, filmId });
             } catch {
-                errors.push(filmId);
+                // duplicate or other error — skip silently
             }
         }
 
         res.json({
             success: true,
             assigned,
-            skipped: errors.length,
+            pairs,
             message: `${assigned} film(s) réparti(s) entre ${activeJury.length} juré(s).`,
         });
     } catch (err) {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la répartition automatique.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── DELETE /api/assignments/batch — Annuler une répartition (admin) ───────────
+export const batchUnassign = async (req: Request, res: Response): Promise<void> => {
+    const { pairs } = req.body as { pairs?: { juryId: number; filmId: number }[] };
+
+    if (!Array.isArray(pairs) || pairs.length === 0) {
+        res.status(400).json({ success: false, message: "Aucune paire à annuler." });
+        return;
+    }
+
+    try {
+        await Promise.all(pairs.map((p) => removeAssignment(p.juryId, p.filmId)));
+        res.json({ success: true, removed: pairs.length });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'annulation.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

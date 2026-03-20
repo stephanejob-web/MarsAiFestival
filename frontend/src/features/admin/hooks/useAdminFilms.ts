@@ -10,6 +10,11 @@ interface ApiResponse<T> {
     message?: string;
 }
 
+export interface DistributionResult {
+    assigned: number;
+    pairs: { juryId: number; filmId: number }[];
+}
+
 export interface UseAdminFilmsReturn {
     films: AdminFilm[];
     juryMembers: AdminJuryMember[];
@@ -17,8 +22,11 @@ export interface UseAdminFilmsReturn {
     isLoading: boolean;
     error: string | null;
     isDistributing: boolean;
+    lastDistribution: DistributionResult | null;
     toggleAssignment: (juryId: number, filmId: number) => Promise<void>;
     autoDistribute: () => Promise<void>;
+    undoDistribution: () => Promise<void>;
+    clearDistribution: () => void;
     deleteFilm: (filmId: number) => Promise<void>;
     selectFilm: (filmId: number, selected: boolean) => Promise<void>;
     reload: () => void;
@@ -31,6 +39,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isDistributing, setIsDistributing] = useState<boolean>(false);
+    const [lastDistribution, setLastDistribution] = useState<DistributionResult | null>(null);
 
     const load = useCallback(async (): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
@@ -110,11 +119,20 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
     const autoDistribute = async (): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
         setIsDistributing(true);
+        setLastDistribution(null);
         try {
-            await apiFetch<{ success: boolean }>("/api/assignments/auto-distribute", {
+            const res = await apiFetch<{
+                success: boolean;
+                assigned: number;
+                pairs: { juryId: number; filmId: number }[];
+                message: string;
+            }>("/api/assignments/auto-distribute", {
                 method: "POST",
                 headers: authHeader,
             });
+            if (res.success) {
+                setLastDistribution({ assigned: res.assigned, pairs: res.pairs ?? [] });
+            }
             await load();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Erreur de distribution");
@@ -122,6 +140,24 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
             setIsDistributing(false);
         }
     };
+
+    const undoDistribution = async (): Promise<void> => {
+        if (!lastDistribution || lastDistribution.pairs.length === 0) return;
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        try {
+            await apiFetch<{ success: boolean }>("/api/assignments/batch", {
+                method: "DELETE",
+                headers: { ...authHeader, "Content-Type": "application/json" },
+                body: JSON.stringify({ pairs: lastDistribution.pairs }),
+            });
+            setLastDistribution(null);
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur d'annulation");
+        }
+    };
+
+    const clearDistribution = (): void => setLastDistribution(null);
 
     const selectFilm = async (filmId: number, selected: boolean): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
@@ -160,8 +196,11 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         isLoading,
         error,
         isDistributing,
+        lastDistribution,
         toggleAssignment,
         autoDistribute,
+        undoDistribution,
+        clearDistribution,
         deleteFilm,
         selectFilm,
         reload: load,

@@ -77,8 +77,11 @@ const AdminFilmsPage = (): React.JSX.Element => {
         isLoading,
         error,
         isDistributing,
+        lastDistribution,
         toggleAssignment,
         autoDistribute,
+        undoDistribution,
+        clearDistribution,
         deleteFilm,
         selectFilm,
     } = useAdminFilms();
@@ -238,6 +241,49 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 </svg>
                             </div>
                         </button>
+
+                        {/* Distribution result banner */}
+                        {lastDistribution !== null && (
+                            <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-aurora/30 bg-aurora/[0.08] px-4 py-3">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-aurora/20 text-[0.85rem] text-aurora">
+                                    ✓
+                                </span>
+                                <span className="flex-1 text-[0.82rem] text-white-soft">
+                                    {lastDistribution.assigned > 0 ? (
+                                        <>
+                                            <span className="font-bold text-aurora">
+                                                {lastDistribution.assigned} film
+                                                {lastDistribution.assigned > 1 ? "s" : ""}
+                                            </span>{" "}
+                                            réparti
+                                            {lastDistribution.assigned > 1 ? "s" : ""}{" "}
+                                            équitablement entre les jurés.
+                                        </>
+                                    ) : (
+                                        "Tous les films sont déjà assignés."
+                                    )}
+                                </span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {lastDistribution.assigned > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void undoDistribution()}
+                                            className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-1.5 text-[0.75rem] font-semibold text-coral transition-all hover:border-coral/50 hover:bg-coral/20"
+                                        >
+                                            ↩ Annuler la répartition
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={clearDistribution}
+                                        className="flex h-6 w-6 items-center justify-center rounded-full text-mist transition-all hover:bg-white/10 hover:text-white-soft"
+                                        title="Fermer"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Search */}
                         <div className="relative mb-3.5">
