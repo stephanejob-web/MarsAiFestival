@@ -16,6 +16,7 @@ export interface UseAdminUsersReturn {
     toggleStatus: (id: number, isActive: boolean) => Promise<void>;
     changeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     banUser: (id: number) => Promise<void>;
+    unbanUser: (id: number) => Promise<void>;
     reload: () => void;
 }
 
@@ -82,7 +83,19 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, changeRole, banUser, reload: load };
+    const unbanUser = async (id: number): Promise<void> => {
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/unban`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur de réactivation");
+        }
+    };
+
+    return { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, reload: load };
 };
 
 export default useAdminUsers;
