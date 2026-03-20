@@ -38,6 +38,7 @@ import commentRouter from "./routes/comment.routes";
 import phaseRouter from "./routes/phase.routes";
 import ticketRouter from "./routes/ticket.routes";
 import vocalRouter from "./routes/vocal.routes";
+import voteTagRouter from "./routes/voteTag.routes";
 
 app.use("/", homeRouter);
 app.use("/api/films", filmRouter);
@@ -51,5 +52,6 @@ app.use("/api/comments", commentRouter);
 app.use("/api/phases", phaseRouter);
 app.use("/api/tickets", ticketRouter);
 app.use("/api/vocal", vocalRouter);
+app.use("/api/vote-tags", voteTagRouter);
 
 export default app;
