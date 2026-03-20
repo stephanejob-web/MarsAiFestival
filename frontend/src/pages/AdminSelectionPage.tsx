@@ -523,7 +523,11 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                                         >
                                             <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-aurora/[0.15] font-display text-[0.5rem] font-black text-aurora">
                                                 {first.profil_picture ? (
-                                                    <img src={first.profil_picture} alt="" className="h-full w-full object-cover" />
+                                                    <img
+                                                        src={first.profil_picture}
+                                                        alt=""
+                                                        className="h-full w-full object-cover"
+                                                    />
                                                 ) : (
                                                     `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
                                                 )}
@@ -557,7 +561,9 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                                         📝 Commentaires jurés
                                     </div>
                                     <div className="mt-0.5 text-[0.72rem] text-mist">
-                                        {film.original_title ?? `Film #${film.film_id}`} · {filmComments.length} commentaire{filmComments.length > 1 ? "s" : ""}
+                                        {film.original_title ?? `Film #${film.film_id}`} ·{" "}
+                                        {filmComments.length} commentaire
+                                        {filmComments.length > 1 ? "s" : ""}
                                     </div>
                                 </div>
                                 <button
@@ -572,53 +578,62 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                             {/* Contenu groupé par juré */}
                             <div className="flex-1 overflow-y-auto px-5 py-4">
                                 <div className="space-y-5">
-                                    {Array.from(commentsByJury.entries()).map(([juryId, comments]) => {
-                                        const first = comments[0];
-                                        const name = `${first.first_name} ${first.last_name}`;
-                                        return (
-                                            <div key={juryId}>
-                                                {/* Juré header */}
-                                                <div className="mb-2.5 flex items-center gap-2.5">
-                                                    <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-aurora/30 bg-aurora/[0.12] font-display text-[0.68rem] font-black text-aurora">
-                                                        {first.profil_picture ? (
-                                                            <img src={first.profil_picture} alt={name} className="h-full w-full object-cover" />
-                                                        ) : (
-                                                            `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
-                                                        )}
+                                    {Array.from(commentsByJury.entries()).map(
+                                        ([juryId, comments]) => {
+                                            const first = comments[0];
+                                            const name = `${first.first_name} ${first.last_name}`;
+                                            return (
+                                                <div key={juryId}>
+                                                    {/* Juré header */}
+                                                    <div className="mb-2.5 flex items-center gap-2.5">
+                                                        <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-aurora/30 bg-aurora/[0.12] font-display text-[0.68rem] font-black text-aurora">
+                                                            {first.profil_picture ? (
+                                                                <img
+                                                                    src={first.profil_picture}
+                                                                    alt={name}
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-display text-[0.78rem] font-bold text-aurora">
+                                                                {name}
+                                                            </div>
+                                                            <div className="font-mono text-[0.6rem] text-mist opacity-50">
+                                                                {comments.length} commentaire
+                                                                {comments.length > 1 ? "s" : ""}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <div className="font-display text-[0.78rem] font-bold text-aurora">
-                                                            {name}
-                                                        </div>
-                                                        <div className="font-mono text-[0.6rem] text-mist opacity-50">
-                                                            {comments.length} commentaire{comments.length > 1 ? "s" : ""}
-                                                        </div>
+                                                    {/* Commentaires */}
+                                                    <div className="space-y-2 pl-[46px]">
+                                                        {comments.map((c) => (
+                                                            <div
+                                                                key={c.id}
+                                                                className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5"
+                                                            >
+                                                                <p className="text-[0.8rem] leading-relaxed text-white-soft">
+                                                                    {c.text}
+                                                                </p>
+                                                                <span className="mt-1 block font-mono text-[0.6rem] text-mist opacity-40">
+                                                                    {new Date(
+                                                                        c.created_at,
+                                                                    ).toLocaleString("fr-FR", {
+                                                                        day: "2-digit",
+                                                                        month: "2-digit",
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit",
+                                                                    })}
+                                                                </span>
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                                {/* Commentaires */}
-                                                <div className="space-y-2 pl-[46px]">
-                                                    {comments.map((c) => (
-                                                        <div
-                                                            key={c.id}
-                                                            className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5"
-                                                        >
-                                                            <p className="text-[0.8rem] leading-relaxed text-white-soft">
-                                                                {c.text}
-                                                            </p>
-                                                            <span className="mt-1 block font-mono text-[0.6rem] text-mist opacity-40">
-                                                                {new Date(c.created_at).toLocaleString("fr-FR", {
-                                                                    day: "2-digit",
-                                                                    month: "2-digit",
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
-                                                                })}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        },
+                                    )}
                                 </div>
                             </div>
                         </div>
