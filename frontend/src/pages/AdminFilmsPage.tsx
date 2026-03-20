@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
+import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -76,12 +77,19 @@ const AdminFilmsPage = (): React.JSX.Element => {
         isLoading,
         error,
         isDistributing,
+        lastDistribution,
         toggleAssignment,
         autoDistribute,
+        undoDistribution,
+        clearDistribution,
+        unassignAll,
+        assignAll,
         deleteFilm,
         selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+    const [confirmUnassignAll, setConfirmUnassignAll] = useState(false);
+    const [detailFilmId, setDetailFilmId] = useState<number | null>(null);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<FilterMode>("all");
@@ -134,7 +142,64 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     {films.length} films · {activeJuryCount} jurés actifs · {assignments.length}{" "}
                     assignations
                 </span>
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
+                    {/* Assign all films to all jury */}
+                    <button
+                        type="button"
+                        onClick={() => void assignAll()}
+                        disabled={isDistributing || films.length === 0 || activeJuryCount === 0}
+                        className="flex items-center gap-1.5 rounded-lg border border-aurora/25 bg-aurora/[0.07] px-3 py-1 text-[0.73rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/15 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <circle cx="6" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.3" />
+                            <path
+                                d="M1.5 10c0-2 2-3.5 4.5-3.5s4.5 1.5 4.5 3.5"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                                strokeLinecap="round"
+                            />
+                            <path
+                                d="M8.5 6.5l1.5 1.5 2.5-2.5"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                        {isDistributing ? "En cours…" : "Assigner à tous les jurés"}
+                    </button>
+                    {/* Unassign all */}
+                    {confirmUnassignAll ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[0.73rem] text-mist">Confirmer ?</span>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void unassignAll();
+                                    setConfirmUnassignAll(false);
+                                }}
+                                className="rounded-lg border border-coral/40 bg-coral/15 px-3 py-1 text-[0.73rem] font-bold text-coral transition-all hover:bg-coral/25"
+                            >
+                                Oui
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmUnassignAll(false)}
+                                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[0.73rem] text-mist transition-all hover:bg-white/10"
+                            >
+                                Non
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setConfirmUnassignAll(true)}
+                            disabled={assignments.length === 0}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-[0.73rem] font-semibold text-mist transition-all hover:border-coral/30 hover:bg-coral/[0.07] hover:text-coral disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            Tout désassigner
+                        </button>
+                    )}
                     <span className="rounded-md border border-aurora/20 bg-aurora/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
                         🎬 Films
                     </span>
@@ -236,6 +301,49 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 </svg>
                             </div>
                         </button>
+
+                        {/* Distribution result banner */}
+                        {lastDistribution !== null && (
+                            <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-aurora/30 bg-aurora/[0.08] px-4 py-3">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-aurora/20 text-[0.85rem] text-aurora">
+                                    ✓
+                                </span>
+                                <span className="flex-1 text-[0.82rem] text-white-soft">
+                                    {lastDistribution.assigned > 0 ? (
+                                        <>
+                                            <span className="font-bold text-aurora">
+                                                {lastDistribution.assigned} film
+                                                {lastDistribution.assigned > 1 ? "s" : ""}
+                                            </span>{" "}
+                                            réparti
+                                            {lastDistribution.assigned > 1 ? "s" : ""} équitablement
+                                            entre les jurés.
+                                        </>
+                                    ) : (
+                                        "Tous les films sont déjà assignés."
+                                    )}
+                                </span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {lastDistribution.assigned > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void undoDistribution()}
+                                            className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-1.5 text-[0.75rem] font-semibold text-coral transition-all hover:border-coral/50 hover:bg-coral/20"
+                                        >
+                                            ↩ Annuler la répartition
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={clearDistribution}
+                                        className="flex h-6 w-6 items-center justify-center rounded-full text-mist transition-all hover:bg-white/10 hover:text-white-soft"
+                                        title="Fermer"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Search */}
                         <div className="relative mb-3.5">
@@ -406,11 +514,18 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             <div
                                                 className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}
                                             >
-                                                <div
-                                                    className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDetailFilmId(film.id)}
+                                                    className={`group/title mb-0.5 flex w-full items-start gap-1.5 text-left text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
                                                 >
-                                                    {film.original_title}
-                                                </div>
+                                                    <span className="group-hover/title:underline">
+                                                        {film.original_title}
+                                                    </span>
+                                                    <span className="mt-0.5 shrink-0 rounded border border-white/[0.12] bg-white/[0.06] px-1 py-[1px] font-mono text-[0.52rem] font-normal text-mist">
+                                                        détails
+                                                    </span>
+                                                </button>
                                                 <div className="text-[0.72rem] text-mist">
                                                     {film.first_name} {film.last_name} ·{" "}
                                                     {film.country}
@@ -681,6 +796,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     </>
                 )}
             </div>
+
+            <FilmDetailDrawer filmId={detailFilmId} onClose={() => setDetailFilmId(null)} />
         </div>
     );
 };
