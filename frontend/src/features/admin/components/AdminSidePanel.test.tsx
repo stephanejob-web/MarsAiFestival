@@ -5,14 +5,14 @@ import AdminSidePanel from "./AdminSidePanel";
 import { ADMIN_LABELS, ADMIN_NAV_LINKS } from "../constants";
 
 describe("AdminSidePanel", () => {
-    it("affiche le titre et le nom de l'admin", () => {
+    it("affiche le titre et le sous-titre", () => {
         render(
             <MemoryRouter>
                 <AdminSidePanel />
             </MemoryRouter>,
         );
-        expect(screen.getByText(ADMIN_LABELS.TITLE)).toBeDefined();
-        expect(screen.getByText(ADMIN_LABELS.HELLO_ADMIN)).toBeDefined();
+        expect(screen.getByText((_, el) => el?.textContent === ADMIN_LABELS.TITLE)).toBeDefined();
+        expect(screen.getByText(ADMIN_LABELS.SUBTITLE)).toBeDefined();
     });
 
     it("affiche toutes les catégories de navigation", () => {

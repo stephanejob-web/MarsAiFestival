@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { listVideosFromS3 } from "../services/s3.service";
+import { listVideosFromS3, getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
+import { getFilms } from "../repositories/film.repository";
 import {
     generateInviteToken,
     verifyInviteToken,
@@ -10,8 +11,37 @@ import {
     getAllJury,
     updateJuryUser,
     toggleJuryActive,
+    banJuryUser,
+    unbanJuryUser,
     deleteJuryUser,
 } from "../repositories/jury.repository";
+
+// ── GET /api/admin/films — Films avec URLs vidéo pré-signées (1h) ─────────────
+export const listAdminFilms = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const rows = await getFilms();
+        const data = await Promise.all(
+            rows.map(async (row) => {
+                if (!row.video_url) return row;
+                const key = extractS3Key(row.video_url as string);
+                if (!key) return row;
+                try {
+                    const presignedUrl = await getPresignedVideoUrl(key);
+                    return { ...row, video_url: presignedUrl };
+                } catch {
+                    return row;
+                }
+            }),
+        );
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la récupération des films.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
 
 // ── GET /api/admin/videos ──────────────────────────────────────────────────────
 export const listS3Videos = async (_req: Request, res: Response): Promise<void> => {
@@ -89,7 +119,7 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
         const updated = await updateJuryUser(id, {
             first_name: firstName,
             last_name: lastName,
-            role: role as "jury" | "admin" | undefined,
+            role: role as "jury" | "admin" | "moderateur" | undefined,
             jury_description: juryDescription,
         });
         if (!updated) {
@@ -163,6 +193,120 @@ export const removeUser = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({
             success: false,
             message: "Erreur lors de la suppression.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/vocal/start — L'admin lance un vocal (notifie tous les jurés) ──
+export const startAdminVocal = (req: Request, res: Response): void => {
+    const io = req.app.locals.io as import("socket.io").Server;
+    const vocalUsers = req.app.locals.vocalUsers as Map<
+        string,
+        { juryId: number; name: string; initials: string; profilPicture: string | null }
+    >;
+    const admin = req.juryUser!;
+    const fullName = `${admin.firstName} ${admin.lastName}`;
+    const initials = `${admin.firstName[0]}${admin.lastName[0]}`.toUpperCase();
+
+    const key = `admin-${admin.id}`;
+    const isFirst = vocalUsers.size === 0;
+    vocalUsers.set(key, {
+        juryId: admin.id,
+        name: fullName,
+        initials,
+        profilPicture: admin.profilPicture ?? null,
+    });
+
+    if (isFirst) {
+        io.emit("vocal:started", {
+            name: fullName,
+            initials,
+            profilPicture: admin.profilPicture ?? null,
+        });
+    } else {
+        io.emit("vocal:joined", {
+            name: fullName,
+            initials,
+            profilPicture: admin.profilPicture ?? null,
+        });
+    }
+    io.emit("vocal:online", Array.from(vocalUsers.values()));
+    res.json({ success: true });
+};
+
+// ── POST /api/admin/vocal/stop — L'admin quitte le vocal ─────────────────────
+export const stopAdminVocal = (req: Request, res: Response): void => {
+    const io = req.app.locals.io as import("socket.io").Server;
+    const vocalUsers = req.app.locals.vocalUsers as Map<
+        string,
+        { juryId: number; name: string; initials: string; profilPicture: string | null }
+    >;
+    const admin = req.juryUser!;
+    const fullName = `${admin.firstName} ${admin.lastName}`;
+
+    const key = `admin-${admin.id}`;
+    if (vocalUsers.has(key)) {
+        vocalUsers.delete(key);
+        io.emit("vocal:left", { name: fullName });
+        io.emit("vocal:online", Array.from(vocalUsers.values()));
+    }
+    res.json({ success: true });
+};
+
+// ── POST /api/admin/users/:id/ban — Bannir un utilisateur en temps réel ───────
+export const banUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        // Bannir en base (is_banned = 1, is_active = 0)
+        const updated = await banJuryUser(id);
+        if (!updated) {
+            res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+            return;
+        }
+
+        // Émettre user:banned à tous les sockets de cet utilisateur
+        const io = req.app.locals.io as import("socket.io").Server;
+        const juryToSockets = req.app.locals.juryToSockets as Map<number, Set<string>>;
+        const sockets = juryToSockets.get(id);
+        if (sockets) {
+            for (const socketId of sockets) {
+                io.to(socketId).emit("user:banned");
+            }
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors du bannissement.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/users/:id/unban — Réactiver un utilisateur banni ──────────
+export const unbanUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        const updated = await unbanJuryUser(id);
+        if (!updated) {
+            res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+            return;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la réactivation.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

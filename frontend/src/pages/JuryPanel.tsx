@@ -1,4 +1,6 @@
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import DelibView from "../features/jury/components/DelibView";
 import DiscuterView from "../features/jury/components/DiscuterView";
@@ -10,12 +12,16 @@ import ListesView from "../features/jury/components/ListesView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
+import { useBanProtection } from "../features/admin/hooks/useBanProtection";
+import BanModal from "../features/admin/components/BanModal";
 
 const JuryPanel = (): React.JSX.Element => {
     const panel = useJuryPanel();
+    const { isBanned } = useBanProtection();
 
     return (
         <div className="flex h-screen overflow-hidden">
+            <BanModal visible={isBanned} />
             <JurySidebar
                 activeView={panel.activeView}
                 onViewChange={panel.setActiveView}
@@ -60,6 +66,7 @@ const JuryPanel = (): React.JSX.Element => {
                 onConfirm={panel.confirmRefuse}
             />
             <JuryToast message={panel.toast} />
+            <ToastContainer />
         </div>
     );
 };

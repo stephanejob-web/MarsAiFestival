@@ -8,12 +8,13 @@ export const upsertVote = async (
     juryId: number,
     filmId: number,
     decision: Decision,
+    message?: string,
 ): Promise<void> => {
     await pool.execute<ResultSetHeader>(
-        `INSERT INTO jury_film_commentary (jury_id, film_id, decision)
-         VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE decision = VALUES(decision), updated_at = CURRENT_TIMESTAMP`,
-        [juryId, filmId, decision],
+        `INSERT INTO jury_film_commentary (jury_id, film_id, decision, message)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE decision = VALUES(decision), message = VALUES(message), updated_at = CURRENT_TIMESTAMP`,
+        [juryId, filmId, decision, message ?? null],
     );
 };
 
@@ -32,7 +33,7 @@ export const getVote = async (juryId: number, filmId: number): Promise<RowDataPa
 export const getVotesByFilm = async (filmId: number): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
-            jfc.id, jfc.decision, jfc.updated_at,
+            jfc.id, jfc.decision, jfc.message, jfc.updated_at,
             j.id AS jury_id, j.first_name, j.last_name, j.profil_picture
          FROM jury_film_commentary jfc
          JOIN jury j ON j.id = jfc.jury_id
@@ -72,21 +73,47 @@ export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
             f.id AS film_id, f.original_title, f.dossier_num, f.statut, f.poster_img,
-            COUNT(jfc.id)                                                  AS total_votes,
-            SUM(jfc.decision = 'valide')                                   AS votes_valide,
-            SUM(jfc.decision = 'arevoir')                                  AS votes_arevoir,
-            SUM(jfc.decision = 'refuse')                                   AS votes_refuse,
-            SUM(jfc.decision = 'in_discussion')                            AS votes_discussion,
-            COUNT(DISTINCT jfa.jury_id)                                    AS total_assigned,
-            COUNT(c.id)                                                     AS total_comments,
-            COUNT(t.id)                                                     AS total_tickets
+            f.video_url,
+            r.email   AS realisator_email,
+            r.first_name AS realisator_first_name,
+            r.last_name  AS realisator_last_name,
+            (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision IS NOT NULL)                AS total_votes,
+            (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'valide')                 AS votes_valide,
+            (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'arevoir')                AS votes_arevoir,
+            (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'refuse')                 AS votes_refuse,
+            (SELECT COUNT(*)          FROM jury_film_commentary v WHERE v.film_id = f.id AND v.decision = 'in_discussion')          AS votes_discussion,
+            (SELECT COUNT(DISTINCT jury_id) FROM jury_film_assignment   a WHERE a.film_id = f.id)                                   AS total_assigned,
+            (SELECT COUNT(*) FROM jury WHERE role = 'jury')                                                                         AS total_jury,
+            (SELECT COUNT(*) FROM jury_film_commentary jfc3 JOIN commentary c ON c.id = jfc3.commentary_id WHERE jfc3.film_id = f.id AND c.commentary IS NOT NULL AND c.commentary != '') AS total_comments,
+            (SELECT COUNT(*)          FROM ticket                       t WHERE t.film_id = f.id AND t.status = 'open')             AS total_tickets,
+            (
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'jury_id',       j2.id,
+                        'first_name',    j2.first_name,
+                        'last_name',     j2.last_name,
+                        'profil_picture',j2.profil_picture,
+                        'decision',      jfc2.decision
+                    )
+                )
+                FROM jury j2
+                LEFT JOIN jury_film_commentary jfc2
+                    ON jfc2.jury_id = j2.id
+                   AND jfc2.film_id = f.id
+                   AND jfc2.decision IS NOT NULL
+                WHERE j2.role = 'jury'
+            )                                                                                                                       AS jury_decisions
          FROM film f
-         LEFT JOIN jury_film_commentary jfc ON jfc.film_id = f.id AND jfc.decision IS NOT NULL
-         LEFT JOIN jury_film_assignment jfa ON jfa.film_id = f.id
-         LEFT JOIN commentary c ON c.id = jfc.commentary_id
-         LEFT JOIN ticket t ON t.film_id = f.id AND t.status = 'open'
-         GROUP BY f.id
+         JOIN realisator r ON r.id = f.realisator_id
          ORDER BY total_votes DESC, votes_valide DESC`,
     );
-    return rows;
+
+    // mysql2 retourne JSON_ARRAYAGG comme une chaîne — on parse manuellement
+    return rows.map((row) => ({
+        ...row,
+        jury_decisions:
+            typeof row.jury_decisions === "string"
+                ? (JSON.parse(row.jury_decisions) as unknown)
+                : row.jury_decisions,
+    }));
 };

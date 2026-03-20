@@ -3,11 +3,13 @@ import { requireAdmin, requireAuth } from "../middlewares/auth.middleware";
 import {
     assign,
     unassign,
+    batchUnassign,
     listAssignments,
     listFilmsForJury,
     listJuryForFilm,
     listJuryMembers,
     autoDistribute,
+    assignAll,
 } from "../controllers/assignment.controller";
 
 const router = Router();
@@ -17,6 +19,8 @@ router.get("/", requireAdmin, listAssignments);
 router.get("/jury-members", requireAdmin, listJuryMembers);
 router.post("/", requireAdmin, assign);
 router.post("/auto-distribute", requireAdmin, autoDistribute);
+router.post("/assign-all", requireAdmin, assignAll);
+router.delete("/batch", requireAdmin, batchUnassign);
 router.delete("/", requireAdmin, unassign);
 
 // Juré connecté — films qui lui sont assignés

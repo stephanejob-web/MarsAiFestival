@@ -20,12 +20,13 @@ export const apiFetchForm = async <T>(endpoint: string, body: FormData): Promise
 };
 
 export const apiFetch = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
+    const { headers: optHeaders, ...restOptions } = options ?? {};
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: {
             "Content-Type": "application/json",
-            ...options?.headers,
+            ...optHeaders,
         },
-        ...options,
+        ...restOptions,
     });
 
     if (!response.ok) {

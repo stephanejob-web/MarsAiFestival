@@ -1,6 +1,41 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/db";
 
+// ── Multi-commentaires (jury_film_comment) — plusieurs par juré par film ───────
+
+export const addFilmComment = async (
+    juryId: number,
+    filmId: number,
+    text: string,
+): Promise<number> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `INSERT INTO jury_film_comment (jury_id, film_id, text) VALUES (?, ?, ?)`,
+        [juryId, filmId, text],
+    );
+    return result.insertId;
+};
+
+export const getFilmComments = async (filmId: number): Promise<RowDataPacket[]> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT fc.id, fc.jury_id, fc.film_id, fc.text, fc.created_at,
+                j.first_name, j.last_name, j.profil_picture
+         FROM jury_film_comment fc
+         JOIN jury j ON j.id = fc.jury_id
+         WHERE fc.film_id = ?
+         ORDER BY fc.created_at ASC`,
+        [filmId],
+    );
+    return rows;
+};
+
+export const getMyFilmComments = async (juryId: number): Promise<RowDataPacket[]> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT id, film_id, text, created_at FROM jury_film_comment WHERE jury_id = ? ORDER BY created_at ASC`,
+        [juryId],
+    );
+    return rows;
+};
+
 // ── Ajouter un commentaire sur un film ────────────────────────────────────────
 export const addComment = async (juryId: number, filmId: number, text: string): Promise<number> => {
     const conn = await pool.getConnection();

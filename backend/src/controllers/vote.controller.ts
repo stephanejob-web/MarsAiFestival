@@ -44,7 +44,7 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
     }
 
     try {
-        await upsertVote(juryId, Number(filmId), decision as Decision);
+        await upsertVote(juryId, Number(filmId), decision as Decision, message);
         const vote = await getVote(juryId, Number(filmId));
 
         // ── Email au réalisateur pour "arevoir" et "refuse" ───────────────────

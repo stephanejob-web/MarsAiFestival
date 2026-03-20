@@ -9,7 +9,7 @@ export interface JwtPayload {
     email: string;
     firstName: string;
     lastName: string;
-    role: "jury" | "admin";
+    role: "jury" | "admin" | "moderateur";
     profilPicture: string | null;
 }
 
@@ -39,7 +39,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
 
 export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
     requireAuth(req, res, () => {
-        if (req.juryUser?.role !== "admin") {
+        if (req.juryUser?.role !== "admin" && req.juryUser?.role !== "moderateur") {
             res.status(403).json({ success: false, message: "Accès réservé aux administrateurs." });
             return;
         }

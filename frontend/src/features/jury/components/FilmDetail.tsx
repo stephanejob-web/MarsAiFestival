@@ -301,7 +301,7 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                     {film.comments.length > 0 ? (
                         <div className="flex flex-col gap-3">
                             {film.comments.map((comment: JuryComment) => (
-                                <CommentCard key={comment.juryId} comment={comment} />
+                                <CommentCard key={comment.id} comment={comment} />
                             ))}
                         </div>
                     ) : (

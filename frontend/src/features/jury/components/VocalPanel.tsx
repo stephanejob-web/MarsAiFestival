@@ -1,162 +1,353 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
     LiveKitRoom,
     RoomAudioRenderer,
     useIsSpeaking,
     useLocalParticipant,
+    useParticipantInfo,
     useParticipants,
+    useTracks,
+    VideoTrack,
 } from "@livekit/components-react";
-import type { Participant } from "livekit-client";
+import { Track } from "livekit-client";
+import type { Participant, TrackPublication } from "livekit-client";
 
 const API = import.meta.env.VITE_API_URL as string;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL as string;
 
-// ── Participant card ───────────────────────────────────────────────────────────
-const ParticipantCard = ({ participant }: { participant: Participant }): React.JSX.Element => {
+// ── Tuile participant mini (mode réduit) ──────────────────────────────────────
+const MiniTile = ({ participant }: { participant: Participant }): React.JSX.Element => {
     const isSpeaking = useIsSpeaking(participant);
     const isMuted = !participant.isMicrophoneEnabled;
+    const isCameraOn = participant.isCameraEnabled;
+    const { name } = useParticipantInfo({ participant });
 
     const meta = participant.metadata
         ? (JSON.parse(participant.metadata) as { profilPicture?: string | null })
         : null;
     const profilPicture = meta?.profilPicture ?? null;
-    const name = participant.name ?? participant.identity;
-    const initials = name
+    const displayName = name ?? participant.identity;
+    const initials = displayName
         .split(" ")
-        .map((p) => p[0])
+        .map((p: string) => p[0])
         .join("")
         .slice(0, 2)
         .toUpperCase();
 
+    const cameraPub = participant.getTrackPublication(Track.Source.Camera) as
+        | TrackPublication
+        | undefined;
+
     return (
-        <div className="flex flex-col items-center gap-1.5">
-            <div
-                className={`relative rounded-full transition-all duration-150 ${
-                    isSpeaking ? "ring-2 ring-aurora ring-offset-2 ring-offset-[#0d1117]" : ""
-                }`}
-            >
-                {profilPicture ? (
-                    <img
-                        src={profilPicture}
-                        alt={initials}
-                        className="h-12 w-12 rounded-full object-cover"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                    />
-                ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.8rem] font-extrabold text-deep-sky">
-                        {initials}
-                    </div>
-                )}
-                {isMuted && (
-                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-coral text-[0.55rem]">
-                        🔇
-                    </span>
-                )}
-                {isSpeaking && (
-                    <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-aurora text-[0.55rem]">
-                        🔊
-                    </span>
-                )}
+        <div
+            className={`relative flex-shrink-0 overflow-hidden rounded-xl border bg-[#0d1117] transition-all duration-150 ${
+                isSpeaking
+                    ? "border-aurora shadow-[0_0_10px_rgba(78,255,206,0.35)]"
+                    : "border-white/[0.08]"
+            }`}
+            style={{ width: 112, height: 84 }}
+        >
+            {isCameraOn && cameraPub ? (
+                <VideoTrack
+                    trackRef={{
+                        participant,
+                        publication: cameraPub,
+                        source: Track.Source.Camera,
+                    }}
+                    className="h-full w-full object-cover"
+                />
+            ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                    {profilPicture ? (
+                        <img
+                            src={profilPicture}
+                            alt={initials}
+                            className="h-9 w-9 rounded-full object-cover"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                        />
+                    ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.7rem] font-extrabold text-deep-sky">
+                            {initials}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Bandeau nom */}
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/60 px-1.5 py-0.5">
+                <span className="max-w-[72px] truncate text-[0.55rem] font-medium text-white/80">
+                    {displayName}
+                </span>
+                <div className="flex items-center gap-0.5">
+                    {isMuted && <span className="text-[0.5rem]">🔇</span>}
+                    {isSpeaking && !isMuted && (
+                        <span className="h-1 w-1 animate-pulse rounded-full bg-aurora" />
+                    )}
+                </div>
             </div>
-            <span className="max-w-[72px] truncate text-center text-[0.65rem] text-white-soft/80">
-                {name}
-            </span>
         </div>
     );
 };
 
-// ── Room controls (inside LiveKitRoom context) ─────────────────────────────────
-const RoomControls = ({ onLeave }: { onLeave: () => void }): React.JSX.Element => {
+// ── Tuile participant étendue (mode agrandi) ───────────────────────────────────
+const FullTile = ({ participant }: { participant: Participant }): React.JSX.Element => {
+    const isSpeaking = useIsSpeaking(participant);
+    const isMuted = !participant.isMicrophoneEnabled;
+    const isCameraOn = participant.isCameraEnabled;
+    const { name } = useParticipantInfo({ participant });
+
+    const meta = participant.metadata
+        ? (JSON.parse(participant.metadata) as { profilPicture?: string | null })
+        : null;
+    const profilPicture = meta?.profilPicture ?? null;
+    const displayName = name ?? participant.identity;
+    const initials = displayName
+        .split(" ")
+        .map((p: string) => p[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+    const cameraPub = participant.getTrackPublication(Track.Source.Camera) as
+        | TrackPublication
+        | undefined;
+
+    return (
+        <div
+            className={`relative overflow-hidden rounded-2xl border bg-[#0d1117] transition-all duration-150 ${
+                isSpeaking
+                    ? "border-aurora shadow-[0_0_16px_rgba(78,255,206,0.3)]"
+                    : "border-white/[0.08]"
+            }`}
+            style={{ width: 200, height: 150 }}
+        >
+            {isCameraOn && cameraPub ? (
+                <VideoTrack
+                    trackRef={{
+                        participant,
+                        publication: cameraPub,
+                        source: Track.Source.Camera,
+                    }}
+                    className="h-full w-full object-cover"
+                />
+            ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+                    {profilPicture ? (
+                        <img
+                            src={profilPicture}
+                            alt={initials}
+                            className="h-14 w-14 rounded-full object-cover"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                        />
+                    ) : (
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.9rem] font-extrabold text-deep-sky">
+                            {initials}
+                        </div>
+                    )}
+                </div>
+            )}
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-black/50 px-2 py-1 backdrop-blur-sm">
+                <span className="max-w-[130px] truncate text-[0.65rem] font-semibold text-white-soft">
+                    {displayName}
+                </span>
+                <div className="flex items-center gap-1">
+                    {isMuted && <span className="text-[0.6rem]">🔇</span>}
+                    {isSpeaking && !isMuted && (
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aurora" />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ── Mini-panel flottant déplaçable ────────────────────────────────────────────
+const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element => {
+    const [expanded, setExpanded] = useState(false);
+
+    // Position initiale : coin bas-droit (lazy init pour accéder à window dès le premier rendu)
+    const [pos, setPos] = useState<{ x: number; y: number }>(() => ({
+        x: window.innerWidth - 320,
+        y: window.innerHeight - 280,
+    }));
+    const panelRef = useRef<HTMLDivElement>(null);
+    const dragging = useRef(false);
+    const dragOffset = useRef({ x: 0, y: 0 });
+
+    const onPointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
+        // Ne pas déclencher le drag sur les boutons
+        if ((e.target as HTMLElement).closest("button")) return;
+        dragging.current = true;
+        dragOffset.current = {
+            x: e.clientX - (pos?.x ?? 0),
+            y: e.clientY - (pos?.y ?? 0),
+        };
+        (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    };
+
+    const onPointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+        if (!dragging.current || !panelRef.current) return;
+        const pw = panelRef.current.offsetWidth;
+        const ph = panelRef.current.offsetHeight;
+        const x = Math.min(Math.max(0, e.clientX - dragOffset.current.x), window.innerWidth - pw);
+        const y = Math.min(Math.max(0, e.clientY - dragOffset.current.y), window.innerHeight - ph);
+        setPos({ x, y });
+    };
+
+    const onPointerUp = (): void => {
+        dragging.current = false;
+    };
     const participants = useParticipants();
     const { localParticipant } = useLocalParticipant();
     const isMuted = !localParticipant.isMicrophoneEnabled;
+    const isCameraOn = localParticipant.isCameraEnabled;
+    const isScreenSharing = localParticipant.isScreenShareEnabled;
+    const screenTracks = useTracks([Track.Source.ScreenShare]);
 
     const toggleMic = (): void => {
         void localParticipant.setMicrophoneEnabled(isMuted);
     };
+    const toggleCamera = (): void => {
+        void localParticipant.setCameraEnabled(!isCameraOn);
+    };
+    const toggleScreen = (): void => {
+        void localParticipant.setScreenShareEnabled(!isScreenSharing);
+    };
 
     return (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0d1117]/95 p-4 shadow-2xl backdrop-blur-md">
-                {/* Participants */}
-                <div className="flex items-end justify-center gap-4">
-                    {participants.map((p) => (
-                        <ParticipantCard key={p.identity} participant={p} />
-                    ))}
-                    {participants.length === 0 && (
-                        <span className="text-[0.75rem] text-mist/50">
-                            En attente des autres jurés…
+        <div
+            ref={panelRef}
+            className="fixed z-50"
+            style={{ left: pos.x, top: pos.y }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+        >
+            {/* Panel principal */}
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1117]/95 shadow-2xl backdrop-blur-md">
+                {/* Header draggable */}
+                <div
+                    className="flex cursor-grab items-center justify-between border-b border-white/[0.06] px-3 py-2 active:cursor-grabbing"
+                    style={{ userSelect: "none" }}
+                >
+                    <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-aurora" />
+                        <span className="font-display text-[0.72rem] font-extrabold text-white-soft">
+                            Salon jury
                         </span>
+                        <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.6rem] text-mist">
+                            {participants.length} en ligne
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setExpanded((v) => !v)}
+                        className="rounded-md p-1 text-[0.75rem] text-mist transition-colors hover:bg-white/[0.06] hover:text-white-soft"
+                        title={expanded ? "Réduire" : "Agrandir"}
+                    >
+                        {expanded ? "⊟" : "⊞"}
+                    </button>
+                </div>
+
+                {/* Partage d'écran (visible en mode étendu seulement) */}
+                {expanded && screenTracks.length > 0 && (
+                    <div className="relative p-2">
+                        <div className="relative overflow-hidden rounded-xl border border-aurora/30">
+                            <VideoTrack
+                                trackRef={screenTracks[0]}
+                                className="max-h-[200px] w-full rounded-xl object-contain"
+                            />
+                            <div className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[0.6rem] text-aurora">
+                                🖥️ Partage d&apos;écran
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Grille participants */}
+                <div className={`p-2 ${expanded ? "flex flex-wrap gap-2" : "flex gap-1.5"}`}>
+                    {participants.length === 0 ? (
+                        <span className="px-2 py-1 text-[0.65rem] text-mist/50">En attente…</span>
+                    ) : expanded ? (
+                        participants.map((p) => <FullTile key={p.identity} participant={p} />)
+                    ) : (
+                        participants.map((p) => <MiniTile key={p.identity} participant={p} />)
                     )}
                 </div>
 
-                {/* Controls */}
-                <div className="flex items-center justify-center gap-3">
+                {/* Contrôles */}
+                <div className="flex items-center justify-center gap-2 border-t border-white/[0.06] px-3 py-2">
+                    {/* Micro */}
                     <button
                         type="button"
                         onClick={toggleMic}
-                        className={`flex h-11 w-11 items-center justify-center rounded-full text-lg transition-all ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all ${
                             isMuted
                                 ? "bg-coral/20 text-coral hover:bg-coral/30"
-                                : "bg-aurora/20 text-aurora hover:bg-aurora/30"
+                                : "bg-aurora/15 text-aurora hover:bg-aurora/25"
                         }`}
                         title={isMuted ? "Activer le micro" : "Couper le micro"}
                     >
                         {isMuted ? "🔇" : "🎙️"}
                     </button>
 
+                    {/* Caméra */}
+                    <button
+                        type="button"
+                        onClick={toggleCamera}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all ${
+                            isCameraOn
+                                ? "bg-aurora/15 text-aurora hover:bg-aurora/25"
+                                : "bg-white/[0.05] text-mist hover:bg-white/[0.10]"
+                        }`}
+                        title={isCameraOn ? "Éteindre la caméra" : "Activer la caméra"}
+                    >
+                        {isCameraOn ? "📹" : "📷"}
+                    </button>
+
+                    {/* Partage d'écran */}
+                    <button
+                        type="button"
+                        onClick={toggleScreen}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all ${
+                            isScreenSharing
+                                ? "bg-solar/20 text-solar hover:bg-solar/30"
+                                : "bg-white/[0.05] text-mist hover:bg-white/[0.10]"
+                        }`}
+                        title={isScreenSharing ? "Arrêter le partage" : "Partager l'écran"}
+                    >
+                        🖥️
+                    </button>
+
+                    {/* Séparateur */}
+                    <div className="h-4 w-px bg-white/[0.08]" />
+
+                    {/* Quitter */}
                     <button
                         type="button"
                         onClick={onLeave}
-                        className="flex h-11 w-28 items-center justify-center gap-2 rounded-full bg-coral text-[0.82rem] font-bold text-white transition-opacity hover:opacity-90"
+                        className="flex h-8 items-center gap-1.5 rounded-full bg-coral px-3 text-[0.72rem] font-bold text-white transition-opacity hover:opacity-85"
                     >
-                        <span>📵</span> Quitter
+                        <span>📵</span>
+                        <span>Quitter</span>
                     </button>
-                </div>
-
-                <div className="text-center text-[0.62rem] text-mist/40">
-                    {participants.length} participant{participants.length > 1 ? "s" : ""} · Salon
-                    vocal jury
                 </div>
             </div>
         </div>
     );
 };
 
-// ── Main VocalPanel ────────────────────────────────────────────────────────────
+// ── Bouton rejoindre (utilisé dans la sidebar) ────────────────────────────────
 interface VocalPanelProps {
     isJoined: boolean;
     onJoin: () => void;
     onLeave: () => void;
 }
 
-const VocalPanel = ({ isJoined, onLeave }: VocalPanelProps): React.JSX.Element | null => {
-    const [token] = useState<string | null>(null);
-
-    const handleLeave = useCallback((): void => {
-        onLeave();
-    }, [onLeave]);
-
-    if (!isJoined || !token) return null;
-
-    return (
-        <LiveKitRoom
-            token={token}
-            serverUrl={LIVEKIT_URL}
-            connect={true}
-            audio={true}
-            video={false}
-            onDisconnected={handleLeave}
-        >
-            <RoomAudioRenderer />
-            <RoomControls onLeave={handleLeave} />
-        </LiveKitRoom>
-    );
-};
-
-// ── Join button (used in sidebar) ─────────────────────────────────────────────
 export const VocalJoinButton = ({
     isJoined,
     onJoin,
@@ -215,7 +406,9 @@ export const VocalJoinButton = ({
                 }`}
             >
                 <span className="mr-1.5">{isJoined ? "🔴" : "🎙️"}</span>
-                <span>{loading ? "Connexion…" : isJoined ? "Vocal actif" : "Vocal jury"}</span>
+                <span>
+                    {loading ? "Connexion…" : isJoined ? "Vocal/Vidéo actif" : "Vocal & Vidéo"}
+                </span>
                 {isJoined && (
                     <span className="ml-1.5 h-[5px] w-[5px] animate-pulse rounded-full bg-aurora" />
                 )}
@@ -228,15 +421,15 @@ export const VocalJoinButton = ({
                     serverUrl={LIVEKIT_URL}
                     connect={true}
                     audio={true}
-                    video={false}
+                    video={true}
                     onDisconnected={handleLeave}
                 >
                     <RoomAudioRenderer />
-                    <RoomControls onLeave={handleLeave} />
+                    <FloatingPanel onLeave={handleLeave} />
                 </LiveKitRoom>
             )}
         </>
     );
 };
 
-export default VocalPanel;
+export default VocalJoinButton;

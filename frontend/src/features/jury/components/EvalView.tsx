@@ -14,6 +14,22 @@ const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
         panel.handleCommentPublish();
     };
 
+    if (!panel.isLoadingFilms && panel.films.length === 0) {
+        return (
+            <div className="flex flex-1 items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-3 text-4xl opacity-20">🎬</div>
+                    <div className="text-[0.9rem] font-semibold text-white-soft">
+                        Aucun film assigné
+                    </div>
+                    <div className="mt-1 text-[0.78rem] text-mist">
+                        L'administrateur n'a pas encore assigné de films à votre compte.
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-1 overflow-hidden">
             <FilmList

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const API = import.meta.env.VITE_API_URL as string;
+const API = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 export interface ChatMessage {
     id: number;

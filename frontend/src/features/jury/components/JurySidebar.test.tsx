@@ -28,8 +28,11 @@ vi.mock("../hooks/useJuryChat", () => ({
         isConnected: true,
         onlineCount: 0,
         mySocketId: "socket-1",
+        vocalUsers: [],
         setInputValue: vi.fn(),
         sendMessage: vi.fn(),
+        joinVocal: vi.fn(),
+        leaveVocal: vi.fn(),
     }),
 }));
 
