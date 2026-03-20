@@ -98,27 +98,45 @@ const UserTable = ({
                         return (
                             <tr
                                 key={u.id}
-                                className="border-b border-white/[0.04] transition-colors last:border-b-0 hover:bg-white/[0.02]"
+                                className={`border-b transition-colors last:border-b-0 ${
+                                    u.is_banned
+                                        ? "border-coral/10 bg-coral/[0.04] hover:bg-coral/[0.06]"
+                                        : "border-white/[0.04] hover:bg-white/[0.02]"
+                                }`}
                             >
                                 {/* Utilisateur */}
                                 <td className="px-4 py-3 align-middle">
                                     <div className="flex items-center gap-3">
-                                        {u.profil_picture ? (
-                                            <img
-                                                src={u.profil_picture}
-                                                alt=""
-                                                className="h-[30px] w-[30px] rounded-lg object-cover"
-                                            />
-                                        ) : (
-                                            <div
-                                                className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-[0.7rem] font-extrabold ${avatarStyle}`}
-                                            >
-                                                {initials}
-                                            </div>
-                                        )}
+                                        <div className="relative">
+                                            {u.profil_picture ? (
+                                                <img
+                                                    src={u.profil_picture}
+                                                    alt=""
+                                                    className={`h-[30px] w-[30px] rounded-lg object-cover ${u.is_banned ? "opacity-40 grayscale" : ""}`}
+                                                />
+                                            ) : (
+                                                <div
+                                                    className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-[0.7rem] font-extrabold ${avatarStyle} ${u.is_banned ? "opacity-40 grayscale" : ""}`}
+                                                >
+                                                    {initials}
+                                                </div>
+                                            )}
+                                            {u.is_banned && (
+                                                <span className="absolute -right-1 -top-1 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-coral text-[0.5rem]">
+                                                    ⊘
+                                                </span>
+                                            )}
+                                        </div>
                                         <div>
-                                            <div className="text-[0.84rem] font-semibold text-white-soft">
+                                            <div
+                                                className={`flex items-center gap-2 text-[0.84rem] font-semibold ${u.is_banned ? "text-mist/50 line-through" : "text-white-soft"}`}
+                                            >
                                                 {u.first_name} {u.last_name}
+                                                {u.is_banned && (
+                                                    <span className="inline-flex items-center gap-1 rounded-full border border-coral/30 bg-coral/10 px-1.5 py-px text-[0.58rem] font-bold uppercase tracking-[0.06em] text-coral no-underline">
+                                                        Banni
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className="mt-0.5 font-mono text-[0.72rem] text-mist">
                                                 {u.email}
@@ -185,6 +203,22 @@ const UserTable = ({
                                                 <div className="h-[6px] w-[6px] rounded-full bg-aurora/50" />
                                                 Actif
                                             </span>
+                                        ) : u.is_banned ? (
+                                            <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
+                                                <svg
+                                                    width="10"
+                                                    height="10"
+                                                    viewBox="0 0 10 10"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.6"
+                                                    strokeLinecap="round"
+                                                >
+                                                    <circle cx="5" cy="5" r="4" />
+                                                    <line x1="2" y1="8" x2="8" y2="2" />
+                                                </svg>
+                                                Banni
+                                            </span>
                                         ) : (
                                             <StatusToggle
                                                 isActive={u.is_active}
@@ -193,7 +227,7 @@ const UserTable = ({
                                                 }
                                             />
                                         )}
-                                        {u.role !== "admin" &&
+                                        {u.role !== "admin" && !u.is_banned &&
                                             (confirmBanId === u.id ? (
                                                 <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
                                                     <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-coral/80">
