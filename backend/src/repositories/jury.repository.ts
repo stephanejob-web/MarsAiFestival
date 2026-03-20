@@ -65,7 +65,7 @@ export const insertJury = async (data: JuryInsert): Promise<JuryRow> => {
 export const getAllJury = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
-            j.id, j.first_name, j.last_name, j.email, j.role, j.is_active,
+            j.id, j.first_name, j.last_name, j.email, j.role, j.is_active, j.is_banned,
             j.profil_picture, j.jury_description, j.created_at,
             COUNT(DISTINCT jfa.film_id) AS films_assigned,
             COUNT(DISTINCT jfc.film_id) AS films_evaluated
@@ -118,6 +118,14 @@ export const toggleJuryActive = async (id: number, isActive: boolean): Promise<b
     const [result] = await pool.execute<ResultSetHeader>(
         `UPDATE jury SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [isActive, id],
+    );
+    return result.affectedRows > 0;
+};
+
+export const banJuryUser = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET is_banned = 1, is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [id],
     );
     return result.affectedRows > 0;
 };
