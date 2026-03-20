@@ -180,10 +180,19 @@ const UserTable = ({
                                 {/* Statut */}
                                 <td className="px-4 py-3 align-middle">
                                     <div className="flex items-center gap-2.5">
-                                        <StatusToggle
-                                            isActive={u.is_active}
-                                            onToggle={() => void onToggleStatus(u.id, !u.is_active)}
-                                        />
+                                        {u.role === "admin" ? (
+                                            <span className="inline-flex items-center gap-1.5 text-[0.75rem] text-aurora/60">
+                                                <div className="h-[6px] w-[6px] rounded-full bg-aurora/50" />
+                                                Actif
+                                            </span>
+                                        ) : (
+                                            <StatusToggle
+                                                isActive={u.is_active}
+                                                onToggle={() =>
+                                                    void onToggleStatus(u.id, !u.is_active)
+                                                }
+                                            />
+                                        )}
                                         {u.role !== "admin" &&
                                             (confirmBanId === u.id ? (
                                                 <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
