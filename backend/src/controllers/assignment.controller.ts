@@ -7,7 +7,7 @@ import {
     getAllAssignments,
     getAllJuryMembers,
 } from "../repositories/assignment.repository";
-import { getUnassignedFilms } from "../repositories/film.repository";
+import { getFilms, getUnassignedFilms } from "../repositories/film.repository";
 import { getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
 
 // ── POST /api/assignments — Assigner un film à un juré (admin) ─────────────────
@@ -187,6 +187,57 @@ export const autoDistribute = async (req: Request, res: Response): Promise<void>
         res.status(500).json({
             success: false,
             message: "Erreur lors de la répartition automatique.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/assignments/assign-all — Assigner tous les films à tous les jurés ─
+export const assignAll = async (req: Request, res: Response): Promise<void> => {
+    const adminId = req.juryUser!.id;
+
+    try {
+        const [allFilms, juryMembers] = await Promise.all([getFilms(), getAllJuryMembers()]);
+
+        const activeJury = (juryMembers as { id: number; role: string }[]).filter(
+            (j) => j.role === "jury",
+        );
+
+        if (activeJury.length === 0) {
+            res.status(400).json({ success: false, message: "Aucun juré actif disponible." });
+            return;
+        }
+        if (allFilms.length === 0) {
+            res.json({ success: true, assigned: 0, message: "Aucun film disponible." });
+            return;
+        }
+
+        let assigned = 0;
+        const pairs: { juryId: number; filmId: number }[] = [];
+
+        for (const film of allFilms) {
+            const filmId = (film as { id: number }).id;
+            for (const jury of activeJury) {
+                try {
+                    await assignFilmToJury(jury.id, filmId, adminId);
+                    assigned++;
+                    pairs.push({ juryId: jury.id, filmId });
+                } catch {
+                    // duplicate — skip
+                }
+            }
+        }
+
+        res.json({
+            success: true,
+            assigned,
+            pairs,
+            message: `${assigned} assignation(s) créée(s) pour ${activeJury.length} juré(s).`,
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'assignation globale.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

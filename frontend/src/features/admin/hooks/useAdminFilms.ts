@@ -29,6 +29,7 @@ export interface UseAdminFilmsReturn {
     clearDistribution: () => void;
     unassignFilm: (filmId: number) => Promise<void>;
     unassignAll: () => Promise<void>;
+    assignAll: () => Promise<void>;
     deleteFilm: (filmId: number) => Promise<void>;
     selectFilm: (filmId: number, selected: boolean) => Promise<void>;
     reload: () => void;
@@ -181,6 +182,31 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         }
     };
 
+    const assignAll = async (): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        setIsDistributing(true);
+        setLastDistribution(null);
+        try {
+            const res = await apiFetch<{
+                success: boolean;
+                assigned: number;
+                pairs: { juryId: number; filmId: number }[];
+                message: string;
+            }>("/api/assignments/assign-all", {
+                method: "POST",
+                headers: authHeader,
+            });
+            if (res.success) {
+                setLastDistribution({ assigned: res.assigned, pairs: res.pairs ?? [] });
+            }
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur d'assignation globale");
+        } finally {
+            setIsDistributing(false);
+        }
+    };
+
     const unassignAll = async (): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
         const pairs = assignments.map((a) => ({ juryId: a.jury_id, filmId: a.film_id }));
@@ -242,6 +268,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         clearDistribution,
         unassignFilm,
         unassignAll,
+        assignAll,
         deleteFilm,
         selectFilm,
         reload: load,

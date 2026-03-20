@@ -9,6 +9,7 @@ import {
     listJuryForFilm,
     listJuryMembers,
     autoDistribute,
+    assignAll,
 } from "../controllers/assignment.controller";
 
 const router = Router();
@@ -18,6 +19,7 @@ router.get("/", requireAdmin, listAssignments);
 router.get("/jury-members", requireAdmin, listJuryMembers);
 router.post("/", requireAdmin, assign);
 router.post("/auto-distribute", requireAdmin, autoDistribute);
+router.post("/assign-all", requireAdmin, assignAll);
 router.delete("/batch", requireAdmin, batchUnassign);
 router.delete("/", requireAdmin, unassign);
 
