@@ -227,7 +227,8 @@ const UserTable = ({
                                                 }
                                             />
                                         )}
-                                        {u.role !== "admin" && !u.is_banned &&
+                                        {u.role !== "admin" &&
+                                            !u.is_banned &&
                                             (confirmBanId === u.id ? (
                                                 <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
                                                     <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-coral/80">
