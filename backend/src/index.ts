@@ -50,6 +50,7 @@ interface OnlineUser {
 // ── State en mémoire ───────────────────────────────────────────────────────────
 const globalUsers = new Map<string, GlobalConnectedUser>();
 const onlineByFilm = new Map<number, Map<string, OnlineUser>>();
+const juryToSockets = new Map<number, Set<string>>();
 
 interface VocalUser {
     juryId: number;
@@ -61,6 +62,9 @@ const vocalUsers = new Map<string, VocalUser>();
 
 // Expose vocalUsers pour les routes HTTP admin
 app.locals.vocalUsers = vocalUsers;
+
+// Expose juryToSockets pour les controllers HTTP (ban)
+app.locals.juryToSockets = juryToSockets;
 
 const broadcastOnline = (filmId: number): void => {
     const users = Array.from(onlineByFilm.get(filmId)?.values() ?? []);
@@ -90,6 +94,14 @@ io.on("connection", (socket: Socket) => {
         // Profil_picture fraîche depuis la DB (le JWT peut être périmé après un changement d'avatar)
         const freshRow = await findById(jury.id);
         const profilPicture = freshRow?.profil_picture ?? jury.profilPicture ?? null;
+
+        // Reverse map juryId → socketIds (pour le ban en temps réel)
+        const existingSockets = juryToSockets.get(jury.id);
+        if (existingSockets) {
+            existingSockets.add(socket.id);
+        } else {
+            juryToSockets.set(jury.id, new Set([socket.id]));
+        }
 
         // ── Chat global (chat:*) — persisté en DB ─────────────────────────────────
 
@@ -242,6 +254,13 @@ io.on("connection", (socket: Socket) => {
         socket.on("disconnect", () => {
             globalUsers.delete(socket.id);
             io.emit("chat:online", Array.from(globalUsers.values()));
+
+            // Nettoyer juryToSockets
+            const jurySockets = juryToSockets.get(jury.id);
+            if (jurySockets) {
+                jurySockets.delete(socket.id);
+                if (jurySockets.size === 0) juryToSockets.delete(jury.id);
+            }
 
             if (vocalUsers.has(socket.id)) {
                 vocalUsers.delete(socket.id);

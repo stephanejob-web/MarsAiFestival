@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { AdminUser } from "../types";
 
 interface UserTableProps {
@@ -6,6 +6,7 @@ interface UserTableProps {
     search: string;
     onToggleStatus: (id: number, isActive: boolean) => Promise<void>;
     onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
+    onBan: (id: number) => Promise<void>;
 }
 
 const AVATAR_GRADIENTS = [
@@ -71,7 +72,10 @@ const UserTable = ({
     search,
     onToggleStatus,
     onChangeRole,
+    onBan,
 }: UserTableProps): React.JSX.Element => {
+    const [confirmBanId, setConfirmBanId] = useState<number | null>(null);
+
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
         return (
@@ -192,10 +196,39 @@ const UserTable = ({
 
                                 {/* Statut */}
                                 <td className="px-4 py-3 align-middle">
-                                    <StatusToggle
-                                        isActive={u.is_active}
-                                        onToggle={() => void onToggleStatus(u.id, !u.is_active)}
-                                    />
+                                    <div className="flex flex-col gap-1.5">
+                                        <StatusToggle
+                                            isActive={u.is_active}
+                                            onToggle={() => void onToggleStatus(u.id, !u.is_active)}
+                                        />
+                                        {u.role !== "admin" &&
+                                            (confirmBanId === u.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            void onBan(u.id);
+                                                            setConfirmBanId(null);
+                                                        }}
+                                                        className="text-[0.62rem] font-bold text-coral hover:underline"
+                                                    >
+                                                        Confirmer
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setConfirmBanId(null)}
+                                                        className="text-[0.62rem] text-mist hover:underline"
+                                                    >
+                                                        Annuler
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setConfirmBanId(u.id)}
+                                                    className="text-[0.62rem] text-mist/40 transition-colors hover:text-coral"
+                                                >
+                                                    🚫 Bannir
+                                                </button>
+                                            ))}
+                                    </div>
                                 </td>
                             </tr>
                         );
