@@ -12,11 +12,56 @@ export interface VoteTag {
 }
 
 const FALLBACK_TAGS: VoteTag[] = [
-    { id: 1, key: "rights", label: "Droits musicaux", icon: "🎵", color: "aurora", message_template: null, is_active: true, sort_order: 0 },
-    { id: 2, key: "quality", label: "Qualité", icon: "📋", color: "solar", message_template: null, is_active: true, sort_order: 1 },
-    { id: 3, key: "content", label: "Contenu", icon: "⚠️", color: "coral", message_template: null, is_active: true, sort_order: 2 },
-    { id: 4, key: "tech", label: "YouTube", icon: "📺", color: "lavande", message_template: null, is_active: true, sort_order: 3 },
-    { id: 5, key: "other", label: "Autre", icon: "❓", color: "mist", message_template: null, is_active: true, sort_order: 4 },
+    {
+        id: 1,
+        key: "rights",
+        label: "Droits musicaux",
+        icon: "🎵",
+        color: "aurora",
+        message_template: null,
+        is_active: true,
+        sort_order: 0,
+    },
+    {
+        id: 2,
+        key: "quality",
+        label: "Qualité",
+        icon: "📋",
+        color: "solar",
+        message_template: null,
+        is_active: true,
+        sort_order: 1,
+    },
+    {
+        id: 3,
+        key: "content",
+        label: "Contenu",
+        icon: "⚠️",
+        color: "coral",
+        message_template: null,
+        is_active: true,
+        sort_order: 2,
+    },
+    {
+        id: 4,
+        key: "tech",
+        label: "YouTube",
+        icon: "📺",
+        color: "lavande",
+        message_template: null,
+        is_active: true,
+        sort_order: 3,
+    },
+    {
+        id: 5,
+        key: "other",
+        label: "Autre",
+        icon: "❓",
+        color: "mist",
+        message_template: null,
+        is_active: true,
+        sort_order: 4,
+    },
 ];
 
 const useVoteTags = (): VoteTag[] => {

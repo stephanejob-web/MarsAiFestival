@@ -88,7 +88,6 @@ const SORT_BUTTONS: Array<{ key: SortKey; label: string }> = [
     { key: "comments", label: "💬 Commentaires" },
 ];
 
-
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 const DECISION_STYLE: Record<
@@ -328,10 +327,7 @@ const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
     },
 };
 
-const FilmInsightDrawer = ({
-    film,
-    onClose,
-}: FilmInsightDrawerProps): React.JSX.Element => {
+const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
@@ -538,9 +534,7 @@ const FilmInsightDrawer = ({
                             { key: "votes", label: "Votes" },
                             { key: "commentaires", label: "Commentaires" },
                             { key: "discussion", label: "Discussion" },
-                            ...(film?.realisator_email
-                                ? [{ key: "email", label: "✉ Email" }]
-                                : []),
+                            ...(film?.realisator_email ? [{ key: "email", label: "✉ Email" }] : []),
                         ] as Array<{ key: InsightTab; label: string }>
                     ).map(({ key, label }) => (
                         <button
@@ -842,7 +836,9 @@ const FilmInsightDrawer = ({
                                     </span>
                                 </div>
                                 <div className="mt-2 flex items-center gap-2">
-                                    <span className="w-12 shrink-0 font-semibold text-mist">Objet</span>
+                                    <span className="w-12 shrink-0 font-semibold text-mist">
+                                        Objet
+                                    </span>
                                     <input
                                         type="text"
                                         value={emailSubject}
@@ -1013,184 +1009,6 @@ const FilmInsightDrawer = ({
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 
-interface VideoModalProps {
-    film: AdminFilmVoteSummary;
-    onClose: () => void;
-}
-
-const VideoModal = ({ film, onClose }: VideoModalProps): React.JSX.Element => {
-    const [signedUrl, setSignedUrl] = useState<string | null>(null);
-    const [loadingUrl, setLoadingUrl] = useState(true);
-    const [urlError, setUrlError] = useState<string | null>(null);
-
-    useEffect(() => {
-        apiFetch<{ success: boolean; url: string }>(`/api/films/${film.film_id}/video-url`, {
-            headers: { Authorization: `Bearer ${getToken()}` },
-        })
-            .then((res) => {
-                if (res.success) setSignedUrl(res.url);
-                else setUrlError("Impossible de charger la vidéo.");
-            })
-            .catch(() => setUrlError("Erreur de connexion."))
-            .finally(() => setLoadingUrl(false));
-    }, [film.film_id]);
-
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            <div
-                className="relative w-full max-w-3xl rounded-2xl border border-white/[0.08] bg-[#0d0f1c] p-5 shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="mb-3 flex items-start justify-between">
-                    <div>
-                        <div className="font-display text-[0.95rem] font-extrabold text-white-soft">
-                            {film.original_title}
-                        </div>
-                        <div className="mt-0.5 font-mono text-[0.65rem] text-mist">
-                            {film.dossier_num}
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="ml-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[0.75rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
-                    >
-                        ✕
-                    </button>
-                </div>
-                {loadingUrl ? (
-                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-black text-[0.82rem] text-mist">
-                        Chargement…
-                    </div>
-                ) : urlError ? (
-                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-black text-[0.82rem] text-coral">
-                        {urlError}
-                    </div>
-                ) : (
-                    <video
-                        src={signedUrl ?? ""}
-                        controls
-                        autoPlay
-                        className="w-full rounded-xl bg-black"
-                        style={{ maxHeight: "60vh" }}
-                    />
-                )}
-            </div>
-        </div>
-    );
-};
-
-interface EmailModalProps {
-    film: AdminFilmVoteSummary;
-    onClose: () => void;
-}
-
-const EmailModal = ({ film, onClose }: EmailModalProps): React.JSX.Element => {
-    const [subject, setSubject] = useState(`Votre film — ${film.original_title}`);
-    const [body, setBody] = useState("");
-    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-
-    const send = async (): Promise<void> => {
-        if (!body.trim()) return;
-        setStatus("sending");
-        try {
-            await apiFetch<{ success: boolean }>(`/api/films/${film.film_id}/email`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${getToken()}` },
-                body: JSON.stringify({ subject, message: body }),
-            });
-            setStatus("sent");
-        } catch {
-            setStatus("error");
-        }
-    };
-
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            <div
-                className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#0d0f1c] p-5 shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="mb-4 flex items-center justify-between">
-                    <div>
-                        <div className="font-display text-[0.9rem] font-extrabold text-white-soft">
-                            📧 Email au réalisateur
-                        </div>
-                        <div className="mt-0.5 text-[0.72rem] text-mist">{film.original_title}</div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[0.75rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div className="mb-3 space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-[0.75rem]">
-                    <div className="flex gap-2">
-                        <span className="w-12 shrink-0 font-semibold text-mist">De</span>
-                        <span className="text-mist opacity-60">administration@marsai2026.fr</span>
-                    </div>
-                    <div className="flex gap-2">
-                        <span className="w-12 shrink-0 font-semibold text-mist">À</span>
-                        <span className="text-white-soft">
-                            {film.realisator_first_name} {film.realisator_last_name}{" "}
-                            <span className="text-mist opacity-60">({film.realisator_email})</span>
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-12 shrink-0 font-semibold text-mist">Objet</span>
-                        <input
-                            type="text"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[0.75rem] text-white-soft outline-none focus:border-solar/40"
-                        />
-                    </div>
-                </div>
-
-                <textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    placeholder="Votre message…"
-                    rows={5}
-                    className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[0.78rem] text-white-soft outline-none placeholder:text-mist focus:border-solar/40"
-                />
-
-                <div className="mt-3 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-[0.78rem] font-semibold text-mist transition-all hover:bg-white/[0.07] hover:text-white-soft"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => void send()}
-                        disabled={!body.trim() || status === "sending"}
-                        className="rounded-lg border border-solar/30 bg-solar/[0.1] px-4 py-2 text-[0.78rem] font-bold text-solar transition-all hover:bg-solar/[0.2] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        {status === "sending"
-                            ? "Envoi…"
-                            : status === "sent"
-                              ? "✓ Envoyé !"
-                              : status === "error"
-                                ? "✕ Erreur"
-                                : "📧 Envoyer"}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -1523,7 +1341,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         filtered.map((film, index) => {
                             const consensus = getConsensus(film);
                             const badge = CONSENSUS_CONFIG[consensus];
-                            const isExpanded = expandedId === film.film_id;
                             return (
                                 <React.Fragment key={film.film_id}>
                                     <tr
@@ -1593,10 +1410,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 e.stopPropagation()
                                             }
                                         >
-                                            <AdminDecision
-                                                film={film}
-                                                onUpdate={updateStatut}
-                                            />
+                                            <AdminDecision film={film} onUpdate={updateStatut} />
                                         </td>
 
                                         {/* Chevron */}
@@ -1840,10 +1654,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                 )}
             </div>
 
-            <FilmInsightDrawer
-                film={expandedFilm}
-                onClose={() => setExpandedId(null)}
-            />
+            <FilmInsightDrawer film={expandedFilm} onClose={() => setExpandedId(null)} />
         </div>
     );
 };

@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { requireAuth, requireAdmin } from "../middlewares/auth.middleware";
-import { listActiveTags, listAllTags, addTag, editTag, removeTag } from "../controllers/voteTag.controller";
+import {
+    listActiveTags,
+    listAllTags,
+    addTag,
+    editTag,
+    removeTag,
+} from "../controllers/voteTag.controller";
 
 const router = Router();
 

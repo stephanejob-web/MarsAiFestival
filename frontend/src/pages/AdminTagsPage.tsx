@@ -24,7 +24,14 @@ const COLOR_PREVIEW: Record<string, string> = {
     mist: "bg-mist",
 };
 
-const EMPTY_FORM = { key: "", label: "", icon: "", color: "aurora", sort_order: 0, message_template: "" };
+const EMPTY_FORM = {
+    key: "",
+    label: "",
+    icon: "",
+    color: "aurora",
+    sort_order: 0,
+    message_template: "",
+};
 
 const AdminTagsPage = (): React.JSX.Element => {
     const [tags, setTags] = useState<VoteTag[]>([]);
@@ -199,9 +206,7 @@ const AdminTagsPage = (): React.JSX.Element => {
                                     onChange={(e) =>
                                         setForm((f) => ({
                                             ...f,
-                                            key: e.target.value
-                                                .toLowerCase()
-                                                .replace(/\s/g, "_"),
+                                            key: e.target.value.toLowerCase().replace(/\s/g, "_"),
                                         }))
                                     }
                                     disabled={editingId !== null}
@@ -216,7 +221,9 @@ const AdminTagsPage = (): React.JSX.Element => {
                                 <input
                                     type="text"
                                     value={form.label}
-                                    onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
+                                    onChange={(e) =>
+                                        setForm((f) => ({ ...f, label: e.target.value }))
+                                    }
                                     placeholder="ex: Droits musicaux"
                                     className="w-full rounded-[8px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
                                 />
@@ -228,7 +235,9 @@ const AdminTagsPage = (): React.JSX.Element => {
                                 <input
                                     type="text"
                                     value={form.icon}
-                                    onChange={(e) => setForm((f) => ({ ...f, icon: e.target.value }))}
+                                    onChange={(e) =>
+                                        setForm((f) => ({ ...f, icon: e.target.value }))
+                                    }
                                     placeholder="ex: 🎵"
                                     className="w-full rounded-[8px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
                                 />
@@ -257,7 +266,10 @@ const AdminTagsPage = (): React.JSX.Element => {
                                     type="number"
                                     value={form.sort_order}
                                     onChange={(e) =>
-                                        setForm((f) => ({ ...f, sort_order: Number(e.target.value) }))
+                                        setForm((f) => ({
+                                            ...f,
+                                            sort_order: Number(e.target.value),
+                                        }))
                                     }
                                     className="w-full rounded-[8px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.82rem] text-white-soft outline-none focus:border-aurora/40"
                                 />
