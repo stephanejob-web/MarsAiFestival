@@ -8,12 +8,13 @@ export const upsertVote = async (
     juryId: number,
     filmId: number,
     decision: Decision,
+    message?: string,
 ): Promise<void> => {
     await pool.execute<ResultSetHeader>(
-        `INSERT INTO jury_film_commentary (jury_id, film_id, decision)
-         VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE decision = VALUES(decision), updated_at = CURRENT_TIMESTAMP`,
-        [juryId, filmId, decision],
+        `INSERT INTO jury_film_commentary (jury_id, film_id, decision, message)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE decision = VALUES(decision), message = VALUES(message), updated_at = CURRENT_TIMESTAMP`,
+        [juryId, filmId, decision, message ?? null],
     );
 };
 
@@ -32,7 +33,7 @@ export const getVote = async (juryId: number, filmId: number): Promise<RowDataPa
 export const getVotesByFilm = async (filmId: number): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
-            jfc.id, jfc.decision, jfc.updated_at,
+            jfc.id, jfc.decision, jfc.message, jfc.updated_at,
             j.id AS jury_id, j.first_name, j.last_name, j.profil_picture
          FROM jury_film_commentary jfc
          JOIN jury j ON j.id = jfc.jury_id
