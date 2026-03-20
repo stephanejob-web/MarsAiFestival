@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
+import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -76,12 +77,16 @@ const AdminFilmsPage = (): React.JSX.Element => {
         isLoading,
         error,
         isDistributing,
+        lastDistribution,
         toggleAssignment,
         autoDistribute,
+        undoDistribution,
+        clearDistribution,
         deleteFilm,
         selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+    const [detailFilmId, setDetailFilmId] = useState<number | null>(null);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<FilterMode>("all");
@@ -237,6 +242,49 @@ const AdminFilmsPage = (): React.JSX.Element => {
                             </div>
                         </button>
 
+                        {/* Distribution result banner */}
+                        {lastDistribution !== null && (
+                            <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-aurora/30 bg-aurora/[0.08] px-4 py-3">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-aurora/20 text-[0.85rem] text-aurora">
+                                    ✓
+                                </span>
+                                <span className="flex-1 text-[0.82rem] text-white-soft">
+                                    {lastDistribution.assigned > 0 ? (
+                                        <>
+                                            <span className="font-bold text-aurora">
+                                                {lastDistribution.assigned} film
+                                                {lastDistribution.assigned > 1 ? "s" : ""}
+                                            </span>{" "}
+                                            réparti
+                                            {lastDistribution.assigned > 1 ? "s" : ""} équitablement
+                                            entre les jurés.
+                                        </>
+                                    ) : (
+                                        "Tous les films sont déjà assignés."
+                                    )}
+                                </span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {lastDistribution.assigned > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void undoDistribution()}
+                                            className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-1.5 text-[0.75rem] font-semibold text-coral transition-all hover:border-coral/50 hover:bg-coral/20"
+                                        >
+                                            ↩ Annuler la répartition
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={clearDistribution}
+                                        className="flex h-6 w-6 items-center justify-center rounded-full text-mist transition-all hover:bg-white/10 hover:text-white-soft"
+                                        title="Fermer"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Search */}
                         <div className="relative mb-3.5">
                             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.85rem] opacity-40">
@@ -377,7 +425,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         <button
                                                             type="button"
                                                             onClick={() => activateVideo(film.id)}
-                                                            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-150 group-hover/thumb:opacity-100"
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-100"
                                                         >
                                                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
                                                                 <svg
@@ -406,14 +454,24 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             <div
                                                 className={`p-3.5 ${isSelected ? "bg-aurora/[0.03]" : ""}`}
                                             >
-                                                <div
-                                                    className={`mb-0.5 text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDetailFilmId(film.id)}
+                                                    className={`group/title mb-0.5 flex w-full items-start gap-1.5 text-left text-[0.88rem] font-bold leading-snug ${isSelected ? "text-aurora" : "text-white-soft"}`}
                                                 >
-                                                    {film.original_title}
-                                                </div>
+                                                    <span className="group-hover/title:underline">
+                                                        {film.original_title}
+                                                    </span>
+                                                    <span className="mt-0.5 shrink-0 rounded border border-white/[0.12] bg-white/[0.06] px-1 py-[1px] font-mono text-[0.52rem] font-normal text-mist">
+                                                        détails
+                                                    </span>
+                                                </button>
                                                 <div className="text-[0.72rem] text-mist">
                                                     {film.first_name} {film.last_name} ·{" "}
                                                     {film.country}
+                                                </div>
+                                                <div className="mt-0.5 font-mono text-[0.75rem] font-bold text-mist opacity-60">
+                                                    #{film.id}
                                                 </div>
 
                                                 {/* Jury avatars — clic direct pour assigner */}
@@ -678,6 +736,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     </>
                 )}
             </div>
+
+            <FilmDetailDrawer filmId={detailFilmId} onClose={() => setDetailFilmId(null)} />
         </div>
     );
 };
