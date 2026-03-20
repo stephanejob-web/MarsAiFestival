@@ -485,6 +485,7 @@ CREATE TABLE `jury_film_commentary` (
   `decision` enum('valide','arevoir','refuse','in_discussion') DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `message` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_jury_film` (`jury_id`,`film_id`),
   KEY `fk_jfc_film` (`film_id`),
@@ -492,7 +493,7 @@ CREATE TABLE `jury_film_commentary` (
   CONSTRAINT `fk_jfc_commentary` FOREIGN KEY (`commentary_id`) REFERENCES `commentary` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_jfc_film` FOREIGN KEY (`film_id`) REFERENCES `film` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_jfc_jury` FOREIGN KEY (`jury_id`) REFERENCES `jury` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -501,7 +502,7 @@ CREATE TABLE `jury_film_commentary` (
 
 LOCK TABLES `jury_film_commentary` WRITE;
 /*!40000 ALTER TABLE `jury_film_commentary` DISABLE KEYS */;
-INSERT INTO `jury_film_commentary` VALUES (2,2,16,10,'in_discussion','2026-03-15 11:58:13','2026-03-15 13:08:47'),(3,2,17,11,'valide','2026-03-15 12:50:37','2026-03-15 13:28:54'),(4,2,1,1,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(5,4,2,2,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(6,3,3,3,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(7,4,4,4,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(8,6,5,5,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(9,2,6,6,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(10,3,7,7,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(11,5,8,8,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(12,4,10,9,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47'),(15,2,7,12,NULL,'2026-03-15 13:29:27','2026-03-15 13:29:27'),(16,3,36,NULL,'refuse','2026-03-16 14:43:36','2026-03-16 14:43:57'),(19,3,63,NULL,'refuse','2026-03-16 14:44:46','2026-03-16 14:45:40'),(21,5,68,NULL,'valide','2026-03-19 12:04:50','2026-03-19 12:04:50'),(22,4,69,13,'refuse','2026-03-19 12:10:05','2026-03-19 12:21:55'),(23,3,69,NULL,'arevoir','2026-03-19 12:10:38','2026-03-19 12:17:36'),(27,4,70,14,'valide','2026-03-19 12:12:38','2026-03-19 13:46:20'),(28,5,69,NULL,'valide','2026-03-19 12:16:06','2026-03-19 13:58:23'),(32,5,70,NULL,'valide','2026-03-19 12:28:58','2026-03-19 13:58:21'),(36,5,63,NULL,'valide','2026-03-19 13:15:26','2026-03-19 13:15:26'),(37,5,64,NULL,'valide','2026-03-19 13:15:28','2026-03-19 13:15:28'),(41,2,70,28,'valide','2026-03-19 14:44:46','2026-03-20 08:20:45');
+INSERT INTO `jury_film_commentary` VALUES (2,2,16,10,'in_discussion','2026-03-15 11:58:13','2026-03-15 13:08:47',NULL),(3,2,17,11,'valide','2026-03-15 12:50:37','2026-03-15 13:28:54',NULL),(4,2,1,1,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(5,4,2,2,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(6,3,3,3,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(7,4,4,4,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(8,6,5,5,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(9,2,6,6,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(10,3,7,7,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(11,5,8,8,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(12,4,10,9,NULL,'2026-03-15 13:08:47','2026-03-15 13:08:47',NULL),(15,2,7,12,NULL,'2026-03-15 13:29:27','2026-03-15 13:29:27',NULL),(16,3,36,NULL,'refuse','2026-03-16 14:43:36','2026-03-16 14:43:57',NULL),(19,3,63,NULL,'refuse','2026-03-16 14:44:46','2026-03-16 14:45:40',NULL),(21,5,68,NULL,'valide','2026-03-19 12:04:50','2026-03-19 12:04:50',NULL),(22,4,69,13,'refuse','2026-03-19 12:10:05','2026-03-19 12:21:55',NULL),(23,3,69,NULL,'arevoir','2026-03-19 12:10:38','2026-03-19 12:17:36',NULL),(27,4,70,14,'valide','2026-03-19 12:12:38','2026-03-19 13:46:20',NULL),(28,5,69,NULL,'valide','2026-03-19 12:16:06','2026-03-19 13:58:23',NULL),(32,5,70,NULL,'valide','2026-03-19 12:28:58','2026-03-19 13:58:21',NULL),(36,5,63,NULL,'valide','2026-03-19 13:15:26','2026-03-19 13:15:26',NULL),(37,5,64,NULL,'valide','2026-03-19 13:15:28','2026-03-19 13:15:28',NULL),(41,2,70,28,'refuse','2026-03-19 14:44:46','2026-03-20 12:40:13','qualite mediocre');
 /*!40000 ALTER TABLE `jury_film_commentary` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -654,5 +655,27 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- ── Table: vote_tags ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `vote_tags` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `message_template` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `vote_tags` VALUES
+(1,'rights','Droits musicaux','🎵','aurora',1,0,'2026-03-20 12:16:02','Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux qui nécessite votre attention avant toute diffusion.\n\nCordialement,\nLe jury marsAI Festival 2026'),
+(2,'quality','Qualité','📋','solar',1,1,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été visionné par le jury. La qualité technique ou artistique ne correspond pas encore aux critères du festival. Nous vous encourageons à retravailler certains aspects.\n\nCordialement,\nLe jury marsAI Festival 2026'),
+(3,'content','Contenu','⚠️','coral',1,2,'2026-03-20 12:16:02','Bonjour,\n\nLe contenu de votre film soulève des réserves de la part du jury. Certains éléments ne sont pas conformes à la charte éditoriale du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),
+(4,'tech','YouTube','📺','lavande',1,3,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été identifié comme déjà disponible sur des plateformes publiques (YouTube, etc.), ce qui ne correspond pas aux critères de première diffusion du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),
+(5,'other','Autre','❓','mist',1,4,'2026-03-20 12:16:02','Bonjour,\n\nAprès évaluation, le jury a décidé de ne pas retenir votre film pour cette édition du festival marsAI 2026.\n\nCordialement,\nLe jury marsAI Festival 2026');
 
 -- Dump completed on 2026-03-20 12:28:31
