@@ -14,6 +14,7 @@ export interface UseAdminUsersReturn {
     isLoading: boolean;
     error: string | null;
     toggleStatus: (id: number, isActive: boolean) => Promise<void>;
+    changeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     reload: () => void;
 }
 
@@ -54,7 +55,21 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, reload: load };
+    const changeRole = async (id: number, role: "jury" | "admin" | "moderateur"): Promise<void> => {
+        setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)));
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}`, {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: JSON.stringify({ role }),
+            });
+        } catch (err) {
+            await load();
+            setError(err instanceof Error ? err.message : "Erreur de changement de rôle");
+        }
+    };
+
+    return { users, isLoading, error, toggleStatus, changeRole, reload: load };
 };
 
 export default useAdminUsers;

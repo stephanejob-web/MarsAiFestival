@@ -15,7 +15,7 @@ export interface AdminUser {
     first_name: string;
     last_name: string;
     email: string;
-    role: "jury" | "admin";
+    role: "jury" | "admin" | "moderateur";
     is_active: boolean;
     profil_picture: string | null;
     jury_description: string | null;

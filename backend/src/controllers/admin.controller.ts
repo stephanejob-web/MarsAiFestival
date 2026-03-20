@@ -117,7 +117,7 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
         const updated = await updateJuryUser(id, {
             first_name: firstName,
             last_name: lastName,
-            role: role as "jury" | "admin" | undefined,
+            role: role as "jury" | "admin" | "moderateur" | undefined,
             jury_description: juryDescription,
         });
         if (!updated) {
