@@ -123,6 +123,33 @@ const Row = ({ label, value }: { label: string; value: React.ReactNode }): React
 
 const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX.Element => {
     const [film, setFilm] = useState<FilmDetail | null>(null);
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailMessage, setEmailMessage] = useState("");
+    const [sending, setSending] = useState(false);
+    const [emailStatus, setEmailStatus] = useState<"idle" | "ok" | "error">("idle");
+
+    const sendEmail = (): void => {
+        if (!filmId || !emailSubject.trim() || !emailMessage.trim()) return;
+        setSending(true);
+        setEmailStatus("idle");
+        apiFetch<{ success: boolean }>(`/api/films/${filmId}/email`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ subject: emailSubject.trim(), message: emailMessage.trim() }),
+        })
+            .then((res) => {
+                setEmailStatus(res.success ? "ok" : "error");
+                if (res.success) {
+                    setEmailSubject("");
+                    setEmailMessage("");
+                }
+            })
+            .catch(() => setEmailStatus("error"))
+            .finally(() => setSending(false));
+    };
 
     useEffect(() => {
         if (!filmId) return;
@@ -368,6 +395,54 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                         </div>
                     )}
                 </div>
+
+                {/* ── Email footer ── */}
+                {film && film.realisator_email && (
+                    <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
+                        <div className="mb-3 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-mist opacity-60">
+                            ✉ Email au réalisateur
+                        </div>
+                        <div className="space-y-2">
+                            <input
+                                type="text"
+                                placeholder="Sujet…"
+                                value={emailSubject}
+                                onChange={(e) => setEmailSubject(e.target.value)}
+                                className="w-full rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.78rem] text-white-soft placeholder-mist/50 outline-none transition-colors focus:border-aurora/40"
+                            />
+                            <textarea
+                                placeholder="Message…"
+                                value={emailMessage}
+                                onChange={(e) => setEmailMessage(e.target.value)}
+                                rows={3}
+                                className="w-full resize-none rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.78rem] text-white-soft placeholder-mist/50 outline-none transition-colors focus:border-aurora/40"
+                            />
+                            <div className="flex items-center justify-between">
+                                {emailStatus === "ok" && (
+                                    <span className="text-[0.72rem] text-aurora">
+                                        ✓ Email envoyé
+                                    </span>
+                                )}
+                                {emailStatus === "error" && (
+                                    <span className="text-[0.72rem] text-coral">
+                                        ✕ Échec de l'envoi
+                                    </span>
+                                )}
+                                {emailStatus === "idle" && <span />}
+                                <button
+                                    type="button"
+                                    onClick={sendEmail}
+                                    disabled={
+                                        sending || !emailSubject.trim() || !emailMessage.trim()
+                                    }
+                                    className="rounded-lg border border-aurora/30 bg-aurora/[0.08] px-4 py-1.5 font-display text-[0.75rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/[0.14] disabled:cursor-not-allowed disabled:opacity-30"
+                                >
+                                    {sending ? "Envoi…" : "Envoyer"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
