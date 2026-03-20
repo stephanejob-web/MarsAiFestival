@@ -300,7 +300,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
     }, []);
 
     const applyDecision = useCallback(
-        (decision: Exclude<Decision, null>): void => {
+        (decision: Exclude<Decision, null>, message?: string): void => {
             setFilms((prev) =>
                 prev.map((film) => {
                     if (film.id !== activeFilm.id) return film;
@@ -318,7 +318,11 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${token}`,
                         },
-                        body: JSON.stringify({ filmId: activeFilm.id, decision: apiDecision }),
+                        body: JSON.stringify({
+                            filmId: activeFilm.id,
+                            decision: apiDecision,
+                            ...(message?.trim() ? { message: message.trim() } : {}),
+                        }),
                     });
                 }
             }
@@ -383,20 +387,20 @@ const useJuryPanel = (): UseJuryPanelReturn => {
     );
 
     const confirmARevoir = useCallback((): void => {
-        applyDecision("aRevoir");
+        applyDecision("aRevoir", modalMessage);
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
         showToast("Film mis en révision ↩");
-    }, [applyDecision, showToast]);
+    }, [applyDecision, showToast, modalMessage]);
 
     const confirmRefuse = useCallback((): void => {
-        applyDecision("refuse");
+        applyDecision("refuse", modalMessage);
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
         showToast("Film refusé ✕");
-    }, [applyDecision, showToast]);
+    }, [applyDecision, showToast, modalMessage]);
 
     const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
