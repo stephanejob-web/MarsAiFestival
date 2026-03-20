@@ -165,7 +165,7 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
     }
 
     return (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
             {decisions.map((d: JuryDecision) => {
                 const hasVoted = d.decision !== null;
                 const style = d.decision
@@ -173,16 +173,20 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                     : PENDING_STYLE;
                 const initials = `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
                 const fullName = `${d.first_name} ${d.last_name}`;
+                const voteLabel =
+                    hasVoted && d.decision
+                        ? (DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label
+                        : "En attente…";
 
                 return (
                     <div
                         key={d.jury_id}
-                        className="flex items-center gap-2"
-                        style={{ opacity: hasVoted ? 1 : 0.45 }}
+                        className="group/dot relative"
+                        style={{ opacity: hasVoted ? 1 : 0.4 }}
+                        title={`${fullName} — ${voteLabel}`}
                     >
-                        {/* Avatar */}
                         <div
-                            className="relative inline-flex h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full"
+                            className="inline-flex h-[30px] w-[30px] shrink-0 overflow-hidden rounded-full"
                             style={{ border: `2px solid ${style.border}` }}
                         >
                             {d.profil_picture ? (
@@ -193,30 +197,23 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                                 />
                             ) : (
                                 <div
-                                    className="flex h-full w-full items-center justify-center font-display text-[0.7rem] font-black text-white-soft"
+                                    className="flex h-full w-full items-center justify-center font-display text-[0.62rem] font-black text-white-soft"
                                     style={{ background: style.bg }}
                                 >
                                     {initials}
                                 </div>
                             )}
                         </div>
-
-                        {/* Nom + vote */}
-                        <div className="flex min-w-0 flex-col">
-                            <span className="truncate font-display text-[0.7rem] font-semibold text-white-soft">
+                        {/* Tooltip */}
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/[0.08] bg-deep-sky px-2 py-1 opacity-0 shadow-lg transition-opacity duration-150 group-hover/dot:opacity-100">
+                            <div className="text-[0.65rem] font-semibold text-white-soft">
                                 {fullName}
-                            </span>
-                            {hasVoted && d.decision ? (
-                                <span
-                                    className={`text-[0.62rem] font-bold ${(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls}`}
-                                >
-                                    {(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label}
-                                </span>
-                            ) : (
-                                <span className="text-[0.62rem] text-mist opacity-50">
-                                    En attente…
-                                </span>
-                            )}
+                            </div>
+                            <div
+                                className={`text-[0.6rem] font-bold ${hasVoted && d.decision ? (DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls : "text-mist opacity-60"}`}
+                            >
+                                {voteLabel}
+                            </div>
                         </div>
                     </div>
                 );
