@@ -8,20 +8,19 @@ export default defineConfig({
   plugins: [tailwindcss(), react(), basicSsl()],
   server: {
     host: true,
-    https: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5500',
+        target: 'http://backend:5500',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:5500',
+        target: 'http://backend:5500',
         changeOrigin: true,
         ws: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:5500',
+        target: 'http://backend:5500',
         changeOrigin: true,
       },
     },
