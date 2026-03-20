@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import { uploadFileToS3 } from "../services/s3.service";
+import {
+    uploadFileToS3,
+    deleteFileFromS3,
+    extractS3Key,
+    getPresignedVideoUrl,
+} from "../services/s3.service";
+import { sendRealisateurEmail } from "../services/realisator-email.service";
 import { uploadVideoToYoutube } from "../services/youtube.service";
 import { insertRealisator } from "../repositories/realisator.repository";
 import {
@@ -7,6 +13,7 @@ import {
     getFilms,
     getFilmById,
     updateFilmStatut,
+    deleteFilm,
 } from "../repositories/film.repository";
 import { getVotesSummary } from "../repositories/vote.repository";
 
@@ -31,12 +38,15 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
     );
 
     // ── Étape 1 : Upload S3 (bloquant) ────────────────────────────────────────
+    const sanitizeName = (name: string): string =>
+        name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
+
     try {
         for (const field of ["video", "subtitleFR", "subtitleEN"]) {
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
                 const file = fileArr[0];
-                const filename = `${dossierNum}/${field}-${file.originalname}`;
+                const filename = `${dossierNum}/${field}-${sanitizeName(file.originalname)}`;
                 urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
             }
         }
@@ -161,6 +171,9 @@ export const patchFilm = async (req: Request, res: Response): Promise<void> => {
         "refuse",
         "in_discussion",
         "asked_to_modify",
+        "soumis",
+        "selectionne",
+        "finaliste",
     ] as const;
 
     if (isNaN(id)) {
@@ -186,6 +199,93 @@ export const patchFilm = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la mise à jour du film.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── DELETE /api/films/:id ──────────────────────────────────────────────────────
+export const deleteFilmById = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        const film = await getFilmById(id);
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+
+        // Delete S3 files (non-blocking errors — DB deletion takes priority)
+        const s3Fields = ["video_url", "subtitle_fr_url", "subtitle_en_url"] as const;
+        await Promise.allSettled(
+            s3Fields
+                .map((field) => film[field] as string | null)
+                .filter((url): url is string => !!url)
+                .map((url) => {
+                    const key = extractS3Key(url);
+                    return key ? deleteFileFromS3(key) : Promise.resolve();
+                }),
+        );
+
+        const deleted = await deleteFilm(id);
+        if (!deleted) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la suppression du film.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/films/:id/email — Envoyer un email au réalisateur ───────────────
+export const emailRealisateur = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+
+    const { subject, message } = req.body as { subject?: string; message?: string };
+    if (!subject?.trim() || !message?.trim()) {
+        res.status(400).json({ success: false, message: "Sujet et message sont requis." });
+        return;
+    }
+
+    try {
+        const film = await getFilmById(id);
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+
+        const realisatorName =
+            `${String(film.first_name ?? "")} ${String(film.last_name ?? "")}`.trim();
+        const email = String(film.realisator_email ?? "");
+        if (!email) {
+            res.status(400).json({ success: false, message: "Aucun email pour ce réalisateur." });
+            return;
+        }
+
+        await sendRealisateurEmail(
+            email,
+            realisatorName,
+            String(film.original_title ?? ""),
+            subject.trim(),
+            message.trim(),
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'envoi de l'email.",
             error: err instanceof Error ? err.message : String(err),
         });
     }
@@ -237,6 +337,40 @@ export const showFilm = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la récupération du film.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── GET /api/films/:id/video-url — URL pré-signée pour lire la vidéo ──────────
+export const getVideoUrl = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        const film = await getFilmById(id);
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+        const videoUrl = film.video_url as string | null;
+        if (!videoUrl) {
+            res.status(404).json({ success: false, message: "Aucune vidéo pour ce film." });
+            return;
+        }
+        const key = extractS3Key(videoUrl);
+        if (!key) {
+            res.status(400).json({ success: false, message: "URL vidéo invalide." });
+            return;
+        }
+        const signedUrl = await getPresignedVideoUrl(key, 3600);
+        res.json({ success: true, url: signedUrl });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la génération de l'URL vidéo.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

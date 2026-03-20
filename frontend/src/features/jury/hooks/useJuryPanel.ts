@@ -11,7 +11,7 @@ import type {
 } from "../types";
 import useJuryUser from "./useJuryUser";
 
-const API = import.meta.env.VITE_API_URL as string;
+const API = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 // ── Mapping décisions frontend ↔ backend (hors discuter, géré séparément) ──────
 const toApiDecision = (d: Exclude<Decision, null>): string | null => {
@@ -82,24 +82,26 @@ const mapApiFilm = (row: ApiFilmRow): JuryFilm => ({
     votes: [],
 });
 
-// ── Shape returned by GET /api/comments?filmId=X ──────────────────────────────
-interface ApiCommentRow {
-    comment_id: number;
-    text: string;
-    updated_at: string;
+// ── Shape returned by GET /api/comments/film?filmId=X ────────────────────────
+interface ApiFilmCommentRow {
+    id: number;
     jury_id: number;
+    film_id: number;
+    text: string;
+    created_at: string;
     first_name: string;
     last_name: string;
     profil_picture: string | null;
 }
 
-const mapApiComment = (r: ApiCommentRow): JuryComment => ({
+const mapApiFilmComment = (r: ApiFilmCommentRow): JuryComment => ({
+    id: r.id,
     juryId: r.jury_id,
     name: `${r.first_name} ${r.last_name}`,
     initials: `${r.first_name[0]}${r.last_name[0]}`.toUpperCase(),
     profilPicture: r.profil_picture ?? null,
     text: r.text,
-    updatedAt: r.updated_at,
+    updatedAt: r.created_at,
 });
 
 export interface UseJuryPanelReturn {
@@ -217,22 +219,18 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         if (!activeFilmId) return;
         const token = localStorage.getItem("jury_token");
         if (!token) return;
-        fetch(`${API}/api/comments?filmId=${activeFilmId}`, {
+        fetch(`/api/comments/film?filmId=${activeFilmId}`, {
             headers: { Authorization: `Bearer ${token}` },
         })
-            .then((r) => r.json() as Promise<{ success: boolean; data: ApiCommentRow[] }>)
+            .then((r) => r.json() as Promise<{ success: boolean; data: ApiFilmCommentRow[] }>)
             .then((data) => {
                 if (!data.success) return;
-                const comments = data.data.map(mapApiComment);
+                const comments = data.data.map(mapApiFilmComment);
                 setFilms((prev) =>
                     prev.map((f) => (f.id === activeFilmId ? { ...f, comments } : f)),
                 );
-                // Pre-fill the notation textarea with current user's existing comment
-                const mine = data.data.find((r) => r.jury_id === user?.id);
-                setNotationComment(mine?.text ?? "");
             })
             .catch(() => {});
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeFilmId]);
 
     const pendingCount = useMemo(
@@ -402,30 +400,10 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-
         const content = commentDraft.trim();
         if (!content) return;
-
-        // Mise à jour locale immédiate (remplace l'unique commentaire)
-        setFilms((prev) =>
-            prev.map((film) =>
-                film.id !== activeFilm.id ? film : { ...film, comments: [content] },
-            ),
-        );
         setCommentDraft("");
-
-        // Persistance en DB (fire and forget)
-        const token = localStorage.getItem("jury_token");
-        if (token) {
-            void fetch(`${API}/api/comments`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ filmId: activeFilm.id, text: content }),
-            });
-        }
+        addDiscussionComment(activeFilm.id, content);
     };
 
     const handleCommentDraftChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -451,25 +429,40 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         (filmId: number, comment: string): void => {
             const content = comment.trim();
             if (!content) return;
-            setFilms((prev) =>
-                prev.map((film) => {
-                    if (film.id !== filmId) return film;
-                    return {
-                        ...film,
-                        comments: [
-                            ...film.comments.filter((c) => c.juryId !== user?.id),
-                            {
-                                juryId: user?.id ?? 0,
-                                name: user?.fullName ?? "",
-                                initials: user?.initials ?? "",
-                                profilPicture: user?.profilPicture ?? null,
-                                text: content,
-                                updatedAt: new Date().toISOString(),
-                            },
-                        ],
-                    };
-                }),
-            );
+            const token = localStorage.getItem("jury_token");
+            if (!token || !user) return;
+            void fetch(`/api/comments/film`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ filmId, text: content }),
+            })
+                .then((r) => r.json() as Promise<{ success: boolean; data: { id: number } }>)
+                .then((res) => {
+                    if (!res.success) return;
+                    setFilms((prev) =>
+                        prev.map((film) => {
+                            if (film.id !== filmId) return film;
+                            return {
+                                ...film,
+                                comments: [
+                                    ...film.comments,
+                                    {
+                                        id: res.data.id,
+                                        juryId: user.id,
+                                        name: user.fullName,
+                                        initials: user.initials,
+                                        profilPicture: user.profilPicture ?? null,
+                                        text: content,
+                                        updatedAt: new Date().toISOString(),
+                                    },
+                                ],
+                            };
+                        }),
+                    );
+                });
         },
         [user],
     );
@@ -478,39 +471,39 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         const content = notationComment.trim();
         if (!content || !user) return;
 
-        const now = new Date().toISOString();
-        const newComment = {
-            juryId: user.id,
-            name: user.fullName,
-            initials: user.initials,
-            profilPicture: user.profilPicture ?? null,
-            text: content,
-            updatedAt: now,
-        };
-
-        // Mise à jour locale — remplace le commentaire existant de ce juré
-        setFilms((prev) =>
-            prev.map((film) => {
-                if (film.id !== activeFilm.id) return film;
-                return {
-                    ...film,
-                    comments: [...film.comments.filter((c) => c.juryId !== user.id), newComment],
-                };
-            }),
-        );
-
-        // Persistance DB (fire and forget)
         const token = localStorage.getItem("jury_token");
-        if (token) {
-            void fetch(`${API}/api/comments`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ filmId: activeFilm.id, text: content }),
+        if (!token) return;
+
+        // Persistance DB, puis mise à jour locale avec l'id réel retourné
+        void fetch(`/api/comments/film`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ filmId: activeFilm.id, text: content }),
+        })
+            .then((r) => r.json() as Promise<{ success: boolean; data: { id: number } }>)
+            .then((res) => {
+                if (!res.success) return;
+                const newComment: JuryComment = {
+                    id: res.data.id,
+                    juryId: user.id,
+                    name: user.fullName,
+                    initials: user.initials,
+                    profilPicture: user.profilPicture ?? null,
+                    text: content,
+                    updatedAt: new Date().toISOString(),
+                };
+                setFilms((prev) =>
+                    prev.map((film) =>
+                        film.id !== activeFilm.id
+                            ? film
+                            : { ...film, comments: [...film.comments, newComment] },
+                    ),
+                );
+                setNotationComment("");
             });
-        }
         showToast("Commentaire publié ✓");
     }, [notationComment, user, activeFilm.id, showToast]);
 

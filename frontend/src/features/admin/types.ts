@@ -29,6 +29,7 @@ export interface AdminFilm {
     dossier_num: string;
     original_title: string;
     statut: string;
+    poster_img: string | null;
     duration: number | null;
     first_name: string;
     last_name: string;
@@ -67,12 +68,17 @@ export interface AdminFilmVoteSummary {
     original_title: string;
     dossier_num: string;
     statut: string;
+    video_url: string | null;
+    realisator_email: string | null;
+    realisator_first_name: string | null;
+    realisator_last_name: string | null;
     total_votes: number;
     votes_valide: number;
     votes_arevoir: number;
     votes_refuse: number;
     votes_discussion: number;
     total_assigned: number;
+    total_jury: number;
     total_comments: number;
     total_tickets: number;
     jury_decisions: JuryDecision[] | null;

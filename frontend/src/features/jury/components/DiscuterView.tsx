@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useDiscussionSocket from "../hooks/useDiscussionSocket";
+import useDiscussionNotify from "../hooks/useDiscussionNotify";
 import useSharedDiscussion from "../hooks/useSharedDiscussion";
 import useJuryUser from "../hooks/useJuryUser";
 
@@ -60,6 +61,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
 
     const firstFilmId = discussFilms[0]?.id ?? null;
     const [selectedFilmId, setSelectedFilmId] = useState<number | null>(firstFilmId);
+    const { unreadCounts, clearUnread } = useDiscussionNotify(selectedFilmId);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -121,7 +123,10 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                         >
                             <button
                                 type="button"
-                                onClick={() => setSelectedFilmId(film.id)}
+                                onClick={() => {
+                                    setSelectedFilmId(film.id);
+                                    clearUnread(film.id);
+                                }}
                                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
                             >
                                 <div
@@ -130,8 +135,15 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                     {emoji}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <div className="truncate text-[0.78rem] font-semibold">
-                                        {film.title}
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="truncate text-[0.78rem] font-semibold">
+                                            {film.title}
+                                        </span>
+                                        {(unreadCounts[film.id] ?? 0) > 0 && (
+                                            <span className="flex-shrink-0 rounded-full bg-yellow-400 px-1.5 font-mono text-[0.6rem] font-bold text-deep-sky">
+                                                {unreadCounts[film.id]}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="mt-0.5 text-[0.65rem] text-mist">
                                         {film.author}

@@ -3,6 +3,7 @@ import {
     PutObjectCommand,
     ListObjectsV2Command,
     GetObjectCommand,
+    DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -37,6 +38,10 @@ export async function uploadFileToS3(
     );
 
     return `${process.env.SCALEWAY_ENDPOINT}/${BUCKET}/${key}`;
+}
+
+export async function deleteFileFromS3(key: string): Promise<void> {
+    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
 
 export async function getPresignedVideoUrl(key: string, expiresIn = 3600): Promise<string> {

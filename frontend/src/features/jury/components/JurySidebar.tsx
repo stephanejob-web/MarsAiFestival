@@ -77,6 +77,7 @@ const JurySidebar = ({
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
+    const { joinVocal, leaveVocal, vocalUsers } = chat;
     const user = useJuryUser();
     const [avatarError, setAvatarError] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -126,7 +127,7 @@ const JurySidebar = ({
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 px-3 py-3.5">
+                <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-3.5">
                     <div className="px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Évaluation
                     </div>
@@ -184,9 +185,41 @@ const JurySidebar = ({
                 <div className="mx-3 border-t border-white/5">
                     <VocalJoinButton
                         isJoined={isVocalJoined}
-                        onJoin={() => setIsVocalJoined(true)}
-                        onLeave={() => setIsVocalJoined(false)}
+                        onJoin={() => {
+                            setIsVocalJoined(true);
+                            joinVocal();
+                        }}
+                        onLeave={() => {
+                            setIsVocalJoined(false);
+                            leaveVocal();
+                        }}
                     />
+                    {vocalUsers.length > 0 && (
+                        <div className="mb-2 flex flex-wrap items-center gap-1.5 px-2.5">
+                            {vocalUsers.map((u) => (
+                                <div
+                                    key={u.juryId}
+                                    className="flex items-center gap-1"
+                                    title={u.name}
+                                >
+                                    {u.profilPicture ? (
+                                        <img
+                                            src={u.profilPicture}
+                                            alt={u.initials}
+                                            className="h-[20px] w-[20px] rounded-full object-cover ring-1 ring-aurora/40"
+                                        />
+                                    ) : (
+                                        <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-aurora/20 text-[0.5rem] font-bold text-aurora ring-1 ring-aurora/40">
+                                            {u.initials}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            <span className="text-[0.6rem] text-aurora/60">
+                                {vocalUsers.length} en vocal
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Chat */}
@@ -264,10 +297,12 @@ const JurySidebar = ({
                                     </div>
                                 ) : (
                                     chat.messages.map((msg) => {
+                                        const isSystem = msg.id.startsWith("vocal-");
                                         const isMe =
-                                            msg.senderId !== null
+                                            !isSystem &&
+                                            (msg.senderId !== null
                                                 ? msg.senderId === chat.mySocketId
-                                                : msg.juryId === user?.id;
+                                                : msg.juryId === user?.id);
                                         const time = new Date(msg.timestamp).toLocaleTimeString(
                                             "fr",
                                             {
@@ -275,6 +310,24 @@ const JurySidebar = ({
                                                 minute: "2-digit",
                                             },
                                         );
+
+                                        if (isSystem) {
+                                            return (
+                                                <div
+                                                    key={msg.id}
+                                                    className="flex items-center gap-1.5 rounded-lg border border-aurora/20 bg-aurora/[0.07] px-2 py-1.5"
+                                                >
+                                                    <span className="text-[0.75rem]">🎙️</span>
+                                                    <span className="flex-1 text-[0.68rem] font-semibold text-aurora">
+                                                        {msg.text.replace("🎙️ ", "")}
+                                                    </span>
+                                                    <span className="text-[0.55rem] text-mist/40">
+                                                        {time}
+                                                    </span>
+                                                </div>
+                                            );
+                                        }
+
                                         return (
                                             <div
                                                 key={msg.id}
@@ -318,7 +371,7 @@ const JurySidebar = ({
                                     })
                                 )}
                             </div>
-                            <div className="mt-2 flex gap-1.5">
+                            <div className="mt-2 flex items-stretch gap-1.5">
                                 <input
                                     type="text"
                                     value={chat.inputValue}
@@ -332,7 +385,7 @@ const JurySidebar = ({
                                 <button
                                     type="button"
                                     onClick={chat.sendMessage}
-                                    className="rounded-lg bg-aurora px-3 text-[0.8rem] font-bold text-deep-sky"
+                                    className="flex items-center justify-center rounded-lg bg-aurora px-3 text-[0.8rem] font-bold text-deep-sky"
                                 >
                                     ↑
                                 </button>

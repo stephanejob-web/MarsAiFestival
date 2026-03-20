@@ -3,7 +3,8 @@ import nodemailer from "nodemailer";
 import "dotenv/config";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
-const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
+const INVITE_URL =
+    process.env.INVITE_URL ?? "https://stephanejob-web.github.io/mars-AI/views/login-jury.html";
 const INVITE_EXPIRY = "48h";
 
 export interface InvitePayload {
@@ -37,7 +38,7 @@ export async function sendInviteEmail(
         },
     });
 
-    const inviteUrl = `${FRONTEND_URL}/register?token=${token}`;
+    const inviteUrl = `${INVITE_URL}?token=${token}`;
     const roleLabel = role === "admin" ? "Administrateur" : "Membre du jury";
 
     await transporter.sendMail({

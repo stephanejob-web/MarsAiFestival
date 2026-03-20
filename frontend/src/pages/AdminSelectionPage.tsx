@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import StatCard from "../features/admin/components/StatCard";
 import useAdminSelection, {
     getConsensus,
@@ -6,6 +6,18 @@ import useAdminSelection, {
     type SortKey,
 } from "../features/admin/hooks/useAdminSelection";
 import type { AdminFilmVoteSummary, JuryDecision } from "../features/admin/types";
+import { apiFetch } from "../services/api";
+
+const getToken = (): string => localStorage.getItem("jury_token") ?? "";
+
+interface DiscussionMessage {
+    id: number;
+    jury_name: string;
+    jury_initials: string;
+    profil_picture: string | null;
+    message: string;
+    sent_at: string;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -13,6 +25,10 @@ const CONSENSUS_CONFIG: Record<string, { label: string; cls: string }> = {
     unanime: {
         label: "✅ Unanime",
         cls: "bg-aurora/10 text-aurora border border-aurora/25",
+    },
+    majorite: {
+        label: "👍 Majorité",
+        cls: "bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25",
     },
     partage: {
         label: "⚠️ Partagé",
@@ -35,6 +51,7 @@ const FILTER_BUTTONS: Array<{
 }> = [
     { key: "tous", label: "Tous" },
     { key: "unanime", label: "✅ Unanimes", countKey: "unanime" },
+    { key: "majorite", label: "👍 Majorité", countKey: "majorite" },
     { key: "partage", label: "⚠️ Partagés", countKey: "partage" },
     { key: "rejete", label: "❌ Rejetés", countKey: "rejete" },
     { key: "attente", label: "⏳ En attente", countKey: "attente" },
@@ -90,11 +107,40 @@ const exportCSV = (films: AdminFilmVoteSummary[]): void => {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-// Vert = a voté, gris = pas encore voté
-const VOTED_BORDER = "#4effce"; // aurora green
-const PENDING_BORDER = "rgba(255,255,255,0.18)";
-const VOTED_BG = "rgba(78,255,206,0.15)";
-const PENDING_BG = "rgba(255,255,255,0.04)";
+const DECISION_STYLE: Record<
+    string,
+    { border: string; bg: string; label: string; labelCls: string }
+> = {
+    valide: {
+        border: "#4effce",
+        bg: "rgba(78,255,206,0.15)",
+        label: "✓ Validé",
+        labelCls: "text-aurora",
+    },
+    arevoir: {
+        border: "#f5e642",
+        bg: "rgba(245,230,66,0.12)",
+        label: "↩ À revoir",
+        labelCls: "text-solar",
+    },
+    refuse: {
+        border: "#ff6b6b",
+        bg: "rgba(255,107,107,0.12)",
+        label: "✕ Refusé",
+        labelCls: "text-coral",
+    },
+    in_discussion: {
+        border: "#c084fc",
+        bg: "rgba(192,132,252,0.12)",
+        label: "💬 Discussion",
+        labelCls: "text-lavande",
+    },
+};
+
+const PENDING_STYLE = {
+    border: "rgba(255,255,255,0.18)",
+    bg: "rgba(255,255,255,0.04)",
+};
 
 interface JuryVoteDotsProps {
     film: AdminFilmVoteSummary;
@@ -111,8 +157,9 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
         <div className="flex flex-col gap-1.5">
             {decisions.map((d: JuryDecision) => {
                 const hasVoted = d.decision !== null;
-                const borderColor = hasVoted ? VOTED_BORDER : PENDING_BORDER;
-                const bgColor = hasVoted ? VOTED_BG : PENDING_BG;
+                const style = d.decision
+                    ? (DECISION_STYLE[d.decision] ?? PENDING_STYLE)
+                    : PENDING_STYLE;
                 const initials = `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
                 const fullName = `${d.first_name} ${d.last_name}`;
 
@@ -120,12 +167,12 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                     <div
                         key={d.jury_id}
                         className="flex items-center gap-2"
-                        style={{ opacity: hasVoted ? 1 : 0.4 }}
+                        style={{ opacity: hasVoted ? 1 : 0.45 }}
                     >
                         {/* Avatar */}
                         <div
-                            className="relative inline-flex h-[42px] w-[42px] shrink-0 overflow-hidden rounded-full"
-                            style={{ border: `3px solid ${borderColor}` }}
+                            className="relative inline-flex h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full"
+                            style={{ border: `2px solid ${style.border}` }}
                         >
                             {d.profil_picture ? (
                                 <img
@@ -135,37 +182,31 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                                 />
                             ) : (
                                 <div
-                                    className="flex h-full w-full items-center justify-center font-display text-[0.75rem] font-black text-white-soft"
-                                    style={{ background: bgColor }}
+                                    className="flex h-full w-full items-center justify-center font-display text-[0.7rem] font-black text-white-soft"
+                                    style={{ background: style.bg }}
                                 >
                                     {initials}
                                 </div>
                             )}
-                            {hasVoted && (
+                        </div>
+
+                        {/* Nom + vote */}
+                        <div className="flex min-w-0 flex-col">
+                            <span className="truncate font-display text-[0.7rem] font-semibold text-white-soft">
+                                {fullName}
+                            </span>
+                            {hasVoted && d.decision ? (
                                 <span
-                                    className="absolute -bottom-[3px] -right-[3px] flex h-[14px] w-[14px] items-center justify-center rounded-full"
-                                    style={{ background: VOTED_BORDER }}
+                                    className={`text-[0.62rem] font-bold ${(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls}`}
                                 >
-                                    <svg width="8" height="8" viewBox="0 0 6 6" fill="none">
-                                        <path
-                                            d="M1 3l1.5 1.5L5 1.5"
-                                            stroke="#0a0c14"
-                                            strokeWidth="1.2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
+                                    {(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label}
+                                </span>
+                            ) : (
+                                <span className="text-[0.62rem] text-mist opacity-50">
+                                    En attente…
                                 </span>
                             )}
                         </div>
-
-                        {/* Nom complet */}
-                        <span
-                            className="font-display text-[0.72rem] font-semibold"
-                            style={{ color: hasVoted ? VOTED_BORDER : "rgba(255,255,255,0.45)" }}
-                        >
-                            {fullName}
-                        </span>
                     </div>
                 );
             })}
@@ -202,9 +243,16 @@ const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
 interface AdminDecisionProps {
     film: AdminFilmVoteSummary;
     onUpdate: (filmId: number, statut: string) => Promise<void>;
+    onOpenVideo: (film: AdminFilmVoteSummary) => void;
+    onOpenEmail: (film: AdminFilmVoteSummary) => void;
 }
 
-const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Element => {
+const AdminDecision = ({
+    film,
+    onUpdate,
+    onOpenVideo,
+    onOpenEmail,
+}: AdminDecisionProps): React.JSX.Element => {
     const isTop50 = film.statut === "selectionne" || film.statut === "finaliste";
     const isFinaliste = film.statut === "finaliste";
 
@@ -223,8 +271,8 @@ const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Elemen
                 onClick={handleToggleTop50}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-display text-[0.72rem] font-extrabold transition-all ${
                     isTop50
-                        ? "border border-aurora/50 bg-aurora/[0.15] text-aurora shadow-[0_0_12px_rgba(78,255,206,0.15)]"
-                        : "border border-aurora/20 bg-aurora/[0.05] text-aurora hover:bg-aurora/[0.12]"
+                        ? "bg-aurora text-deep-sky shadow-[0_2px_12px_rgba(78,255,206,0.35)] hover:opacity-90"
+                        : "border border-white/[0.12] bg-white/[0.04] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
                 }`}
             >
                 {isTop50 ? (
@@ -239,7 +287,7 @@ const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Elemen
                             <path
                                 d="M2 6l3 3 5-5"
                                 stroke="currentColor"
-                                strokeWidth="1.8"
+                                strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />
@@ -280,6 +328,24 @@ const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Elemen
                     {isFinaliste ? "🏆 Finaliste" : "→ Top 5"}
                 </button>
             )}
+            {/* Video button */}
+            <button
+                type="button"
+                onClick={() => onOpenVideo(film)}
+                disabled={!film.video_url}
+                className="flex items-center gap-1.5 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-mist transition-all hover:border-aurora/30 hover:text-aurora disabled:cursor-not-allowed disabled:opacity-25"
+            >
+                🎬 Lire la vidéo
+            </button>
+            {/* Email button */}
+            <button
+                type="button"
+                onClick={() => onOpenEmail(film)}
+                disabled={!film.realisator_email}
+                className="flex items-center gap-1.5 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-mist transition-all hover:border-solar/30 hover:text-solar disabled:cursor-not-allowed disabled:opacity-25"
+            >
+                ✉ Email réalisateur
+            </button>
         </div>
     );
 };
@@ -289,86 +355,355 @@ interface ExpandedRowProps {
     colSpan: number;
 }
 
-const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => (
-    <tr>
-        <td colSpan={colSpan} className="border-t border-white/[0.04] bg-white/[0.015] px-5 py-4">
-            <div className="grid grid-cols-2 gap-4">
-                {/* Vote breakdown */}
-                <div>
-                    <div className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
-                        ⚖️ Répartition des votes
-                    </div>
-                    <div className="space-y-1.5">
-                        {[
-                            { label: "✓ Validé", count: film.votes_valide, color: "text-aurora" },
-                            { label: "↩ À revoir", count: film.votes_arevoir, color: "text-solar" },
-                            { label: "✕ Refusé", count: film.votes_refuse, color: "text-coral" },
-                            {
-                                label: "💬 En discussion",
-                                count: film.votes_discussion,
-                                color: "text-lavande",
-                            },
-                        ].map(({ label, count, color }) => (
-                            <div key={label} className="flex items-center gap-2">
-                                <span className={`w-28 text-[0.75rem] font-semibold ${color}`}>
-                                    {label}
-                                </span>
-                                <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                                    <div
-                                        className={`h-full rounded-full ${color.replace("text-", "bg-")}`}
-                                        style={{
-                                            width:
-                                                film.total_assigned > 0
-                                                    ? `${(count / film.total_assigned) * 100}%`
-                                                    : "0%",
-                                        }}
-                                    />
+const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => {
+    const [messages, setMessages] = useState<DiscussionMessage[]>([]);
+    const [loadingMessages, setLoadingMessages] = useState(true);
+
+    useEffect(() => {
+        apiFetch<{ success: boolean; data: DiscussionMessage[] }>(
+            `/api/discussion/messages/${film.film_id}`,
+            { headers: { Authorization: `Bearer ${getToken()}` } },
+        )
+            .then((res) => {
+                if (res.success) setMessages(res.data);
+            })
+            .catch(() => undefined)
+            .finally(() => setLoadingMessages(false));
+    }, [film.film_id]);
+
+    return (
+        <tr>
+            <td
+                colSpan={colSpan}
+                className="border-t border-white/[0.04] bg-white/[0.015] px-5 py-4"
+            >
+                <div className="grid grid-cols-2 gap-6">
+                    {/* col 1: vote breakdown + meta */}
+                    <div>
+                        <div className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
+                            ⚖️ Répartition des votes
+                        </div>
+                        <div className="space-y-1.5">
+                            {[
+                                {
+                                    label: "✓ Validé",
+                                    count: film.votes_valide,
+                                    color: "text-aurora",
+                                },
+                                {
+                                    label: "↩ À revoir",
+                                    count: film.votes_arevoir,
+                                    color: "text-solar",
+                                },
+                                {
+                                    label: "✕ Refusé",
+                                    count: film.votes_refuse,
+                                    color: "text-coral",
+                                },
+                                {
+                                    label: "💬 En discussion",
+                                    count: film.votes_discussion,
+                                    color: "text-lavande",
+                                },
+                            ].map(({ label, count, color }) => (
+                                <div key={label} className="flex items-center gap-2">
+                                    <span className={`w-28 text-[0.75rem] font-semibold ${color}`}>
+                                        {label}
+                                    </span>
+                                    <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                                        <div
+                                            className={`h-full rounded-full ${color.replace("text-", "bg-")}`}
+                                            style={{
+                                                width:
+                                                    (film.total_jury ?? film.total_assigned) > 0
+                                                        ? `${(count / (film.total_jury ?? film.total_assigned)) * 100}%`
+                                                        : "0%",
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="w-6 text-right font-mono text-[0.72rem] text-mist">
+                                        {count}
+                                    </span>
                                 </div>
-                                <span className="w-6 text-right font-mono text-[0.72rem] text-mist">
-                                    {count}
+                            ))}
+                        </div>
+                        <div className="mt-4 space-y-1">
+                            <div className="flex gap-2 text-[0.75rem]">
+                                <span className="text-mist">Jurés ayant voté :</span>
+                                <span className="font-semibold text-white-soft">
+                                    {film.total_votes} / {film.total_jury ?? film.total_assigned}
                                 </span>
                             </div>
-                        ))}
-                    </div>
-                </div>
-                {/* Meta */}
-                <div>
-                    <div className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
-                        📊 Données
-                    </div>
-                    <div className="space-y-1">
-                        <div className="flex gap-2 text-[0.75rem]">
-                            <span className="text-mist">Jurés ayant voté :</span>
-                            <span className="font-semibold text-white-soft">
-                                {film.total_votes} / {film.total_assigned}
-                            </span>
-                        </div>
-                        <div className="flex gap-2 text-[0.75rem]">
-                            <span className="text-mist">Commentaires :</span>
-                            <span className="font-semibold text-lavande">
-                                {film.total_comments}
-                            </span>
-                        </div>
-                        {film.total_tickets > 0 && (
                             <div className="flex gap-2 text-[0.75rem]">
-                                <span className="text-mist">Tickets ouverts :</span>
-                                <span className="font-semibold text-solar">
-                                    {film.total_tickets}
+                                <span className="text-mist">Commentaires :</span>
+                                <span className="font-semibold text-lavande">
+                                    {film.total_comments}
                                 </span>
+                            </div>
+                            {film.total_tickets > 0 && (
+                                <div className="flex gap-2 text-[0.75rem]">
+                                    <span className="text-mist">Tickets ouverts :</span>
+                                    <span className="font-semibold text-solar">
+                                        {film.total_tickets}
+                                    </span>
+                                </div>
+                            )}
+                            <div className="flex gap-2 text-[0.75rem]">
+                                <span className="text-mist">Dossier :</span>
+                                <span className="font-mono font-semibold text-white-soft">
+                                    {film.dossier_num}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* col 2: discussion */}
+                    <div>
+                        <div className="mb-2 flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
+                            💬 Discussion jurés
+                            {messages.length > 0 && (
+                                <span className="rounded-full bg-lavande/20 px-1.5 py-0.5 font-mono text-[0.6rem] text-lavande">
+                                    {messages.length}
+                                </span>
+                            )}
+                        </div>
+                        {loadingMessages ? (
+                            <div className="text-[0.75rem] text-mist opacity-50">Chargement…</div>
+                        ) : messages.length === 0 ? (
+                            <div className="text-[0.75rem] text-mist opacity-40">
+                                Aucun message de discussion pour ce film.
+                            </div>
+                        ) : (
+                            <div className="max-h-[220px] space-y-2 overflow-y-auto pr-1">
+                                {messages.map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className="flex items-start gap-2.5 rounded-lg bg-white/[0.03] px-3 py-2"
+                                    >
+                                        <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-lavande/30 bg-lavande/[0.12] font-display text-[0.65rem] font-black text-lavande">
+                                            {msg.profil_picture ? (
+                                                <img
+                                                    src={msg.profil_picture}
+                                                    alt={msg.jury_name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                `${msg.jury_name
+                                                    .split(" ")
+                                                    .map((n: string) => n[0])
+                                                    .join("")
+                                                    .toUpperCase()
+                                                    .slice(0, 2)}`
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="font-display text-[0.72rem] font-bold text-lavande">
+                                                    {msg.jury_name}
+                                                </span>
+                                                <span className="font-mono text-[0.6rem] text-mist opacity-50">
+                                                    {new Date(msg.sent_at).toLocaleString("fr-FR", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <p className="mt-0.5 text-[0.78rem] leading-snug text-white-soft">
+                                                {msg.message}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
-                        <div className="flex gap-2 text-[0.75rem]">
-                            <span className="text-mist">Dossier :</span>
-                            <span className="font-mono font-semibold text-white-soft">
-                                {film.dossier_num}
-                            </span>
-                        </div>
                     </div>
                 </div>
+            </td>
+        </tr>
+    );
+};
+
+// ── Modals ────────────────────────────────────────────────────────────────────
+
+interface VideoModalProps {
+    film: AdminFilmVoteSummary;
+    onClose: () => void;
+}
+
+const VideoModal = ({ film, onClose }: VideoModalProps): React.JSX.Element => {
+    const [signedUrl, setSignedUrl] = useState<string | null>(null);
+    const [loadingUrl, setLoadingUrl] = useState(true);
+    const [urlError, setUrlError] = useState<string | null>(null);
+
+    useEffect(() => {
+        apiFetch<{ success: boolean; url: string }>(`/api/films/${film.film_id}/video-url`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
+            .then((res) => {
+                if (res.success) setSignedUrl(res.url);
+                else setUrlError("Impossible de charger la vidéo.");
+            })
+            .catch(() => setUrlError("Erreur de connexion."))
+            .finally(() => setLoadingUrl(false));
+    }, [film.film_id]);
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="relative w-full max-w-3xl rounded-2xl border border-white/[0.08] bg-[#0d0f1c] p-5 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="mb-3 flex items-start justify-between">
+                    <div>
+                        <div className="font-display text-[0.95rem] font-extrabold text-white-soft">
+                            {film.original_title}
+                        </div>
+                        <div className="mt-0.5 font-mono text-[0.65rem] text-mist">
+                            {film.dossier_num}
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="ml-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[0.75rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                    >
+                        ✕
+                    </button>
+                </div>
+                {loadingUrl ? (
+                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-black text-[0.82rem] text-mist">
+                        Chargement…
+                    </div>
+                ) : urlError ? (
+                    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-black text-[0.82rem] text-coral">
+                        {urlError}
+                    </div>
+                ) : (
+                    <video
+                        src={signedUrl ?? ""}
+                        controls
+                        autoPlay
+                        className="w-full rounded-xl bg-black"
+                        style={{ maxHeight: "60vh" }}
+                    />
+                )}
             </div>
-        </td>
-    </tr>
-);
+        </div>
+    );
+};
+
+interface EmailModalProps {
+    film: AdminFilmVoteSummary;
+    onClose: () => void;
+}
+
+const EmailModal = ({ film, onClose }: EmailModalProps): React.JSX.Element => {
+    const [subject, setSubject] = useState(`Votre film — ${film.original_title}`);
+    const [body, setBody] = useState("");
+    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+    const send = async (): Promise<void> => {
+        if (!body.trim()) return;
+        setStatus("sending");
+        try {
+            await apiFetch<{ success: boolean }>(`/api/films/${film.film_id}/email`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: JSON.stringify({ subject, message: body }),
+            });
+            setStatus("sent");
+        } catch {
+            setStatus("error");
+        }
+    };
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#0d0f1c] p-5 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="mb-4 flex items-center justify-between">
+                    <div>
+                        <div className="font-display text-[0.9rem] font-extrabold text-white-soft">
+                            📧 Email au réalisateur
+                        </div>
+                        <div className="mt-0.5 text-[0.72rem] text-mist">{film.original_title}</div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[0.75rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div className="mb-3 space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-[0.75rem]">
+                    <div className="flex gap-2">
+                        <span className="w-12 shrink-0 font-semibold text-mist">De</span>
+                        <span className="text-mist opacity-60">administration@marsai2026.fr</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <span className="w-12 shrink-0 font-semibold text-mist">À</span>
+                        <span className="text-white-soft">
+                            {film.realisator_first_name} {film.realisator_last_name}{" "}
+                            <span className="text-mist opacity-60">({film.realisator_email})</span>
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-12 shrink-0 font-semibold text-mist">Objet</span>
+                        <input
+                            type="text"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[0.75rem] text-white-soft outline-none focus:border-solar/40"
+                        />
+                    </div>
+                </div>
+
+                <textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    placeholder="Votre message…"
+                    rows={5}
+                    className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[0.78rem] text-white-soft outline-none placeholder:text-mist focus:border-solar/40"
+                />
+
+                <div className="mt-3 flex justify-end gap-2">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-[0.78rem] font-semibold text-mist transition-all hover:bg-white/[0.07] hover:text-white-soft"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => void send()}
+                        disabled={!body.trim() || status === "sending"}
+                        className="rounded-lg border border-solar/30 bg-solar/[0.1] px-4 py-2 text-[0.78rem] font-bold text-solar transition-all hover:bg-solar/[0.2] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        {status === "sending"
+                            ? "Envoi…"
+                            : status === "sent"
+                              ? "✓ Envoyé !"
+                              : status === "error"
+                                ? "✕ Erreur"
+                                : "📧 Envoyer"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -391,6 +726,8 @@ const AdminSelectionPage = (): React.JSX.Element => {
     } = useAdminSelection();
 
     const [expandedId, setExpandedId] = useState<number | null>(null);
+    const [videoFilm, setVideoFilm] = useState<AdminFilmVoteSummary | null>(null);
+    const [emailFilm, setEmailFilm] = useState<AdminFilmVoteSummary | null>(null);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         setSearch(e.target.value);
@@ -718,6 +1055,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                         {/* Film */}
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-1.5">
+                                                <span className="font-mono text-[0.65rem] font-black text-mist opacity-40">
+                                                    {String(film.film_id).padStart(3, "0")}
+                                                </span>
                                                 <div className="text-[0.82rem] font-semibold text-white-soft">
                                                     {film.original_title}
                                                 </div>
@@ -774,7 +1114,12 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 e.stopPropagation()
                                             }
                                         >
-                                            <AdminDecision film={film} onUpdate={updateStatut} />
+                                            <AdminDecision
+                                                film={film}
+                                                onUpdate={updateStatut}
+                                                onOpenVideo={setVideoFilm}
+                                                onOpenEmail={setEmailFilm}
+                                            />
                                         </td>
                                     </tr>
                                     {isExpanded && <ExpandedRow film={film} colSpan={7} />}
@@ -858,11 +1203,17 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         </div>
 
                         {/* Stats */}
-                        <div className="mb-6 grid grid-cols-5 gap-3">
+                        <div className="mb-6 grid grid-cols-6 gap-3">
                             <StatCard
                                 label="Unanimes ✅"
                                 value={stats.unanime}
-                                sub="validation directe"
+                                sub="tous valident"
+                                color="aurora"
+                            />
+                            <StatCard
+                                label="Majorité 👍"
+                                value={stats.majorite}
+                                sub="+50% valident"
                                 color="aurora"
                             />
                             <StatCard
@@ -874,7 +1225,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             <StatCard
                                 label="Rejetés ❌"
                                 value={stats.rejete}
-                                sub="majorité refusé"
+                                sub="majorité refuse"
                                 color="coral"
                             />
                             <StatCard
@@ -1012,6 +1363,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                     </>
                 )}
             </div>
+
+            {videoFilm && <VideoModal film={videoFilm} onClose={() => setVideoFilm(null)} />}
+            {emailFilm && <EmailModal film={emailFilm} onClose={() => setEmailFilm(null)} />}
         </div>
     );
 };
