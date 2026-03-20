@@ -43,28 +43,10 @@ const StatusToggle = ({ isActive, onToggle }: StatusToggleProps): React.JSX.Elem
     </button>
 );
 
-const ROLE_CONFIG: Record<
-    "jury" | "admin" | "moderateur",
-    { label: string; cls: string; next: "jury" | "admin" | "moderateur"; nextLabel: string }
-> = {
-    jury: {
-        label: "Jury",
-        cls: "border-aurora/20 bg-aurora/10 text-aurora",
-        next: "moderateur",
-        nextLabel: "Passer Modérateur",
-    },
-    moderateur: {
-        label: "Modérateur",
-        cls: "border-solar/20 bg-solar/10 text-solar",
-        next: "jury",
-        nextLabel: "Repasser Jury",
-    },
-    admin: {
-        label: "Admin",
-        cls: "border-lavande/20 bg-lavande/10 text-lavande",
-        next: "admin",
-        nextLabel: "",
-    },
+const ROLE_SELECT_CLS: Record<"jury" | "admin" | "moderateur", string> = {
+    jury: "border-aurora/20 bg-aurora/10 text-aurora",
+    moderateur: "border-lavande/20 bg-lavande/10 text-lavande",
+    admin: "border-lavande/20 bg-lavande/10 text-lavande",
 };
 
 const UserTable = ({
@@ -147,29 +129,30 @@ const UserTable = ({
 
                                 {/* Rôle */}
                                 <td className="px-4 py-3 align-middle">
-                                    {(() => {
-                                        const cfg = ROLE_CONFIG[u.role] ?? ROLE_CONFIG.jury;
-                                        return (
-                                            <div className="flex flex-col gap-1">
-                                                <span
-                                                    className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] ${cfg.cls}`}
-                                                >
-                                                    {cfg.label}
-                                                </span>
-                                                {u.role !== "admin" && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            void onChangeRole(u.id, cfg.next)
-                                                        }
-                                                        className="w-fit text-[0.62rem] text-mist underline-offset-2 transition-colors hover:text-white-soft hover:underline"
-                                                    >
-                                                        {cfg.nextLabel}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
+                                    {u.role === "admin" ? (
+                                        <span className="inline-flex w-fit items-center rounded-full border border-lavande/20 bg-lavande/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] text-lavande">
+                                            Admin
+                                        </span>
+                                    ) : (
+                                        <div className="relative inline-flex">
+                                            <select
+                                                value={u.role}
+                                                onChange={(e) =>
+                                                    void onChangeRole(
+                                                        u.id,
+                                                        e.target.value as "jury" | "moderateur",
+                                                    )
+                                                }
+                                                className={`cursor-pointer appearance-none rounded-full border py-[3px] pl-[10px] pr-[22px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-opacity hover:opacity-80 ${ROLE_SELECT_CLS[u.role]}`}
+                                            >
+                                                <option value="jury">⚖️ Jury</option>
+                                                <option value="moderateur">🛡️ Modérateur</option>
+                                            </select>
+                                            <span className="pointer-events-none absolute right-[7px] top-1/2 -translate-y-1/2 text-[0.5rem] opacity-60">
+                                                ▾
+                                            </span>
+                                        </div>
+                                    )}
                                 </td>
 
                                 {/* Films assignés */}
