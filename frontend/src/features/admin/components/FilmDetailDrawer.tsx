@@ -123,22 +123,21 @@ const Row = ({ label, value }: { label: string; value: React.ReactNode }): React
 
 const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX.Element => {
     const [film, setFilm] = useState<FilmDetail | null>(null);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!filmId) return;
-        setLoading(true);
         apiFetch<{ success: boolean; data: FilmDetail }>(`/api/films/${filmId}`, {
             headers: { Authorization: `Bearer ${getToken()}` },
         })
             .then((res) => {
                 if (res.success) setFilm(res.data);
             })
-            .catch(() => undefined)
-            .finally(() => setLoading(false));
+            .catch(() => undefined);
     }, [filmId]);
 
     const isOpen = filmId !== null;
+    // loading = drawer open but film not yet fetched (or fetching a new film)
+    const loading = isOpen && film?.id !== filmId;
     const statut = film
         ? (STATUT_CONFIG[film.statut] ?? { label: film.statut, color: "text-mist" })
         : null;
