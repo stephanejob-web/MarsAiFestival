@@ -130,6 +130,14 @@ export const banJuryUser = async (id: number): Promise<boolean> => {
     return result.affectedRows > 0;
 };
 
+export const unbanJuryUser = async (id: number): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE jury SET is_banned = 0, is_active = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [id],
+    );
+    return result.affectedRows > 0;
+};
+
 export const deleteJuryUser = async (id: number): Promise<boolean> => {
     const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM jury WHERE id = ?`, [id]);
     return result.affectedRows > 0;
