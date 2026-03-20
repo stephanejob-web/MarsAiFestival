@@ -9,7 +9,8 @@ import ParticipationChart from "../features/admin/components/ParticipationChart"
 import UserTable from "../features/admin/components/UserTable";
 
 const AdminPage = (): React.JSX.Element => {
-    const { users, isLoading, error, toggleStatus, changeRole, banUser } = useAdminUsers();
+    const { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser } =
+        useAdminUsers();
     const { isInVocal, joinVocal, leaveVocal } = useAdminVocal();
     const { isBanned } = useBanProtection();
     const [search, setSearch] = useState<string>("");
@@ -142,6 +143,7 @@ const AdminPage = (): React.JSX.Element => {
                                 onToggleStatus={toggleStatus}
                                 onChangeRole={changeRole}
                                 onBan={banUser}
+                                onUnban={unbanUser}
                             />
                         </>
                     )}
