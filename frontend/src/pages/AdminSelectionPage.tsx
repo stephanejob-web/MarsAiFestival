@@ -389,41 +389,50 @@ const FilmInsightDrawer = ({
     onOpenEmail,
 }: FilmInsightDrawerProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
-    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [loadingMessages, setLoadingMessages] = useState(false);
     const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
-    const [loadingComments, setLoadingComments] = useState(true);
+    const [loadingComments, setLoadingComments] = useState(false);
     const [activeTab, setActiveTab] = useState<InsightTab>("votes");
 
     useEffect(() => {
         if (!film) return;
-        setLoadingMessages(true);
-        setLoadingComments(true);
+        const filmId = film.film_id;
+
         setMessages([]);
         setFilmComments([]);
+        setActiveTab("votes");
+        setLoadingMessages(true);
+        setLoadingComments(true);
+
+        let cancelled = false;
 
         apiFetch<{ success: boolean; data: DiscussionMessage[] }>(
-            `/api/discussion/messages/${film.film_id}`,
+            `/api/discussion/messages/${filmId}`,
             { headers: { Authorization: `Bearer ${getToken()}` } },
         )
             .then((res) => {
-                if (res.success) setMessages(res.data);
+                if (!cancelled && res.success) setMessages(res.data);
             })
             .catch(() => undefined)
-            .finally(() => setLoadingMessages(false));
+            .finally(() => {
+                if (!cancelled) setLoadingMessages(false);
+            });
 
-        apiFetch<{ success: boolean; data: FilmComment[] }>(
-            `/api/comments/film?filmId=${film.film_id}`,
-            { headers: { Authorization: `Bearer ${getToken()}` } },
-        )
+        apiFetch<{ success: boolean; data: FilmComment[] }>(`/api/comments/film?filmId=${filmId}`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
             .then((res) => {
-                if (res.success) setFilmComments(res.data);
+                if (!cancelled && res.success) setFilmComments(res.data);
             })
             .catch(() => undefined)
-            .finally(() => setLoadingComments(false));
-    }, [film?.film_id]);
+            .finally(() => {
+                if (!cancelled) setLoadingComments(false);
+            });
 
-    useEffect(() => {
-        setActiveTab("votes");
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [film?.film_id]);
 
     const commentsByJury = filmComments.reduce<Map<number, FilmComment[]>>((acc, c) => {
