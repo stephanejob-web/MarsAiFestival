@@ -32,7 +32,14 @@ const useAdminUsers = (): UseAdminUsersReturn => {
             const data = await apiFetch<ApiUsersResponse>("/api/admin/users", {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
-            if (data.success) setUsers(data.data);
+            if (data.success)
+                setUsers(
+                    data.data.map((u) => ({
+                        ...u,
+                        is_active: Boolean(u.is_active),
+                        is_banned: Boolean(u.is_banned),
+                    })),
+                );
         } catch (err) {
             setError(err instanceof Error ? err.message : "Erreur de chargement");
         } finally {
