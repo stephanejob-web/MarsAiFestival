@@ -416,7 +416,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     <span className="group-hover/title:underline">
                                                         {film.original_title}
                                                     </span>
-                                                    <span className="mt-0.5 shrink-0 rounded border border-white/[0.12] bg-white/[0.06] px-1 py-[1px] font-mono text-[0.52rem] font-normal text-mist opacity-0 transition-opacity group-hover/title:opacity-100">
+                                                    <span className="mt-0.5 shrink-0 rounded border border-white/[0.12] bg-white/[0.06] px-1 py-[1px] font-mono text-[0.52rem] font-normal text-mist">
                                                         détails
                                                     </span>
                                                 </button>
