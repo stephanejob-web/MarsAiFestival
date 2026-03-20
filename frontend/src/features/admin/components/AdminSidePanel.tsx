@@ -62,27 +62,44 @@ const AdminSidePanel = (): React.JSX.Element => {
                         <ul>
                             {category.items.map((item: AdminNavItem) => (
                                 <li key={item.to}>
-                                    <NavLink
-                                        to={item.to}
-                                        end={item.to === "/admin"}
-                                        className={({ isActive }): string =>
-                                            `mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-all ${
-                                                isActive
-                                                    ? "bg-aurora/10 text-aurora"
-                                                    : "text-mist hover:bg-white/[0.04] hover:text-white-soft"
-                                            }`
-                                        }
-                                    >
-                                        <span className="w-[17px] shrink-0 text-center">
-                                            {item.icon}
-                                        </span>
-                                        <span>{item.label}</span>
-                                        {item.count !== undefined && (
-                                            <span className="ml-auto rounded-full bg-white/[0.06] px-[7px] py-0.5 font-mono text-[0.65rem] font-semibold text-mist">
-                                                {item.count}
+                                    {item.external ? (
+                                        <a
+                                            href={item.to}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] text-mist transition-all hover:bg-white/[0.04] hover:text-white-soft"
+                                        >
+                                            <span className="w-[17px] shrink-0 text-center">
+                                                {item.icon}
                                             </span>
-                                        )}
-                                    </NavLink>
+                                            <span>{item.label}</span>
+                                            <span className="ml-auto text-[0.6rem] text-mist opacity-40">
+                                                ↗
+                                            </span>
+                                        </a>
+                                    ) : (
+                                        <NavLink
+                                            to={item.to}
+                                            end={item.to === "/admin"}
+                                            className={({ isActive }): string =>
+                                                `mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-all ${
+                                                    isActive
+                                                        ? "bg-aurora/10 text-aurora"
+                                                        : "text-mist hover:bg-white/[0.04] hover:text-white-soft"
+                                                }`
+                                            }
+                                        >
+                                            <span className="w-[17px] shrink-0 text-center">
+                                                {item.icon}
+                                            </span>
+                                            <span>{item.label}</span>
+                                            {item.count !== undefined && (
+                                                <span className="ml-auto rounded-full bg-white/[0.06] px-[7px] py-0.5 font-mono text-[0.65rem] font-semibold text-mist">
+                                                    {item.count}
+                                                </span>
+                                            )}
+                                        </NavLink>
+                                    )}
                                 </li>
                             ))}
                         </ul>

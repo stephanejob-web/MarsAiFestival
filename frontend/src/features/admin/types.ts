@@ -3,6 +3,7 @@ export interface AdminNavItem {
     to: string;
     icon: string;
     count?: number;
+    external?: boolean;
 }
 
 export interface AdminNavCategory {
