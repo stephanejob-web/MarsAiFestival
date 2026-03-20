@@ -165,7 +165,7 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
     }
 
     return (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
             {decisions.map((d: JuryDecision) => {
                 const hasVoted = d.decision !== null;
                 const style = d.decision
@@ -173,17 +173,21 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                     : PENDING_STYLE;
                 const initials = `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
                 const fullName = `${d.first_name} ${d.last_name}`;
+                const voteLabel =
+                    hasVoted && d.decision
+                        ? (DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label
+                        : "En attente…";
 
                 return (
                     <div
                         key={d.jury_id}
-                        className="flex items-center gap-2"
-                        style={{ opacity: hasVoted ? 1 : 0.45 }}
+                        className="group/dot relative"
+                        style={{ opacity: hasVoted ? 1 : 0.4 }}
+                        title={`${fullName} — ${voteLabel}`}
                     >
-                        {/* Avatar */}
                         <div
-                            className="relative inline-flex h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full"
-                            style={{ border: `2px solid ${style.border}` }}
+                            className="inline-flex h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full"
+                            style={{ border: `2.5px solid ${style.border}` }}
                         >
                             {d.profil_picture ? (
                                 <img
@@ -193,30 +197,23 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                                 />
                             ) : (
                                 <div
-                                    className="flex h-full w-full items-center justify-center font-display text-[0.7rem] font-black text-white-soft"
+                                    className="flex h-full w-full items-center justify-center font-display text-[0.78rem] font-black text-white-soft"
                                     style={{ background: style.bg }}
                                 >
                                     {initials}
                                 </div>
                             )}
                         </div>
-
-                        {/* Nom + vote */}
-                        <div className="flex min-w-0 flex-col">
-                            <span className="truncate font-display text-[0.7rem] font-semibold text-white-soft">
+                        {/* Tooltip */}
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/[0.08] bg-deep-sky px-2 py-1 opacity-0 shadow-lg transition-opacity duration-150 group-hover/dot:opacity-100">
+                            <div className="text-[0.65rem] font-semibold text-white-soft">
                                 {fullName}
-                            </span>
-                            {hasVoted && d.decision ? (
-                                <span
-                                    className={`text-[0.62rem] font-bold ${(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls}`}
-                                >
-                                    {(DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).label}
-                                </span>
-                            ) : (
-                                <span className="text-[0.62rem] text-mist opacity-50">
-                                    En attente…
-                                </span>
-                            )}
+                            </div>
+                            <div
+                                className={`text-[0.6rem] font-bold ${hasVoted && d.decision ? (DECISION_STYLE[d.decision] ?? DECISION_STYLE.valide).labelCls : "text-mist opacity-60"}`}
+                            >
+                                {voteLabel}
+                            </div>
                         </div>
                     </div>
                 );
@@ -361,41 +358,93 @@ const AdminDecision = ({
     );
 };
 
-interface ExpandedRowProps {
-    film: AdminFilmVoteSummary;
-    colSpan: number;
+interface FilmInsightDrawerProps {
+    film: AdminFilmVoteSummary | null;
+    onClose: () => void;
+    onOpenEmail: (film: AdminFilmVoteSummary) => void;
 }
 
-const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => {
+type InsightTab = "votes" | "commentaires" | "discussion";
+
+const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
+    selectionne: {
+        label: "★ Sélectionné",
+        cls: "bg-aurora/10 text-aurora border border-aurora/25",
+    },
+    finaliste: {
+        label: "🏆 Finaliste",
+        cls: "bg-lavande/10 text-lavande border border-lavande/25",
+    },
+    soumis: {
+        label: "En attente",
+        cls: "bg-white/[0.04] text-mist border border-white/[0.08]",
+    },
+};
+
+const FilmInsightDrawer = ({
+    film,
+    onClose,
+    onOpenEmail,
+}: FilmInsightDrawerProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
-    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [loadingMessages, setLoadingMessages] = useState(false);
     const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
-    const [loadingComments, setLoadingComments] = useState(true);
-    const [commentsDrawerOpen, setCommentsDrawerOpen] = useState(false);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [activeTab, setActiveTab] = useState<InsightTab>("votes");
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!film) return;
+        const filmId = film.film_id;
+
+        setMessages([]);
+        setFilmComments([]);
+        setVideoUrl(null);
+        setActiveTab("votes");
+        setLoadingMessages(true);
+        setLoadingComments(true);
+
+        if (film.video_url) {
+            apiFetch<{ success: boolean; url: string }>(`/api/films/${filmId}/video-url`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+            })
+                .then((res) => {
+                    if (!cancelled && res.success) setVideoUrl(res.url);
+                })
+                .catch(() => undefined);
+        }
+
+        let cancelled = false;
+
         apiFetch<{ success: boolean; data: DiscussionMessage[] }>(
-            `/api/discussion/messages/${film.film_id}`,
+            `/api/discussion/messages/${filmId}`,
             { headers: { Authorization: `Bearer ${getToken()}` } },
         )
             .then((res) => {
-                if (res.success) setMessages(res.data);
+                if (!cancelled && res.success) setMessages(res.data);
             })
             .catch(() => undefined)
-            .finally(() => setLoadingMessages(false));
+            .finally(() => {
+                if (!cancelled) setLoadingMessages(false);
+            });
 
-        apiFetch<{ success: boolean; data: FilmComment[] }>(
-            `/api/comments/film?filmId=${film.film_id}`,
-            { headers: { Authorization: `Bearer ${getToken()}` } },
-        )
+        apiFetch<{ success: boolean; data: FilmComment[] }>(`/api/comments/film?filmId=${filmId}`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
             .then((res) => {
-                if (res.success) setFilmComments(res.data);
+                if (!cancelled && res.success) setFilmComments(res.data);
             })
             .catch(() => undefined)
-            .finally(() => setLoadingComments(false));
-    }, [film.film_id]);
+            .finally(() => {
+                if (!cancelled) setLoadingComments(false);
+            });
 
-    // Group comments by jury member
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [film?.film_id]);
+
     const commentsByJury = filmComments.reduce<Map<number, FilmComment[]>>((acc, c) => {
         const list = acc.get(c.jury_id) ?? [];
         list.push(c);
@@ -403,190 +452,327 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
         return acc;
     }, new Map());
 
+    const isOpen = film !== null;
+    const total = film ? (film.total_jury ?? film.total_assigned) : 0;
+    const participationPct = total > 0 && film ? Math.round((film.total_votes / total) * 100) : 0;
+
+    const statutBadge = film ? (STATUT_BADGE[film.statut] ?? STATUT_BADGE.soumis) : null;
+
+    const voteRows = film
+        ? [
+              {
+                  label: "✓ Validé",
+                  count: film.votes_valide,
+                  color: "text-aurora",
+                  bg: "bg-aurora",
+                  icon: "✓",
+                  cardCls: "border-aurora/20 bg-aurora/[0.06]",
+                  iconCls: "text-aurora",
+              },
+              {
+                  label: "↩ À revoir",
+                  count: film.votes_arevoir,
+                  color: "text-solar",
+                  bg: "bg-solar",
+                  icon: "↩",
+                  cardCls: "border-solar/20 bg-solar/[0.06]",
+                  iconCls: "text-solar",
+              },
+              {
+                  label: "✕ Refusé",
+                  count: film.votes_refuse,
+                  color: "text-coral",
+                  bg: "bg-coral",
+                  icon: "✕",
+                  cardCls: "border-coral/20 bg-coral/[0.06]",
+                  iconCls: "text-coral",
+              },
+              {
+                  label: "💬 Discussion",
+                  count: film.votes_discussion,
+                  color: "text-lavande",
+                  bg: "bg-lavande",
+                  icon: "💬",
+                  cardCls: "border-lavande/20 bg-lavande/[0.06]",
+                  iconCls: "text-lavande",
+              },
+          ]
+        : [];
+
     return (
-        <tr>
-            <td
-                colSpan={colSpan}
-                className="border-t border-white/[0.04] bg-white/[0.015] px-5 py-4"
+        <>
+            {/* Backdrop */}
+            <div
+                className={`fixed inset-0 z-[700] bg-black/50 backdrop-blur-[3px] transition-opacity duration-300 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                onClick={onClose}
+            />
+
+            {/* Drawer panel */}
+            <div
+                className={`fixed bottom-0 right-0 top-0 z-[710] flex w-[520px] flex-col border-l border-white/[0.08] bg-surface shadow-[-24px_0_60px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isOpen ? "translate-x-0" : "translate-x-full"}`}
             >
-                <div className="grid grid-cols-2 gap-6">
-                    {/* col 1: vote breakdown + meta */}
+                {/* Header */}
+                <div className="flex shrink-0 items-start justify-between border-b border-white/[0.06] px-6 py-5">
                     <div>
-                        <div className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
-                            ⚖️ Répartition des votes
-                        </div>
-                        <div className="space-y-1.5">
-                            {[
-                                {
-                                    label: "✓ Validé",
-                                    count: film.votes_valide,
-                                    color: "text-aurora",
-                                },
-                                {
-                                    label: "↩ À revoir",
-                                    count: film.votes_arevoir,
-                                    color: "text-solar",
-                                },
-                                {
-                                    label: "✕ Refusé",
-                                    count: film.votes_refuse,
-                                    color: "text-coral",
-                                },
-                                {
-                                    label: "💬 En discussion",
-                                    count: film.votes_discussion,
-                                    color: "text-lavande",
-                                },
-                            ].map(({ label, count, color }) => (
-                                <div key={label} className="flex items-center gap-2">
-                                    <span className={`w-28 text-[0.75rem] font-semibold ${color}`}>
-                                        {label}
-                                    </span>
-                                    <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                                        <div
-                                            className={`h-full rounded-full ${color.replace("text-", "bg-")}`}
-                                            style={{
-                                                width:
-                                                    (film.total_jury ?? film.total_assigned) > 0
-                                                        ? `${(count / (film.total_jury ?? film.total_assigned)) * 100}%`
-                                                        : "0%",
-                                            }}
-                                        />
-                                    </div>
-                                    <span className="w-6 text-right font-mono text-[0.72rem] text-mist">
-                                        {count}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-4 space-y-1">
-                            <div className="flex gap-2 text-[0.75rem]">
-                                <span className="text-mist">Jurés ayant voté :</span>
-                                <span className="font-semibold text-white-soft">
-                                    {film.total_votes} / {film.total_jury ?? film.total_assigned}
+                        <div className="flex items-center gap-2">
+                            <span className="font-mono text-[0.65rem] text-mist opacity-60">
+                                #{film?.dossier_num}
+                            </span>
+                            {statutBadge && (
+                                <span
+                                    className={`inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold ${statutBadge.cls}`}
+                                >
+                                    {statutBadge.label}
                                 </span>
-                            </div>
-                            <div className="flex gap-2 text-[0.75rem]">
-                                <span className="text-mist">Commentaires :</span>
-                                <span className="font-semibold text-lavande">
-                                    {film.total_comments}
-                                </span>
-                            </div>
-                            {film.total_tickets > 0 && (
-                                <div className="flex gap-2 text-[0.75rem]">
-                                    <span className="text-mist">Tickets ouverts :</span>
-                                    <span className="font-semibold text-solar">
-                                        {film.total_tickets}
-                                    </span>
-                                </div>
                             )}
-                            <div className="flex gap-2 text-[0.75rem]">
-                                <span className="text-mist">Dossier :</span>
-                                <span className="font-mono font-semibold text-white-soft">
-                                    {film.dossier_num}
-                                </span>
-                            </div>
+                        </div>
+                        <div className="mt-1 font-display text-[1.05rem] font-extrabold text-white-soft">
+                            {film?.original_title}
+                        </div>
+                        <div className="mt-0.5 text-[0.75rem] text-mist">
+                            {film?.realisator_first_name} {film?.realisator_last_name}
                         </div>
                     </div>
-                    {/* col 2: commentaires jurés — bouton drawer */}
-                    <div className="flex flex-col gap-3">
-                        <div className="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
-                            📝 Commentaires jurés
-                        </div>
-                        {loadingComments ? (
-                            <div className="text-[0.75rem] text-mist opacity-50">Chargement…</div>
-                        ) : filmComments.length === 0 ? (
-                            <div className="text-[0.75rem] text-mist opacity-40">
-                                Aucun commentaire pour ce film.
-                            </div>
-                        ) : (
+                    <div className="flex items-center gap-2">
+                        {film?.realisator_email && (
                             <button
                                 type="button"
-                                onClick={() => setCommentsDrawerOpen(true)}
-                                className="flex w-fit items-center gap-2 rounded-lg border border-aurora/25 bg-aurora/[0.07] px-4 py-2.5 font-display text-[0.78rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/[0.12]"
+                                onClick={() => film && onOpenEmail(film)}
+                                className="rounded-lg border border-solar/25 bg-solar/[0.07] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-solar transition-all hover:border-solar/50 hover:bg-solar/[0.12]"
                             >
-                                <span>Voir les commentaires</span>
-                                <span className="rounded-full bg-aurora/20 px-1.5 py-0.5 font-mono text-[0.62rem]">
-                                    {filmComments.length}
-                                </span>
+                                ✉ Email
                             </button>
                         )}
-                        {/* Aperçu : jurés qui ont commenté */}
-                        {commentsByJury.size > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {Array.from(commentsByJury.entries()).map(([juryId, comments]) => {
-                                    const first = comments[0];
-                                    return (
-                                        <div
-                                            key={juryId}
-                                            className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2 py-1"
-                                        >
-                                            <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-aurora/[0.15] font-display text-[0.5rem] font-black text-aurora">
-                                                {first.profil_picture ? (
-                                                    <img
-                                                        src={first.profil_picture}
-                                                        alt=""
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
-                                                )}
-                                            </div>
-                                            <span className="text-[0.65rem] text-mist">
-                                                {first.first_name}
-                                            </span>
-                                            <span className="font-mono text-[0.58rem] text-aurora opacity-70">
-                                                {comments.length}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] text-[0.85rem] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+
+                {/* Video player */}
+                {film?.video_url && (
+                    <div className="shrink-0 bg-black">
+                        {videoUrl ? (
+                            <video
+                                key={videoUrl}
+                                src={videoUrl}
+                                controls
+                                className="aspect-video w-full"
+                            />
+                        ) : (
+                            <div className="flex aspect-video w-full items-center justify-center text-[0.78rem] text-mist opacity-50">
+                                Chargement de la vidéo…
                             </div>
                         )}
                     </div>
+                )}
 
-                    {/* Drawer commentaires */}
-                    <>
-                        <div
-                            className={`fixed inset-0 z-[700] bg-[rgba(5,8,24,0.55)] backdrop-blur-[4px] transition-opacity duration-[280ms] ${commentsDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
-                            onClick={() => setCommentsDrawerOpen(false)}
-                        />
-                        <div
-                            className={`fixed bottom-0 right-0 top-0 z-[710] flex w-[420px] flex-col border-l border-white/[0.08] bg-surface shadow-[-32px_0_80px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${commentsDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+                {/* Tabs */}
+                <div className="flex shrink-0 border-b border-white/[0.06] px-6">
+                    {(["votes", "commentaires", "discussion"] as InsightTab[]).map((tab) => (
+                        <button
+                            key={tab}
+                            type="button"
+                            onClick={() => setActiveTab(tab)}
+                            className={`flex items-center gap-1.5 border-b-2 px-4 py-3 font-display text-[0.78rem] font-semibold capitalize transition-colors ${
+                                activeTab === tab
+                                    ? "border-aurora text-aurora"
+                                    : "border-transparent text-mist hover:text-white-soft"
+                            }`}
                         >
-                            {/* Header */}
-                            <div className="flex shrink-0 items-start gap-2.5 border-b border-white/[0.06] px-5 pb-4 pt-5">
-                                <div className="flex-1">
-                                    <div className="font-display text-[0.95rem] font-extrabold text-white-soft">
-                                        📝 Commentaires jurés
+                            {tab}
+                            {tab === "commentaires" && filmComments.length > 0 && (
+                                <span className="rounded-full bg-aurora/15 px-1.5 py-0.5 font-mono text-[0.58rem] text-aurora">
+                                    {filmComments.length}
+                                </span>
+                            )}
+                            {tab === "discussion" && messages.length > 0 && (
+                                <span className="rounded-full bg-lavande/15 px-1.5 py-0.5 font-mono text-[0.58rem] text-lavande">
+                                    {messages.length}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Tab content */}
+                <div className="flex-1 overflow-y-auto px-6 py-5">
+                    {/* TAB: votes */}
+                    {activeTab === "votes" && film && (
+                        <>
+                            {/* Big numbers row */}
+                            <div className="mb-6 grid grid-cols-4 gap-3">
+                                {voteRows.map(({ label, count, cardCls, iconCls, icon }) => (
+                                    <div
+                                        key={label}
+                                        className={`rounded-xl border px-3 py-3 text-center ${cardCls}`}
+                                    >
+                                        <div className={`text-[1.1rem] ${iconCls}`}>{icon}</div>
+                                        <div
+                                            className={`font-display text-[1.5rem] font-extrabold leading-none ${iconCls}`}
+                                        >
+                                            {count}
+                                        </div>
+                                        <div className="mt-1 text-[0.62rem] text-mist opacity-70">
+                                            {label}
+                                        </div>
                                     </div>
-                                    <div className="mt-0.5 text-[0.72rem] text-mist">
-                                        {film.original_title ?? `Film #${film.film_id}`} ·{" "}
-                                        {filmComments.length} commentaire
-                                        {filmComments.length > 1 ? "s" : ""}
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setCommentsDrawerOpen(false)}
-                                    className="mt-0.5 shrink-0 cursor-pointer p-0.5 text-[1rem] text-mist transition-colors hover:text-white-soft"
-                                >
-                                    ✕
-                                </button>
+                                ))}
                             </div>
 
-                            {/* Contenu groupé par juré */}
-                            <div className="flex-1 overflow-y-auto px-5 py-4">
-                                <div className="space-y-5">
+                            {/* Progress bars */}
+                            <div className="mb-6 space-y-2">
+                                {voteRows.map(({ label, count, color, bg }) => (
+                                    <div key={label} className="flex items-center gap-2">
+                                        <span
+                                            className={`w-28 shrink-0 text-[0.75rem] font-semibold ${color}`}
+                                        >
+                                            {label}
+                                        </span>
+                                        <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                                            <div
+                                                className={`h-full rounded-full ${bg}`}
+                                                style={{
+                                                    width:
+                                                        total > 0
+                                                            ? `${(count / total) * 100}%`
+                                                            : "0%",
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="w-6 shrink-0 text-right font-mono text-[0.72rem] text-mist">
+                                            {count}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Participation */}
+                            <div className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+                                <div className="mb-3 text-[0.65rem] uppercase tracking-[0.1em] text-mist">
+                                    Participation
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="font-display text-[1.8rem] font-extrabold leading-none text-white-soft">
+                                        {film.total_votes}
+                                    </span>
+                                    <span className="text-mist">/</span>
+                                    <span className="text-[1.2rem] text-mist">{total} jurés</span>
+                                </div>
+                                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                                    <div
+                                        className="h-full rounded-full bg-aurora"
+                                        style={{ width: `${participationPct}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Jury decisions grid */}
+                            <div>
+                                <div className="mb-3 text-[0.65rem] uppercase tracking-[0.1em] text-mist">
+                                    Vote par juré
+                                </div>
+                                <div className="space-y-2">
+                                    {(film.jury_decisions ?? []).map((d) => {
+                                        const style = d.decision
+                                            ? (DECISION_STYLE[d.decision] ?? PENDING_STYLE)
+                                            : PENDING_STYLE;
+                                        const initials =
+                                            `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
+                                        const decisionInfo = d.decision
+                                            ? DECISION_STYLE[d.decision]
+                                            : null;
+                                        const decisionIcon = d.decision
+                                            ? ({
+                                                  valide: "✓",
+                                                  arevoir: "↩",
+                                                  refuse: "✕",
+                                                  in_discussion: "💬",
+                                              }[d.decision] ?? "?")
+                                            : null;
+                                        return (
+                                            <div
+                                                key={d.jury_id}
+                                                className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5"
+                                            >
+                                                <div
+                                                    className="flex h-[38px] w-[38px] shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-[0.7rem] font-black"
+                                                    style={{
+                                                        border: `2px solid ${style.border}`,
+                                                        background: style.bg,
+                                                    }}
+                                                >
+                                                    {d.profil_picture ? (
+                                                        <img
+                                                            src={d.profil_picture}
+                                                            alt={`${d.first_name} ${d.last_name}`}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-white-soft">
+                                                            {initials}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-[0.82rem] text-white-soft">
+                                                        {d.first_name} {d.last_name}
+                                                    </div>
+                                                    {decisionInfo ? (
+                                                        <span
+                                                            className={`text-[0.72rem] font-semibold ${decisionInfo.labelCls}`}
+                                                        >
+                                                            {decisionInfo.label}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[0.72rem] text-mist opacity-50">
+                                                            En attente…
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {decisionIcon && (
+                                                    <span
+                                                        className={`text-[0.85rem] ${decisionInfo?.labelCls ?? ""}`}
+                                                    >
+                                                        {decisionIcon}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {/* TAB: commentaires */}
+                    {activeTab === "commentaires" && (
+                        <>
+                            {loadingComments ? (
+                                <div className="flex items-center justify-center py-12 text-[0.82rem] text-mist opacity-50">
+                                    Chargement…
+                                </div>
+                            ) : filmComments.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center gap-2 py-12">
+                                    <span className="text-[1.5rem] opacity-30">📝</span>
+                                    <span className="text-[0.82rem] text-mist opacity-50">
+                                        Aucun commentaire pour ce film.
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
                                     {Array.from(commentsByJury.entries()).map(
                                         ([juryId, comments]) => {
                                             const first = comments[0];
                                             const name = `${first.first_name} ${first.last_name}`;
                                             return (
                                                 <div key={juryId}>
-                                                    {/* Juré header */}
-                                                    <div className="mb-2.5 flex items-center gap-2.5">
-                                                        <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-aurora/30 bg-aurora/[0.12] font-display text-[0.68rem] font-black text-aurora">
+                                                    <div className="mb-3 flex items-center gap-3">
+                                                        <div className="flex h-[40px] w-[40px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-aurora/30 bg-aurora/[0.12] font-display text-[0.7rem] font-black text-aurora">
                                                             {first.profil_picture ? (
                                                                 <img
                                                                     src={first.profil_picture}
@@ -598,23 +784,22 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <div className="font-display text-[0.78rem] font-bold text-aurora">
+                                                            <div className="font-bold text-[0.85rem] text-aurora">
                                                                 {name}
                                                             </div>
-                                                            <div className="font-mono text-[0.6rem] text-mist opacity-50">
+                                                            <div className="text-[0.65rem] text-mist">
                                                                 {comments.length} commentaire
                                                                 {comments.length > 1 ? "s" : ""}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {/* Commentaires */}
-                                                    <div className="space-y-2 pl-[46px]">
+                                                    <div className="space-y-2 pl-[52px]">
                                                         {comments.map((c) => (
                                                             <div
                                                                 key={c.id}
-                                                                className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5"
+                                                                className="rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3"
                                                             >
-                                                                <p className="text-[0.8rem] leading-relaxed text-white-soft">
+                                                                <p className="text-[0.82rem] leading-relaxed text-white-soft">
                                                                     {c.text}
                                                                 </p>
                                                                 <span className="mt-1 block font-mono text-[0.6rem] text-mist opacity-40">
@@ -635,75 +820,74 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                                         },
                                     )}
                                 </div>
-                            </div>
-                        </div>
-                    </>
-
-                    {/* col 3: discussion */}
-                    <div>
-                        <div className="mb-2 flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
-                            💬 Discussion jurés
-                            {messages.length > 0 && (
-                                <span className="rounded-full bg-lavande/20 px-1.5 py-0.5 font-mono text-[0.6rem] text-lavande">
-                                    {messages.length}
-                                </span>
                             )}
-                        </div>
-                        {loadingMessages ? (
-                            <div className="text-[0.75rem] text-mist opacity-50">Chargement…</div>
-                        ) : messages.length === 0 ? (
-                            <div className="text-[0.75rem] text-mist opacity-40">
-                                Aucun message de discussion pour ce film.
-                            </div>
-                        ) : (
-                            <div className="max-h-[220px] space-y-2 overflow-y-auto pr-1">
-                                {messages.map((msg) => (
-                                    <div
-                                        key={msg.id}
-                                        className="flex items-start gap-2.5 rounded-lg bg-white/[0.03] px-3 py-2"
-                                    >
-                                        <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-lavande/30 bg-lavande/[0.12] font-display text-[0.65rem] font-black text-lavande">
-                                            {msg.profil_picture ? (
-                                                <img
-                                                    src={msg.profil_picture}
-                                                    alt={msg.jury_name}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : (
-                                                `${msg.jury_name
-                                                    .split(" ")
-                                                    .map((n: string) => n[0])
-                                                    .join("")
-                                                    .toUpperCase()
-                                                    .slice(0, 2)}`
-                                            )}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="font-display text-[0.72rem] font-bold text-lavande">
-                                                    {msg.jury_name}
-                                                </span>
-                                                <span className="font-mono text-[0.6rem] text-mist opacity-50">
-                                                    {new Date(msg.sent_at).toLocaleString("fr-FR", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    })}
-                                                </span>
+                        </>
+                    )}
+
+                    {/* TAB: discussion */}
+                    {activeTab === "discussion" && (
+                        <>
+                            {loadingMessages ? (
+                                <div className="flex items-center justify-center py-12 text-[0.82rem] text-mist opacity-50">
+                                    Chargement…
+                                </div>
+                            ) : messages.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center gap-2 py-12">
+                                    <span className="text-[1.5rem] opacity-30">💬</span>
+                                    <span className="text-[0.82rem] text-mist opacity-50">
+                                        Aucun message de discussion pour ce film.
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {messages.map((msg) => (
+                                        <div key={msg.id} className="flex items-start gap-3">
+                                            <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-lavande/30 bg-lavande/[0.12] font-display text-[0.65rem] font-black text-lavande">
+                                                {msg.profil_picture ? (
+                                                    <img
+                                                        src={msg.profil_picture}
+                                                        alt={msg.jury_name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    msg.jury_name
+                                                        .split(" ")
+                                                        .map((n: string) => n[0])
+                                                        .join("")
+                                                        .toUpperCase()
+                                                        .slice(0, 2)
+                                                )}
                                             </div>
-                                            <p className="mt-0.5 text-[0.78rem] leading-snug text-white-soft">
-                                                {msg.message}
-                                            </p>
+                                            <div className="flex-1 rounded-xl border border-white/[0.05] bg-white/[0.025] px-4 py-3">
+                                                <div className="mb-1 flex items-baseline gap-2">
+                                                    <span className="font-bold text-[0.78rem] text-lavande">
+                                                        {msg.jury_name}
+                                                    </span>
+                                                    <span className="font-mono text-[0.6rem] text-mist opacity-40">
+                                                        {new Date(msg.sent_at).toLocaleString(
+                                                            "fr-FR",
+                                                            {
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            },
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[0.82rem] leading-relaxed text-white-soft">
+                                                    {msg.message}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
-            </td>
-        </tr>
+            </div>
+        </>
     );
 };
 
@@ -911,6 +1095,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [videoFilm, setVideoFilm] = useState<AdminFilmVoteSummary | null>(null);
     const [emailFilm, setEmailFilm] = useState<AdminFilmVoteSummary | null>(null);
+    const expandedFilm = allFilms.find((f) => f.film_id === expandedId) ?? null;
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         setSearch(e.target.value);
@@ -1305,7 +1490,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                             />
                                         </td>
                                     </tr>
-                                    {isExpanded && <ExpandedRow film={film} colSpan={7} />}
                                 </React.Fragment>
                             );
                         })
@@ -1549,6 +1733,11 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
             {videoFilm && <VideoModal film={videoFilm} onClose={() => setVideoFilm(null)} />}
             {emailFilm && <EmailModal film={emailFilm} onClose={() => setEmailFilm(null)} />}
+            <FilmInsightDrawer
+                film={expandedFilm}
+                onClose={() => setExpandedId(null)}
+                onOpenEmail={setEmailFilm}
+            />
         </div>
     );
 };
