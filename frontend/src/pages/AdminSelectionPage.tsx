@@ -1009,7 +1009,6 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 const AdminSelectionPage = (): React.JSX.Element => {
