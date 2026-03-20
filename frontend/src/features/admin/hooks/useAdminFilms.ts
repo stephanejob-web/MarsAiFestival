@@ -27,6 +27,8 @@ export interface UseAdminFilmsReturn {
     autoDistribute: () => Promise<void>;
     undoDistribution: () => Promise<void>;
     clearDistribution: () => void;
+    unassignFilm: (filmId: number) => Promise<void>;
+    unassignAll: () => Promise<void>;
     deleteFilm: (filmId: number) => Promise<void>;
     selectFilm: (filmId: number, selected: boolean) => Promise<void>;
     reload: () => void;
@@ -159,6 +161,43 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
 
     const clearDistribution = (): void => setLastDistribution(null);
 
+    const unassignFilm = async (filmId: number): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        const pairs = assignments
+            .filter((a) => a.film_id === filmId)
+            .map((a) => ({ juryId: a.jury_id, filmId }));
+        if (pairs.length === 0) return;
+        // Optimistic update
+        setAssignments((prev) => prev.filter((a) => a.film_id !== filmId));
+        try {
+            await apiFetch<{ success: boolean }>("/api/assignments/batch", {
+                method: "DELETE",
+                headers: { ...authHeader, "Content-Type": "application/json" },
+                body: JSON.stringify({ pairs }),
+            });
+        } catch (err) {
+            await load();
+            setError(err instanceof Error ? err.message : "Erreur de désassignation");
+        }
+    };
+
+    const unassignAll = async (): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        const pairs = assignments.map((a) => ({ juryId: a.jury_id, filmId: a.film_id }));
+        if (pairs.length === 0) return;
+        setAssignments([]);
+        try {
+            await apiFetch<{ success: boolean }>("/api/assignments/batch", {
+                method: "DELETE",
+                headers: { ...authHeader, "Content-Type": "application/json" },
+                body: JSON.stringify({ pairs }),
+            });
+        } catch (err) {
+            await load();
+            setError(err instanceof Error ? err.message : "Erreur de désassignation globale");
+        }
+    };
+
     const selectFilm = async (filmId: number, selected: boolean): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
         const statut = selected ? "selectionne" : "soumis";
@@ -201,6 +240,8 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         autoDistribute,
         undoDistribution,
         clearDistribution,
+        unassignFilm,
+        unassignAll,
         deleteFilm,
         selectFilm,
         reload: load,

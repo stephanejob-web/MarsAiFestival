@@ -82,10 +82,12 @@ const AdminFilmsPage = (): React.JSX.Element => {
         autoDistribute,
         undoDistribution,
         clearDistribution,
+        unassignAll,
         deleteFilm,
         selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+    const [confirmUnassignAll, setConfirmUnassignAll] = useState(false);
     const [detailFilmId, setDetailFilmId] = useState<number | null>(null);
 
     const [search, setSearch] = useState<string>("");
@@ -139,7 +141,59 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     {films.length} films · {activeJuryCount} jurés actifs · {assignments.length}{" "}
                     assignations
                 </span>
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
+                    {confirmUnassignAll ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[0.73rem] text-mist">Confirmer ?</span>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    void unassignAll();
+                                    setConfirmUnassignAll(false);
+                                }}
+                                className="rounded-lg border border-coral/40 bg-coral/15 px-3 py-1 text-[0.73rem] font-bold text-coral transition-all hover:bg-coral/25"
+                            >
+                                Oui, tout désassigner
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmUnassignAll(false)}
+                                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[0.73rem] text-mist transition-all hover:bg-white/10"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setConfirmUnassignAll(true)}
+                            disabled={assignments.length === 0}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-[0.73rem] font-semibold text-mist transition-all hover:border-coral/30 hover:bg-coral/[0.07] hover:text-coral disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <circle
+                                    cx="6"
+                                    cy="4"
+                                    r="2.2"
+                                    stroke="currentColor"
+                                    strokeWidth="1.3"
+                                />
+                                <path
+                                    d="M1.5 10.5c0-2.2 2-4 4.5-4s4.5 1.8 4.5 4"
+                                    stroke="currentColor"
+                                    strokeWidth="1.3"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M9 1l2.5 2.5M11.5 1L9 3.5"
+                                    stroke="currentColor"
+                                    strokeWidth="1.3"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                            Tout désassigner ({assignments.length})
+                        </button>
+                    )}
                     <span className="rounded-md border border-aurora/20 bg-aurora/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
                         🎬 Films
                     </span>
