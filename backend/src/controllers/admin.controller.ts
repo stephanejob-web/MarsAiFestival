@@ -252,6 +252,41 @@ export const stopAdminVocal = (req: Request, res: Response): void => {
     res.json({ success: true });
 };
 
+// ── POST /api/admin/users/:id/ban — Bannir un utilisateur en temps réel ───────
+export const banUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    try {
+        // Désactiver en base
+        const updated = await toggleJuryActive(id, false);
+        if (!updated) {
+            res.status(404).json({ success: false, message: "Utilisateur introuvable." });
+            return;
+        }
+
+        // Émettre user:banned à tous les sockets de cet utilisateur
+        const io = req.app.locals.io as import("socket.io").Server;
+        const juryToSockets = req.app.locals.juryToSockets as Map<number, Set<string>>;
+        const sockets = juryToSockets.get(id);
+        if (sockets) {
+            for (const socketId of sockets) {
+                io.to(socketId).emit("user:banned");
+            }
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors du bannissement.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
 // ── GET /api/admin/invite/verify?token= ───────────────────────────────────────
 // Vérifie le token d'invitation et retourne email + rôle (utilisé par la page d'inscription).
 export const verifyInvite = (_req: Request, res: Response): void => {

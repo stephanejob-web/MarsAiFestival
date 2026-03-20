@@ -12,12 +12,16 @@ import ListesView from "../features/jury/components/ListesView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
+import { useBanProtection } from "../features/admin/hooks/useBanProtection";
+import BanModal from "../features/admin/components/BanModal";
 
 const JuryPanel = (): React.JSX.Element => {
     const panel = useJuryPanel();
+    const { isBanned } = useBanProtection();
 
     return (
         <div className="flex h-screen overflow-hidden">
+            <BanModal visible={isBanned} />
             <JurySidebar
                 activeView={panel.activeView}
                 onViewChange={panel.setActiveView}

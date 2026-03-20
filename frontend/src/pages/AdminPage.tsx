@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import useAdminUsers from "../features/admin/hooks/useAdminUsers";
 import useAdminVocal from "../features/admin/hooks/useAdminVocal";
+import { useBanProtection } from "../features/admin/hooks/useBanProtection";
+import BanModal from "../features/admin/components/BanModal";
 import InviteModal from "../features/admin/components/InviteModal";
 import StatCard from "../features/admin/components/StatCard";
 import ParticipationChart from "../features/admin/components/ParticipationChart";
 import UserTable from "../features/admin/components/UserTable";
 
 const AdminPage = (): React.JSX.Element => {
-    const { users, isLoading, error, toggleStatus, changeRole } = useAdminUsers();
+    const { users, isLoading, error, toggleStatus, changeRole, banUser } = useAdminUsers();
     const { isInVocal, joinVocal, leaveVocal } = useAdminVocal();
+    const { isBanned } = useBanProtection();
     const [search, setSearch] = useState<string>("");
     const [isInviteOpen, setIsInviteOpen] = useState(false);
 
@@ -23,6 +26,7 @@ const AdminPage = (): React.JSX.Element => {
 
     return (
         <>
+            <BanModal visible={isBanned} />
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Topbar */}
                 <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
@@ -137,6 +141,7 @@ const AdminPage = (): React.JSX.Element => {
                                 search={search}
                                 onToggleStatus={toggleStatus}
                                 onChangeRole={changeRole}
+                                onBan={banUser}
                             />
                         </>
                     )}

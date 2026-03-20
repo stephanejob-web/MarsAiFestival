@@ -15,6 +15,7 @@ export interface UseAdminUsersReturn {
     error: string | null;
     toggleStatus: (id: number, isActive: boolean) => Promise<void>;
     changeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
+    banUser: (id: number) => Promise<void>;
     reload: () => void;
 }
 
@@ -69,7 +70,19 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, changeRole, reload: load };
+    const banUser = async (id: number): Promise<void> => {
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/ban`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur de bannissement");
+        }
+    };
+
+    return { users, isLoading, error, toggleStatus, changeRole, banUser, reload: load };
 };
 
 export default useAdminUsers;
