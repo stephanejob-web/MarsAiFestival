@@ -186,21 +186,24 @@ const UserTable = ({
                                         />
                                         {u.role !== "admin" &&
                                             (confirmBanId === u.id ? (
-                                                <div className="flex items-center gap-1.5">
+                                                <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/20 bg-coral/[0.06] px-2 py-1">
+                                                    <span className="text-[0.6rem] text-coral/70">
+                                                        Bannir ?
+                                                    </span>
                                                     <button
                                                         type="button"
                                                         onClick={() => {
                                                             void onBan(u.id);
                                                             setConfirmBanId(null);
                                                         }}
-                                                        className="rounded-[6px] border border-coral/35 bg-coral/10 px-2 py-[3px] text-[0.62rem] font-bold text-coral transition-all hover:bg-coral/20"
+                                                        className="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] bg-coral text-[0.6rem] font-black text-white shadow-[0_2px_8px_rgba(255,82,82,0.4)] transition-all hover:shadow-[0_2px_12px_rgba(255,82,82,0.6)]"
                                                     >
-                                                        Confirmer
+                                                        ✓
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setConfirmBanId(null)}
-                                                        className="rounded-[6px] border border-white/[0.08] bg-white/[0.03] px-2 py-[3px] text-[0.62rem] text-mist transition-all hover:border-white/[0.14] hover:text-white-soft"
+                                                        className="flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border border-white/[0.1] bg-white/[0.05] text-[0.6rem] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
                                                     >
                                                         ✕
                                                     </button>
@@ -210,9 +213,22 @@ const UserTable = ({
                                                     type="button"
                                                     onClick={() => setConfirmBanId(u.id)}
                                                     title="Bannir ce compte"
-                                                    className="rounded-[6px] border border-white/[0.05] bg-white/[0.02] px-2 py-[3px] text-[0.62rem] text-mist/35 transition-all hover:border-coral/25 hover:bg-coral/[0.07] hover:text-coral"
+                                                    className="group flex h-[26px] items-center gap-1.5 rounded-[7px] border border-white/[0.06] bg-white/[0.02] px-2.5 text-[0.62rem] font-medium text-mist/40 transition-all duration-200 hover:border-coral/30 hover:bg-gradient-to-r hover:from-coral/10 hover:to-coral/[0.04] hover:text-coral hover:shadow-[0_0_10px_rgba(255,82,82,0.12)]"
                                                 >
-                                                    ⊘ Bannir
+                                                    <svg
+                                                        width="10"
+                                                        height="10"
+                                                        viewBox="0 0 10 10"
+                                                        fill="none"
+                                                        className="transition-colors group-hover:stroke-coral"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1.5"
+                                                        strokeLinecap="round"
+                                                    >
+                                                        <circle cx="5" cy="5" r="4" />
+                                                        <line x1="2" y1="8" x2="8" y2="2" />
+                                                    </svg>
+                                                    Bannir
                                                 </button>
                                             ))}
                                     </div>
