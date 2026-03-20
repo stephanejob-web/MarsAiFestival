@@ -186,8 +186,8 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                         title={`${fullName} — ${voteLabel}`}
                     >
                         <div
-                            className="inline-flex h-[30px] w-[30px] shrink-0 overflow-hidden rounded-full"
-                            style={{ border: `2px solid ${style.border}` }}
+                            className="inline-flex h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full"
+                            style={{ border: `2.5px solid ${style.border}` }}
                         >
                             {d.profil_picture ? (
                                 <img
@@ -197,7 +197,7 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
                                 />
                             ) : (
                                 <div
-                                    className="flex h-full w-full items-center justify-center font-display text-[0.62rem] font-black text-white-soft"
+                                    className="flex h-full w-full items-center justify-center font-display text-[0.78rem] font-black text-white-soft"
                                     style={{ background: style.bg }}
                                 >
                                     {initials}
