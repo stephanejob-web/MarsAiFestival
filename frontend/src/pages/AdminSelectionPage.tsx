@@ -19,6 +19,17 @@ interface DiscussionMessage {
     sent_at: string;
 }
 
+interface FilmComment {
+    id: number;
+    jury_id: number;
+    film_id: number;
+    text: string;
+    created_at: string;
+    first_name: string;
+    last_name: string;
+    profil_picture: string | null;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const CONSENSUS_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -358,6 +369,9 @@ interface ExpandedRowProps {
 const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
     const [loadingMessages, setLoadingMessages] = useState(true);
+    const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
+    const [loadingComments, setLoadingComments] = useState(true);
+    const [commentsDrawerOpen, setCommentsDrawerOpen] = useState(false);
 
     useEffect(() => {
         apiFetch<{ success: boolean; data: DiscussionMessage[] }>(
@@ -369,7 +383,25 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
             })
             .catch(() => undefined)
             .finally(() => setLoadingMessages(false));
+
+        apiFetch<{ success: boolean; data: FilmComment[] }>(
+            `/api/comments/film?filmId=${film.film_id}`,
+            { headers: { Authorization: `Bearer ${getToken()}` } },
+        )
+            .then((res) => {
+                if (res.success) setFilmComments(res.data);
+            })
+            .catch(() => undefined)
+            .finally(() => setLoadingComments(false));
     }, [film.film_id]);
+
+    // Group comments by jury member
+    const commentsByJury = filmComments.reduce<Map<number, FilmComment[]>>((acc, c) => {
+        const list = acc.get(c.jury_id) ?? [];
+        list.push(c);
+        acc.set(c.jury_id, list);
+        return acc;
+    }, new Map());
 
     return (
         <tr>
@@ -456,7 +488,143 @@ const ExpandedRow = ({ film, colSpan }: ExpandedRowProps): React.JSX.Element => 
                             </div>
                         </div>
                     </div>
-                    {/* col 2: discussion */}
+                    {/* col 2: commentaires jurés — bouton drawer */}
+                    <div className="flex flex-col gap-3">
+                        <div className="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
+                            📝 Commentaires jurés
+                        </div>
+                        {loadingComments ? (
+                            <div className="text-[0.75rem] text-mist opacity-50">Chargement…</div>
+                        ) : filmComments.length === 0 ? (
+                            <div className="text-[0.75rem] text-mist opacity-40">
+                                Aucun commentaire pour ce film.
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => setCommentsDrawerOpen(true)}
+                                className="flex w-fit items-center gap-2 rounded-lg border border-aurora/25 bg-aurora/[0.07] px-4 py-2.5 font-display text-[0.78rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/[0.12]"
+                            >
+                                <span>Voir les commentaires</span>
+                                <span className="rounded-full bg-aurora/20 px-1.5 py-0.5 font-mono text-[0.62rem]">
+                                    {filmComments.length}
+                                </span>
+                            </button>
+                        )}
+                        {/* Aperçu : jurés qui ont commenté */}
+                        {commentsByJury.size > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {Array.from(commentsByJury.entries()).map(([juryId, comments]) => {
+                                    const first = comments[0];
+                                    return (
+                                        <div
+                                            key={juryId}
+                                            className="flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2 py-1"
+                                        >
+                                            <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-aurora/[0.15] font-display text-[0.5rem] font-black text-aurora">
+                                                {first.profil_picture ? (
+                                                    <img src={first.profil_picture} alt="" className="h-full w-full object-cover" />
+                                                ) : (
+                                                    `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
+                                                )}
+                                            </div>
+                                            <span className="text-[0.65rem] text-mist">
+                                                {first.first_name}
+                                            </span>
+                                            <span className="font-mono text-[0.58rem] text-aurora opacity-70">
+                                                {comments.length}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Drawer commentaires */}
+                    <>
+                        <div
+                            className={`fixed inset-0 z-[700] bg-[rgba(5,8,24,0.55)] backdrop-blur-[4px] transition-opacity duration-[280ms] ${commentsDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                            onClick={() => setCommentsDrawerOpen(false)}
+                        />
+                        <div
+                            className={`fixed bottom-0 right-0 top-0 z-[710] flex w-[420px] flex-col border-l border-white/[0.08] bg-surface shadow-[-32px_0_80px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${commentsDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+                        >
+                            {/* Header */}
+                            <div className="flex shrink-0 items-start gap-2.5 border-b border-white/[0.06] px-5 pb-4 pt-5">
+                                <div className="flex-1">
+                                    <div className="font-display text-[0.95rem] font-extrabold text-white-soft">
+                                        📝 Commentaires jurés
+                                    </div>
+                                    <div className="mt-0.5 text-[0.72rem] text-mist">
+                                        {film.original_title ?? `Film #${film.film_id}`} · {filmComments.length} commentaire{filmComments.length > 1 ? "s" : ""}
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setCommentsDrawerOpen(false)}
+                                    className="mt-0.5 shrink-0 cursor-pointer p-0.5 text-[1rem] text-mist transition-colors hover:text-white-soft"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Contenu groupé par juré */}
+                            <div className="flex-1 overflow-y-auto px-5 py-4">
+                                <div className="space-y-5">
+                                    {Array.from(commentsByJury.entries()).map(([juryId, comments]) => {
+                                        const first = comments[0];
+                                        const name = `${first.first_name} ${first.last_name}`;
+                                        return (
+                                            <div key={juryId}>
+                                                {/* Juré header */}
+                                                <div className="mb-2.5 flex items-center gap-2.5">
+                                                    <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-aurora/30 bg-aurora/[0.12] font-display text-[0.68rem] font-black text-aurora">
+                                                        {first.profil_picture ? (
+                                                            <img src={first.profil_picture} alt={name} className="h-full w-full object-cover" />
+                                                        ) : (
+                                                            `${first.first_name[0]}${first.last_name[0]}`.toUpperCase()
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-display text-[0.78rem] font-bold text-aurora">
+                                                            {name}
+                                                        </div>
+                                                        <div className="font-mono text-[0.6rem] text-mist opacity-50">
+                                                            {comments.length} commentaire{comments.length > 1 ? "s" : ""}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* Commentaires */}
+                                                <div className="space-y-2 pl-[46px]">
+                                                    {comments.map((c) => (
+                                                        <div
+                                                            key={c.id}
+                                                            className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3.5 py-2.5"
+                                                        >
+                                                            <p className="text-[0.8rem] leading-relaxed text-white-soft">
+                                                                {c.text}
+                                                            </p>
+                                                            <span className="mt-1 block font-mono text-[0.6rem] text-mist opacity-40">
+                                                                {new Date(c.created_at).toLocaleString("fr-FR", {
+                                                                    day: "2-digit",
+                                                                    month: "2-digit",
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                })}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </>
+
+                    {/* col 3: discussion */}
                     <div>
                         <div className="mb-2 flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.1em] text-mist">
                             💬 Discussion jurés
