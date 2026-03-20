@@ -2853,6 +2853,44 @@ paths:
         "404":
           description: Utilisateur introuvable
 
+  /api/admin/users/{id}/ban:
+    post:
+      tags: [Administration]
+      summary: Bannir un utilisateur en temps réel 🛡️
+      description: |
+        Désactive immédiatement le compte de l'utilisateur **et** envoie un événement
+        Socket.IO `user:banned` à tous ses sockets actifs.
+
+        L'utilisateur reçoit une modale "Accès suspendu" instantanément, son token
+        est supprimé côté client et il est redirigé vers la page d'accueil.
+
+        > Fonctionne même si l'utilisateur est en train de naviguer ou de regarder une vidéo.
+
+        > Nécessite le rôle `admin` ou `moderateur`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur à bannir
+      responses:
+        "200":
+          description: Utilisateur banni — événement socket émis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: ID invalide
+        "500":
+          description: Erreur serveur
+
   /api/admin/invite:
     post:
       tags: [Administration]
