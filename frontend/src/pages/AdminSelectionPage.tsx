@@ -6,6 +6,7 @@ import useAdminSelection, {
     type SortKey,
 } from "../features/admin/hooks/useAdminSelection";
 import type { AdminFilmVoteSummary, JuryDecision } from "../features/admin/types";
+import useVoteTags from "../features/jury/hooks/useVoteTags";
 import { apiFetch } from "../services/api";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
@@ -25,6 +26,16 @@ interface FilmComment {
     film_id: number;
     text: string;
     created_at: string;
+    first_name: string;
+    last_name: string;
+    profil_picture: string | null;
+}
+
+interface VoteDetail {
+    jury_id: number;
+    decision: string;
+    message: string | null;
+    updated_at: string;
     first_name: string;
     last_name: string;
     profil_picture: string | null;
@@ -77,44 +88,6 @@ const SORT_BUTTONS: Array<{ key: SortKey; label: string }> = [
     { key: "comments", label: "💬 Commentaires" },
 ];
 
-const exportCSV = (films: AdminFilmVoteSummary[]): void => {
-    const headers = [
-        "#",
-        "Dossier",
-        "Titre",
-        "Valide",
-        "À revoir",
-        "Refusé",
-        "Discussion",
-        "Total votes",
-        "Jurés assignés",
-        "Commentaires",
-        "Tickets",
-        "Statut",
-    ];
-    const rows = films.map((f, i) => [
-        i + 1,
-        f.dossier_num,
-        `"${f.original_title.replace(/"/g, '""')}"`,
-        f.votes_valide,
-        f.votes_arevoir,
-        f.votes_refuse,
-        f.votes_discussion,
-        f.total_votes,
-        f.total_assigned,
-        f.total_comments,
-        f.total_tickets,
-        f.statut || "—",
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "selection-votes.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-};
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -251,16 +224,9 @@ const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
 interface AdminDecisionProps {
     film: AdminFilmVoteSummary;
     onUpdate: (filmId: number, statut: string) => Promise<void>;
-    onOpenVideo: (film: AdminFilmVoteSummary) => void;
-    onOpenEmail: (film: AdminFilmVoteSummary) => void;
 }
 
-const AdminDecision = ({
-    film,
-    onUpdate,
-    onOpenVideo,
-    onOpenEmail,
-}: AdminDecisionProps): React.JSX.Element => {
+const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Element => {
     const isTop50 = film.statut === "selectionne" || film.statut === "finaliste";
     const isFinaliste = film.statut === "finaliste";
 
@@ -336,24 +302,6 @@ const AdminDecision = ({
                     {isFinaliste ? "🏆 Finaliste" : "→ Top 5"}
                 </button>
             )}
-            {/* Video button */}
-            <button
-                type="button"
-                onClick={() => onOpenVideo(film)}
-                disabled={!film.video_url}
-                className="flex items-center gap-1.5 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-mist transition-all hover:border-aurora/30 hover:text-aurora disabled:cursor-not-allowed disabled:opacity-25"
-            >
-                🎬 Lire la vidéo
-            </button>
-            {/* Email button */}
-            <button
-                type="button"
-                onClick={() => onOpenEmail(film)}
-                disabled={!film.realisator_email}
-                className="flex items-center gap-1.5 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-mist transition-all hover:border-solar/30 hover:text-solar disabled:cursor-not-allowed disabled:opacity-25"
-            >
-                ✉ Email réalisateur
-            </button>
         </div>
     );
 };
@@ -361,10 +309,9 @@ const AdminDecision = ({
 interface FilmInsightDrawerProps {
     film: AdminFilmVoteSummary | null;
     onClose: () => void;
-    onOpenEmail: (film: AdminFilmVoteSummary) => void;
 }
 
-type InsightTab = "votes" | "commentaires" | "discussion";
+type InsightTab = "votes" | "commentaires" | "discussion" | "email";
 
 const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
     selectionne: {
@@ -384,14 +331,19 @@ const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
 const FilmInsightDrawer = ({
     film,
     onClose,
-    onOpenEmail,
 }: FilmInsightDrawerProps): React.JSX.Element => {
     const [messages, setMessages] = useState<DiscussionMessage[]>([]);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [filmComments, setFilmComments] = useState<FilmComment[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [voteDetails, setVoteDetails] = useState<VoteDetail[]>([]);
     const [activeTab, setActiveTab] = useState<InsightTab>("votes");
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailBody, setEmailBody] = useState("");
+    const [emailStatus, setEmailStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+    const [emailSelectedTag, setEmailSelectedTag] = useState<string | null>(null);
+    const voteTags = useVoteTags();
 
     useEffect(() => {
         if (!film) return;
@@ -399,8 +351,13 @@ const FilmInsightDrawer = ({
 
         setMessages([]);
         setFilmComments([]);
+        setVoteDetails([]);
         setVideoUrl(null);
         setActiveTab("votes");
+        setEmailSubject(`Votre film — ${film.original_title}`);
+        setEmailBody("");
+        setEmailStatus("idle");
+        setEmailSelectedTag(null);
         setLoadingMessages(true);
         setLoadingComments(true);
 
@@ -439,11 +396,25 @@ const FilmInsightDrawer = ({
                 if (!cancelled) setLoadingComments(false);
             });
 
+        apiFetch<{ success: boolean; data: VoteDetail[] }>(`/api/votes?filmId=${filmId}`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        })
+            .then((res) => {
+                if (!cancelled && res.success) setVoteDetails(res.data);
+            })
+            .catch(() => undefined);
+
         return () => {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [film?.film_id]);
+
+    const voteMessageByJury = new Map<number, VoteDetail>(
+        voteDetails
+            .filter((v) => v.message && (v.decision === "arevoir" || v.decision === "refuse"))
+            .map((v) => [v.jury_id, v]),
+    );
 
     const commentsByJury = filmComments.reduce<Map<number, FilmComment[]>>((acc, c) => {
         const list = acc.get(c.jury_id) ?? [];
@@ -533,24 +504,13 @@ const FilmInsightDrawer = ({
                             {film?.realisator_first_name} {film?.realisator_last_name}
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        {film?.realisator_email && (
-                            <button
-                                type="button"
-                                onClick={() => film && onOpenEmail(film)}
-                                className="rounded-lg border border-solar/25 bg-solar/[0.07] px-3 py-1.5 font-display text-[0.72rem] font-semibold text-solar transition-all hover:border-solar/50 hover:bg-solar/[0.12]"
-                            >
-                                ✉ Email
-                            </button>
-                        )}
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] text-[0.85rem] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
-                        >
-                            ✕
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] text-[0.85rem] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
+                    >
+                        ✕
+                    </button>
                 </div>
 
                 {/* Video player */}
@@ -573,24 +533,35 @@ const FilmInsightDrawer = ({
 
                 {/* Tabs */}
                 <div className="flex shrink-0 border-b border-white/[0.06] px-6">
-                    {(["votes", "commentaires", "discussion"] as InsightTab[]).map((tab) => (
+                    {(
+                        [
+                            { key: "votes", label: "Votes" },
+                            { key: "commentaires", label: "Commentaires" },
+                            { key: "discussion", label: "Discussion" },
+                            ...(film?.realisator_email
+                                ? [{ key: "email", label: "✉ Email" }]
+                                : []),
+                        ] as Array<{ key: InsightTab; label: string }>
+                    ).map(({ key, label }) => (
                         <button
-                            key={tab}
+                            key={key}
                             type="button"
-                            onClick={() => setActiveTab(tab)}
+                            onClick={() => setActiveTab(key)}
                             className={`flex items-center gap-1.5 border-b-2 px-4 py-3 font-display text-[0.78rem] font-semibold capitalize transition-colors ${
-                                activeTab === tab
-                                    ? "border-aurora text-aurora"
+                                activeTab === key
+                                    ? key === "email"
+                                        ? "border-solar text-solar"
+                                        : "border-aurora text-aurora"
                                     : "border-transparent text-mist hover:text-white-soft"
                             }`}
                         >
-                            {tab}
-                            {tab === "commentaires" && filmComments.length > 0 && (
+                            {label}
+                            {key === "commentaires" && filmComments.length > 0 && (
                                 <span className="rounded-full bg-aurora/15 px-1.5 py-0.5 font-mono text-[0.58rem] text-aurora">
                                     {filmComments.length}
                                 </span>
                             )}
-                            {tab === "discussion" && messages.length > 0 && (
+                            {key === "discussion" && messages.length > 0 && (
                                 <span className="rounded-full bg-lavande/15 px-1.5 py-0.5 font-mono text-[0.58rem] text-lavande">
                                     {messages.length}
                                 </span>
@@ -694,52 +665,82 @@ const FilmInsightDrawer = ({
                                                   in_discussion: "💬",
                                               }[d.decision] ?? "?")
                                             : null;
+                                        const voteMsg = voteMessageByJury.get(d.jury_id);
+                                        const hasMotif =
+                                            voteMsg &&
+                                            (d.decision === "arevoir" || d.decision === "refuse");
                                         return (
                                             <div
                                                 key={d.jury_id}
-                                                className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5"
+                                                className="rounded-xl border border-white/[0.05] bg-white/[0.025]"
                                             >
-                                                <div
-                                                    className="flex h-[38px] w-[38px] shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-[0.7rem] font-black"
-                                                    style={{
-                                                        border: `2px solid ${style.border}`,
-                                                        background: style.bg,
-                                                    }}
-                                                >
-                                                    {d.profil_picture ? (
-                                                        <img
-                                                            src={d.profil_picture}
-                                                            alt={`${d.first_name} ${d.last_name}`}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <span className="text-white-soft">
-                                                            {initials}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="font-semibold text-[0.82rem] text-white-soft">
-                                                        {d.first_name} {d.last_name}
-                                                    </div>
-                                                    {decisionInfo ? (
-                                                        <span
-                                                            className={`text-[0.72rem] font-semibold ${decisionInfo.labelCls}`}
-                                                        >
-                                                            {decisionInfo.label}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[0.72rem] text-mist opacity-50">
-                                                            En attente…
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                {decisionIcon && (
-                                                    <span
-                                                        className={`text-[0.85rem] ${decisionInfo?.labelCls ?? ""}`}
+                                                <div className="flex items-center gap-3 px-3 py-2.5">
+                                                    <div
+                                                        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-[0.7rem] font-black"
+                                                        style={{
+                                                            border: `2px solid ${style.border}`,
+                                                            background: style.bg,
+                                                        }}
                                                     >
-                                                        {decisionIcon}
-                                                    </span>
+                                                        {d.profil_picture ? (
+                                                            <img
+                                                                src={d.profil_picture}
+                                                                alt={`${d.first_name} ${d.last_name}`}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-white-soft">
+                                                                {initials}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="font-semibold text-[0.82rem] text-white-soft">
+                                                            {d.first_name} {d.last_name}
+                                                        </div>
+                                                        {decisionInfo ? (
+                                                            <span
+                                                                className={`text-[0.72rem] font-semibold ${decisionInfo.labelCls}`}
+                                                            >
+                                                                {decisionInfo.label}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[0.72rem] text-mist opacity-50">
+                                                                En attente…
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {decisionIcon && (
+                                                        <span
+                                                            className={`text-[0.85rem] ${decisionInfo?.labelCls ?? ""}`}
+                                                        >
+                                                            {decisionIcon}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {hasMotif && (
+                                                    <div
+                                                        className={`border-t px-3 pb-3 pt-2.5 ${
+                                                            d.decision === "refuse"
+                                                                ? "border-coral/15 bg-coral/[0.04]"
+                                                                : "border-solar/15 bg-solar/[0.04]"
+                                                        }`}
+                                                    >
+                                                        <div
+                                                            className={`mb-1 text-[0.6rem] font-semibold uppercase tracking-[0.08em] ${
+                                                                d.decision === "refuse"
+                                                                    ? "text-coral opacity-60"
+                                                                    : "text-solar opacity-60"
+                                                            }`}
+                                                        >
+                                                            {d.decision === "refuse"
+                                                                ? "✉ Message envoyé au réalisateur"
+                                                                : "💬 Motif de révision"}
+                                                        </div>
+                                                        <p className="text-[0.78rem] leading-relaxed text-white-soft/80">
+                                                            {voteMsg.message}
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
                                         );
@@ -822,6 +823,125 @@ const FilmInsightDrawer = ({
                                 </div>
                             )}
                         </>
+                    )}
+
+                    {/* TAB: email */}
+                    {activeTab === "email" && film && (
+                        <div className="space-y-4">
+                            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-[0.75rem]">
+                                <div className="mb-2 text-[0.65rem] uppercase tracking-[0.1em] text-mist">
+                                    Destinataire
+                                </div>
+                                <div className="flex gap-2">
+                                    <span className="w-12 shrink-0 font-semibold text-mist">À</span>
+                                    <span className="text-white-soft">
+                                        {film.realisator_first_name} {film.realisator_last_name}{" "}
+                                        <span className="text-mist opacity-60">
+                                            ({film.realisator_email})
+                                        </span>
+                                    </span>
+                                </div>
+                                <div className="mt-2 flex items-center gap-2">
+                                    <span className="w-12 shrink-0 font-semibold text-mist">Objet</span>
+                                    <input
+                                        type="text"
+                                        value={emailSubject}
+                                        onChange={(e) => setEmailSubject(e.target.value)}
+                                        className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2 py-1 text-[0.75rem] text-white-soft outline-none focus:border-solar/40"
+                                    />
+                                </div>
+                            </div>
+
+                            {voteTags.length > 0 && (
+                                <div>
+                                    <div className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-mist">
+                                        Modèle de message
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {voteTags.map((tag) => {
+                                            const isActive = emailSelectedTag === tag.key;
+                                            return (
+                                                <button
+                                                    key={tag.key}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const next = isActive ? null : tag.key;
+                                                        setEmailSelectedTag(next);
+                                                        if (!isActive && tag.message_template) {
+                                                            setEmailBody(tag.message_template);
+                                                            setEmailStatus("idle");
+                                                        }
+                                                    }}
+                                                    className={`flex items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-[0.75rem] transition-all ${
+                                                        isActive
+                                                            ? `border-${tag.color}/30 bg-${tag.color}/10 text-${tag.color}`
+                                                            : "border-white/10 bg-white/[0.04] text-mist hover:border-white/20 hover:text-white-soft"
+                                                    }`}
+                                                >
+                                                    <span
+                                                        className={`h-[5px] w-[5px] shrink-0 rounded-full bg-${tag.color}`}
+                                                    />
+                                                    <span>{tag.icon}</span>
+                                                    {tag.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <textarea
+                                value={emailBody}
+                                onChange={(e) => setEmailBody(e.target.value)}
+                                placeholder="Votre message… ou sélectionnez un modèle ci-dessus"
+                                rows={7}
+                                className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-[0.78rem] text-white-soft outline-none placeholder:text-mist focus:border-solar/40"
+                            />
+
+                            {emailStatus === "sent" && (
+                                <div className="rounded-xl border border-aurora/25 bg-aurora/[0.06] px-4 py-3 text-[0.78rem] text-aurora">
+                                    ✓ Email envoyé avec succès.
+                                </div>
+                            )}
+                            {emailStatus === "error" && (
+                                <div className="rounded-xl border border-coral/25 bg-coral/[0.06] px-4 py-3 text-[0.78rem] text-coral">
+                                    ✕ Erreur lors de l&apos;envoi. Réessayez.
+                                </div>
+                            )}
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    disabled={!emailBody.trim() || emailStatus === "sending"}
+                                    onClick={() => {
+                                        if (!emailBody.trim()) return;
+                                        setEmailStatus("sending");
+                                        apiFetch<{ success: boolean }>(
+                                            `/api/films/${film.film_id}/email`,
+                                            {
+                                                method: "POST",
+                                                headers: {
+                                                    Authorization: `Bearer ${getToken()}`,
+                                                },
+                                                body: JSON.stringify({
+                                                    subject: emailSubject,
+                                                    message: emailBody,
+                                                }),
+                                            },
+                                        )
+                                            .then(() => setEmailStatus("sent"))
+                                            .catch(() => setEmailStatus("error"));
+                                    }}
+                                    className="rounded-lg border border-solar/30 bg-solar/[0.1] px-5 py-2 text-[0.78rem] font-bold text-solar transition-all hover:bg-solar/[0.2] disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    {emailStatus === "sending"
+                                        ? "Envoi…"
+                                        : emailStatus === "sent"
+                                          ? "✓ Envoyé !"
+                                          : "📧 Envoyer"}
+                                </button>
+                            </div>
+                        </div>
                     )}
 
                     {/* TAB: discussion */}
@@ -1093,8 +1213,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
     } = useAdminSelection();
 
     const [expandedId, setExpandedId] = useState<number | null>(null);
-    const [videoFilm, setVideoFilm] = useState<AdminFilmVoteSummary | null>(null);
-    const [emailFilm, setEmailFilm] = useState<AdminFilmVoteSummary | null>(null);
     const expandedFilm = allFilms.find((f) => f.film_id === expandedId) ?? null;
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -1103,10 +1221,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
     const handleRowClick = (filmId: number): void => {
         setExpandedId((prev) => (prev === filmId ? null : filmId));
-    };
-
-    const handleExport = (): void => {
-        exportCSV(filtered);
     };
 
     // ── Top 50 special view ────────────────────────────────────────────────────
@@ -1392,13 +1506,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
                             Décision admin
                         </th>
+                        <th className="w-8 px-2 py-3" />
                     </tr>
                 </thead>
                 <tbody>
                     {filtered.length === 0 ? (
                         <tr>
                             <td
-                                colSpan={7}
+                                colSpan={8}
                                 className="px-4 py-12 text-center text-[0.82rem] text-mist"
                             >
                                 Aucun film ne correspond à ce filtre.
@@ -1413,7 +1528,8 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                 <React.Fragment key={film.film_id}>
                                     <tr
                                         onClick={(): void => handleRowClick(film.film_id)}
-                                        className="cursor-pointer border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]"
+                                        className="group/row cursor-pointer border-b border-white/[0.04] transition-colors hover:bg-white/[0.04]"
+                                        title="Cliquez pour voir les détails"
                                     >
                                         {/* # */}
                                         <td className="px-4 py-3 font-mono text-[0.7rem] text-mist">
@@ -1429,11 +1545,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 <div className="text-[0.82rem] font-semibold text-white-soft">
                                                     {film.original_title}
                                                 </div>
-                                                {isExpanded && (
-                                                    <span className="text-[0.65rem] text-aurora opacity-60">
-                                                        ▲
-                                                    </span>
-                                                )}
                                             </div>
                                             <div className="mt-0.5 font-mono text-[0.62rem] text-mist">
                                                 {film.dossier_num}
@@ -1485,9 +1596,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                             <AdminDecision
                                                 film={film}
                                                 onUpdate={updateStatut}
-                                                onOpenVideo={setVideoFilm}
-                                                onOpenEmail={setEmailFilm}
                                             />
+                                        </td>
+
+                                        {/* Chevron */}
+                                        <td className="w-8 px-2 py-3 text-right">
+                                            <span className="text-[1rem] text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora">
+                                                ›
+                                            </span>
                                         </td>
                                     </tr>
                                 </React.Fragment>
@@ -1560,13 +1676,6 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                     endroit pour faciliter vos décisions.
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                onClick={handleExport}
-                                className="flex shrink-0 items-center gap-2 rounded-[9px] bg-aurora px-[18px] py-2.5 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
-                            >
-                                📤 Exporter CSV
-                            </button>
                         </div>
 
                         {/* Stats */}
@@ -1731,12 +1840,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                 )}
             </div>
 
-            {videoFilm && <VideoModal film={videoFilm} onClose={() => setVideoFilm(null)} />}
-            {emailFilm && <EmailModal film={emailFilm} onClose={() => setEmailFilm(null)} />}
             <FilmInsightDrawer
                 film={expandedFilm}
                 onClose={() => setExpandedId(null)}
-                onOpenEmail={setEmailFilm}
             />
         </div>
     );
