@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import heroVideoFallback from "../../../assets/hero-marsai.mp4";
 import useCountdown from "../hooks/useCountdown";
+import { usePhase } from "../hooks/usePhase";
 import { API_BASE_URL } from "../../../constants/api";
 
 interface CountdownUnit {
@@ -12,9 +13,82 @@ interface CountdownUnit {
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
+const getCountdownConfig = (phase: ReturnType<typeof usePhase>["phase"]): {
+    targetDate: string | null;
+    label: string;
+    ctaEnabled: boolean;
+    ctaDisabledReason: string | null;
+} => {
+    const { submissionOpen, dates } = phase;
+
+    if (submissionOpen) {
+        return {
+            targetDate: dates.submission_close,
+            label: "Clôture des candidatures",
+            ctaEnabled: true,
+            ctaDisabledReason: null,
+        };
+    }
+
+    // Before submissions open
+    if (dates.submission_open && new Date(dates.submission_open) > new Date()) {
+        const openDate = new Date(dates.submission_open).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+        return {
+            targetDate: dates.submission_open,
+            label: "Ouverture des candidatures",
+            ctaEnabled: false,
+            ctaDisabledReason: `Ouverture le ${openDate}`,
+        };
+    }
+
+    // Phase 1 — top 50 countdown
+    if (phase.phase === 1 && dates.phase_top50_close) {
+        return {
+            targetDate: dates.phase_top50_close,
+            label: "Annonce des finalistes",
+            ctaEnabled: false,
+            ctaDisabledReason: "Les candidatures sont closes",
+        };
+    }
+
+    // Phase 2 — award countdown
+    if (phase.phase === 2 && dates.phase_award_close) {
+        return {
+            targetDate: dates.phase_award_close,
+            label: "Révélation du palmarès",
+            ctaEnabled: false,
+            ctaDisabledReason: "Les candidatures sont closes",
+        };
+    }
+
+    // Phase 3 — ceremony countdown
+    if (phase.phase === 3 && dates.ceremony) {
+        return {
+            targetDate: dates.ceremony,
+            label: "Cérémonie de clôture",
+            ctaEnabled: false,
+            ctaDisabledReason: "Le festival est terminé",
+        };
+    }
+
+    // Fallback: use nextDate from phase
+    return {
+        targetDate: phase.nextDate,
+        label: "Prochain événement",
+        ctaEnabled: false,
+        ctaDisabledReason: "Les candidatures sont closes",
+    };
+};
+
 const HeroSection = (): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const { days, hours, minutes, seconds } = useCountdown();
+    const { phase } = usePhase();
+    const { targetDate, label: countdownLabel, ctaEnabled, ctaDisabledReason } = getCountdownConfig(phase);
+    const { days, hours, minutes, seconds } = useCountdown(targetDate);
     const { t } = useTranslation();
     const [videoSrc, setVideoSrc] = useState<string>(heroVideoFallback);
 
@@ -49,11 +123,11 @@ const HeroSection = (): React.JSX.Element => {
         window.open("/assets/video.mp4", "_blank");
     };
 
-    const HERO_TAGS = [
-        { label: "60s", sub: t("hero.tags.chrono") },
-        { label: "120+", sub: t("hero.tags.pays") },
-        { label: "100%", sub: t("hero.tags.gratuit") },
-        { label: t("hero.tags.prix"), sub: "Marseille" },
+    const STATS = [
+        { value: "60s", label: t("hero.tags.chrono") },
+        { value: "120+", label: t("hero.tags.pays") },
+        { value: "100%", label: t("hero.tags.gratuit") },
+        { value: t("hero.tags.prix"), label: "Marseille" },
     ];
 
     const countdownUnits: CountdownUnit[] = [
@@ -66,13 +140,13 @@ const HeroSection = (): React.JSX.Element => {
     return (
         <section
             id="home"
-            className="relative min-h-screen flex items-center px-6 py-24 overflow-hidden"
+            className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-deep-sky"
         >
             {/* Video background */}
             <video
                 key={videoSrc}
                 ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
+                className="absolute inset-0 w-full h-full object-cover opacity-[0.12] z-0"
                 autoPlay
                 muted
                 loop
@@ -83,107 +157,189 @@ const HeroSection = (): React.JSX.Element => {
                 <source src={videoSrc} type="video/mp4" />
             </video>
 
-            {/* Aurora orbs */}
+            {/* Aurora orb — gauche */}
             <div
-                className="aurora-1 absolute top-1/4 -left-40 w-[500px] h-[500px] rounded-full bg-aurora/10 blur-3xl pointer-events-none z-0"
+                className="aurora-1 absolute top-1/2 -translate-y-1/2 -left-64 w-[700px] h-[700px] rounded-full bg-aurora/8 blur-3xl pointer-events-none z-0"
                 aria-hidden="true"
             />
+            {/* Aurora orb — droite */}
             <div
-                className="aurora-2 absolute bottom-1/4 -right-40 w-[400px] h-[400px] rounded-full bg-lavande/10 blur-3xl pointer-events-none z-0"
+                className="aurora-2 absolute top-1/2 -translate-y-1/2 -right-64 w-[700px] h-[700px] rounded-full bg-lavande/8 blur-3xl pointer-events-none z-0"
                 aria-hidden="true"
             />
 
-            <div className="relative z-10 max-w-6xl mx-auto w-full flex flex-col lg:flex-row items-center gap-16">
-                {/* Left — main text */}
-                <div className="flex-1">
-                    {/* Partners */}
-                    <div className="flex flex-wrap items-center gap-2 mb-6 text-sm text-mist">
-                        <span>{t("hero.coCreation")}</span>
-                        <strong className="text-white-soft">La Plateforme</strong>
-                        <span>&amp;</span>
-                        <strong className="text-white-soft">Mobile Film Festival</strong>
-                    </div>
+            {/* Gradient overlay bas */}
+            <div
+                className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-deep-sky to-transparent z-[1] pointer-events-none"
+                aria-hidden="true"
+            />
 
-                    {/* Badge */}
-                    <div className="inline-block font-mono text-xs text-aurora border border-aurora/30 rounded-full px-3 py-1 mb-6 tracking-wider">
-                        {t("hero.badge")}
-                    </div>
+            {/* Contenu principal centré */}
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-24 pb-40">
 
-                    {/* Title */}
-                    <h1 className="font-display text-8xl lg:text-9xl font-black leading-none mb-5">
-                        mars<span className="text-aurora">AI</span>
-                    </h1>
+                {/* Co-création label */}
+                <p
+                    className="font-mono text-xs text-mist/60 mb-6 tracking-wider"
+                    style={{ animation: "var(--animate-fade-in)" }}
+                >
+                    Une co-création &middot; La Plateforme &amp; Mobile Film Festival
+                </p>
 
-                    {/* Description */}
-                    <p className="text-lg font-semibold text-white-soft max-w-lg mb-6">
-                        {t("hero.description")}
-                    </p>
+                {/* Badge pill */}
+                <div
+                    className="inline-flex items-center gap-2 border border-aurora/30 rounded-full px-4 py-1.5 mb-8 font-mono text-xs text-aurora/80 tracking-wider"
+                    style={{ animation: "var(--animate-fade-in)" }}
+                >
+                    <span className="w-2 h-2 rounded-full bg-aurora animate-pulse flex-shrink-0" aria-hidden="true" />
+                    {t("hero.badge")}
+                </div>
 
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mb-8">
-                        {HERO_TAGS.map((tag) => (
-                            <span
-                                key={tag.sub}
-                                className="font-mono text-sm bg-surface border border-white/10 rounded px-3 py-1.5 text-white-soft"
-                            >
-                                <strong className="text-aurora">{tag.label}</strong> {tag.sub}
-                            </span>
-                        ))}
-                    </div>
+                {/* Titre massif */}
+                <h1
+                    className="font-display font-black leading-none tracking-tighter my-6 lg:my-8"
+                    style={{
+                        fontSize: "clamp(5rem, 15vw, 14rem)",
+                        animation: "var(--animate-fade-in-up)",
+                    }}
+                >
+                    <span className="text-white-soft">mars</span>
+                    <span
+                        className="text-aurora"
+                        style={{
+                            textShadow:
+                                "0 0 40px rgba(78, 255, 206, 0.4), 0 0 80px rgba(78, 255, 206, 0.15)",
+                        }}
+                    >
+                        AI
+                    </span>
+                </h1>
 
-                    {/* Accroche */}
-                    <p className="text-base text-mist mb-8 leading-relaxed">
-                        {t("hero.accroche1")}
-                        <br />
-                        <span className="text-aurora font-semibold">{t("hero.accroche2")}</span>
-                    </p>
+                {/* Tagline */}
+                <p
+                    className="text-lg md:text-xl text-mist max-w-2xl mx-auto mb-8 leading-relaxed"
+                    style={{ animation: "var(--animate-fade-in-up)", animationDelay: "0.15s" }}
+                >
+                    {t("hero.description")}
+                </p>
 
-                    {/* CTAs */}
-                    <div className="flex flex-wrap gap-3">
+                {/* CTAs */}
+                <div
+                    className="flex flex-wrap gap-4 justify-center mb-12"
+                    style={{ animation: "var(--animate-fade-in-up)", animationDelay: "0.25s" }}
+                >
+                    {ctaEnabled ? (
                         <Link
                             to="/formulaire"
-                            className="inline-flex items-center gap-2 bg-aurora text-[#0a0f2e] font-bold px-6 py-3 rounded-lg hover:bg-aurora/90 transition-colors"
+                            className="inline-flex items-center gap-2 bg-aurora text-deep-sky font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:bg-aurora/90"
+                            style={{ boxShadow: "0 0 30px rgba(78, 255, 206, 0.3)" }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                                    "0 0 40px rgba(78, 255, 206, 0.5)";
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                                    "0 0 30px rgba(78, 255, 206, 0.3)";
+                            }}
                         >
-                            {t("hero.cta")} <span aria-hidden="true">→</span>
+                            {t("hero.cta")}
+                            <span aria-hidden="true">→</span>
                         </Link>
-                        <button
-                            onClick={handleDemoClick}
-                            className="inline-flex items-center gap-2 border border-white/20 text-white-soft px-6 py-3 rounded-lg hover:border-aurora/50 hover:text-aurora transition-colors"
-                        >
-                            {t("hero.demo")}
-                        </button>
-                    </div>
+                    ) : (
+                        <div className="relative group">
+                            <button
+                                disabled
+                                className="inline-flex items-center gap-2 bg-surface border border-white/10 text-mist/50 font-bold px-8 py-4 rounded-xl cursor-not-allowed select-none"
+                            >
+                                {t("hero.cta")}
+                                <span aria-hidden="true">→</span>
+                            </button>
+                            {ctaDisabledReason && (
+                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-surface border border-white/10 text-mist/80 text-xs font-mono px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {ctaDisabledReason}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    <button
+                        onClick={handleDemoClick}
+                        className="inline-flex items-center gap-2 border border-white/20 text-white-soft px-8 py-4 rounded-xl hover:border-aurora/50 hover:text-aurora transition-all duration-300"
+                    >
+                        {t("hero.demo")}
+                    </button>
                 </div>
 
-                {/* Right — city + countdown */}
-                <div className="flex-shrink-0">
-                    <div className="font-display text-6xl font-black text-white/10 tracking-widest mb-8 text-center">
-                        Marseille
-                    </div>
-                    <p className="font-mono text-xs text-mist mb-4 text-center">
-                        {t("hero.deadline")}
-                    </p>
-                    <div className="flex items-start justify-center gap-1">
-                        {countdownUnits.map((unit, i) => (
-                            <React.Fragment key={unit.label}>
-                                {i > 0 && (
-                                    <span
-                                        className="text-aurora text-2xl font-bold mt-1 px-1"
-                                        aria-hidden="true"
-                                    >
-                                        :
-                                    </span>
-                                )}
-                                <div className="text-center min-w-[56px]">
-                                    <div className="font-display text-4xl font-black text-white tabular-nums">
-                                        {unit.value}
-                                    </div>
-                                    <div className="text-xs text-mist mt-1">{unit.label}</div>
-                                </div>
-                            </React.Fragment>
-                        ))}
-                    </div>
+                {/* Stats row */}
+                <div
+                    className="flex flex-wrap gap-6 md:gap-10 justify-center items-center"
+                    style={{ animation: "var(--animate-fade-in-up)", animationDelay: "0.35s" }}
+                >
+                    {STATS.map((stat, i) => (
+                        <React.Fragment key={stat.label}>
+                            {i > 0 && (
+                                <span
+                                    className="w-1 h-1 rounded-full bg-white/20 hidden sm:block"
+                                    aria-hidden="true"
+                                />
+                            )}
+                            <div className="flex flex-col items-center gap-0.5">
+                                <span className="text-aurora font-display text-2xl font-black tabular-nums leading-none">
+                                    {stat.value}
+                                </span>
+                                <span className="text-xs text-mist uppercase tracking-wider">
+                                    {stat.label}
+                                </span>
+                            </div>
+                        </React.Fragment>
+                    ))}
                 </div>
+            </div>
+
+            {/* Countdown — ancré en bas */}
+            <div
+                className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center pb-12 px-6"
+                style={{ animation: "var(--animate-fade-in)", animationDelay: "0.5s" }}
+            >
+                <p className="font-mono text-xs text-mist/60 uppercase tracking-widest mb-4">
+                    {countdownLabel}
+                </p>
+                <div className="flex items-center gap-2">
+                    {countdownUnits.map((unit, i) => (
+                        <React.Fragment key={unit.label}>
+                            {i > 0 && (
+                                <span
+                                    className="text-aurora text-2xl font-bold select-none"
+                                    aria-hidden="true"
+                                >
+                                    :
+                                </span>
+                            )}
+                            <div className="flex flex-col items-center bg-surface border border-white/10 rounded-xl px-4 py-3 min-w-[64px]">
+                                <span className="font-display text-3xl font-black text-white-soft tabular-nums leading-none">
+                                    {unit.value}
+                                </span>
+                                <span className="text-xs text-mist mt-1 leading-none">
+                                    {unit.label}
+                                </span>
+                            </div>
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+
+            {/* Scroll indicator */}
+            <div
+                className="absolute bottom-8 right-8 z-10 animate-bounce hidden lg:block"
+                aria-hidden="true"
+            >
+                <svg
+                    className="w-6 h-6 text-white/30"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
             </div>
         </section>
     );
