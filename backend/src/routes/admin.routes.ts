@@ -14,6 +14,7 @@ import {
     startAdminVocal,
     stopAdminVocal,
 } from "../controllers/admin.controller";
+import { getCalendarHandler, updateCalendarHandler } from "../controllers/calendar.controller";
 
 const router = Router();
 
@@ -50,5 +51,11 @@ router.delete("/users/:id", requireAdmin, removeUser);
 router.post("/vocal/start", requireAdmin, startAdminVocal);
 // POST /api/admin/vocal/stop
 router.post("/vocal/stop", requireAdmin, stopAdminVocal);
+
+// ── Calendrier ────────────────────────────────────────────────────────────────
+// GET  /api/admin/calendar
+router.get("/calendar", requireAdmin, getCalendarHandler);
+// PUT  /api/admin/calendar
+router.put("/calendar", requireAdmin, updateCalendarHandler);
 
 export default router;

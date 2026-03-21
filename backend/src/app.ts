@@ -39,6 +39,8 @@ import phaseRouter from "./routes/phase.routes";
 import ticketRouter from "./routes/ticket.routes";
 import vocalRouter from "./routes/vocal.routes";
 import voteTagRouter from "./routes/voteTag.routes";
+import programmeRouter from "./routes/programme.routes";
+import juryShowcaseRouter from "./routes/jury_showcase.routes";
 
 app.use("/", homeRouter);
 app.use("/api/films", filmRouter);
@@ -53,5 +55,7 @@ app.use("/api/phases", phaseRouter);
 app.use("/api/tickets", ticketRouter);
 app.use("/api/vocal", vocalRouter);
 app.use("/api/vote-tags", voteTagRouter);
+app.use("/api/programme", programmeRouter);
+app.use("/api/jury-showcase", juryShowcaseRouter);
 
 export default app;
