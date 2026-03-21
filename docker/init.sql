@@ -28,12 +28,20 @@ CREATE TABLE `award` (
   `description` text,
   `cash_prize` varchar(255) DEFAULT NULL,
   `laureat` int DEFAULT NULL,
+  `display_rank` int NOT NULL DEFAULT 0,
+  `reveal_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_award_laureat` (`laureat`),
   CONSTRAINT `fk_award_laureat` FOREIGN KEY (`laureat`) REFERENCES `film` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `award` (`name`, `description`, `cash_prize`, `display_rank`) VALUES
+('Grand Prix marsAI', 'Récompense le film le plus abouti artistiquement et techniquement.', '5 000 €', 1),
+('Prix du Jury', 'Coup de cœur des membres du jury international.', '2 000 €', 2),('Prix de l''Innovation IA', 'Film ayant fait l''usage le plus créatif de l''intelligence artificielle.', '1 500 €', 3),
+('Prix du Mobile', 'Meilleur film tourné et monté intégralement sur smartphone.', '1 000 €', 4),
+('Mention Spéciale', 'Distinction honorifique décernée par le jury.', NULL, 5);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `award` DISABLE KEYS */;
@@ -68,6 +76,7 @@ CREATE TABLE `cms_content` (
   `contact_instagram` varchar(255) DEFAULT NULL,
   `contact_website` varchar(500) DEFAULT NULL,
   `contact_description` text,
+  `finalist_count` int NOT NULL DEFAULT 5,
   `header_logo_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `hero_video_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `is_jury_list_toggle` tinyint(1) NOT NULL DEFAULT '0',

@@ -20,7 +20,7 @@ const Divider = (): React.JSX.Element => (
     />
 );
 
-const Home = (): React.JSX.Element => {
+const HomePage = (): React.JSX.Element => {
     const { phase } = usePhase();
 
     return (
@@ -38,7 +38,7 @@ const Home = (): React.JSX.Element => {
             <ProgrammeSection />
             <Divider />
 
-            {/* Section dynamique selon la phase active */}
+            {/* ── Sections dynamiques selon la phase ── */}
             {phase.phase === 0 && <FilmsSection />}
             {phase.phase === 1 && <SelectionGrid />}
             {phase.phase === 2 && <FinalistGrid />}
@@ -51,4 +51,4 @@ const Home = (): React.JSX.Element => {
     );
 };
 
-export default Home;
+export default HomePage;

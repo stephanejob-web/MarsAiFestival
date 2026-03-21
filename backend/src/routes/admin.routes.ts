@@ -32,6 +32,13 @@ import {
     deleteSponsorHandler,
     uploadSponsorLogoHandler,
 } from "../controllers/sponsor.controller";
+import {
+    listAwards,
+    createAwardHandler,
+    updateAwardHandler,
+    deleteAwardHandler,
+} from "../controllers/award.controller";
+import { setFilmPhaseStatus, listFilmsByPhase } from "../controllers/film_phase.controller";
 
 // ── Upload dirs ───────────────────────────────────────────────────────────────
 const HERO_DIR = path.join(__dirname, "../../uploads/hero");
@@ -104,5 +111,27 @@ router.post(
     uploadLogo.single("logo"),
     uploadSponsorLogoHandler,
 );
+
+// ── Awards (Palmarès) ─────────────────────────────────────────────────────────
+router.get("/awards", requireAdmin, listAwards);
+router.post("/awards", requireAdmin, createAwardHandler);
+router.put("/awards/:id", requireAdmin, updateAwardHandler);
+router.delete("/awards/:id", requireAdmin, deleteAwardHandler);
+
+// ── Phases films ──────────────────────────────────────────────────────────────
+router.get("/phase-films", requireAdmin, listFilmsByPhase);
+router.patch("/films/:id/phase", requireAdmin, setFilmPhaseStatus);
+
+// ── Finalist count ────────────────────────────────────────────────────────────
+router.put("/finalist-count", requireAdmin, async (req, res): Promise<void> => {
+    const count = parseInt(req.body.finalist_count);
+    if (!count || count < 1 || count > 50) {
+        res.status(400).json({ success: false, message: "Valeur invalide (1-50)." });
+        return;
+    }
+    const pool = (await import("../config/db")).default;
+    await pool.execute("UPDATE cms_content SET finalist_count = ? WHERE id = 1", [count]);
+    res.json({ success: true });
+});
 
 export default router;

@@ -7,8 +7,9 @@ import CmsProgramme from "../features/admin/components/CmsProgramme";
 import CmsJury from "../features/admin/components/CmsJury";
 import CmsSponsors from "../features/admin/components/CmsSponsors";
 import CmsContactInfo from "../features/admin/components/CmsContactInfo";
+import CmsPhases from "../features/admin/components/CmsPhases";
 
-type SectionId = "hero" | "calendrier" | "programme" | "jury" | "sponsors" | "contact";
+type SectionId = "hero" | "calendrier" | "programme" | "jury" | "sponsors" | "contact" | "phases";
 
 interface Tab {
     id: SectionId;
@@ -93,6 +94,15 @@ const IconContact = (): React.JSX.Element => (
     </svg>
 );
 
+const IconPhases = (): React.JSX.Element => (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="3" cy="7.5" r="1.5" fill="currentColor" />
+        <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" />
+        <circle cx="12" cy="7.5" r="1.5" fill="currentColor" />
+        <path d="M4.5 7.5h1.5M9 7.5h1.5" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+);
+
 const TABS: Tab[] = [
     {
         id: "hero",
@@ -136,6 +146,13 @@ const TABS: Tab[] = [
         color: "text-aurora",
         description: "Infos & réseaux sociaux",
     },
+    {
+        id: "phases",
+        label: "Phases",
+        icon: <IconPhases />,
+        color: "text-coral",
+        description: "Sélection, finalistes, palmarès",
+    },
 ];
 
 const COLOR_MAP: Record<SectionId, { border: string; bg: string; text: string; dot: string }> = {
@@ -174,6 +191,12 @@ const COLOR_MAP: Record<SectionId, { border: string; bg: string; text: string; d
         bg: "bg-aurora/10",
         text: "text-aurora",
         dot: "bg-aurora",
+    },
+    phases: {
+        border: "border-coral/40",
+        bg: "bg-coral/10",
+        text: "text-coral",
+        dot: "bg-coral",
     },
 };
 
@@ -311,6 +334,7 @@ const AdminCmsPage = (): React.JSX.Element => {
                         {active === "jury" && <CmsJury />}
                         {active === "sponsors" && <CmsSponsors />}
                         {active === "contact" && <CmsContactInfo />}
+                        {active === "phases" && <CmsPhases />}
                     </div>
                 </div>
             </div>
