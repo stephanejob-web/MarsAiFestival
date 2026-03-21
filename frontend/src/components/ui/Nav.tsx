@@ -17,6 +17,7 @@ const Nav = (): React.JSX.Element => {
         { label: t("nav.links.films"), href: "#films" },
         { label: t("nav.links.palmares"), href: "#palmares" },
         { label: t("nav.links.jury"), href: "#jury" },
+        { label: t("nav.links.sponsors"), href: "#sponsors" },
     ];
 
     useEffect((): (() => void) => {
@@ -26,9 +27,16 @@ const Nav = (): React.JSX.Element => {
     }, []);
 
     const handleAnchor = (href: string): void => {
-        if (!isHome) return;
+        if (!isHome) {
+            window.location.href = "/" + href;
+            return;
+        }
         const el = document.querySelector(href);
-        el?.scrollIntoView({ behavior: "smooth" });
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+        } else {
+            window.location.hash = href;
+        }
     };
 
     const toggleLang = (): void => {
