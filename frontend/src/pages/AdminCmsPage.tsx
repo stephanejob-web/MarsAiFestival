@@ -1,6 +1,12 @@
 import React from "react";
+import CmsTopBar from "../features/admin/components/CmsTopBar";
+import CmsVideoHero from "../features/admin/components/CmsVideoHero";
+import CmsHeroContent from "../features/admin/components/CmsHeroContent";
+import CmsCalendar from "../features/admin/components/CmsCalendar";
 import CmsProgramme from "../features/admin/components/CmsProgramme";
 import CmsJury from "../features/admin/components/CmsJury";
+import CmsSponsors from "../features/admin/components/CmsSponsors";
+import CmsContactInfo from "../features/admin/components/CmsContactInfo";
 
 interface SectionTitleProps {
     icon: string;
@@ -42,10 +48,28 @@ const AdminCmsPage = (): React.JSX.Element => {
             </div>
 
             {/* Quick nav */}
-            <div className="flex items-center gap-2 border-b border-white/[0.04] bg-surface/60 px-5 py-2">
-                <span className="text-[0.68rem] text-mist/50 uppercase tracking-widest font-mono mr-1">
+            <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.04] bg-surface/60 px-5 py-2">
+                <span className="mr-1 font-mono text-[0.68rem] uppercase tracking-widest text-mist/50">
                     Aller à :
                 </span>
+                <a
+                    href="#cms-site"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                >
+                    Site 🌐
+                </a>
+                <a
+                    href="#cms-hero"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                >
+                    Hero 🎬
+                </a>
+                <a
+                    href="#cms-calendrier"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                >
+                    Calendrier 📅
+                </a>
                 <a
                     href="#cms-programme"
                     className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
@@ -58,10 +82,59 @@ const AdminCmsPage = (): React.JSX.Element => {
                 >
                     Jury 👥
                 </a>
+                <a
+                    href="#cms-sponsors"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                >
+                    Sponsors 🤝
+                </a>
+                <a
+                    href="#cms-contact"
+                    className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                >
+                    Contact 📬
+                </a>
             </div>
 
             {/* Contenu */}
             <div className="flex-1 overflow-y-auto px-6 py-6">
+                {/* Statut du site */}
+                <section id="cms-site">
+                    <CmsTopBar />
+                </section>
+
+                <Divider />
+
+                {/* Hero */}
+                <section id="cms-hero">
+                    <SectionTitle
+                        icon="🎬"
+                        title="Hero · Page d'accueil"
+                        subtitle="Vidéo de fond et texte principal affiché en plein écran"
+                    />
+                    <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <CmsVideoHero />
+                        <CmsHeroContent />
+                    </div>
+                </section>
+
+                <Divider />
+
+                {/* Calendrier */}
+                <section id="cms-calendrier">
+                    <SectionTitle
+                        icon="📅"
+                        title="Calendrier · Dates clés"
+                        subtitle="Dates affichées publiquement sur le site"
+                    />
+                    <div className="mt-4">
+                        <CmsCalendar />
+                    </div>
+                </section>
+
+                <Divider />
+
+                {/* Programme */}
                 <section id="cms-programme">
                     <SectionTitle
                         icon="🗓️"
@@ -75,6 +148,7 @@ const AdminCmsPage = (): React.JSX.Element => {
 
                 <Divider />
 
+                {/* Jury */}
                 <section id="cms-jury">
                     <SectionTitle
                         icon="👥"
@@ -83,6 +157,34 @@ const AdminCmsPage = (): React.JSX.Element => {
                     />
                     <div className="mt-4">
                         <CmsJury />
+                    </div>
+                </section>
+
+                <Divider />
+
+                {/* Sponsors */}
+                <section id="cms-sponsors">
+                    <SectionTitle
+                        icon="🤝"
+                        title="Sponsors · Page d'accueil"
+                        subtitle="Partenaires et sponsors affichés sur le site"
+                    />
+                    <div className="mt-4">
+                        <CmsSponsors />
+                    </div>
+                </section>
+
+                <Divider />
+
+                {/* Contact */}
+                <section id="cms-contact">
+                    <SectionTitle
+                        icon="📬"
+                        title="Contact · Informations"
+                        subtitle="Coordonnées affichées dans le footer et la page contact"
+                    />
+                    <div className="mt-4">
+                        <CmsContactInfo />
                     </div>
                 </section>
             </div>
