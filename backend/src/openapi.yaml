@@ -319,32 +319,31 @@ components:
         id:
           type: integer
           example: 1
-        title:
-          type: string
-          example: "Cérémonie d'ouverture"
-        date:
+        day:
+          type: integer
+          example: 1
+        event_date:
           type: string
           format: date
-          example: "2026-03-28"
+          nullable: true
+          example: "2026-05-05"
         time:
           type: string
           example: "18:00"
-        duration:
+        title:
           type: string
-          nullable: true
-          example: "2h"
-        type:
-          type: string
-          enum: [opening, projection, masterclass, workshop, gala]
-          example: "opening"
-        location:
-          type: string
-          nullable: true
-          example: "Friche la Belle de Mai"
+          example: "Cérémonie d'ouverture"
         description:
           type: string
           nullable: true
           example: "Soirée inaugurale du festival marsAI 2026"
+        type:
+          type: string
+          enum: [opening, projection, masterclass, pause, gala, default]
+          example: "opening"
+        sort_order:
+          type: integer
+          example: 0
         created_at:
           type: string
           format: date-time
@@ -4377,33 +4376,28 @@ paths:
           application/json:
             schema:
               type: object
-              required: [title, date, time, type]
+              required: [title, time, type]
               properties:
-                title:
-                  type: string
-                  example: "Cérémonie d'ouverture"
-                date:
+                event_date:
                   type: string
                   format: date
-                  example: "2026-03-28"
+                  example: "2026-05-05"
                 time:
                   type: string
                   example: "18:00"
-                duration:
+                title:
                   type: string
-                  nullable: true
-                  example: "2h"
-                type:
-                  type: string
-                  enum: [opening, projection, masterclass, workshop, gala]
-                  example: "opening"
-                location:
-                  type: string
-                  nullable: true
-                  example: "Friche la Belle de Mai"
+                  example: "Cérémonie d'ouverture"
                 description:
                   type: string
                   nullable: true
+                type:
+                  type: string
+                  enum: [opening, projection, masterclass, pause, gala, default]
+                  example: "opening"
+                sort_order:
+                  type: integer
+                  example: 0
       responses:
         "201":
           description: Événement créé
@@ -4443,25 +4437,21 @@ paths:
             schema:
               type: object
               properties:
-                title:
-                  type: string
-                date:
+                event_date:
                   type: string
                   format: date
                 time:
                   type: string
-                duration:
+                title:
+                  type: string
+                description:
                   type: string
                   nullable: true
                 type:
                   type: string
-                  enum: [opening, projection, masterclass, workshop, gala]
-                location:
-                  type: string
-                  nullable: true
-                description:
-                  type: string
-                  nullable: true
+                  enum: [opening, projection, masterclass, pause, gala, default]
+                sort_order:
+                  type: integer
       responses:
         "200":
           description: Événement modifié
