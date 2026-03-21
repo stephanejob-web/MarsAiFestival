@@ -185,6 +185,31 @@ tags:
       Étiquettes (tags) affichées dans les popups « À revoir » et « Refuser » du jury.
       Gérées par l'admin depuis `/admin/tags`. Les jurés voient uniquement les étiquettes actives.
       Stockées dans la table `vote_tags`.
+  - name: CMS Public
+    description: |
+      Endpoint public (sans authentification) exposant les données CMS du site :
+      contenu Hero, vidéo hero, informations de contact.
+      Consommé par la page d'accueil publique.
+  - name: CMS Admin
+    description: |
+      Gestion du contenu de la page d'accueil par l'admin 🛡️.
+      Regroupe le Hero (textes + vidéo), le Calendrier éditorial et le Contact.
+      Données stockées dans la table `cms_content` (ligne unique id=1).
+  - name: Sponsors
+    description: |
+      CRUD complet des sponsors du festival 🛡️.
+      Niveaux de partenariat : `main`, `lead`, `premium`, `partner`, `supporter`.
+      Chaque sponsor peut avoir un logo (upload fichier ou URL) et un lien vers son site.
+  - name: Jury Showcase
+    description: |
+      Gestion de l'affichage public des membres du jury sur la page d'accueil.
+      Route publique : `GET /api/jury-showcase`.
+      Routes admin 🛡️ : création, modification, suppression, upload photo.
+  - name: Programme
+    description: |
+      Programme des événements du festival (calendrier public).
+      Route publique : `GET /api/programme`.
+      Routes admin 🛡️ : création, modification, suppression d'événements.
 
 components:
   securitySchemes:
@@ -214,6 +239,119 @@ components:
           type: string
           description: Description lisible de l'erreur
           example: "Film introuvable."
+
+    Sponsor:
+      type: object
+      description: Sponsor du festival
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Mistral AI"
+        partnership_statut:
+          type: string
+          enum: [main, lead, premium, partner, supporter]
+          nullable: true
+          example: "lead"
+        sponsored_award:
+          type: string
+          nullable: true
+          example: "Prix de l'Innovation IA"
+        sponsor_link:
+          type: string
+          nullable: true
+          example: "https://mistral.ai"
+        sponsor_logo:
+          type: string
+          nullable: true
+          example: "/uploads/sponsors/sponsor_1_1710000000000.png"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    JuryShowcaseMember:
+      type: object
+      description: Membre du jury affiché sur la page d'accueil
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Justine Triet"
+        display_role:
+          type: string
+          example: "Réalisatrice"
+        badge:
+          type: string
+          example: "Présidente du Jury"
+        quote:
+          type: string
+          nullable: true
+          example: "L'IA ouvre de nouveaux horizons créatifs."
+        photo_url:
+          type: string
+          nullable: true
+          example: "https://images.unsplash.com/photo-xxx"
+        is_featured:
+          type: integer
+          enum: [0, 1]
+          description: "1 = affiché en carte featured (grand format)"
+          example: 1
+        sort_order:
+          type: integer
+          example: 0
+        is_active:
+          type: integer
+          enum: [0, 1]
+          example: 1
+
+    ProgrammeEvent:
+      type: object
+      description: Événement du programme festival
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Cérémonie d'ouverture"
+        date:
+          type: string
+          format: date
+          example: "2026-03-28"
+        time:
+          type: string
+          example: "18:00"
+        duration:
+          type: string
+          nullable: true
+          example: "2h"
+        type:
+          type: string
+          enum: [opening, projection, masterclass, workshop, gala]
+          example: "opening"
+        location:
+          type: string
+          nullable: true
+          example: "Friche la Belle de Mai"
+        description:
+          type: string
+          nullable: true
+          example: "Soirée inaugurale du festival marsAI 2026"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
         error:
           type: string
           description: Détail technique (présent en cas d'erreur serveur 500)
@@ -3355,6 +3493,1002 @@ paths:
       responses:
         "200":
           description: Étiquette supprimée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── CMS PUBLIC ─────────────────────────────────────────────────────────────
+
+  /api/cms/public:
+    get:
+      tags: [CMS Public]
+      summary: Données CMS publiques de la page d'accueil
+      description: |
+        Retourne l'ensemble des données CMS nécessaires à la page d'accueil publique :
+        contenu Hero (label, titre, description, tags), chemin de la vidéo hero,
+        et informations de contact.
+        **Aucune authentification requise.**
+      responses:
+        "200":
+          description: Données CMS
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      hero_label:
+                        type: string
+                        nullable: true
+                        example: "Festival International"
+                      hero_title:
+                        type: string
+                        nullable: true
+                        example: "marsAI 2026"
+                      hero_description:
+                        type: string
+                        nullable: true
+                      hero_content:
+                        type: string
+                        nullable: true
+                      hero_tag1:
+                        type: string
+                        nullable: true
+                        example: "60s"
+                      hero_tag2:
+                        type: string
+                        nullable: true
+                        example: "120+"
+                      hero_tag3:
+                        type: string
+                        nullable: true
+                        example: "100%"
+                      hero_tag4:
+                        type: string
+                        nullable: true
+                        example: "Gratuit"
+                      hero_video_path:
+                        type: string
+                        nullable: true
+                        example: "/uploads/hero/hero_1710000000000.mp4"
+                      contact_email:
+                        type: string
+                        nullable: true
+                        example: "contact@marsai.fr"
+                      contact_instagram:
+                        type: string
+                        nullable: true
+                        example: "@marsai_festival"
+                      contact_website:
+                        type: string
+                        nullable: true
+                        example: "https://marsai.fr"
+                      contact_description:
+                        type: string
+                        nullable: true
+        "500":
+          description: Erreur serveur
+
+  # ─── CMS ADMIN — HERO ───────────────────────────────────────────────────────
+
+  /api/admin/hero:
+    get:
+      tags: [CMS Admin]
+      summary: Lire le contenu Hero 🛡️
+      description: Retourne les champs Hero de la table `cms_content` (id=1).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Contenu Hero
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      hero_label:
+                        type: string
+                        nullable: true
+                      hero_title:
+                        type: string
+                        nullable: true
+                      hero_description:
+                        type: string
+                        nullable: true
+                      hero_content:
+                        type: string
+                        nullable: true
+                      hero_tag1:
+                        type: string
+                        nullable: true
+                      hero_tag2:
+                        type: string
+                        nullable: true
+                      hero_tag3:
+                        type: string
+                        nullable: true
+                      hero_tag4:
+                        type: string
+                        nullable: true
+                      hero_video_path:
+                        type: string
+                        nullable: true
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    put:
+      tags: [CMS Admin]
+      summary: Mettre à jour le contenu Hero 🛡️
+      description: Met à jour les champs texte du Hero dans `cms_content` (id=1).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hero_label:
+                  type: string
+                  example: "Festival International"
+                hero_title:
+                  type: string
+                  example: "marsAI 2026"
+                hero_description:
+                  type: string
+                  example: "Le premier festival de films IA en 60 secondes"
+                hero_content:
+                  type: string
+                  nullable: true
+                hero_tag1:
+                  type: string
+                  example: "60s"
+                hero_tag2:
+                  type: string
+                  example: "120+"
+                hero_tag3:
+                  type: string
+                  example: "100%"
+                hero_tag4:
+                  type: string
+                  example: "Gratuit"
+      responses:
+        "200":
+          description: Hero mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/admin/hero/video:
+    post:
+      tags: [CMS Admin]
+      summary: Uploader la vidéo Hero 🛡️
+      description: |
+        Remplace la vidéo de fond du Hero. Le fichier est sauvegardé dans `uploads/hero/`.
+        Le champ `hero_video_path` de `cms_content` est mis à jour.
+        Taille maximale : 100 Mo. Format accepté : `video/mp4`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [video]
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Fichier MP4 (max 100 Mo)
+      responses:
+        "200":
+          description: Vidéo uploadée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  path:
+                    type: string
+                    example: "/uploads/hero/hero_1710000000000.mp4"
+        "400":
+          description: Aucun fichier reçu
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── CMS ADMIN — CONTACT ────────────────────────────────────────────────────
+
+  /api/admin/contact:
+    get:
+      tags: [CMS Admin]
+      summary: Lire les infos de contact 🛡️
+      description: Retourne les champs contact de `cms_content` (id=1).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Informations de contact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      contact_email:
+                        type: string
+                        nullable: true
+                        example: "contact@marsai.fr"
+                      contact_instagram:
+                        type: string
+                        nullable: true
+                        example: "@marsai_festival"
+                      contact_website:
+                        type: string
+                        nullable: true
+                        example: "https://marsai.fr"
+                      contact_description:
+                        type: string
+                        nullable: true
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    put:
+      tags: [CMS Admin]
+      summary: Mettre à jour les infos de contact 🛡️
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact_email:
+                  type: string
+                  example: "contact@marsai.fr"
+                contact_instagram:
+                  type: string
+                  example: "@marsai_festival"
+                contact_website:
+                  type: string
+                  example: "https://marsai.fr"
+                contact_description:
+                  type: string
+                  example: "Pour toute question, contactez-nous."
+      responses:
+        "200":
+          description: Contact mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── CMS ADMIN — CALENDRIER ─────────────────────────────────────────────────
+
+  /api/admin/calendar:
+    get:
+      tags: [CMS Admin]
+      summary: Lire le calendrier éditorial 🛡️
+      description: |
+        Retourne les dates des phases du festival stockées dans `cms_content` (id=1) :
+        ouverture/fermeture des soumissions, phase Top 50, phase récompenses.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dates du calendrier
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      submission_open_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-01-01"
+                      submission_close_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-09-30"
+                      phase_top50_open_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-10-01"
+                      phase_top50_close_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-10-31"
+                      phase_award_open_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-11-01"
+                      phase_award_close_date:
+                        type: string
+                        format: date
+                        nullable: true
+                        example: "2026-11-30"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    put:
+      tags: [CMS Admin]
+      summary: Mettre à jour le calendrier éditorial 🛡️
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                submission_open_date:
+                  type: string
+                  format: date
+                  example: "2026-01-01"
+                submission_close_date:
+                  type: string
+                  format: date
+                  example: "2026-09-30"
+                phase_top50_open_date:
+                  type: string
+                  format: date
+                  example: "2026-10-01"
+                phase_top50_close_date:
+                  type: string
+                  format: date
+                  example: "2026-10-31"
+                phase_award_open_date:
+                  type: string
+                  format: date
+                  example: "2026-11-01"
+                phase_award_close_date:
+                  type: string
+                  format: date
+                  example: "2026-11-30"
+      responses:
+        "200":
+          description: Calendrier mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── SPONSORS ───────────────────────────────────────────────────────────────
+
+  /api/admin/sponsors:
+    get:
+      tags: [Sponsors]
+      summary: Lister tous les sponsors 🛡️
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des sponsors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Sponsor"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    post:
+      tags: [Sponsors]
+      summary: Créer un sponsor 🛡️
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "Mistral AI"
+                partnership_statut:
+                  type: string
+                  enum: [main, lead, premium, partner, supporter]
+                  example: "lead"
+                sponsored_award:
+                  type: string
+                  nullable: true
+                  example: "Prix de l'Innovation IA"
+                sponsor_link:
+                  type: string
+                  nullable: true
+                  example: "https://mistral.ai"
+                sponsor_logo:
+                  type: string
+                  nullable: true
+                  example: "https://mistral.ai/logo.png"
+      responses:
+        "201":
+          description: Sponsor créé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    example: 3
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/admin/sponsors/{id}:
+    put:
+      tags: [Sponsors]
+      summary: Modifier un sponsor 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                partnership_statut:
+                  type: string
+                  enum: [main, lead, premium, partner, supporter]
+                sponsored_award:
+                  type: string
+                  nullable: true
+                sponsor_link:
+                  type: string
+                  nullable: true
+                sponsor_logo:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Sponsor modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    delete:
+      tags: [Sponsors]
+      summary: Supprimer un sponsor 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Sponsor supprimé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/admin/sponsors/{id}/logo:
+    post:
+      tags: [Sponsors]
+      summary: Uploader le logo d'un sponsor 🛡️
+      description: |
+        Upload un logo pour le sponsor identifié par `id`.
+        Le fichier est sauvegardé dans `uploads/sponsors/` et le champ `sponsor_logo` est mis à jour.
+        Taille maximale : 5 Mo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [logo]
+              properties:
+                logo:
+                  type: string
+                  format: binary
+                  description: Fichier image (PNG, JPG, SVG — max 5 Mo)
+      responses:
+        "200":
+          description: Logo uploadé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    example: "/uploads/sponsors/sponsor_1_1710000000000.png"
+        "400":
+          description: Aucun fichier reçu
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── JURY SHOWCASE ──────────────────────────────────────────────────────────
+
+  /api/jury-showcase:
+    get:
+      tags: [Jury Showcase]
+      summary: Lister les membres du jury (public)
+      description: |
+        Retourne les membres actifs du jury triés par `sort_order`.
+        Utilisé par la section Jury de la page d'accueil publique.
+        **Aucune authentification requise.**
+      responses:
+        "200":
+          description: Liste des membres du jury
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/JuryShowcaseMember"
+
+    post:
+      tags: [Jury Showcase]
+      summary: Ajouter un membre du jury 🛡️
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, display_role]
+              properties:
+                name:
+                  type: string
+                  example: "Justine Triet"
+                display_role:
+                  type: string
+                  example: "Réalisatrice"
+                badge:
+                  type: string
+                  example: "Présidente du Jury"
+                quote:
+                  type: string
+                  nullable: true
+                  example: "L'IA ouvre de nouveaux horizons créatifs."
+                photo_url:
+                  type: string
+                  nullable: true
+                  example: "https://example.com/photo.jpg"
+                is_featured:
+                  type: boolean
+                  example: true
+                sort_order:
+                  type: integer
+                  example: 0
+                is_active:
+                  type: boolean
+                  example: true
+      responses:
+        "201":
+          description: Membre créé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    example: 4
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/jury-showcase/admin:
+    get:
+      tags: [Jury Showcase]
+      summary: Lister tous les membres du jury (admin) 🛡️
+      description: Retourne tous les membres (actifs et inactifs) pour la gestion admin.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste complète des membres
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/JuryShowcaseMember"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/jury-showcase/upload-photo:
+    post:
+      tags: [Jury Showcase]
+      summary: Uploader une photo de membre du jury 🛡️
+      description: |
+        Upload une photo pour un membre du jury.
+        Le fichier est sauvegardé dans `uploads/jury/` et l'URL est retournée.
+        À utiliser en combinaison avec `PUT /api/jury-showcase/{id}` pour associer la photo.
+        Taille maximale : 5 Mo.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo]
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: Fichier image (PNG, JPG — max 5 Mo)
+      responses:
+        "200":
+          description: Photo uploadée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  url:
+                    type: string
+                    example: "/uploads/jury/jury_1710000000000.jpg"
+        "400":
+          description: Aucun fichier reçu
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/jury-showcase/{id}:
+    put:
+      tags: [Jury Showcase]
+      summary: Modifier un membre du jury 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                display_role:
+                  type: string
+                badge:
+                  type: string
+                quote:
+                  type: string
+                  nullable: true
+                photo_url:
+                  type: string
+                  nullable: true
+                is_featured:
+                  type: boolean
+                sort_order:
+                  type: integer
+                is_active:
+                  type: boolean
+      responses:
+        "200":
+          description: Membre modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    delete:
+      tags: [Jury Showcase]
+      summary: Supprimer un membre du jury 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Membre supprimé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  # ─── PROGRAMME ──────────────────────────────────────────────────────────────
+
+  /api/programme:
+    get:
+      tags: [Programme]
+      summary: Lister les événements du programme (public)
+      description: |
+        Retourne tous les événements du programme festival triés par date et heure.
+        **Aucune authentification requise.**
+      responses:
+        "200":
+          description: Liste des événements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProgrammeEvent"
+
+    post:
+      tags: [Programme]
+      summary: Créer un événement du programme 🛡️
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, date, time, type]
+              properties:
+                title:
+                  type: string
+                  example: "Cérémonie d'ouverture"
+                date:
+                  type: string
+                  format: date
+                  example: "2026-03-28"
+                time:
+                  type: string
+                  example: "18:00"
+                duration:
+                  type: string
+                  nullable: true
+                  example: "2h"
+                type:
+                  type: string
+                  enum: [opening, projection, masterclass, workshop, gala]
+                  example: "opening"
+                location:
+                  type: string
+                  nullable: true
+                  example: "Friche la Belle de Mai"
+                description:
+                  type: string
+                  nullable: true
+      responses:
+        "201":
+          description: Événement créé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    example: 18
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/programme/{id}:
+    put:
+      tags: [Programme]
+      summary: Modifier un événement du programme 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                time:
+                  type: string
+                duration:
+                  type: string
+                  nullable: true
+                type:
+                  type: string
+                  enum: [opening, projection, masterclass, workshop, gala]
+                location:
+                  type: string
+                  nullable: true
+                description:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Événement modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+    delete:
+      tags: [Programme]
+      summary: Supprimer un événement du programme 🛡️
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Événement supprimé
           content:
             application/json:
               schema:
