@@ -22,7 +22,10 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
     },
     {
         category: "Développement",
-        items: [{ label: "Documentation API", to: "/api/docs", icon: "📖", external: true }],
+        items: [
+            { label: "Documentation", to: "/admin/docs", icon: "📖" },
+            { label: "Documentation API", to: "/api/docs", icon: "🔌", external: true },
+        ],
     },
 ];
 

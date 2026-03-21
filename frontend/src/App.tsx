@@ -12,6 +12,7 @@ import Layout from "./components/ui/Layout";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedAdminRoute from "./components/ui/ProtectedAdminRoute";
 import AdminCmsPage from "./pages/AdminCmsPage";
+import AdminDocsPage from "./pages/AdminDocsPage";
 
 const App = (): React.JSX.Element => {
     return (
@@ -28,6 +29,7 @@ const App = (): React.JSX.Element => {
                         <Route path="selection" element={<AdminSelectionPage />} />
                         <Route path="tags" element={<AdminTagsPage />} />
                         <Route path="/admin/cms" element={<AdminCmsPage />} />
+                        <Route path="docs" element={<AdminDocsPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />
