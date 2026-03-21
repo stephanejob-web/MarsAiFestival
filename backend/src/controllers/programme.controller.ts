@@ -21,24 +21,26 @@ export const listProgramme = async (_req: Request, res: Response): Promise<void>
 };
 
 export const createProgrammeEvent = async (req: Request, res: Response): Promise<void> => {
-    const { day, time, title, description, type, sort_order } = req.body as {
+    const { day, event_date, time, title, description, type, sort_order } = req.body as {
         day?: number;
+        event_date?: string;
         time?: string;
         title?: string;
         description?: string;
         type?: string;
         sort_order?: number;
     };
-    if (!day || !time || !title || !type) {
+    if (!time || !title || !type) {
         res.status(400).json({
             success: false,
-            message: "day, time, title et type sont obligatoires.",
+            message: "time, title et type sont obligatoires.",
         });
         return;
     }
     try {
         const id = await createEvent({
-            day: Number(day),
+            day: Number(day ?? 1),
+            event_date: event_date ?? null,
             time,
             title,
             description: description ?? null,
