@@ -167,7 +167,7 @@ const CmsProgramme = (): React.JSX.Element => {
             } else {
                 setApiError(json.message ?? `Erreur ${res.status}`);
             }
-        } catch (e) {
+        } catch {
             setApiError("Impossible de contacter le serveur.");
         } finally {
             setAddSaving(false);
