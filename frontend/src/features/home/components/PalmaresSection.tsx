@@ -101,17 +101,22 @@ const VideoModal = ({
     }, [onClose]);
 
     useEffect(() => {
-        if (!award.film_id) {
-            setLoading(false);
-            return;
-        }
-        fetch(`${API_BASE_URL}/api/public/films/${award.film_id}/video`)
-            .then((r) => r.json())
-            .then((j) => {
-                if (j.success) setSignedUrl(j.url);
-            })
-            .catch(() => {})
-            .finally(() => setLoading(false));
+        const load = async (): Promise<void> => {
+            if (!award.film_id) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const r = await fetch(`${API_BASE_URL}/api/public/films/${award.film_id}/video`);
+                const j = await r.json();
+                if (j.success) setSignedUrl(j.url as string);
+            } catch {
+                // silently fail
+            } finally {
+                setLoading(false);
+            }
+        };
+        void load();
     }, [award.film_id]);
 
     const rank = getRank(award.display_rank);

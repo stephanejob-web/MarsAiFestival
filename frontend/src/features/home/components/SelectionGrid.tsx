@@ -52,14 +52,19 @@ const VideoModal = ({ film, onClose }: { film: Film; onClose: () => void }): Rea
     }, [onClose]);
 
     useEffect(() => {
-        setLoadingUrl(true);
-        fetch(`${API_BASE_URL}/api/public/films/${film.id}/video`)
-            .then((r) => r.json())
-            .then((json) => {
-                if (json.success) setSignedUrl(json.url);
-            })
-            .catch(() => {})
-            .finally(() => setLoadingUrl(false));
+        const load = async (): Promise<void> => {
+            setLoadingUrl(true);
+            try {
+                const r = await fetch(`${API_BASE_URL}/api/public/films/${film.id}/video`);
+                const json = await r.json();
+                if (json.success) setSignedUrl(json.url as string);
+            } catch {
+                // silently fail
+            } finally {
+                setLoadingUrl(false);
+            }
+        };
+        void load();
     }, [film.id]);
 
     return (
