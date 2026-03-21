@@ -21,21 +21,58 @@ interface Award {
 }
 
 const FLAG: Record<string, string> = {
-    France: "🇫🇷", "United States": "🇺🇸", Japan: "🇯🇵",
-    Brazil: "🇧🇷", Germany: "🇩🇪", Spain: "🇪🇸",
-    Italy: "🇮🇹", "United Kingdom": "🇬🇧", Canada: "🇨🇦",
+    France: "🇫🇷",
+    "United States": "🇺🇸",
+    Japan: "🇯🇵",
+    Brazil: "🇧🇷",
+    Germany: "🇩🇪",
+    Spain: "🇪🇸",
+    Italy: "🇮🇹",
+    "United Kingdom": "🇬🇧",
+    Canada: "🇨🇦",
 };
-const flag = (c: string | null) => c ? (FLAG[c] ?? "🌍") : "🌍";
+const flag = (c: string | null) => (c ? (FLAG[c] ?? "🌍") : "🌍");
 
 /* ── Rank config ───────────────────────────────────────────── */
 const RANK: Record<number, { color: string; border: string; glow: string; label: string }> = {
-    1: { color: "text-solar",   border: "border-solar/40",   glow: "rgba(245,230,66,0.12)",  label: "① Grand Prix" },
-    2: { color: "text-lavande", border: "border-lavande/40", glow: "rgba(192,132,252,0.10)", label: "② Prix du Jury" },
-    3: { color: "text-aurora",  border: "border-aurora/40",  glow: "rgba(78,255,206,0.10)",  label: "③ Prix Spécial" },
-    4: { color: "text-coral",   border: "border-coral/30",   glow: "rgba(255,107,107,0.08)", label: "④ Prix du Mobile" },
-    5: { color: "text-mist",    border: "border-white/20",   glow: "rgba(136,146,176,0.06)", label: "⑤ Mention" },
+    1: {
+        color: "text-solar",
+        border: "border-solar/40",
+        glow: "rgba(245,230,66,0.12)",
+        label: "① Grand Prix",
+    },
+    2: {
+        color: "text-lavande",
+        border: "border-lavande/40",
+        glow: "rgba(192,132,252,0.10)",
+        label: "② Prix du Jury",
+    },
+    3: {
+        color: "text-aurora",
+        border: "border-aurora/40",
+        glow: "rgba(78,255,206,0.10)",
+        label: "③ Prix Spécial",
+    },
+    4: {
+        color: "text-coral",
+        border: "border-coral/30",
+        glow: "rgba(255,107,107,0.08)",
+        label: "④ Prix du Mobile",
+    },
+    5: {
+        color: "text-mist",
+        border: "border-white/20",
+        glow: "rgba(136,146,176,0.06)",
+        label: "⑤ Mention",
+    },
 };
-const getRank = (r: number) => RANK[r] ?? { color: "text-mist", border: "border-white/15", glow: "rgba(255,255,255,0.04)", label: `Prix ${r}` };
+const getRank = (r: number) =>
+    RANK[r] ?? {
+        color: "text-mist",
+        border: "border-white/15",
+        glow: "rgba(255,255,255,0.04)",
+        label: `Prix ${r}`,
+    };
 
 /* ── SVG Play ──────────────────────────────────────────────── */
 const PlayIcon = (): React.JSX.Element => (
@@ -45,21 +82,34 @@ const PlayIcon = (): React.JSX.Element => (
 );
 
 /* ── Video Modal ───────────────────────────────────────────── */
-const VideoModal = ({ award, onClose }: { award: Award; onClose: () => void }): React.JSX.Element => {
+const VideoModal = ({
+    award,
+    onClose,
+}: {
+    award: Award;
+    onClose: () => void;
+}): React.JSX.Element => {
     const [signedUrl, setSignedUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
         document.addEventListener("keydown", handler);
         return () => document.removeEventListener("keydown", handler);
     }, [onClose]);
 
     useEffect(() => {
-        if (!award.film_id) { setLoading(false); return; }
+        if (!award.film_id) {
+            setLoading(false);
+            return;
+        }
         fetch(`${API_BASE_URL}/api/public/films/${award.film_id}/video`)
             .then((r) => r.json())
-            .then((j) => { if (j.success) setSignedUrl(j.url); })
+            .then((j) => {
+                if (j.success) setSignedUrl(j.url);
+            })
             .catch(() => {})
             .finally(() => setLoading(false));
     }, [award.film_id]);
@@ -79,8 +129,18 @@ const VideoModal = ({ award, onClose }: { award: Award; onClose: () => void }): 
                     className="absolute -top-10 right-0 text-white/40 hover:text-white transition-colors flex items-center gap-2 font-mono text-xs uppercase tracking-widest"
                 >
                     <span>Fermer</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        className="w-4 h-4"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                 </button>
 
@@ -104,14 +164,18 @@ const VideoModal = ({ award, onClose }: { award: Award; onClose: () => void }): 
                 {/* Infos sous le player */}
                 <div className="mt-5 flex items-start justify-between gap-4">
                     <div>
-                        <div className={`font-mono text-xs uppercase tracking-widest mb-1 ${rank.color}`}>
+                        <div
+                            className={`font-mono text-xs uppercase tracking-widest mb-1 ${rank.color}`}
+                        >
                             {rank.label}
                         </div>
                         <h3 className="font-display font-black text-white-soft text-xl leading-tight">
                             {award.original_title}
                         </h3>
                         {award.english_title && award.english_title !== award.original_title && (
-                            <p className="text-mist/50 text-sm italic mt-0.5">{award.english_title}</p>
+                            <p className="text-mist/50 text-sm italic mt-0.5">
+                                {award.english_title}
+                            </p>
                         )}
                         {award.realisator_name && (
                             <p className="text-mist text-sm mt-1.5">
@@ -126,7 +190,9 @@ const VideoModal = ({ award, onClose }: { award: Award; onClose: () => void }): 
                     )}
                 </div>
                 {award.synopsis && (
-                    <p className="text-mist/50 text-sm mt-3 leading-relaxed line-clamp-3">{award.synopsis}</p>
+                    <p className="text-mist/50 text-sm mt-3 leading-relaxed line-clamp-3">
+                        {award.synopsis}
+                    </p>
                 )}
             </div>
         </div>
@@ -134,7 +200,13 @@ const VideoModal = ({ award, onClose }: { award: Award; onClose: () => void }): 
 };
 
 /* ── Grand Prix card — hero ────────────────────────────────── */
-const GrandPrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): React.JSX.Element => (
+const GrandPrixCard = ({
+    award,
+    onPlay,
+}: {
+    award: Award;
+    onPlay: () => void;
+}): React.JSX.Element => (
     <div
         className="relative rounded-2xl overflow-hidden border border-solar/30 group cursor-pointer"
         style={{ boxShadow: "0 0 60px rgba(245,230,66,0.08)", background: "#0f1535" }}
@@ -147,15 +219,25 @@ const GrandPrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }):
             <div className="lg:w-80 xl:w-96 flex-shrink-0">
                 {award.poster_img ? (
                     <img
-                        src={award.poster_img.startsWith("/") ? `${API_BASE_URL}${award.poster_img}` : award.poster_img}
+                        src={
+                            award.poster_img.startsWith("/")
+                                ? `${API_BASE_URL}${award.poster_img}`
+                                : award.poster_img
+                        }
                         alt={award.original_title ?? ""}
                         className="w-full h-64 lg:h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         style={{ maxHeight: "420px" }}
                         loading="lazy"
                     />
                 ) : (
-                    <div className="w-full h-64 lg:h-full bg-gradient-to-br from-surface-2 to-deep-sky flex items-center justify-center" style={{ minHeight: "280px" }}>
-                        <span className="font-display font-black text-solar/10" style={{ fontSize: "6rem" }}>
+                    <div
+                        className="w-full h-64 lg:h-full bg-gradient-to-br from-surface-2 to-deep-sky flex items-center justify-center"
+                        style={{ minHeight: "280px" }}
+                    >
+                        <span
+                            className="font-display font-black text-solar/10"
+                            style={{ fontSize: "6rem" }}
+                        >
                             {(award.original_title ?? "??").slice(0, 2).toUpperCase()}
                         </span>
                     </div>
@@ -165,22 +247,27 @@ const GrandPrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }):
             {/* Content */}
             <div className="flex flex-col justify-center p-8 lg:p-12 flex-1">
                 <div className="font-mono text-xs text-solar/60 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                    <span className="w-6 h-px bg-solar/40" />
-                    ① Grand Prix marsAI 2026
+                    <span className="w-6 h-px bg-solar/40" />① Grand Prix marsAI 2026
                 </div>
 
                 {award.original_title ? (
                     <>
-                        <h3 className="font-display font-black text-white-soft leading-tight mb-2"
-                            style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>
+                        <h3
+                            className="font-display font-black text-white-soft leading-tight mb-2"
+                            style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
+                        >
                             {award.original_title}
                         </h3>
                         {award.english_title && award.english_title !== award.original_title && (
-                            <p className="text-mist/60 text-base italic mb-4">{award.english_title}</p>
+                            <p className="text-mist/60 text-base italic mb-4">
+                                {award.english_title}
+                            </p>
                         )}
                         <div className="flex items-center gap-3 text-mist mb-6">
                             <span className="text-lg">{flag(award.realisator_country)}</span>
-                            {award.realisator_name && <span className="font-semibold">{award.realisator_name}</span>}
+                            {award.realisator_name && (
+                                <span className="font-semibold">{award.realisator_name}</span>
+                            )}
                             {award.ia_class && (
                                 <>
                                     <span className="text-white/15">·</span>
@@ -191,7 +278,9 @@ const GrandPrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }):
                             )}
                         </div>
                         {award.synopsis && (
-                            <p className="text-mist/70 text-sm leading-relaxed mb-6 line-clamp-3">{award.synopsis}</p>
+                            <p className="text-mist/70 text-sm leading-relaxed mb-6 line-clamp-3">
+                                {award.synopsis}
+                            </p>
                         )}
                     </>
                 ) : (
@@ -233,7 +322,11 @@ const PrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): Reac
                 {award.poster_img ? (
                     <div className="w-28 flex-shrink-0">
                         <img
-                            src={award.poster_img.startsWith("/") ? `${API_BASE_URL}${award.poster_img}` : award.poster_img}
+                            src={
+                                award.poster_img.startsWith("/")
+                                    ? `${API_BASE_URL}${award.poster_img}`
+                                    : award.poster_img
+                            }
                             alt={award.original_title ?? ""}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             style={{ minHeight: "140px", maxHeight: "180px" }}
@@ -241,8 +334,13 @@ const PrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): Reac
                         />
                     </div>
                 ) : (
-                    <div className="w-28 flex-shrink-0 flex items-center justify-center bg-surface-2" style={{ minHeight: "140px" }}>
-                        <span className={`font-display font-black text-2xl opacity-20 ${rank.color}`}>
+                    <div
+                        className="w-28 flex-shrink-0 flex items-center justify-center bg-surface-2"
+                        style={{ minHeight: "140px" }}
+                    >
+                        <span
+                            className={`font-display font-black text-2xl opacity-20 ${rank.color}`}
+                        >
                             {(award.original_title ?? "??").slice(0, 2).toUpperCase()}
                         </span>
                     </div>
@@ -251,7 +349,9 @@ const PrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): Reac
                 {/* Content */}
                 <div className="flex flex-col justify-between p-5 flex-1 min-w-0">
                     <div>
-                        <div className={`font-mono text-[10px] uppercase tracking-[0.18em] mb-2 ${rank.color}`}>
+                        <div
+                            className={`font-mono text-[10px] uppercase tracking-[0.18em] mb-2 ${rank.color}`}
+                        >
                             {rank.label}
                         </div>
                         {award.original_title ? (
@@ -259,13 +359,18 @@ const PrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): Reac
                                 <h3 className="font-display font-bold text-white-soft text-base leading-tight mb-1 line-clamp-2">
                                     {award.original_title}
                                 </h3>
-                                {award.english_title && award.english_title !== award.original_title && (
-                                    <p className="text-mist/50 text-xs italic mb-2 line-clamp-1">{award.english_title}</p>
-                                )}
+                                {award.english_title &&
+                                    award.english_title !== award.original_title && (
+                                        <p className="text-mist/50 text-xs italic mb-2 line-clamp-1">
+                                            {award.english_title}
+                                        </p>
+                                    )}
                                 <div className="flex items-center gap-1.5 text-sm text-mist">
                                     <span>{flag(award.realisator_country)}</span>
                                     {award.realisator_name && (
-                                        <span className="truncate text-xs">{award.realisator_name}</span>
+                                        <span className="truncate text-xs">
+                                            {award.realisator_name}
+                                        </span>
                                     )}
                                 </div>
                             </>
@@ -276,12 +381,17 @@ const PrixCard = ({ award, onPlay }: { award: Award; onPlay: () => void }): Reac
 
                     <div className="flex items-center justify-between mt-3">
                         {award.cash_prize && (
-                            <span className={`font-mono text-xs ${rank.color} opacity-70`}>{award.cash_prize}</span>
+                            <span className={`font-mono text-xs ${rank.color} opacity-70`}>
+                                {award.cash_prize}
+                            </span>
                         )}
                         {award.video_url && (
                             <div
                                 className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
+                                style={{
+                                    background: "rgba(255,255,255,0.08)",
+                                    border: "1px solid rgba(255,255,255,0.15)",
+                                }}
                             >
                                 <PlayIcon />
                             </div>
@@ -303,7 +413,9 @@ const PalmaresSection = (): React.JSX.Element => {
     useEffect(() => {
         fetch(`${API_BASE_URL}/api/public/awards`)
             .then((r) => r.json())
-            .then((j) => { if (j.success) setAwards(j.data ?? []); })
+            .then((j) => {
+                if (j.success) setAwards(j.data ?? []);
+            })
             .catch(() => {})
             .finally(() => setLoading(false));
     }, []);
@@ -319,7 +431,10 @@ const PalmaresSection = (): React.JSX.Element => {
                 {/* Ambient glow */}
                 <div
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse, rgba(245,230,66,0.05) 0%, transparent 65%)" }}
+                    style={{
+                        background:
+                            "radial-gradient(ellipse, rgba(245,230,66,0.05) 0%, transparent 65%)",
+                    }}
                     aria-hidden="true"
                 />
 
@@ -327,18 +442,24 @@ const PalmaresSection = (): React.JSX.Element => {
                     {/* Header */}
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 font-mono text-xs text-solar mb-4 uppercase tracking-widest">
-                            <span className="w-2 h-2 rounded-full bg-solar animate-pulse" aria-hidden="true" />
+                            <span
+                                className="w-2 h-2 rounded-full bg-solar animate-pulse"
+                                aria-hidden="true"
+                            />
                             {t("palmares.overline", { defaultValue: "Phase 3 · Le Palmarès" })}
                         </div>
-                        <h2 className="font-display font-black text-white-soft mb-4"
-                            style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)", lineHeight: 1.05 }}>
+                        <h2
+                            className="font-display font-black text-white-soft mb-4"
+                            style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)", lineHeight: 1.05 }}
+                        >
                             {t("palmares.title", { defaultValue: "Les Lauréats" })}
                             <br />
                             <span className="text-solar">marsAI 2026</span>
                         </h2>
                         <p className="text-mist max-w-xl mx-auto">
                             {t("palmares.subtitle", {
-                                defaultValue: "Découvrez les films primés lors de la cérémonie de clôture.",
+                                defaultValue:
+                                    "Découvrez les films primés lors de la cérémonie de clôture.",
                             })}
                         </p>
                     </div>
@@ -349,7 +470,10 @@ const PalmaresSection = (): React.JSX.Element => {
                             <div className="h-72 bg-surface border border-white/5 rounded-2xl" />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {[1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="h-40 bg-surface border border-white/5 rounded-2xl" />
+                                    <div
+                                        key={i}
+                                        className="h-40 bg-surface border border-white/5 rounded-2xl"
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -358,7 +482,9 @@ const PalmaresSection = (): React.JSX.Element => {
                     {/* Empty */}
                     {!loading && awards.length === 0 && (
                         <div className="text-center py-24 border border-white/6 rounded-2xl">
-                            <div className="font-mono text-xs text-solar/40 uppercase tracking-widest mb-3">Palmarès</div>
+                            <div className="font-mono text-xs text-solar/40 uppercase tracking-widest mb-3">
+                                Palmarès
+                            </div>
                             <p className="text-white-soft font-display font-bold text-xl mb-2">
                                 Le palmarès sera révélé lors de la cérémonie.
                             </p>

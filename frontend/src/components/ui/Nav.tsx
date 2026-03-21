@@ -28,14 +28,14 @@ const Nav = (): React.JSX.Element => {
 
     const handleAnchor = (href: string): void => {
         if (!isHome) {
-            window.location.href = "/" + href;
+            window.location.assign("/" + href);
             return;
         }
         const el = document.querySelector(href);
         if (el) {
             el.scrollIntoView({ behavior: "smooth" });
         } else {
-            window.location.hash = href;
+            window.location.replace(window.location.pathname + href);
         }
     };
 

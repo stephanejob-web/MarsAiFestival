@@ -81,16 +81,29 @@ const ProgrammeSection = (): React.JSX.Element => {
 
     const buildDays = (): Day[] => {
         if (!apiEvents || apiEvents.length === 0) return [];
-        const dateKeys = [...new Set(
-            apiEvents.map((e) => (e.event_date ? String(e.event_date).slice(0, 10) : null)).filter(Boolean) as string[]
-        )].sort();
+        const dateKeys = [
+            ...new Set(
+                apiEvents
+                    .map((e) => (e.event_date ? String(e.event_date).slice(0, 10) : null))
+                    .filter(Boolean) as string[],
+            ),
+        ].sort();
         return dateKeys.map((dk) => {
             const d = new Date(dk + "T00:00:00");
             const label = d.toLocaleDateString("fr-FR", { weekday: "long" });
-            const date = d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+            const date = d.toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            });
             const events = apiEvents
                 .filter((e) => e.event_date && String(e.event_date).slice(0, 10) === dk)
-                .map((e) => ({ time: e.time, title: e.title, desc: e.description ?? undefined, type: e.type }));
+                .map((e) => ({
+                    time: e.time,
+                    title: e.title,
+                    desc: e.description ?? undefined,
+                    type: e.type,
+                }));
             return { label, date, events };
         });
     };
@@ -154,7 +167,9 @@ const ProgrammeSection = (): React.JSX.Element => {
                         <div className="font-mono text-xs text-aurora/50 uppercase tracking-widest mb-2">
                             {t("programme.overline")}
                         </div>
-                        <p className="text-mist text-sm">{t("programme.empty", "Programme à venir")}</p>
+                        <p className="text-mist text-sm">
+                            {t("programme.empty", "Programme à venir")}
+                        </p>
                     </div>
                 )}
 

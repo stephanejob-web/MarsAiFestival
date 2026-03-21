@@ -10,28 +10,111 @@ interface Sponsor {
     sponsored_award: string | null;
 }
 
-const TIER_ORDER: Sponsor["partnership_statut"][] = ["main", "lead", "premium", "partner", "supporter"];
+const TIER_ORDER: Sponsor["partnership_statut"][] = [
+    "main",
+    "lead",
+    "premium",
+    "partner",
+    "supporter",
+];
 
 const TIER_LABEL: Record<Sponsor["partnership_statut"], string> = {
-    main:      "Sponsor Principal",
-    lead:      "Sponsors Or",
-    premium:   "Sponsors Premium",
-    partner:   "Partenaires",
+    main: "Sponsor Principal",
+    lead: "Sponsors Or",
+    premium: "Sponsors Premium",
+    partner: "Partenaires",
     supporter: "Soutiens",
 };
 
 const FALLBACK_SPONSORS: Sponsor[] = [
-    { id: 1,  name: "La Plateforme_",               partnership_statut: "main",      sponsor_link: "https://www.la-plateforme.fr",    sponsor_logo: null, sponsored_award: "Grand Prix marsAI" },
-    { id: 2,  name: "Mobile Film Festival",          partnership_statut: "lead",      sponsor_link: "https://mobilefilmfestival.com",  sponsor_logo: null, sponsored_award: "Prix du Mobile" },
-    { id: 3,  name: "Mistral AI",                    partnership_statut: "lead",      sponsor_link: "https://mistral.ai",              sponsor_logo: null, sponsored_award: "Prix de l'Innovation IA" },
-    { id: 4,  name: "Ville de Marseille",            partnership_statut: "premium",   sponsor_link: "https://www.marseille.fr",        sponsor_logo: null, sponsored_award: null },
-    { id: 5,  name: "ARTE",                          partnership_statut: "premium",   sponsor_link: "https://www.arte.tv",             sponsor_logo: null, sponsored_award: "Prix du Documentaire" },
-    { id: 6,  name: "CNC – Centre National du Cinéma", partnership_statut: "partner", sponsor_link: "https://www.cnc.fr",             sponsor_logo: null, sponsored_award: null },
-    { id: 7,  name: "Aix-Marseille Université",      partnership_statut: "partner",   sponsor_link: "https://www.univ-amu.fr",        sponsor_logo: null, sponsored_award: "Prix Académique" },
-    { id: 8,  name: "France Télévisions",            partnership_statut: "partner",   sponsor_link: "https://www.france.tv",          sponsor_logo: null, sponsored_award: null },
-    { id: 9,  name: "Région Sud",                    partnership_statut: "supporter", sponsor_link: "https://www.maregionsud.fr",     sponsor_logo: null, sponsored_award: null },
-    { id: 10, name: "Dailymotion",                   partnership_statut: "supporter", sponsor_link: "https://www.dailymotion.com",    sponsor_logo: null, sponsored_award: null },
-    { id: 11, name: "Canson",                        partnership_statut: "supporter", sponsor_link: "https://www.canson.com",         sponsor_logo: null, sponsored_award: null },
+    {
+        id: 1,
+        name: "La Plateforme_",
+        partnership_statut: "main",
+        sponsor_link: "https://www.la-plateforme.fr",
+        sponsor_logo: null,
+        sponsored_award: "Grand Prix marsAI",
+    },
+    {
+        id: 2,
+        name: "Mobile Film Festival",
+        partnership_statut: "lead",
+        sponsor_link: "https://mobilefilmfestival.com",
+        sponsor_logo: null,
+        sponsored_award: "Prix du Mobile",
+    },
+    {
+        id: 3,
+        name: "Mistral AI",
+        partnership_statut: "lead",
+        sponsor_link: "https://mistral.ai",
+        sponsor_logo: null,
+        sponsored_award: "Prix de l'Innovation IA",
+    },
+    {
+        id: 4,
+        name: "Ville de Marseille",
+        partnership_statut: "premium",
+        sponsor_link: "https://www.marseille.fr",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
+    {
+        id: 5,
+        name: "ARTE",
+        partnership_statut: "premium",
+        sponsor_link: "https://www.arte.tv",
+        sponsor_logo: null,
+        sponsored_award: "Prix du Documentaire",
+    },
+    {
+        id: 6,
+        name: "CNC – Centre National du Cinéma",
+        partnership_statut: "partner",
+        sponsor_link: "https://www.cnc.fr",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
+    {
+        id: 7,
+        name: "Aix-Marseille Université",
+        partnership_statut: "partner",
+        sponsor_link: "https://www.univ-amu.fr",
+        sponsor_logo: null,
+        sponsored_award: "Prix Académique",
+    },
+    {
+        id: 8,
+        name: "France Télévisions",
+        partnership_statut: "partner",
+        sponsor_link: "https://www.france.tv",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
+    {
+        id: 9,
+        name: "Région Sud",
+        partnership_statut: "supporter",
+        sponsor_link: "https://www.maregionsud.fr",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
+    {
+        id: 10,
+        name: "Dailymotion",
+        partnership_statut: "supporter",
+        sponsor_link: "https://www.dailymotion.com",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
+    {
+        id: 11,
+        name: "Canson",
+        partnership_statut: "supporter",
+        sponsor_link: "https://www.canson.com",
+        sponsor_logo: null,
+        sponsored_award: null,
+    },
 ];
 
 interface SponsorCardProps {
@@ -94,12 +177,15 @@ const SponsorsSection = (): React.JSX.Element => {
                     setSponsors(j.data);
                 }
             })
-            .catch(() => { /* keep fallback */ });
+            .catch(() => {
+                /* keep fallback */
+            });
     }, []);
 
     // Tri par ordre de tier
     const sortedSponsors = [...sponsors].sort(
-        (a, b) => TIER_ORDER.indexOf(a.partnership_statut) - TIER_ORDER.indexOf(b.partnership_statut),
+        (a, b) =>
+            TIER_ORDER.indexOf(a.partnership_statut) - TIER_ORDER.indexOf(b.partnership_statut),
     );
 
     return (
@@ -107,7 +193,10 @@ const SponsorsSection = (): React.JSX.Element => {
             {/* Header */}
             <div className="text-center mb-14">
                 <div className="inline-flex items-center gap-2 font-mono text-xs text-aurora/60 mb-3 uppercase tracking-widest">
-                    <span className="w-1.5 h-1.5 rounded-full bg-aurora/40 inline-block" aria-hidden="true" />
+                    <span
+                        className="w-1.5 h-1.5 rounded-full bg-aurora/40 inline-block"
+                        aria-hidden="true"
+                    />
                     Nos partenaires
                 </div>
                 <h2 className="font-display text-3xl font-black text-white-soft">
@@ -118,7 +207,10 @@ const SponsorsSection = (): React.JSX.Element => {
             {/* Bandeau scrollant */}
             <div
                 className="overflow-hidden"
-                style={{ maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}
+                style={{
+                    maskImage:
+                        "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+                }}
             >
                 <div
                     className="flex"
@@ -132,10 +224,7 @@ const SponsorsSection = (): React.JSX.Element => {
                 >
                     {/* Dupliquer 2x pour l'effet infini */}
                     {[...sortedSponsors, ...sortedSponsors].map((sponsor, index) => (
-                        <SponsorCard
-                            key={`${sponsor.id}-${index}`}
-                            sponsor={sponsor}
-                        />
+                        <SponsorCard key={`${sponsor.id}-${index}`} sponsor={sponsor} />
                     ))}
                 </div>
             </div>

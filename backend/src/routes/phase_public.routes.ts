@@ -35,15 +35,24 @@ router.get("/films", async (req: Request, res: Response): Promise<void> => {
 /** GET /api/public/films/:id/video — signed video URL (no auth, film must be selectionne/finaliste) */
 router.get("/films/:id/video", async (req: Request, res: Response): Promise<void> => {
     const filmId = parseInt(req.params.id);
-    if (isNaN(filmId)) { res.status(400).json({ success: false }); return; }
+    if (isNaN(filmId)) {
+        res.status(400).json({ success: false });
+        return;
+    }
     try {
         const [[film]] = await pool.execute<RowDataPacket[]>(
             `SELECT video_url, statut FROM film WHERE id = ? AND statut IN ('selectionne','finaliste')`,
             [filmId],
         );
-        if (!film?.video_url) { res.status(404).json({ success: false }); return; }
+        if (!film?.video_url) {
+            res.status(404).json({ success: false });
+            return;
+        }
         const key = extractS3Key(film.video_url as string);
-        if (!key) { res.status(404).json({ success: false }); return; }
+        if (!key) {
+            res.status(404).json({ success: false });
+            return;
+        }
         const url = await getPresignedVideoUrl(key, 3600);
         res.json({ success: true, url });
     } catch {

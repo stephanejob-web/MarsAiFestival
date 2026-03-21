@@ -34,10 +34,30 @@ interface PhaseInfo {
 const token = () => localStorage.getItem("jury_token") ?? "";
 
 const DEV_PHASES = [
-    { phase: 0, label: "Phase 0", sub: "Inscriptions", color: "border-white/20 text-mist hover:border-white/40" },
-    { phase: 1, label: "Phase 1", sub: "Sélection", color: "border-aurora/40 text-aurora hover:border-aurora" },
-    { phase: 2, label: "Phase 2", sub: "Finalistes", color: "border-lavande/40 text-lavande hover:border-lavande" },
-    { phase: 3, label: "Phase 3", sub: "Palmarès", color: "border-solar/40 text-solar hover:border-solar" },
+    {
+        phase: 0,
+        label: "Phase 0",
+        sub: "Inscriptions",
+        color: "border-white/20 text-mist hover:border-white/40",
+    },
+    {
+        phase: 1,
+        label: "Phase 1",
+        sub: "Sélection",
+        color: "border-aurora/40 text-aurora hover:border-aurora",
+    },
+    {
+        phase: 2,
+        label: "Phase 2",
+        sub: "Finalistes",
+        color: "border-lavande/40 text-lavande hover:border-lavande",
+    },
+    {
+        phase: 3,
+        label: "Phase 3",
+        sub: "Palmarès",
+        color: "border-solar/40 text-solar hover:border-solar",
+    },
 ];
 
 const DevSimulator = ({ onSimulated }: { onSimulated: () => void }): React.JSX.Element => {
@@ -73,7 +93,9 @@ const DevSimulator = ({ onSimulated }: { onSimulated: () => void }): React.JSX.E
                 <span className="font-mono text-[10px] uppercase tracking-widest text-yellow-400/70 bg-yellow-500/10 border border-yellow-500/20 rounded px-2 py-0.5">
                     DEV ONLY
                 </span>
-                <span className="text-xs text-yellow-400/60">Simuler une phase — modifie les dates en base</span>
+                <span className="text-xs text-yellow-400/60">
+                    Simuler une phase — modifie les dates en base
+                </span>
                 {last !== null && (
                     <span className="ml-auto text-xs text-yellow-400/80 font-mono">
                         ✓ Phase {last} active
@@ -131,7 +153,9 @@ const CmsPhases = (): React.JSX.Element => {
             .catch(() => {});
     }, []);
 
-    useEffect(() => { fetchPhaseInfo(); }, [fetchPhaseInfo]);
+    useEffect(() => {
+        fetchPhaseInfo();
+    }, [fetchPhaseInfo]);
 
     const fetchFilms = useCallback(async (statut: string) => {
         setLoading(true);
@@ -236,9 +260,7 @@ const CmsPhases = (): React.JSX.Element => {
     return (
         <div className="space-y-6">
             {/* DEV simulator — visible uniquement en développement */}
-            {import.meta.env.DEV && (
-                <DevSimulator onSimulated={fetchPhaseInfo} />
-            )}
+            {import.meta.env.DEV && <DevSimulator onSimulated={fetchPhaseInfo} />}
 
             {/* Phase active badge */}
             {phaseInfo && (

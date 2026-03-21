@@ -13,7 +13,9 @@ interface CountdownUnit {
 
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-const getCountdownConfig = (phase: ReturnType<typeof usePhase>["phase"]): {
+const getCountdownConfig = (
+    phase: ReturnType<typeof usePhase>["phase"],
+): {
     targetDate: string | null;
     label: string;
     ctaEnabled: boolean;
@@ -87,7 +89,12 @@ const getCountdownConfig = (phase: ReturnType<typeof usePhase>["phase"]): {
 const HeroSection = (): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { phase } = usePhase();
-    const { targetDate, label: countdownLabel, ctaEnabled, ctaDisabledReason } = getCountdownConfig(phase);
+    const {
+        targetDate,
+        label: countdownLabel,
+        ctaEnabled,
+        ctaDisabledReason,
+    } = getCountdownConfig(phase);
     const { days, hours, minutes, seconds } = useCountdown(targetDate);
     const { t } = useTranslation();
     const [videoSrc, setVideoSrc] = useState<string>(heroVideoFallback);
@@ -176,7 +183,6 @@ const HeroSection = (): React.JSX.Element => {
 
             {/* Contenu principal centré */}
             <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-24 pb-40">
-
                 {/* Co-création label */}
                 <p
                     className="font-mono text-xs text-mist/60 mb-6 tracking-wider"
@@ -190,7 +196,10 @@ const HeroSection = (): React.JSX.Element => {
                     className="inline-flex items-center gap-2 border border-aurora/30 rounded-full px-4 py-1.5 mb-8 font-mono text-xs text-aurora/80 tracking-wider"
                     style={{ animation: "var(--animate-fade-in)" }}
                 >
-                    <span className="w-2 h-2 rounded-full bg-aurora animate-pulse flex-shrink-0" aria-hidden="true" />
+                    <span
+                        className="w-2 h-2 rounded-full bg-aurora animate-pulse flex-shrink-0"
+                        aria-hidden="true"
+                    />
                     {t("hero.badge")}
                 </div>
 
@@ -338,7 +347,11 @@ const HeroSection = (): React.JSX.Element => {
                     stroke="currentColor"
                     strokeWidth={1.5}
                 >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    />
                 </svg>
             </div>
         </section>

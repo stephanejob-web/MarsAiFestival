@@ -39,18 +39,14 @@ const PlayIcon = (): React.JSX.Element => (
 );
 
 /* ── Modal player ─────────────────────────────────────────── */
-const VideoModal = ({
-    film,
-    onClose,
-}: {
-    film: Film;
-    onClose: () => void;
-}): React.JSX.Element => {
+const VideoModal = ({ film, onClose }: { film: Film; onClose: () => void }): React.JSX.Element => {
     const [signedUrl, setSignedUrl] = useState<string | null>(null);
     const [loadingUrl, setLoadingUrl] = useState(true);
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
         document.addEventListener("keydown", handler);
         return () => document.removeEventListener("keydown", handler);
     }, [onClose]);
@@ -59,7 +55,9 @@ const VideoModal = ({
         setLoadingUrl(true);
         fetch(`${API_BASE_URL}/api/public/films/${film.id}/video`)
             .then((r) => r.json())
-            .then((json) => { if (json.success) setSignedUrl(json.url); })
+            .then((json) => {
+                if (json.success) setSignedUrl(json.url);
+            })
             .catch(() => {})
             .finally(() => setLoadingUrl(false));
     }, [film.id]);
@@ -70,10 +68,7 @@ const VideoModal = ({
             style={{ background: "rgba(5,7,20,0.95)", backdropFilter: "blur(12px)" }}
             onClick={onClose}
         >
-            <div
-                className="relative w-full max-w-4xl"
-                onClick={(e) => e.stopPropagation()}
-            >
+            <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
                 {/* Close */}
                 <button
                     onClick={onClose}
@@ -81,8 +76,18 @@ const VideoModal = ({
                     aria-label="Fermer"
                 >
                     <span>Fermer</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        className="w-4 h-4"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                 </button>
 
@@ -110,7 +115,9 @@ const VideoModal = ({
                             {film.original_title}
                         </h3>
                         {film.english_title && film.english_title !== film.original_title && (
-                            <p className="text-mist/60 text-sm italic mt-0.5">{film.english_title}</p>
+                            <p className="text-mist/60 text-sm italic mt-0.5">
+                                {film.english_title}
+                            </p>
                         )}
                         {film.realisator_name && (
                             <p className="text-mist text-sm mt-1">
@@ -172,7 +179,9 @@ const FilmCard = ({
                     loading="lazy"
                 />
             ) : (
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                <div
+                    className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}
+                >
                     <span
                         className="font-display font-black text-white/[0.07] select-none"
                         style={{ fontSize: "clamp(4rem, 12vw, 7rem)" }}
@@ -270,19 +279,22 @@ const SelectionGrid = (): React.JSX.Element => {
         }
     }, []);
 
-    useEffect(() => { void fetchFilms(page); }, [fetchFilms, page]);
+    useEffect(() => {
+        void fetchFilms(page);
+    }, [fetchFilms, page]);
 
     return (
         <>
-            {activeFilm && (
-                <VideoModal film={activeFilm} onClose={() => setActiveFilm(null)} />
-            )}
+            {activeFilm && <VideoModal film={activeFilm} onClose={() => setActiveFilm(null)} />}
 
             <section id="selection" className="py-24 px-6 relative overflow-hidden">
                 {/* Subtle aurora glow */}
                 <div
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse, rgba(78,255,206,0.04) 0%, transparent 70%)" }}
+                    style={{
+                        background:
+                            "radial-gradient(ellipse, rgba(78,255,206,0.04) 0%, transparent 70%)",
+                    }}
                     aria-hidden="true"
                 />
 
@@ -290,15 +302,21 @@ const SelectionGrid = (): React.JSX.Element => {
                     {/* Header */}
                     <div className="text-center mb-14">
                         <div className="inline-flex items-center gap-2 font-mono text-xs text-aurora mb-4 uppercase tracking-widest">
-                            <span className="w-2 h-2 rounded-full bg-aurora inline-block animate-pulse" aria-hidden="true" />
-                            {t("selection.overline", { defaultValue: "Phase 1 · Sélection Officielle" })}
+                            <span
+                                className="w-2 h-2 rounded-full bg-aurora inline-block animate-pulse"
+                                aria-hidden="true"
+                            />
+                            {t("selection.overline", {
+                                defaultValue: "Phase 1 · Sélection Officielle",
+                            })}
                         </div>
                         <h2 className="font-display text-4xl lg:text-5xl font-black text-white-soft mb-4">
                             {t("selection.title", { defaultValue: "Les 50 Films Sélectionnés" })}
                         </h2>
                         <p className="text-mist max-w-xl mx-auto text-base">
                             {t("selection.subtitle", {
-                                defaultValue: "Découvrez les œuvres sélectionnées pour marsAI 2026 par notre comité.",
+                                defaultValue:
+                                    "Découvrez les œuvres sélectionnées pour marsAI 2026 par notre comité.",
                             })}
                         </p>
                         {total > 0 && (

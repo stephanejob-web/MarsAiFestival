@@ -58,7 +58,13 @@ const EVENT_TYPES: EventType[] = [
     "default",
 ];
 
-const emptyForm = { event_date: "", time: "", title: "", description: "", type: "default" as EventType };
+const emptyForm = {
+    event_date: "",
+    time: "",
+    title: "",
+    description: "",
+    type: "default" as EventType,
+};
 
 const inputClass =
     "w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-[0.78rem] text-white-soft outline-none transition-colors placeholder:text-mist/40 focus:border-aurora/40";
@@ -119,7 +125,9 @@ const CmsProgramme = (): React.JSX.Element => {
                 const data: ProgrammeEvent[] = json.data;
                 setEvents(data);
                 // Auto-select first date tab
-                const dates = [...new Set(data.map((e) => toInputDate(e.event_date)).filter(Boolean))].sort();
+                const dates = [
+                    ...new Set(data.map((e) => toInputDate(e.event_date)).filter(Boolean)),
+                ].sort();
                 if (dates.length > 0) setActiveDate((prev) => prev || dates[0]);
             }
         } catch {
@@ -133,7 +141,9 @@ const CmsProgramme = (): React.JSX.Element => {
         fetchEvents();
     }, []);
 
-    const allDates = [...new Set(events.map((e) => toInputDate(e.event_date)).filter(Boolean))].sort();
+    const allDates = [
+        ...new Set(events.map((e) => toInputDate(e.event_date)).filter(Boolean)),
+    ].sort();
     const dayEvents = events.filter((e) => toInputDate(e.event_date) === activeDate);
 
     const handleAdd = async () => {
@@ -198,13 +208,18 @@ const CmsProgramme = (): React.JSX.Element => {
     const handleRenameDate = async () => {
         if (!renamingDate || !renameValue || renameValue === renamingDate) return;
         setRenameSaving(true);
-        const ids = events.filter((e) => toInputDate(e.event_date) === renamingDate).map((e) => e.id);
+        const ids = events
+            .filter((e) => toInputDate(e.event_date) === renamingDate)
+            .map((e) => e.id);
         try {
             await Promise.all(
                 ids.map((id) =>
                     fetch(`${API_BASE_URL}/api/programme/${id}`, {
                         method: "PUT",
-                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
                         body: JSON.stringify({ event_date: renameValue }),
                     }),
                 ),
@@ -306,7 +321,9 @@ const CmsProgramme = (): React.JSX.Element => {
                                 </div>
                             ) : (
                                 /* ── Onglet normal ── */
-                                <div className={`flex items-center gap-1.5 rounded-lg border transition-all ${activeDate === d ? "border-aurora/40 bg-aurora/10" : "border-white/10 bg-white/5"}`}>
+                                <div
+                                    className={`flex items-center gap-1.5 rounded-lg border transition-all ${activeDate === d ? "border-aurora/40 bg-aurora/10" : "border-white/10 bg-white/5"}`}
+                                >
                                     <button
                                         onClick={() => {
                                             setActiveDate(d);
@@ -316,7 +333,9 @@ const CmsProgramme = (): React.JSX.Element => {
                                         className={`flex items-center gap-2 px-3 py-2 font-display text-[0.78rem] font-bold ${activeDate === d ? "text-aurora" : "text-mist hover:text-white-soft"}`}
                                     >
                                         <span>Jour {i + 1}</span>
-                                        <span className={`text-[0.68rem] font-normal ${activeDate === d ? "text-aurora/70" : "text-white/30"}`}>
+                                        <span
+                                            className={`text-[0.68rem] font-normal ${activeDate === d ? "text-aurora/70" : "text-white/30"}`}
+                                        >
                                             {formatDateTab(d)}
                                         </span>
                                     </button>
@@ -329,8 +348,17 @@ const CmsProgramme = (): React.JSX.Element => {
                                         title="Changer la date"
                                         className={`pr-2.5 py-2 text-[0.7rem] transition-colors ${activeDate === d ? "text-aurora/50 hover:text-aurora" : "text-white/20 hover:text-mist"}`}
                                     >
-                                        <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3" stroke="currentColor" strokeWidth="1.5">
-                                            <path d="M11 2l3 3-8 8H3v-3l8-8z" strokeLinejoin="round"/>
+                                        <svg
+                                            viewBox="0 0 16 16"
+                                            fill="none"
+                                            className="w-3 h-3"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                        >
+                                            <path
+                                                d="M11 2l3 3-8 8H3v-3l8-8z"
+                                                strokeLinejoin="round"
+                                            />
                                         </svg>
                                     </button>
                                 </div>
@@ -338,7 +366,9 @@ const CmsProgramme = (): React.JSX.Element => {
                         </div>
                     ))}
                     {allDates.length === 0 && !showNewDay && (
-                        <span className="text-[0.75rem] text-mist/50 italic">Aucune date — ajoutez un jour</span>
+                        <span className="text-[0.75rem] text-mist/50 italic">
+                            Aucune date — ajoutez un jour
+                        </span>
                     )}
 
                     {/* Bouton + Nouveau jour */}
@@ -367,7 +397,10 @@ const CmsProgramme = (): React.JSX.Element => {
                                 ✓
                             </button>
                             <button
-                                onClick={() => { setShowNewDay(false); setNewDayDate(""); }}
+                                onClick={() => {
+                                    setShowNewDay(false);
+                                    setNewDayDate("");
+                                }}
                                 className="rounded border border-white/10 px-2 py-1 text-[0.7rem] text-mist hover:text-white-soft"
                             >
                                 ✕
@@ -375,7 +408,10 @@ const CmsProgramme = (): React.JSX.Element => {
                         </div>
                     ) : (
                         <button
-                            onClick={() => { setShowNewDay(true); setRenamingDate(null); }}
+                            onClick={() => {
+                                setShowNewDay(true);
+                                setRenamingDate(null);
+                            }}
                             className="flex items-center gap-1.5 rounded-lg border border-dashed border-white/15 px-3 py-2 font-display text-[0.75rem] font-bold text-white/30 transition-all hover:border-solar/30 hover:text-solar"
                         >
                             <span className="text-base leading-none">+</span>
@@ -687,7 +723,12 @@ const CmsProgramme = (): React.JSX.Element => {
                         <div className="flex gap-2 pt-1">
                             <button
                                 onClick={handleAdd}
-                                disabled={addSaving || !addForm.event_date || !addForm.time || !addForm.title}
+                                disabled={
+                                    addSaving ||
+                                    !addForm.event_date ||
+                                    !addForm.time ||
+                                    !addForm.title
+                                }
                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {addSaving ? "Ajout en cours…" : "✓ Ajouter l'événement"}

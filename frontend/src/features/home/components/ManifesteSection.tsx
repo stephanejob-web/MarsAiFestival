@@ -52,7 +52,6 @@ const ManifesteSection = (): React.JSX.Element => {
             </div>
 
             <div className="relative max-w-4xl mx-auto">
-
                 {/* Overline */}
                 <div className="font-mono text-xs text-aurora/40 uppercase tracking-[0.25em] mb-16 flex items-center gap-3">
                     <span className="w-8 h-px bg-aurora/30 inline-block" />
@@ -61,12 +60,9 @@ const ManifesteSection = (): React.JSX.Element => {
 
                 {/* Timeline */}
                 <div className="relative pl-10 border-l border-white/[0.06]">
-
                     {/* Acte I — Contexte */}
                     <div className="mb-14 relative">
-                        <div
-                            className="absolute -left-[42px] top-0.5 w-4 h-4 rounded-full bg-deep-sky border-2 border-mist/20 flex items-center justify-center"
-                        >
+                        <div className="absolute -left-[42px] top-0.5 w-4 h-4 rounded-full bg-deep-sky border-2 border-mist/20 flex items-center justify-center">
                             <div className="w-1.5 h-1.5 rounded-full bg-mist/30" />
                         </div>
                         <p className="font-mono text-[10px] text-mist/30 uppercase tracking-[0.2em] mb-5">
@@ -102,9 +98,7 @@ const ManifesteSection = (): React.JSX.Element => {
 
                     {/* Acte III — La Question */}
                     <div className="relative">
-                        <div
-                            className="absolute -left-[42px] top-0.5 w-4 h-4 rounded-full bg-deep-sky border-2 border-solar/50 flex items-center justify-center"
-                        >
+                        <div className="absolute -left-[42px] top-0.5 w-4 h-4 rounded-full bg-deep-sky border-2 border-solar/50 flex items-center justify-center">
                             <div className="w-1.5 h-1.5 rounded-full bg-solar/80" />
                         </div>
                         <p className="font-mono text-[10px] text-solar/40 uppercase tracking-[0.2em] mb-5">

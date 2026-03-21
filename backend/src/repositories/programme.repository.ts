@@ -22,7 +22,15 @@ export const getAllEvents = async (): Promise<ProgrammeEvent[]> => {
 export const createEvent = async (data: Omit<ProgrammeEvent, "id">): Promise<number> => {
     const [result] = await pool.execute<ResultSetHeader>(
         "INSERT INTO programme_event (day, event_date, time, title, description, type, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        [data.day, data.event_date ?? null, data.time, data.title, data.description, data.type, data.sort_order],
+        [
+            data.day,
+            data.event_date ?? null,
+            data.time,
+            data.title,
+            data.description,
+            data.type,
+            data.sort_order,
+        ],
     );
     return result.insertId;
 };
