@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import heroVideo from "../../../assets/hero-marsai.mp4";
+import heroVideoFallback from "../../../assets/hero-marsai.mp4";
 import useCountdown from "../hooks/useCountdown";
+import { API_BASE_URL } from "../../../constants/api";
 
 interface CountdownUnit {
     value: string;
@@ -15,6 +16,18 @@ const HeroSection = (): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { days, hours, minutes, seconds } = useCountdown();
     const { t } = useTranslation();
+    const [videoSrc, setVideoSrc] = useState<string>(heroVideoFallback);
+
+    useEffect(() => {
+        fetch(`${API_BASE_URL}/api/cms/public`)
+            .then((r) => r.json())
+            .then((json) => {
+                if (json.success && json.data?.hero_video_path) {
+                    setVideoSrc(`${API_BASE_URL}${json.data.hero_video_path}`);
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     useEffect((): (() => void) => {
         const video = videoRef.current;
@@ -57,6 +70,7 @@ const HeroSection = (): React.JSX.Element => {
         >
             {/* Video background */}
             <video
+                key={videoSrc}
                 ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover opacity-20 z-0"
                 autoPlay
@@ -66,7 +80,7 @@ const HeroSection = (): React.JSX.Element => {
                 preload="auto"
                 aria-hidden="true"
             >
-                <source src={heroVideo} type="video/mp4" />
+                <source src={videoSrc} type="video/mp4" />
             </video>
 
             {/* Aurora orbs */}

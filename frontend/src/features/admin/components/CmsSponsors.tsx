@@ -21,36 +21,133 @@ const emptyForm = {
     partnership_statut: "partner" as SponsorLevel,
     sponsor_link: "",
     sponsored_award: "",
-    sponsor_logo: null as string | null,
+    sponsor_logo: "",
 };
 
-// ── Logo upload cell ────────────────────────────────────────────────────────────
-interface LogoCellProps {
-    sponsor: Sponsor;
-    onUploaded: (id: number, file: File) => void;
+// ── Logo field: upload + URL fallback ─────────────────────────────────────────
+interface LogoFieldProps {
+    value: string;
+    onChange: (url: string) => void;
+    onFileUpload?: (file: File) => Promise<string | null>;
 }
 
-const LogoCell = ({ sponsor, onUploaded }: LogoCellProps): React.JSX.Element => {
+const LogoField = ({ value, onChange, onFileUpload }: LogoFieldProps): React.JSX.Element => {
     const ref = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleFile = async (file: File) => {
+        if (!onFileUpload) return;
+        setUploading(true);
+        const url = await onFileUpload(file);
+        if (url) onChange(url);
+        setUploading(false);
+    };
+
+    const displaySrc = value
+        ? value.startsWith("http")
+            ? value
+            : `${API_BASE_URL}${value}`
+        : null;
+
     return (
-        <div
-            className="flex h-[44px] w-[56px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-[1.5px] border-white/10 bg-white/5 transition-colors hover:border-solar/40"
-            onClick={() => ref.current?.click()}
-            title="Cliquer pour changer le logo"
-        >
-            {sponsor.sponsor_logo ? (
-                <img
-                    src={
-                        sponsor.sponsor_logo.startsWith("http")
-                            ? sponsor.sponsor_logo
-                            : `${API_BASE_URL}${sponsor.sponsor_logo}`
-                    }
-                    alt={sponsor.name}
-                    className="h-full w-full object-contain p-1"
-                />
-            ) : (
-                <span className="text-[0.58rem] text-mist">Logo</span>
-            )}
+        <div className="flex flex-col gap-1.5">
+            <label className="block text-[0.63rem] text-mist">Logo</label>
+            <div className="flex gap-2">
+                {/* Preview / click to upload */}
+                <div
+                    className="flex h-[44px] w-[56px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-[1.5px] border-dashed border-solar/25 bg-white/[0.03] transition-colors hover:border-solar/50"
+                    onClick={() => ref.current?.click()}
+                    title="Cliquer pour uploader"
+                >
+                    {displaySrc ? (
+                        <img src={displaySrc} className="h-full w-full object-contain p-1" />
+                    ) : (
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                            className="text-mist/30"
+                        >
+                            <rect
+                                x="1.5"
+                                y="3"
+                                width="15"
+                                height="12"
+                                rx="2"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                            />
+                            <circle cx="6" cy="7.5" r="1.5" fill="currentColor" opacity="0.4" />
+                            <path
+                                d="M1.5 13l4-4 3 3 2.5-2.5L15 13"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                opacity="0.4"
+                            />
+                        </svg>
+                    )}
+                </div>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    {onFileUpload && (
+                        <button
+                            type="button"
+                            onClick={() => ref.current?.click()}
+                            disabled={uploading}
+                            className="flex items-center gap-1.5 rounded-md border border-solar/20 bg-solar/5 px-2.5 py-1 text-[0.72rem] text-solar transition-all hover:border-solar/40 hover:bg-solar/10 disabled:opacity-50"
+                        >
+                            {uploading ? (
+                                <>
+                                    <svg
+                                        className="h-3 w-3 animate-spin"
+                                        viewBox="0 0 12 12"
+                                        fill="none"
+                                    >
+                                        <circle
+                                            cx="6"
+                                            cy="6"
+                                            r="4"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeDasharray="16 8"
+                                        />
+                                    </svg>
+                                    Upload…
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                        <path
+                                            d="M5.5 1v7M3 3.5l2.5-2.5L8 3.5"
+                                            stroke="currentColor"
+                                            strokeWidth="1.4"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                        <path
+                                            d="M1 8.5v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5v-1"
+                                            stroke="currentColor"
+                                            strokeWidth="1.3"
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                    Uploader un logo
+                                </>
+                            )}
+                        </button>
+                    )}
+                    <input
+                        type="text"
+                        placeholder="ou coller une URL…"
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        className={inputClass}
+                    />
+                </div>
+            </div>
             <input
                 ref={ref}
                 type="file"
@@ -58,7 +155,7 @@ const LogoCell = ({ sponsor, onUploaded }: LogoCellProps): React.JSX.Element => 
                 className="hidden"
                 onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) onUploaded(sponsor.id, f);
+                    if (f) void handleFile(f);
                     e.target.value = "";
                 }}
             />
@@ -87,7 +184,7 @@ const CmsSponsors = (): React.JSX.Element => {
             partnership_statut: addForm.partnership_statut,
             sponsored_award: addForm.sponsored_award || null,
             sponsor_link: addForm.sponsor_link || null,
-            sponsor_logo: null,
+            sponsor_logo: addForm.sponsor_logo || null,
         });
         if (ok) {
             setAddForm({ ...emptyForm });
@@ -98,20 +195,26 @@ const CmsSponsors = (): React.JSX.Element => {
 
     const startEdit = (s: Sponsor) => {
         setEditingId(s.id);
-        setEditForm({ ...s });
+        setEditForm({ ...s, sponsor_logo: s.sponsor_logo ?? "" });
     };
 
     const handleUpdate = async (id: number) => {
         setSavingId(id);
-        await updateSponsor(id, editForm);
+        await updateSponsor(id, {
+            ...editForm,
+            sponsor_logo: editForm.sponsor_logo || null,
+        });
         setEditingId(null);
         setEditForm({});
         setSavingId(null);
     };
 
-    const handleLogoUpload = async (id: number, file: File) => {
-        await uploadLogo(id, file);
-    };
+    // Upload logo for existing sponsor and return URL
+    const makeLogoUploader =
+        (id: number) =>
+        async (file: File): Promise<string | null> => {
+            return uploadLogo(id, file);
+        };
 
     return (
         <div className="mb-4 overflow-hidden rounded-2xl border border-white/5 bg-surface-2 transition-colors hover:border-white/10">
@@ -256,6 +359,13 @@ const CmsSponsors = (): React.JSX.Element => {
                                             />
                                         </div>
                                     </div>
+                                    <LogoField
+                                        value={editForm.sponsor_logo ?? ""}
+                                        onChange={(url) =>
+                                            setEditForm((p) => ({ ...p, sponsor_logo: url }))
+                                        }
+                                        onFileUpload={makeLogoUploader(s.id)}
+                                    />
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => void handleUpdate(s.id)}
@@ -309,7 +419,24 @@ const CmsSponsors = (): React.JSX.Element => {
                                     key={s.id}
                                     className="flex items-center gap-2.5 py-2.5 sm:gap-3"
                                 >
-                                    <LogoCell sponsor={s} onUploaded={handleLogoUpload} />
+                                    {/* Logo preview */}
+                                    <div className="flex h-[44px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                                        {s.sponsor_logo ? (
+                                            <img
+                                                src={
+                                                    s.sponsor_logo.startsWith("http")
+                                                        ? s.sponsor_logo
+                                                        : `${API_BASE_URL}${s.sponsor_logo}`
+                                                }
+                                                alt={s.name}
+                                                className="h-full w-full object-contain p-1"
+                                            />
+                                        ) : (
+                                            <span className="text-[0.58rem] text-mist/40">
+                                                Logo
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                                         <div className="flex flex-wrap items-center gap-1.5">
                                             <span className="text-[0.84rem] font-semibold text-white-soft">
@@ -327,9 +454,14 @@ const CmsSponsors = (): React.JSX.Element => {
                                             )}
                                         </div>
                                         {s.sponsor_link && (
-                                            <span className="truncate font-mono text-[0.65rem] text-mist/40">
+                                            <a
+                                                href={s.sponsor_link}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="truncate font-mono text-[0.65rem] text-aurora/50 hover:text-aurora"
+                                            >
                                                 {s.sponsor_link}
-                                            </span>
+                                            </a>
                                         )}
                                     </div>
                                     <div className="flex shrink-0 gap-1">
@@ -428,6 +560,24 @@ const CmsSponsors = (): React.JSX.Element => {
                                     className={inputClass}
                                 />
                             </div>
+                        </div>
+                        {/* Logo (URL only on add — upload after creation via Éditer) */}
+                        <div>
+                            <label className="mb-1 block text-[0.63rem] text-mist">
+                                Logo (URL)
+                            </label>
+                            <input
+                                type="text"
+                                value={addForm.sponsor_logo ?? ""}
+                                onChange={(e) =>
+                                    setAddForm((p) => ({ ...p, sponsor_logo: e.target.value }))
+                                }
+                                placeholder="https://… ou laisser vide pour uploader après"
+                                className={inputClass}
+                            />
+                            <p className="mt-0.5 text-[0.6rem] text-mist/40">
+                                Pour uploader un fichier : ajoutez d'abord, puis cliquez sur Éditer.
+                            </p>
                         </div>
                         <div className="flex gap-2 pt-1">
                             <button
