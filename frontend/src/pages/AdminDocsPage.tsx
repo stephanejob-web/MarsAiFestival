@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 
-type Section =
-    | "overview"
-    | "architecture"
-    | "roles"
-    | "workflow"
-    | "database"
-    | "realtime"
-    | "cms";
+type Section = "overview" | "architecture" | "roles" | "workflow" | "database" | "realtime" | "cms";
 
 const NAV: { id: Section; label: string; icon: string }[] = [
     { id: "overview", label: "Vue d'ensemble", icon: "🏠" },
@@ -43,9 +36,7 @@ const Card = ({
     children: React.ReactNode;
     className?: string;
 }): React.JSX.Element => (
-    <div
-        className={`rounded-xl border border-white/[0.07] bg-surface-2 p-5 ${className}`}
-    >
+    <div className={`rounded-xl border border-white/[0.07] bg-surface-2 p-5 ${className}`}>
         {children}
     </div>
 );
@@ -283,9 +274,7 @@ const DbTableCard = ({ table }: { table: DbTable }): React.JSX.Element => (
     <Card>
         <div className="mb-3 flex items-center gap-2.5">
             <span className={`h-2.5 w-2.5 rounded-full ${colorDot[table.color]}`} />
-            <span
-                className={`font-mono text-[0.88rem] font-bold ${colorText[table.color]}`}
-            >
+            <span className={`font-mono text-[0.88rem] font-bold ${colorText[table.color]}`}>
                 {table.name}
             </span>
             <span className="text-[0.72rem] text-mist/60">{table.description}</span>
@@ -347,7 +336,7 @@ const DbTableCard = ({ table }: { table: DbTable }): React.JSX.Element => (
                                 {f.fk ? (
                                     <span className="text-aurora/60">→ {f.fk}</span>
                                 ) : (
-                                    f.note ?? ""
+                                    (f.note ?? "")
                                 )}
                             </td>
                         </tr>
@@ -406,10 +395,10 @@ const SectionOverview = (): React.JSX.Element => (
                 Qu&apos;est-ce que marsAI Festival ?
             </h3>
             <p className="mb-3 text-[0.82rem] leading-relaxed text-mist/80">
-                marsAI est une plateforme complète de gestion de festival de films courts. Elle couvre
-                l&apos;intégralité du cycle de vie d&apos;un dossier de candidature : de la soumission
-                par le réalisateur jusqu&apos;à la délibération finale du jury et la publication des
-                résultats sur le site public.
+                marsAI est une plateforme complète de gestion de festival de films courts. Elle
+                couvre l&apos;intégralité du cycle de vie d&apos;un dossier de candidature : de la
+                soumission par le réalisateur jusqu&apos;à la délibération finale du jury et la
+                publication des résultats sur le site public.
             </p>
             <div className="grid grid-cols-2 gap-3 text-[0.8rem]">
                 {[
@@ -438,9 +427,18 @@ const SectionOverview = (): React.JSX.Element => (
                         Frontend
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        {["React 19", "TypeScript", "Vite", "Tailwind CSS 4", "React Router 7", "Socket.io client", "i18next", "LiveKit"].map(
-                            (t) => <Tag key={t}>{t}</Tag>,
-                        )}
+                        {[
+                            "React 19",
+                            "TypeScript",
+                            "Vite",
+                            "Tailwind CSS 4",
+                            "React Router 7",
+                            "Socket.io client",
+                            "i18next",
+                            "LiveKit",
+                        ].map((t) => (
+                            <Tag key={t}>{t}</Tag>
+                        ))}
                     </div>
                 </div>
                 <div>
@@ -448,9 +446,19 @@ const SectionOverview = (): React.JSX.Element => (
                         Backend
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        {["Node.js", "Express", "TypeScript", "MySQL 8", "JWT", "Socket.io", "AWS S3", "Multer", "Swagger"].map(
-                            (t) => <Tag key={t}>{t}</Tag>,
-                        )}
+                        {[
+                            "Node.js",
+                            "Express",
+                            "TypeScript",
+                            "MySQL 8",
+                            "JWT",
+                            "Socket.io",
+                            "AWS S3",
+                            "Multer",
+                            "Swagger",
+                        ].map((t) => (
+                            <Tag key={t}>{t}</Tag>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -518,7 +526,10 @@ const SectionArchitecture = (): React.JSX.Element => (
                     <div className="mb-3 font-mono text-[0.65rem] text-mist/40">{layer.port}</div>
                     <ul className="space-y-1">
                         {layer.items.map((i) => (
-                            <li key={i} className="flex items-start gap-1.5 text-[0.78rem] text-mist/70">
+                            <li
+                                key={i}
+                                className="flex items-start gap-1.5 text-[0.78rem] text-mist/70"
+                            >
                                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-mist/30" />
                                 {i}
                             </li>
@@ -529,9 +540,7 @@ const SectionArchitecture = (): React.JSX.Element => (
         </div>
 
         <Card>
-            <h3 className="mb-4 text-[0.88rem] font-bold text-white-soft">
-                Flux de communication
-            </h3>
+            <h3 className="mb-4 text-[0.88rem] font-bold text-white-soft">Flux de communication</h3>
             <div className="space-y-2.5 text-[0.8rem]">
                 {[
                     {
@@ -659,7 +668,9 @@ const SectionRoles = (): React.JSX.Element => (
                 <Card key={r.role}>
                     <div className="mb-1 flex items-center gap-2">
                         <span className="text-[1.1rem]">{r.icon}</span>
-                        <span className={`font-display text-[0.9rem] font-bold ${colorText[r.color]}`}>
+                        <span
+                            className={`font-display text-[0.9rem] font-bold ${colorText[r.color]}`}
+                        >
                             {r.label}
                         </span>
                     </div>
@@ -669,8 +680,13 @@ const SectionRoles = (): React.JSX.Element => (
                     <p className="mb-3 text-[0.75rem] text-mist/60">{r.desc}</p>
                     <ul className="space-y-1.5">
                         {r.perms.map((p) => (
-                            <li key={p} className="flex items-start gap-1.5 text-[0.75rem] text-mist/75">
-                                <span className={`mt-0.5 shrink-0 text-[0.6rem] ${colorText[r.color]}`}>
+                            <li
+                                key={p}
+                                className="flex items-start gap-1.5 text-[0.75rem] text-mist/75"
+                            >
+                                <span
+                                    className={`mt-0.5 shrink-0 text-[0.6rem] ${colorText[r.color]}`}
+                                >
                                     ✓
                                 </span>
                                 {p}
@@ -682,9 +698,7 @@ const SectionRoles = (): React.JSX.Element => (
         </div>
 
         <Card>
-            <h3 className="mb-3 text-[0.88rem] font-bold text-white-soft">
-                Authentification JWT
-            </h3>
+            <h3 className="mb-3 text-[0.88rem] font-bold text-white-soft">Authentification JWT</h3>
             <div className="grid grid-cols-2 gap-6 text-[0.8rem] text-mist/70">
                 <div>
                     <div className="mb-2 font-semibold text-white-soft/80">Connexion standard</div>
@@ -706,7 +720,9 @@ const SectionRoles = (): React.JSX.Element => (
                     </ol>
                 </div>
                 <div>
-                    <div className="mb-2 font-semibold text-white-soft/80">Connexion Google OAuth</div>
+                    <div className="mb-2 font-semibold text-white-soft/80">
+                        Connexion Google OAuth
+                    </div>
                     <ol className="space-y-1.5">
                         {[
                             "Redirection vers Google OAuth",
@@ -922,8 +938,8 @@ const SectionRealtime = (): React.JSX.Element => (
                     <Badge color="aurora">Socket.io</Badge>
                 </div>
                 <p className="mb-3 text-[0.78rem] leading-relaxed text-mist/70">
-                    Canal de communication privé entre tous les membres du jury et les admins. Visible
-                    directement dans la sidebar du panel admin et du panel jury.
+                    Canal de communication privé entre tous les membres du jury et les admins.
+                    Visible directement dans la sidebar du panel admin et du panel jury.
                 </p>
                 <ul className="space-y-2">
                     {[
@@ -934,7 +950,10 @@ const SectionRealtime = (): React.JSX.Element => (
                         "Historique persisté en base de données",
                         "Envoi avec Entrée ou le bouton ↑",
                     ].map((i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-[0.75rem] text-mist/70">
+                        <li
+                            key={i}
+                            className="flex items-start gap-1.5 text-[0.75rem] text-mist/70"
+                        >
                             <span className="mt-0.5 shrink-0 text-[0.6rem] text-aurora">✓</span>
                             {i}
                         </li>
@@ -951,8 +970,8 @@ const SectionRealtime = (): React.JSX.Element => (
                     <Badge color="solar">LiveKit</Badge>
                 </div>
                 <p className="mb-3 text-[0.78rem] leading-relaxed text-mist/70">
-                    Conférences audio WebRTC hébergées sur LiveKit Cloud. Permettent des délibérations
-                    orales entre les jurés sans quitter l&apos;interface.
+                    Conférences audio WebRTC hébergées sur LiveKit Cloud. Permettent des
+                    délibérations orales entre les jurés sans quitter l&apos;interface.
                 </p>
                 <ul className="space-y-2">
                     {[
@@ -963,7 +982,10 @@ const SectionRealtime = (): React.JSX.Element => (
                         "Indicateur visuel des speakers actifs",
                         "Indépendant du chat texte",
                     ].map((i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-[0.75rem] text-mist/70">
+                        <li
+                            key={i}
+                            className="flex items-start gap-1.5 text-[0.75rem] text-mist/70"
+                        >
                             <span className="mt-0.5 shrink-0 text-[0.6rem] text-solar">✓</span>
                             {i}
                         </li>
@@ -973,9 +995,7 @@ const SectionRealtime = (): React.JSX.Element => (
         </div>
 
         <Card>
-            <h3 className="mb-3 text-[0.88rem] font-bold text-white-soft">
-                Événements Socket.io
-            </h3>
+            <h3 className="mb-3 text-[0.88rem] font-bold text-white-soft">Événements Socket.io</h3>
             <div className="overflow-hidden rounded-lg border border-white/[0.06]">
                 <table className="w-full text-[0.75rem]">
                     <thead>
@@ -1047,9 +1067,9 @@ const SectionCms = (): React.JSX.Element => (
 
         <Card className="mb-4">
             <p className="text-[0.82rem] leading-relaxed text-mist/70">
-                Le CMS intégré permet à l&apos;administrateur de modifier l&apos;intégralité du contenu
-                visible sur le site public en temps réel, sans intervention technique. Toutes les
-                données sont stockées dans la table{" "}
+                Le CMS intégré permet à l&apos;administrateur de modifier l&apos;intégralité du
+                contenu visible sur le site public en temps réel, sans intervention technique.
+                Toutes les données sont stockées dans la table{" "}
                 <span className="font-mono text-aurora/80">cms_content</span> (ligne unique) et les
                 tables associées.
             </p>
@@ -1135,8 +1155,13 @@ const SectionCms = (): React.JSX.Element => (
                     </div>
                     <ul className="space-y-1.5">
                         {s.fields.map((f) => (
-                            <li key={f} className="flex items-start gap-1.5 text-[0.75rem] text-mist/70">
-                                <span className={`mt-0.5 shrink-0 text-[0.6rem] ${colorText[s.color]}`}>
+                            <li
+                                key={f}
+                                className="flex items-start gap-1.5 text-[0.75rem] text-mist/70"
+                            >
+                                <span
+                                    className={`mt-0.5 shrink-0 text-[0.6rem] ${colorText[s.color]}`}
+                                >
                                     ›
                                 </span>
                                 {f}
