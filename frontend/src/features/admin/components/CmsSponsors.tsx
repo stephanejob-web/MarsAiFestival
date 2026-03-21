@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Check, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useCmsSponsors, LEVEL_LABELS } from "../hooks/useCmsSponsors";
 import type { Sponsor, SponsorLevel } from "../hooks/useCmsSponsors";
 import { API_BASE_URL } from "../../../constants/api";
