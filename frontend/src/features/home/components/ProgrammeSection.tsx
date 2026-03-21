@@ -123,7 +123,7 @@ const ProgrammeSection = (): React.JSX.Element => {
                             onClick={(): void => setActiveDay(i)}
                             className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 ${
                                 activeDay === i
-                                    ? "bg-aurora text-deep-sky"
+                                    ? "bg-aurora text-[#0a0f2e]"
                                     : "bg-surface border border-white/10 text-mist hover:text-white hover:border-white/25"
                             }`}
                         >

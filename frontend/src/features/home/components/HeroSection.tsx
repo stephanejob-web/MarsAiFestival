@@ -142,7 +142,7 @@ const HeroSection = (): React.JSX.Element => {
                     <div className="flex flex-wrap gap-3">
                         <Link
                             to="/formulaire"
-                            className="inline-flex items-center gap-2 bg-aurora text-deep-sky font-bold px-6 py-3 rounded-lg hover:bg-aurora/90 transition-colors"
+                            className="inline-flex items-center gap-2 bg-aurora text-[#0a0f2e] font-bold px-6 py-3 rounded-lg hover:bg-aurora/90 transition-colors"
                         >
                             {t("hero.cta")} <span aria-hidden="true">→</span>
                         </Link>

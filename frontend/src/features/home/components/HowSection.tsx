@@ -90,7 +90,7 @@ const HowSection = (): React.JSX.Element => {
                 <div className="text-center">
                     <Link
                         to="/formulaire"
-                        className="inline-flex items-center gap-2 bg-aurora text-deep-sky font-bold px-8 py-4 rounded-lg hover:bg-aurora/90 transition-colors text-lg"
+                        className="inline-flex items-center gap-2 bg-aurora text-[#0a0f2e] font-bold px-8 py-4 rounded-lg hover:bg-aurora/90 transition-colors text-lg"
                     >
                         {t("how.cta")} <span aria-hidden="true">→</span>
                     </Link>
