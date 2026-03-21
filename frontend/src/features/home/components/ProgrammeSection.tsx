@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { API_BASE_URL } from "../../../constants/api";
 
 type EventType = "opening" | "projection" | "masterclass" | "pause" | "gala" | "default";
 
@@ -14,6 +15,16 @@ interface Day {
     label: string;
     date: string;
     events: Event[];
+}
+
+interface ApiEvent {
+    id: number;
+    day: number;
+    time: string;
+    title: string;
+    description: string | null;
+    type: EventType;
+    sort_order: number;
 }
 
 const TYPE_STYLES: Record<EventType, string> = {
@@ -34,29 +45,29 @@ const TYPE_DOT: Record<EventType, string> = {
     default: "bg-white/30",
 };
 
-const DAY_EVENT_TYPES: EventType[][] = [
-    [
-        "default",
-        "opening",
-        "masterclass",
-        "pause",
-        "projection",
-        "masterclass",
-        "projection",
-        "default",
-        "gala",
-    ],
-    ["projection", "masterclass", "pause", "projection", "default", "opening", "gala", "gala"],
-];
-
-const DAY_EVENT_TIMES: string[][] = [
-    ["09:00", "10:00", "10:45", "12:30", "14:00", "15:45", "17:00", "18:30", "20:00"],
-    ["09:30", "11:00", "12:30", "14:00", "15:30", "17:30", "19:00", "20:30"],
-];
-
 const ProgrammeSection = (): React.JSX.Element => {
     const [activeDay, setActiveDay] = useState<number>(0);
+    const [apiEvents, setApiEvents] = useState<ApiEvent[] | null>(null);
+    const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
     const { t } = useTranslation();
+
+    useEffect(() => {
+        fetch(`${API_BASE_URL}/api/programme`)
+            .then((r) => r.json())
+            .then((json) => {
+                if (json.success && Array.isArray(json.data)) {
+                    setApiEvents(json.data);
+                } else {
+                    setApiEvents([]);
+                }
+            })
+            .catch(() => {
+                setApiEvents([]);
+            })
+            .finally(() => {
+                setLoadingEvents(false);
+            });
+    }, []);
 
     const TYPE_LABELS: Record<EventType, string> = {
         opening: t("programme.typeLabels.opening"),
@@ -69,23 +80,17 @@ const ProgrammeSection = (): React.JSX.Element => {
 
     const buildDays = (): Day[] =>
         [0, 1].map((di) => {
-            const eventKeys = Object.keys(
-                t(`programme.days.${di}.events`, { returnObjects: true }) as Record<
-                    string,
-                    unknown
-                >,
-            );
-            const events: Event[] = eventKeys.map((ek) => {
-                const evData = t(`programme.days.${di}.events.${ek}`, {
-                    returnObjects: true,
-                }) as { title: string; desc?: string };
-                return {
-                    time: DAY_EVENT_TIMES[di][Number(ek)],
-                    title: evData.title,
-                    desc: evData.desc,
-                    type: DAY_EVENT_TYPES[di][Number(ek)],
-                };
-            });
+            let events: Event[] = [];
+            if (apiEvents !== null) {
+                events = apiEvents
+                    .filter((e) => e.day === di + 1)
+                    .map((e) => ({
+                        time: e.time,
+                        title: e.title,
+                        desc: e.description ?? undefined,
+                        type: e.type,
+                    }));
+            }
             return {
                 label: t(`programme.days.${di}.label`),
                 date: t(`programme.days.${di}.date`),
@@ -135,57 +140,66 @@ const ProgrammeSection = (): React.JSX.Element => {
                     {day.date}
                 </div>
 
+                {/* Loading state */}
+                {loadingEvents && (
+                    <div className="text-center text-sm text-mist py-12">
+                        Chargement du programme…
+                    </div>
+                )}
+
                 {/* Timeline */}
-                <div className="relative">
-                    {/* Ligne verticale */}
-                    <div
-                        className="absolute left-[72px] top-0 bottom-0 w-px bg-white/8"
-                        aria-hidden="true"
-                    />
+                {!loadingEvents && (
+                    <div className="relative">
+                        {/* Ligne verticale */}
+                        <div
+                            className="absolute left-[72px] top-0 bottom-0 w-px bg-white/8"
+                            aria-hidden="true"
+                        />
 
-                    <div className="flex flex-col gap-1">
-                        {day.events.map((event, i) => (
-                            <div key={i} className="flex items-start gap-4">
-                                {/* Heure */}
-                                <div className="w-[72px] shrink-0 text-right pt-3.5">
-                                    <span className="font-mono text-sm font-semibold text-white/40">
-                                        {event.time}
-                                    </span>
-                                </div>
-
-                                {/* Point sur la ligne */}
-                                <div className="shrink-0 relative z-10 mt-4">
-                                    <div
-                                        className={`w-2.5 h-2.5 rounded-full ring-2 ring-[#050714] ${TYPE_DOT[event.type]}`}
-                                    />
-                                </div>
-
-                                {/* Carte événement */}
-                                <div
-                                    className={`flex-1 mb-3 border rounded-xl px-4 py-3 transition-colors ${TYPE_STYLES[event.type]} ${event.type === "pause" ? "opacity-50" : ""}`}
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <span className="font-semibold text-sm leading-snug text-white-soft">
-                                            {event.title}
+                        <div className="flex flex-col gap-1">
+                            {day.events.map((event, i) => (
+                                <div key={i} className="flex items-start gap-4">
+                                    {/* Heure */}
+                                    <div className="w-[72px] shrink-0 text-right pt-3.5">
+                                        <span className="font-mono text-sm font-semibold text-white/40">
+                                            {event.time}
                                         </span>
-                                        {TYPE_LABELS[event.type] && (
-                                            <span
-                                                className={`font-mono text-[10px] uppercase tracking-wider shrink-0 mt-0.5 ${TYPE_STYLES[event.type].split(" ")[0]}`}
-                                            >
-                                                {TYPE_LABELS[event.type]}
+                                    </div>
+
+                                    {/* Point sur la ligne */}
+                                    <div className="shrink-0 relative z-10 mt-4">
+                                        <div
+                                            className={`w-2.5 h-2.5 rounded-full ring-2 ring-[#050714] ${TYPE_DOT[event.type]}`}
+                                        />
+                                    </div>
+
+                                    {/* Carte événement */}
+                                    <div
+                                        className={`flex-1 mb-3 border rounded-xl px-4 py-3 transition-colors ${TYPE_STYLES[event.type]} ${event.type === "pause" ? "opacity-50" : ""}`}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className="font-semibold text-sm leading-snug text-white-soft">
+                                                {event.title}
                                             </span>
+                                            {TYPE_LABELS[event.type] && (
+                                                <span
+                                                    className={`font-mono text-[10px] uppercase tracking-wider shrink-0 mt-0.5 ${TYPE_STYLES[event.type].split(" ")[0]}`}
+                                                >
+                                                    {TYPE_LABELS[event.type]}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {event.desc && (
+                                            <p className="text-xs text-mist mt-1 leading-relaxed">
+                                                {event.desc}
+                                            </p>
                                         )}
                                     </div>
-                                    {event.desc && (
-                                        <p className="text-xs text-mist mt-1 leading-relaxed">
-                                            {event.desc}
-                                        </p>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </section>
     );
