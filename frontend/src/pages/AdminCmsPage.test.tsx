@@ -1,11 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import AdminCmsPage from "./AdminCmsPage";
 
-vi.mock("../features/admin/components/CmsTopBar", () => ({
-    default: () => <div>CmsTopBar</div>,
-}));
 vi.mock("../features/admin/components/CmsVideoHero", () => ({
     default: () => <div>CmsVideoHero</div>,
 }));
@@ -29,35 +26,45 @@ vi.mock("../features/admin/components/CmsContactInfo", () => ({
 }));
 
 describe("AdminCmsPage", () => {
-    it("renders the main title", () => {
+    it("renders the CMS title", () => {
         render(
             <BrowserRouter>
                 <AdminCmsPage />
             </BrowserRouter>,
         );
-        expect(screen.getByText("Administration du site")).toBeInTheDocument();
+        expect(screen.getByText("CMS")).toBeInTheDocument();
     });
 
-    it("renders the subtitle", () => {
+    it("renders all section nav tabs", () => {
         render(
             <BrowserRouter>
                 <AdminCmsPage />
             </BrowserRouter>,
         );
-        expect(screen.getByText("Gérez le contenu public du festival")).toBeInTheDocument();
+        expect(screen.getAllByText("Hero").length).toBeGreaterThan(0);
+        expect(screen.getByText("Calendrier")).toBeInTheDocument();
+        expect(screen.getByText("Programme")).toBeInTheDocument();
+        expect(screen.getByText("Jury")).toBeInTheDocument();
+        expect(screen.getByText("Sponsors")).toBeInTheDocument();
+        expect(screen.getByText("Contact")).toBeInTheDocument();
     });
 
-    it("renders all quick nav links", () => {
+    it("shows Hero section by default", () => {
         render(
             <BrowserRouter>
                 <AdminCmsPage />
             </BrowserRouter>,
         );
-        expect(screen.getByText("Programme 🗓️")).toBeInTheDocument();
-        expect(screen.getByText("Jury 👥")).toBeInTheDocument();
-        expect(screen.getByText("Hero 🎬")).toBeInTheDocument();
-        expect(screen.getByText("Calendrier 📅")).toBeInTheDocument();
-        expect(screen.getByText("Sponsors 🤝")).toBeInTheDocument();
-        expect(screen.getByText("Contact 📬")).toBeInTheDocument();
+        expect(screen.getByText("CmsVideoHero")).toBeInTheDocument();
+    });
+
+    it("switches to Calendar section on click", () => {
+        render(
+            <BrowserRouter>
+                <AdminCmsPage />
+            </BrowserRouter>,
+        );
+        fireEvent.click(screen.getByText("Calendrier"));
+        expect(screen.getByText("CmsCalendar")).toBeInTheDocument();
     });
 });
