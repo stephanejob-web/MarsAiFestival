@@ -60,6 +60,14 @@ CREATE TABLE `cms_content` (
   `submission_open_date` date DEFAULT NULL,
   `submission_close_date` date DEFAULT NULL,
   `ceremony_date` date DEFAULT NULL,
+  `hero_tag1` varchar(100) DEFAULT NULL,
+  `hero_tag2` varchar(100) DEFAULT NULL,
+  `hero_tag3` varchar(100) DEFAULT NULL,
+  `hero_tag4` varchar(100) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_instagram` varchar(255) DEFAULT NULL,
+  `contact_website` varchar(500) DEFAULT NULL,
+  `contact_description` text,
   `header_logo_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `hero_video_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `is_jury_list_toggle` tinyint(1) NOT NULL DEFAULT '0',
@@ -70,6 +78,8 @@ CREATE TABLE `cms_content` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `cms_content` DISABLE KEYS */;
+INSERT IGNORE INTO `cms_content` (`id`, `hero_label`, `hero_title`, `hero_description`, `hero_content`, `hero_tag1`, `hero_tag2`, `hero_tag3`, `hero_tag4`, `contact_email`, `contact_instagram`, `contact_website`, `contact_description`) VALUES
+(1, 'marsAI 2026', 'Le premier festival mondial du cinéma généré par intelligence artificielle.', 'Voici ce qu''une IA peut créer. Imaginez ce que vous allez faire.', 'Soumettre un film', '60s chrono', '120+ pays', '100% gratuit', 'Prix Marseille', 'contact@marsai.fr', '@marsai.festival', 'https://marsai.fr', 'Marseille accueille la première édition de marsAI, festival international dédié aux films créés par ou avec l''intelligence artificielle.');
 /*!40000 ALTER TABLE `cms_content` ENABLE KEYS */;
 DROP TABLE IF EXISTS `programme_event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

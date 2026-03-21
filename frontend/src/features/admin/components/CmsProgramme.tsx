@@ -94,7 +94,7 @@ const CmsProgramme = (): React.JSX.Element => {
     const [savingId, setSavingId] = useState<number | null>(null);
     const [addSaving, setAddSaving] = useState<boolean>(false);
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("jury_token");
 
     const fetchEvents = async () => {
         try {

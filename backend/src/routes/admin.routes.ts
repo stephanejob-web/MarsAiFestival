@@ -1,4 +1,7 @@
 import { Router } from "express";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
 import { requireAdmin } from "../middlewares/auth.middleware";
 import {
     listAdminFilms,
@@ -15,47 +18,91 @@ import {
     stopAdminVocal,
 } from "../controllers/admin.controller";
 import { getCalendarHandler, updateCalendarHandler } from "../controllers/calendar.controller";
+import {
+    getHeroHandler,
+    updateHeroHandler,
+    uploadHeroVideoHandler,
+    getContactHandler,
+    updateContactHandler,
+} from "../controllers/hero.controller";
+import {
+    listSponsors,
+    createSponsorHandler,
+    updateSponsorHandler,
+    deleteSponsorHandler,
+    uploadSponsorLogoHandler,
+} from "../controllers/sponsor.controller";
+
+// ── Upload dirs ───────────────────────────────────────────────────────────────
+const HERO_DIR = path.join(__dirname, "../../uploads/hero");
+const SPONSORS_DIR = path.join(__dirname, "../../uploads/sponsors");
+if (!fs.existsSync(HERO_DIR)) fs.mkdirSync(HERO_DIR, { recursive: true });
+if (!fs.existsSync(SPONSORS_DIR)) fs.mkdirSync(SPONSORS_DIR, { recursive: true });
+
+const heroStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, HERO_DIR),
+    filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase() || ".mp4";
+        cb(null, `hero_${Date.now()}${ext}`);
+    },
+});
+
+const sponsorStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, SPONSORS_DIR),
+    filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase() || ".png";
+        cb(null, `sponsor_${Date.now()}${ext}`);
+    },
+});
+
+const uploadHero = multer({ storage: heroStorage, limits: { fileSize: 200 * 1024 * 1024 } });
+const uploadLogo = multer({ storage: sponsorStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = Router();
 
-// ── Films (avec URLs pré-signées) ─────────────────────────────────────────────
-// GET  /api/admin/films
+// ── Films ─────────────────────────────────────────────────────────────────────
 router.get("/films", requireAdmin, listAdminFilms);
-
-// ── Vidéos S3 ────────────────────────────────────────────────────────────────
-// GET  /api/admin/videos
 router.get("/videos", requireAdmin, listS3Videos);
 
 // ── Invitations ───────────────────────────────────────────────────────────────
-// POST /api/admin/invite
 router.post("/invite", requireAdmin, sendInvite);
-// GET  /api/admin/invite/verify?token=   (public — pas de requireAdmin)
 router.get("/invite/verify", verifyInvite);
 
-// ── Gestion utilisateurs ──────────────────────────────────────────────────────
-// GET    /api/admin/users
+// ── Utilisateurs ──────────────────────────────────────────────────────────────
 router.get("/users", requireAdmin, listUsers);
-// PATCH  /api/admin/users/:id
 router.patch("/users/:id", requireAdmin, editUser);
-// PATCH  /api/admin/users/:id/status
 router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
-// POST   /api/admin/users/:id/ban
 router.post("/users/:id/ban", requireAdmin, banUser);
-// POST   /api/admin/users/:id/unban
 router.post("/users/:id/unban", requireAdmin, unbanUser);
-// DELETE /api/admin/users/:id
 router.delete("/users/:id", requireAdmin, removeUser);
 
 // ── Vocal admin ───────────────────────────────────────────────────────────────
-// POST /api/admin/vocal/start
 router.post("/vocal/start", requireAdmin, startAdminVocal);
-// POST /api/admin/vocal/stop
 router.post("/vocal/stop", requireAdmin, stopAdminVocal);
 
 // ── Calendrier ────────────────────────────────────────────────────────────────
-// GET  /api/admin/calendar
 router.get("/calendar", requireAdmin, getCalendarHandler);
-// PUT  /api/admin/calendar
 router.put("/calendar", requireAdmin, updateCalendarHandler);
+
+// ── Hero content ──────────────────────────────────────────────────────────────
+router.get("/hero", requireAdmin, getHeroHandler);
+router.put("/hero", requireAdmin, updateHeroHandler);
+router.post("/hero/video", requireAdmin, uploadHero.single("video"), uploadHeroVideoHandler);
+
+// ── Contact ───────────────────────────────────────────────────────────────────
+router.get("/contact", requireAdmin, getContactHandler);
+router.put("/contact", requireAdmin, updateContactHandler);
+
+// ── Sponsors ──────────────────────────────────────────────────────────────────
+router.get("/sponsors", requireAdmin, listSponsors);
+router.post("/sponsors", requireAdmin, createSponsorHandler);
+router.put("/sponsors/:id", requireAdmin, updateSponsorHandler);
+router.delete("/sponsors/:id", requireAdmin, deleteSponsorHandler);
+router.post(
+    "/sponsors/:id/logo",
+    requireAdmin,
+    uploadLogo.single("logo"),
+    uploadSponsorLogoHandler,
+);
 
 export default router;

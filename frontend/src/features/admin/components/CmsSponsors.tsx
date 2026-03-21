@@ -1,51 +1,118 @@
-import React from "react";
+import React, { useState, useRef } from "react";
+import { useCmsSponsors, LEVEL_LABELS } from "../hooks/useCmsSponsors";
+import type { Sponsor, SponsorLevel } from "../hooks/useCmsSponsors";
+import { API_BASE_URL } from "../../../constants/api";
 
-interface SponsorItemProps {
-    name: string;
-    level: "principal" | "partenaire" | "institutionnel";
-    logoSrc: string | null;
+const inputClass =
+    "w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-body text-[0.78rem] text-white-soft outline-none transition-colors placeholder:text-mist/40 focus:border-aurora/40";
+
+const LEVELS: SponsorLevel[] = ["main", "lead", "partner", "supporter", "premium"];
+
+const LEVEL_COLOR: Record<SponsorLevel, string> = {
+    main: "text-aurora border-aurora/30 bg-aurora/10",
+    lead: "text-solar border-solar/30 bg-solar/10",
+    partner: "text-lavande border-lavande/30 bg-lavande/10",
+    supporter: "text-mist border-white/10 bg-white/5",
+    premium: "text-coral border-coral/30 bg-coral/10",
+};
+
+const emptyForm = {
+    name: "",
+    partnership_statut: "partner" as SponsorLevel,
+    sponsor_link: "",
+    sponsored_award: "",
+    sponsor_logo: null as string | null,
+};
+
+// ── Logo upload cell ────────────────────────────────────────────────────────────
+interface LogoCellProps {
+    sponsor: Sponsor;
+    onUploaded: (id: number, file: File) => void;
 }
 
-const SponsorItem = ({ name, level, logoSrc }: SponsorItemProps): React.JSX.Element => {
+const LogoCell = ({ sponsor, onUploaded }: LogoCellProps): React.JSX.Element => {
+    const ref = useRef<HTMLInputElement>(null);
     return (
-        <div className="flex flex-col items-start border-b border-white/5 py-2.5 sm:flex-row sm:items-start sm:gap-2.5 gap-2">
-            <div className="flex h-[44px] w-[56px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-[1.5px] border-white/10 bg-white/5 text-center text-[0.6rem] text-mist transition-colors hover:border-solar/40">
-                {logoSrc ? (
-                    <img src={logoSrc} alt={name} className="h-full w-full object-contain" />
-                ) : (
-                    "Upload"
-                )}
-            </div>
-            <div className="flex w-full min-w-0 flex-1 flex-col gap-1.5 sm:w-auto">
-                <div className="flex flex-wrap items-center gap-1.5">
-                    <select
-                        className="shrink-0 cursor-pointer rounded-md border border-white/10 bg-white/5 px-2 py-1.5 font-body text-[0.73rem] text-mist outline-none focus:border-aurora/40 [&>option]:bg-horizon"
-                        defaultValue={level}
-                    >
-                        <option value="principal">Principal</option>
-                        <option value="partenaire">Partenaire</option>
-                        <option value="institutionnel">Institutionnel</option>
-                    </select>
-                </div>
-                <input
-                    className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-body text-[0.84rem] text-white-soft outline-none transition-colors focus:border-aurora/40 sm:w-auto"
-                    type="text"
-                    defaultValue={name}
-                    placeholder="Nom du partenaire"
+        <div
+            className="flex h-[44px] w-[56px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-[1.5px] border-white/10 bg-white/5 transition-colors hover:border-solar/40"
+            onClick={() => ref.current?.click()}
+            title="Cliquer pour changer le logo"
+        >
+            {sponsor.sponsor_logo ? (
+                <img
+                    src={
+                        sponsor.sponsor_logo.startsWith("http")
+                            ? sponsor.sponsor_logo
+                            : `${API_BASE_URL}${sponsor.sponsor_logo}`
+                    }
+                    alt={sponsor.name}
+                    className="h-full w-full object-contain p-1"
                 />
-            </div>
-            <button
-                type="button"
-                className="shrink-0 cursor-pointer bg-transparent px-0.5 py-1 text-[0.95rem] text-coral/40 transition-colors hover:text-coral"
-                title="Supprimer"
-            >
-                ×
-            </button>
+            ) : (
+                <span className="text-[0.58rem] text-mist">Logo</span>
+            )}
+            <input
+                ref={ref}
+                type="file"
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onUploaded(sponsor.id, f);
+                    e.target.value = "";
+                }}
+            />
         </div>
     );
 };
 
+// ── Main component ─────────────────────────────────────────────────────────────
 const CmsSponsors = (): React.JSX.Element => {
+    const { sponsors, loading, createSponsor, updateSponsor, deleteSponsor, uploadLogo } =
+        useCmsSponsors();
+
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [addForm, setAddForm] = useState({ ...emptyForm });
+    const [addSaving, setAddSaving] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editForm, setEditForm] = useState<Partial<Sponsor>>({});
+    const [savingId, setSavingId] = useState<number | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+    const handleAdd = async () => {
+        if (!addForm.name.trim()) return;
+        setAddSaving(true);
+        const ok = await createSponsor({
+            name: addForm.name.trim(),
+            partnership_statut: addForm.partnership_statut,
+            sponsored_award: addForm.sponsored_award || null,
+            sponsor_link: addForm.sponsor_link || null,
+            sponsor_logo: null,
+        });
+        if (ok) {
+            setAddForm({ ...emptyForm });
+            setShowAddForm(false);
+        }
+        setAddSaving(false);
+    };
+
+    const startEdit = (s: Sponsor) => {
+        setEditingId(s.id);
+        setEditForm({ ...s });
+    };
+
+    const handleUpdate = async (id: number) => {
+        setSavingId(id);
+        await updateSponsor(id, editForm);
+        setEditingId(null);
+        setEditForm({});
+        setSavingId(null);
+    };
+
+    const handleLogoUpload = async (id: number, file: File) => {
+        await uploadLogo(id, file);
+    };
+
     return (
         <div className="mb-4 overflow-hidden rounded-2xl border border-white/5 bg-surface-2 transition-colors hover:border-white/10">
             {/* Header */}
@@ -65,42 +132,330 @@ const CmsSponsors = (): React.JSX.Element => {
                         Partenaires & Sponsors
                     </div>
                     <div className="mt-0.5 text-[0.72rem] text-mist">
-                        Logos et liens — page d'accueil
+                        {loading
+                            ? "Chargement…"
+                            : `${sponsors.length} partenaires · logos et liens`}
                     </div>
                 </div>
             </div>
 
             {/* Body */}
-            <div className="border-t border-white/5 px-5 pb-5 pt-1">
-                <p className="my-3.5 text-[0.77rem] leading-[1.55] text-mist">
-                    3 niveaux : <strong className="font-bold text-solar">Principal</strong> ·{" "}
-                    <strong className="font-bold text-white-soft">Partenaire</strong> ·
-                    Institutionnel.
-                    <br />
-                    Cliquez sur le logo pour le changer. Laissez vide pour afficher le nom.
-                </p>
+            <div className="border-t border-white/5 px-5 pb-5 pt-3">
+                {loading ? (
+                    <div className="flex items-center justify-center gap-2 py-6 text-[0.78rem] text-mist">
+                        <svg
+                            className="h-4 w-4 animate-spin opacity-50"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            />
+                            <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"
+                            />
+                        </svg>
+                        Chargement…
+                    </div>
+                ) : sponsors.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-white/10 py-6 text-center text-[0.78rem] text-mist">
+                        Aucun partenaire.
+                        <br />
+                        <span className="text-solar/60">
+                            Cliquez sur « Ajouter » pour commencer.
+                        </span>
+                    </div>
+                ) : (
+                    <div className="flex flex-col divide-y divide-white/[0.04]">
+                        {sponsors.map((s) =>
+                            editingId === s.id ? (
+                                <div key={s.id} className="flex flex-col gap-2.5 py-3">
+                                    <div className="text-[0.65rem] font-bold uppercase tracking-widest text-solar">
+                                        Modifier · {s.name}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="mb-1 block text-[0.63rem] text-mist">
+                                                Nom *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.name ?? ""}
+                                                onChange={(e) =>
+                                                    setEditForm((p) => ({
+                                                        ...p,
+                                                        name: e.target.value,
+                                                    }))
+                                                }
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-[0.63rem] text-mist">
+                                                Niveau
+                                            </label>
+                                            <select
+                                                value={editForm.partnership_statut ?? "partner"}
+                                                onChange={(e) =>
+                                                    setEditForm((p) => ({
+                                                        ...p,
+                                                        partnership_statut: e.target
+                                                            .value as SponsorLevel,
+                                                    }))
+                                                }
+                                                className={`${inputClass} cursor-pointer [&>option]:bg-horizon`}
+                                            >
+                                                {LEVELS.map((l) => (
+                                                    <option key={l} value={l}>
+                                                        {LEVEL_LABELS[l]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="mb-1 block text-[0.63rem] text-mist">
+                                                Lien du site
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={editForm.sponsor_link ?? ""}
+                                                onChange={(e) =>
+                                                    setEditForm((p) => ({
+                                                        ...p,
+                                                        sponsor_link: e.target.value,
+                                                    }))
+                                                }
+                                                placeholder="https://…"
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-[0.63rem] text-mist">
+                                                Prix sponsorisé
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.sponsored_award ?? ""}
+                                                onChange={(e) =>
+                                                    setEditForm((p) => ({
+                                                        ...p,
+                                                        sponsored_award: e.target.value,
+                                                    }))
+                                                }
+                                                placeholder="Ex: Prix du public"
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => void handleUpdate(s.id)}
+                                            disabled={savingId === s.id}
+                                            className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:opacity-60"
+                                        >
+                                            {savingId === s.id
+                                                ? "Enregistrement…"
+                                                : "✓ Enregistrer"}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setEditingId(null);
+                                                setEditForm({});
+                                            }}
+                                            className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20"
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : confirmDeleteId === s.id ? (
+                                <div
+                                    key={s.id}
+                                    className="flex items-center justify-between gap-3 py-3"
+                                >
+                                    <div className="text-[0.78rem] text-mist">
+                                        Supprimer <strong className="text-coral">{s.name}</strong> ?
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() =>
+                                                void deleteSponsor(s.id).then(() =>
+                                                    setConfirmDeleteId(null),
+                                                )
+                                            }
+                                            className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-1 text-[0.72rem] font-bold text-coral hover:bg-coral/20"
+                                        >
+                                            Supprimer
+                                        </button>
+                                        <button
+                                            onClick={() => setConfirmDeleteId(null)}
+                                            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] font-bold text-mist hover:border-white/20"
+                                        >
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    key={s.id}
+                                    className="flex items-center gap-2.5 py-2.5 sm:gap-3"
+                                >
+                                    <LogoCell sponsor={s} onUploaded={handleLogoUpload} />
+                                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                            <span className="text-[0.84rem] font-semibold text-white-soft">
+                                                {s.name}
+                                            </span>
+                                            <span
+                                                className={`rounded border px-1.5 py-0.5 font-mono text-[0.6rem] ${LEVEL_COLOR[s.partnership_statut]}`}
+                                            >
+                                                {LEVEL_LABELS[s.partnership_statut]}
+                                            </span>
+                                            {s.sponsored_award && (
+                                                <span className="text-[0.65rem] text-mist/60">
+                                                    · {s.sponsored_award}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {s.sponsor_link && (
+                                            <span className="truncate font-mono text-[0.65rem] text-mist/40">
+                                                {s.sponsor_link}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex shrink-0 gap-1">
+                                        <button
+                                            onClick={() => startEdit(s)}
+                                            className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                                        >
+                                            Éditer
+                                        </button>
+                                        <button
+                                            onClick={() => setConfirmDeleteId(s.id)}
+                                            className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.72rem] text-mist transition-all hover:border-coral/30 hover:text-coral"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                </div>
+                            ),
+                        )}
+                    </div>
+                )}
 
-                <div className="mt-3">
-                    <SponsorItem
-                        name="OpenAI"
-                        level="principal"
-                        logoSrc="https://stephanejob-web.github.io/mars-AI/assets/openAi.svg"
-                    />
-                    <SponsorItem
-                        name="Midjourney"
-                        level="partenaire"
-                        logoSrc="https://stephanejob-web.github.io/mars-AI/assets/logo3.svg"
-                    />
-                    <SponsorItem name="Ville de Marseille" level="institutionnel" logoSrc={null} />
-                </div>
-
-                <button className="mt-3 w-full cursor-pointer rounded-lg border border-dashed border-white/15 bg-white/5 p-2 font-body text-[0.82rem] text-mist transition-all hover:border-solar/30 hover:bg-solar/5 hover:text-solar">
-                    + Ajouter un partenaire
-                </button>
-
-                <button className="mt-[14px] block w-full shrink-0 cursor-pointer rounded-lg border border-aurora/25 bg-aurora/10 px-4.5 py-2 text-center font-display text-[0.8rem] font-extrabold text-aurora transition-all hover:border-aurora/40 hover:bg-aurora/15">
-                    Enregistrer les sponsors →
-                </button>
+                {/* Add form */}
+                {showAddForm ? (
+                    <div className="mt-3 flex flex-col gap-2.5 rounded-xl border border-solar/20 bg-solar/[0.04] p-4">
+                        <div className="text-[0.65rem] font-bold uppercase tracking-widest text-solar">
+                            Nouveau partenaire
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="mb-1 block text-[0.63rem] text-mist">Nom *</label>
+                                <input
+                                    type="text"
+                                    value={addForm.name}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, name: e.target.value }))
+                                    }
+                                    placeholder="Ex: OpenAI"
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[0.63rem] text-mist">
+                                    Niveau
+                                </label>
+                                <select
+                                    value={addForm.partnership_statut}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({
+                                            ...p,
+                                            partnership_statut: e.target.value as SponsorLevel,
+                                        }))
+                                    }
+                                    className={`${inputClass} cursor-pointer [&>option]:bg-horizon`}
+                                >
+                                    {LEVELS.map((l) => (
+                                        <option key={l} value={l}>
+                                            {LEVEL_LABELS[l]}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="mb-1 block text-[0.63rem] text-mist">
+                                    Lien du site
+                                </label>
+                                <input
+                                    type="url"
+                                    value={addForm.sponsor_link}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({
+                                            ...p,
+                                            sponsor_link: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="https://…"
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[0.63rem] text-mist">
+                                    Prix sponsorisé
+                                </label>
+                                <input
+                                    type="text"
+                                    value={addForm.sponsored_award}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({
+                                            ...p,
+                                            sponsored_award: e.target.value,
+                                        }))
+                                    }
+                                    placeholder="Ex: Prix du public"
+                                    className={inputClass}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                            <button
+                                onClick={() => void handleAdd()}
+                                disabled={addSaving || !addForm.name.trim()}
+                                className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {addSaving ? "Ajout…" : "✓ Ajouter"}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowAddForm(false);
+                                    setAddForm({ ...emptyForm });
+                                }}
+                                className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        className="mt-3 w-full cursor-pointer rounded-lg border border-dashed border-white/15 bg-white/5 p-2 font-body text-[0.82rem] text-mist transition-all hover:border-solar/30 hover:bg-solar/5 hover:text-solar"
+                    >
+                        + Ajouter un partenaire
+                    </button>
+                )}
             </div>
         </div>
     );
