@@ -1,15 +1,25 @@
 import React, { useState } from "react";
+import {
+    LayoutDashboard,
+    Layers,
+    Shield,
+    GitBranch,
+    Database,
+    Zap,
+    Globe,
+    Check,
+} from "lucide-react";
 
 type Section = "overview" | "architecture" | "roles" | "workflow" | "database" | "realtime" | "cms";
 
-const NAV: { id: Section; label: string; icon: string }[] = [
-    { id: "overview", label: "Vue d'ensemble", icon: "🏠" },
-    { id: "architecture", label: "Architecture", icon: "🏗️" },
-    { id: "roles", label: "Rôles & Accès", icon: "🔐" },
-    { id: "workflow", label: "Flux de sélection", icon: "🔄" },
-    { id: "database", label: "Schéma base de données", icon: "🗄️" },
-    { id: "realtime", label: "Temps réel", icon: "⚡" },
-    { id: "cms", label: "Gestion du site", icon: "🌐" },
+const NAV: { id: Section; label: string; icon: React.ReactNode }[] = [
+    { id: "overview", label: "Vue d'ensemble", icon: <LayoutDashboard size={14} /> },
+    { id: "architecture", label: "Architecture", icon: <Layers size={14} /> },
+    { id: "roles", label: "Rôles & Accès", icon: <Shield size={14} /> },
+    { id: "workflow", label: "Flux de sélection", icon: <GitBranch size={14} /> },
+    { id: "database", label: "Schéma base de données", icon: <Database size={14} /> },
+    { id: "realtime", label: "Temps réel", icon: <Zap size={14} /> },
+    { id: "cms", label: "Gestion du site", icon: <Globe size={14} /> },
 ];
 
 /* ─── Composants utilitaires ─── */
@@ -358,21 +368,18 @@ const SectionOverview = (): React.JSX.Element => (
         <div className="mb-6 grid grid-cols-3 gap-4">
             {[
                 {
-                    icon: "🎬",
                     label: "Films",
                     value: "50+",
                     desc: "dossiers soumis",
                     color: "text-aurora",
                 },
                 {
-                    icon: "👥",
                     label: "Jury",
                     value: "6",
                     desc: "membres actifs",
                     color: "text-solar",
                 },
                 {
-                    icon: "🏆",
                     label: "Prix",
                     value: "3",
                     desc: "catégories de récompenses",
@@ -380,7 +387,6 @@ const SectionOverview = (): React.JSX.Element => (
                 },
             ].map((s) => (
                 <Card key={s.label} className="text-center">
-                    <div className="mb-1 text-[1.6rem]">{s.icon}</div>
                     <div className={`font-display text-[1.6rem] font-extrabold ${s.color}`}>
                         {s.value}
                     </div>
@@ -412,7 +418,7 @@ const SectionOverview = (): React.JSX.Element => (
                     "Swagger UI pour l'API REST",
                 ].map((item) => (
                     <div key={item} className="flex items-start gap-2 text-mist/70">
-                        <span className="mt-0.5 text-aurora">✓</span>
+                        <Check size={12} className="mt-0.5 shrink-0 text-aurora" />
                         {item}
                     </div>
                 ))}
@@ -620,7 +626,6 @@ const SectionRoles = (): React.JSX.Element => (
                 {
                     role: "admin",
                     color: "solar" as const,
-                    icon: "👑",
                     label: "Administrateur",
                     desc: "Accès complet au panel admin",
                     perms: [
@@ -637,7 +642,6 @@ const SectionRoles = (): React.JSX.Element => (
                 {
                     role: "jury",
                     color: "aurora" as const,
-                    icon: "🎬",
                     label: "Membre du jury",
                     desc: "Accès au panel jury uniquement",
                     perms: [
@@ -653,7 +657,6 @@ const SectionRoles = (): React.JSX.Element => (
                 {
                     role: "moderateur",
                     color: "lavande" as const,
-                    icon: "🛡️",
                     label: "Modérateur",
                     desc: "Accès limité en lecture/modération",
                     perms: [
@@ -667,7 +670,6 @@ const SectionRoles = (): React.JSX.Element => (
             ].map((r) => (
                 <Card key={r.role}>
                     <div className="mb-1 flex items-center gap-2">
-                        <span className="text-[1.1rem]">{r.icon}</span>
                         <span
                             className={`font-display text-[0.9rem] font-bold ${colorText[r.color]}`}
                         >
@@ -684,11 +686,10 @@ const SectionRoles = (): React.JSX.Element => (
                                 key={p}
                                 className="flex items-start gap-1.5 text-[0.75rem] text-mist/75"
                             >
-                                <span
-                                    className={`mt-0.5 shrink-0 text-[0.6rem] ${colorText[r.color]}`}
-                                >
-                                    ✓
-                                </span>
+                                <Check
+                                    size={11}
+                                    className={`mt-0.5 shrink-0 ${colorText[r.color]}`}
+                                />
                                 {p}
                             </li>
                         ))}
@@ -931,7 +932,6 @@ const SectionRealtime = (): React.JSX.Element => (
         <div className="mb-4 grid grid-cols-2 gap-4">
             <Card>
                 <div className="mb-3 flex items-center gap-2">
-                    <span className="text-[1.1rem]">💬</span>
                     <span className="font-display text-[0.9rem] font-bold text-aurora">
                         Chat jury
                     </span>
@@ -954,7 +954,7 @@ const SectionRealtime = (): React.JSX.Element => (
                             key={i}
                             className="flex items-start gap-1.5 text-[0.75rem] text-mist/70"
                         >
-                            <span className="mt-0.5 shrink-0 text-[0.6rem] text-aurora">✓</span>
+                            <Check size={11} className="mt-0.5 shrink-0 text-aurora" />
                             {i}
                         </li>
                     ))}
@@ -963,7 +963,6 @@ const SectionRealtime = (): React.JSX.Element => (
 
             <Card>
                 <div className="mb-3 flex items-center gap-2">
-                    <span className="text-[1.1rem]">🎙️</span>
                     <span className="font-display text-[0.9rem] font-bold text-solar">
                         Sessions vocales
                     </span>
@@ -986,7 +985,7 @@ const SectionRealtime = (): React.JSX.Element => (
                             key={i}
                             className="flex items-start gap-1.5 text-[0.75rem] text-mist/70"
                         >
-                            <span className="mt-0.5 shrink-0 text-[0.6rem] text-solar">✓</span>
+                            <Check size={11} className="mt-0.5 shrink-0 text-solar" />
                             {i}
                         </li>
                     ))}
@@ -1078,7 +1077,6 @@ const SectionCms = (): React.JSX.Element => (
         <div className="grid grid-cols-2 gap-4">
             {[
                 {
-                    icon: "🎥",
                     title: "Hero & Vidéo",
                     color: "aurora" as const,
                     fields: [
@@ -1089,7 +1087,6 @@ const SectionCms = (): React.JSX.Element => (
                     ],
                 },
                 {
-                    icon: "📅",
                     title: "Programme & Phases",
                     color: "solar" as const,
                     fields: [
@@ -1100,7 +1097,6 @@ const SectionCms = (): React.JSX.Element => (
                     ],
                 },
                 {
-                    icon: "👨‍⚖️",
                     title: "Section Jury",
                     color: "lavande" as const,
                     fields: [
@@ -1111,7 +1107,6 @@ const SectionCms = (): React.JSX.Element => (
                     ],
                 },
                 {
-                    icon: "🏆",
                     title: "Prix & Palmarès",
                     color: "solar" as const,
                     fields: [
@@ -1122,7 +1117,6 @@ const SectionCms = (): React.JSX.Element => (
                     ],
                 },
                 {
-                    icon: "🤝",
                     title: "Sponsors",
                     color: "mist" as const,
                     fields: [
@@ -1133,7 +1127,6 @@ const SectionCms = (): React.JSX.Element => (
                     ],
                 },
                 {
-                    icon: "📞",
                     title: "Contact & Informations",
                     color: "coral" as const,
                     fields: [
@@ -1146,7 +1139,6 @@ const SectionCms = (): React.JSX.Element => (
             ].map((s) => (
                 <Card key={s.title}>
                     <div className="mb-3 flex items-center gap-2">
-                        <span className="text-[1rem]">{s.icon}</span>
                         <span
                             className={`font-display text-[0.85rem] font-bold ${colorText[s.color]}`}
                         >
@@ -1234,7 +1226,7 @@ const AdminDocsPage = (): React.JSX.Element => {
                                             : "text-mist hover:bg-white/[0.04] hover:text-white-soft"
                                     }`}
                                 >
-                                    <span className="text-[0.85rem]">{item.icon}</span>
+                                    <span className="shrink-0">{item.icon}</span>
                                     {item.label}
                                 </button>
                             </li>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { MessageSquare, LogOut, ChevronDown, ChevronUp, Send, ExternalLink } from "lucide-react";
 import { ADMIN_NAV_LINKS, ADMIN_LABELS } from "../constants";
 import type { AdminNavCategory, AdminNavItem } from "../types";
 import useJuryChat from "../../jury/hooks/useJuryChat";
@@ -73,9 +74,10 @@ const AdminSidePanel = (): React.JSX.Element => {
                                                 {item.icon}
                                             </span>
                                             <span>{item.label}</span>
-                                            <span className="ml-auto text-[0.6rem] text-mist opacity-40">
-                                                ↗
-                                            </span>
+                                            <ExternalLink
+                                                size={11}
+                                                className="ml-auto opacity-40"
+                                            />
                                         </a>
                                     ) : (
                                         <NavLink
@@ -123,7 +125,7 @@ const AdminSidePanel = (): React.JSX.Element => {
                     onClick={() => setIsChatOpen((v) => !v)}
                     className="flex w-full items-center px-2.5 py-2 text-[0.8rem] text-mist hover:text-white-soft"
                 >
-                    <span className="mr-1.5">💬</span>
+                    <MessageSquare size={14} className="mr-1.5 shrink-0" />
                     <span>Chat jury</span>
                     <span className="ml-1.5 flex items-center gap-1 text-[0.65rem] text-mist/70">
                         <span
@@ -137,8 +139,8 @@ const AdminSidePanel = (): React.JSX.Element => {
                             {chat.unreadCount}
                         </span>
                     )}
-                    <span className="ml-auto text-[0.65rem] text-mist">
-                        {isChatOpen ? "▲" : "▼"}
+                    <span className="ml-auto text-mist">
+                        {isChatOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                     </span>
                 </button>
 
@@ -254,7 +256,7 @@ const AdminSidePanel = (): React.JSX.Element => {
                                 disabled={!chat.isConnected || !chat.inputValue.trim()}
                                 className="w-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-solar text-[0.8rem] font-bold text-deep-sky disabled:opacity-40"
                             >
-                                ↑
+                                <Send size={13} />
                             </button>
                         </div>
                     </div>
@@ -267,9 +269,9 @@ const AdminSidePanel = (): React.JSX.Element => {
                     type="button"
                     aria-label={ADMIN_LABELS.LOGOUT}
                     onClick={handleLogout}
-                    className="w-full rounded-lg px-3 py-2 text-left text-[0.82rem] text-coral/80 transition-all hover:bg-coral/[0.08] hover:text-coral"
+                    className="flex w-full items-center rounded-lg px-3 py-2 text-left text-[0.82rem] text-coral/80 transition-all hover:bg-coral/[0.08] hover:text-coral"
                 >
-                    🔒 {ADMIN_LABELS.LOGOUT}
+                    <LogOut size={14} className="mr-2" /> {ADMIN_LABELS.LOGOUT}
                 </button>
             </div>
         </div>

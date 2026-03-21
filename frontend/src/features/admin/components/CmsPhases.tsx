@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { X, Trophy } from "lucide-react";
 import { API_BASE_URL } from "../../../constants/api";
 
 interface Film {
@@ -98,7 +99,7 @@ const DevSimulator = ({ onSimulated }: { onSimulated: () => void }): React.JSX.E
                 </span>
                 {last !== null && (
                     <span className="ml-auto text-xs text-yellow-400/80 font-mono">
-                        ✓ Phase {last} active
+                        Phase {last} active
                     </span>
                 )}
             </div>
@@ -565,8 +566,8 @@ const CmsPhases = (): React.JSX.Element => {
                                                 )}
                                             </div>
                                             {award.laureate_film ? (
-                                                <div className="text-xs text-aurora mt-0.5">
-                                                    🏆 {award.laureate_film}
+                                                <div className="flex items-center gap-1 text-xs text-aurora mt-0.5">
+                                                    <Trophy size={11} /> {award.laureate_film}
                                                     {award.laureate_name &&
                                                         ` — ${award.laureate_name}`}
                                                 </div>
@@ -593,9 +594,9 @@ const CmsPhases = (): React.JSX.Element => {
                                             </button>
                                             <button
                                                 onClick={() => deleteAward(award.id)}
-                                                className="px-3 py-1 text-xs text-coral border border-coral/20 rounded-lg hover:bg-coral/10 transition-colors"
+                                                className="flex items-center justify-center px-3 py-1 text-coral border border-coral/20 rounded-lg hover:bg-coral/10 transition-colors"
                                             >
-                                                ✕
+                                                <X size={14} />
                                             </button>
                                         </div>
                                     </div>

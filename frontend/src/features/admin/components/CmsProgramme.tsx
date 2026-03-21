@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Check, X } from "lucide-react";
 import { API_BASE_URL } from "../../../constants/api";
 
 type EventType = "opening" | "projection" | "masterclass" | "pause" | "gala" | "default";
@@ -310,13 +311,13 @@ const CmsProgramme = (): React.JSX.Element => {
                                         disabled={renameSaving || !renameValue}
                                         className="rounded border border-aurora/30 bg-aurora/10 px-2.5 py-1 text-[0.7rem] font-bold text-aurora hover:bg-aurora/20 disabled:opacity-50"
                                     >
-                                        {renameSaving ? "…" : "✓"}
+                                        {renameSaving ? "…" : <Check size={13} />}
                                     </button>
                                     <button
                                         onClick={() => setRenamingDate(null)}
-                                        className="rounded border border-white/10 px-2 py-1 text-[0.7rem] text-mist hover:text-white-soft"
+                                        className="flex items-center justify-center rounded border border-white/10 px-2 py-1 text-mist hover:text-white-soft"
                                     >
-                                        ✕
+                                        <X size={13} />
                                     </button>
                                 </div>
                             ) : (
@@ -391,19 +392,19 @@ const CmsProgramme = (): React.JSX.Element => {
                                     setNewDayDate("");
                                     setEditingId(null);
                                 }}
-                                className="rounded border border-solar/30 bg-solar/10 px-2.5 py-1 text-[0.7rem] font-bold text-solar hover:bg-solar/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center rounded border border-solar/30 bg-solar/10 px-2.5 py-1 font-bold text-solar hover:bg-solar/20 disabled:opacity-40 disabled:cursor-not-allowed"
                                 title={allDates.includes(newDayDate) ? "Ce jour existe déjà" : ""}
                             >
-                                ✓
+                                <Check size={13} />
                             </button>
                             <button
                                 onClick={() => {
                                     setShowNewDay(false);
                                     setNewDayDate("");
                                 }}
-                                className="rounded border border-white/10 px-2 py-1 text-[0.7rem] text-mist hover:text-white-soft"
+                                className="flex items-center justify-center rounded border border-white/10 px-2 py-1 text-mist hover:text-white-soft"
                             >
-                                ✕
+                                <X size={13} />
                             </button>
                         </div>
                     ) : (
@@ -552,7 +553,7 @@ const CmsProgramme = (): React.JSX.Element => {
                                             >
                                                 {savingId === event.id
                                                     ? "Enregistrement…"
-                                                    : "✓ Enregistrer"}
+                                                    : "Enregistrer"}
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -632,9 +633,9 @@ const CmsProgramme = (): React.JSX.Element => {
                                             <button
                                                 onClick={() => setConfirmDeleteId(event.id)}
                                                 title="Supprimer"
-                                                className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.72rem] text-mist transition-all hover:border-coral/30 hover:text-coral"
+                                                className="flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 py-1 text-mist transition-all hover:border-coral/30 hover:text-coral"
                                             >
-                                                ✕
+                                                <X size={13} />
                                             </button>
                                         </div>
                                     </div>
@@ -731,7 +732,7 @@ const CmsProgramme = (): React.JSX.Element => {
                                 }
                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {addSaving ? "Ajout en cours…" : "✓ Ajouter l'événement"}
+                                {addSaving ? "Ajout en cours…" : "Ajouter l'événement"}
                             </button>
                             <button
                                 onClick={() => {

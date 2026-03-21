@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { ShieldCheck } from "lucide-react";
 import CmsVideoHero from "../features/admin/components/CmsVideoHero";
 import CmsHeroContent from "../features/admin/components/CmsHeroContent";
 import CmsCalendar from "../features/admin/components/CmsCalendar";
@@ -242,8 +243,8 @@ const AdminCmsPage = (): React.JSX.Element => {
                         Voir le site
                     </Link>
 
-                    <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                        🛡️ Admin
+                    <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
+                        <ShieldCheck size={13} className="mr-1" /> Admin
                     </span>
                 </div>
             </div>

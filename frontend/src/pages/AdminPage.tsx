@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Mic, MicOff, ShieldCheck, Search } from "lucide-react";
 import useAdminUsers from "../features/admin/hooks/useAdminUsers";
 import useAdminVocal from "../features/admin/hooks/useAdminVocal";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
@@ -48,11 +49,11 @@ const AdminPage = (): React.JSX.Element => {
                                     : "flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.07] px-3.5 py-1.5 font-display text-[0.78rem] font-extrabold text-aurora transition-all hover:bg-aurora/[0.14] hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
                             }
                         >
-                            <span>{isInVocal ? "📵" : "🎙️"}</span>
+                            {isInVocal ? <MicOff size={14} /> : <Mic size={14} />}
                             {isInVocal ? "Quitter le vocal" : "Lancer un vocal"}
                         </button>
-                        <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                            🛡️ Admin
+                        <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
+                            <ShieldCheck size={13} className="mr-1.5" /> Admin
                         </span>
                     </div>
                 </div>
@@ -124,8 +125,8 @@ const AdminPage = (): React.JSX.Element => {
 
                             {/* Search */}
                             <div className="relative mb-3.5">
-                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.85rem] opacity-40">
-                                    🔍
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 opacity-40">
+                                    <Search size={14} />
                                 </span>
                                 <input
                                     type="text"

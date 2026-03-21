@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { X, CheckCircle2 } from "lucide-react";
 import { API_BASE_URL } from "../../../constants/api";
 
 interface InviteModalProps {
@@ -55,13 +56,13 @@ const InviteModal = ({ onClose }: InviteModalProps): React.JSX.Element => {
                         onClick={onClose}
                         className="rounded-lg p-1.5 text-mist/50 transition-all hover:bg-white/8 hover:text-white-soft"
                     >
-                        ✕
+                        <X size={14} />
                     </button>
                 </div>
 
                 {status === "success" ? (
                     <div className="flex flex-col items-center gap-4 py-4 text-center">
-                        <div className="text-4xl">✅</div>
+                        <CheckCircle2 size={44} className="text-aurora" />
                         <p className="text-[0.9rem] font-semibold text-aurora">
                             Invitation envoyée à <span className="text-white-soft">{email}</span>
                         </p>

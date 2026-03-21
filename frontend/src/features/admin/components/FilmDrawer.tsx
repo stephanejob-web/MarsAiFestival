@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { X, Check } from "lucide-react";
 import type { AdminFilm, AdminJuryMember, AdminAssignment } from "../types";
 
 interface FilmDrawerProps {
@@ -71,9 +72,9 @@ const FilmDrawer = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="mt-0.5 shrink-0 cursor-pointer p-0.5 text-[1rem] text-mist transition-colors hover:text-white-soft"
+                        className="mt-0.5 shrink-0 cursor-pointer p-0.5 text-mist transition-colors hover:text-white-soft"
                     >
-                        ✕
+                        <X size={15} />
                     </button>
                 </div>
 
@@ -107,7 +108,7 @@ const FilmDrawer = ({
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="🔍 Rechercher un juré…"
+                        placeholder="Rechercher un juré…"
                         className="mb-2 w-full rounded-[9px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 font-body text-[0.82rem] text-white-soft outline-none transition-colors placeholder:text-mist focus:border-aurora/35"
                     />
 
@@ -164,13 +165,13 @@ const FilmDrawer = ({
 
                                         {/* Checkbox */}
                                         <div
-                                            className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] text-[0.55rem] font-black transition-all ${
+                                            className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] transition-all ${
                                                 isAssigned
                                                     ? "bg-aurora text-deep-sky shadow-[0_0_0_0]"
                                                     : "border border-white/20 text-transparent"
                                             }`}
                                         >
-                                            ✓
+                                            <Check size={11} />
                                         </div>
                                     </button>
                                 );

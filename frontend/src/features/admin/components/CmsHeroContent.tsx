@@ -119,10 +119,10 @@ const CmsHeroContent = (): React.JSX.Element => {
                     }`}
                 >
                     {saved
-                        ? "✓ Contenus enregistrés"
+                        ? "Contenus enregistrés"
                         : isSaving
                           ? "Enregistrement…"
-                          : "Enregistrer les contenus →"}
+                          : "Enregistrer les contenus"}
                 </button>
             </div>
         </div>

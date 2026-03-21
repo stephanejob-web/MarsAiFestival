@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { MessageSquare, Send, ChevronDown, ChevronUp } from "lucide-react";
 import useJuryChat from "../../jury/hooks/useJuryChat";
 import useJuryUser from "../../jury/hooks/useJuryUser";
 import { VocalJoinButton } from "../../jury/components/VocalPanel";
@@ -23,7 +24,7 @@ const AdminChatPanel = (): React.JSX.Element => {
                 <div className="flex w-[320px] flex-col rounded-2xl border border-white/10 bg-[#0d1117]/95 shadow-2xl backdrop-blur-md">
                     {/* Header */}
                     <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3">
-                        <span className="text-[0.8rem]">💬</span>
+                        <MessageSquare size={14} />
                         <span className="flex-1 font-display text-[0.82rem] font-extrabold text-white-soft">
                             Chat jury
                         </span>
@@ -149,7 +150,7 @@ const AdminChatPanel = (): React.JSX.Element => {
                             disabled={!chat.isConnected || !chat.inputValue.trim()}
                             className="flex items-center justify-center rounded-lg bg-solar px-3 font-bold text-deep-sky disabled:opacity-40"
                         >
-                            ↑
+                            <Send size={13} />
                         </button>
                     </div>
                 </div>
@@ -172,7 +173,7 @@ const AdminChatPanel = (): React.JSX.Element => {
                     onClick={() => setIsOpen((v) => !v)}
                     className="flex items-center gap-2 rounded-full border border-white/10 bg-surface px-4 py-2.5 text-[0.8rem] font-semibold text-white-soft shadow-lg transition-all hover:border-solar/30 hover:bg-surface-2"
                 >
-                    <span>💬</span>
+                    <MessageSquare size={13} />
                     <span>Chat jury</span>
                     {!isOpen && chat.unreadCount > 0 && (
                         <span className="rounded-full bg-coral/15 px-1.5 font-mono text-[0.62rem] font-semibold text-coral">
@@ -185,7 +186,9 @@ const AdminChatPanel = (): React.JSX.Element => {
                             {chat.onlineCount}
                         </span>
                     )}
-                    <span className="text-[0.65rem] text-mist">{isOpen ? "▼" : "▲"}</span>
+                    <span className="text-mist">
+                        {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    </span>
                 </button>
             </div>
         </div>

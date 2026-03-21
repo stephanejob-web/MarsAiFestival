@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Film, Search, Check, Star, X } from "lucide-react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
 import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
@@ -200,8 +201,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                             Tout désassigner
                         </button>
                     )}
-                    <span className="rounded-md border border-aurora/20 bg-aurora/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                        🎬 Films
+                    <span className="flex items-center gap-1 rounded-md border border-aurora/20 bg-aurora/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
+                        <Film size={13} className="mr-1" /> Films
                     </span>
                 </div>
             </div>
@@ -305,8 +306,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                         {/* Distribution result banner */}
                         {lastDistribution !== null && (
                             <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-aurora/30 bg-aurora/[0.08] px-4 py-3">
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-aurora/20 text-[0.85rem] text-aurora">
-                                    ✓
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-aurora/20 text-aurora">
+                                    <Check size={14} />
                                 </span>
                                 <span className="flex-1 text-[0.82rem] text-white-soft">
                                     {lastDistribution.assigned > 0 ? (
@@ -339,7 +340,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                         className="flex h-6 w-6 items-center justify-center rounded-full text-mist transition-all hover:bg-white/10 hover:text-white-soft"
                                         title="Fermer"
                                     >
-                                        ×
+                                        <X size={14} />
                                     </button>
                                 </div>
                             </div>
@@ -347,8 +348,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
 
                         {/* Search */}
                         <div className="relative mb-3.5">
-                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[0.85rem] opacity-40">
-                                🔍
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 opacity-40">
+                                <Search size={14} />
                             </span>
                             <input
                                 type="text"
@@ -468,9 +469,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     {/* Selected badge */}
                                                     {isSelected && (
                                                         <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">
-                                                            <span className="text-[0.65rem] text-aurora">
-                                                                ★
-                                                            </span>
+                                                            <Star
+                                                                size={10}
+                                                                className="text-aurora"
+                                                            />
                                                             <span className="font-display text-[0.65rem] font-extrabold tracking-wide text-aurora">
                                                                 {film.statut === "finaliste"
                                                                     ? "Finaliste"
@@ -586,8 +588,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                             initials
                                                                         )}
                                                                         {jAssigned && (
-                                                                            <span className="absolute -right-[4px] -top-[4px] flex h-[15px] w-[15px] items-center justify-center rounded-full bg-aurora text-[0.55rem] font-black text-deep-sky">
-                                                                                ✓
+                                                                            <span className="absolute -right-[4px] -top-[4px] flex h-[15px] w-[15px] items-center justify-center rounded-full bg-aurora text-deep-sky">
+                                                                                <Check size={9} />
                                                                             </span>
                                                                         )}
                                                                     </div>
@@ -639,9 +641,17 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                                     : "border border-white/[0.10] bg-white/[0.03] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
                                                             }`}
                                                         >
-                                                            {isSelected
-                                                                ? "✓ Top 50"
-                                                                : "★ Sélectionner"}
+                                                            {isSelected ? (
+                                                                <span className="flex items-center gap-1">
+                                                                    <Check size={11} />
+                                                                    Top 50
+                                                                </span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1">
+                                                                    <Star size={11} />
+                                                                    Sélectionner
+                                                                </span>
+                                                            )}
                                                         </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"

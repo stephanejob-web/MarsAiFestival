@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { Check, X } from "lucide-react";
 import { useCmsSponsors, LEVEL_LABELS } from "../hooks/useCmsSponsors";
 import type { Sponsor, SponsorLevel } from "../hooks/useCmsSponsors";
 import { API_BASE_URL } from "../../../constants/api";
@@ -372,9 +373,7 @@ const CmsSponsors = (): React.JSX.Element => {
                                             disabled={savingId === s.id}
                                             className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:opacity-60"
                                         >
-                                            {savingId === s.id
-                                                ? "Enregistrement…"
-                                                : "✓ Enregistrer"}
+                                            {savingId === s.id ? "Enregistrement…" : "Enregistrer"}
                                         </button>
                                         <button
                                             onClick={() => {
@@ -473,9 +472,9 @@ const CmsSponsors = (): React.JSX.Element => {
                                         </button>
                                         <button
                                             onClick={() => setConfirmDeleteId(s.id)}
-                                            className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.72rem] text-mist transition-all hover:border-coral/30 hover:text-coral"
+                                            className="flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 py-1 text-mist transition-all hover:border-coral/30 hover:text-coral"
                                         >
-                                            ✕
+                                            <X size={13} />
                                         </button>
                                     </div>
                                 </div>
@@ -585,7 +584,7 @@ const CmsSponsors = (): React.JSX.Element => {
                                 disabled={addSaving || !addForm.name.trim()}
                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {addSaving ? "Ajout…" : "✓ Ajouter"}
+                                {addSaving ? "Ajout…" : "Ajouter"}
                             </button>
                             <button
                                 onClick={() => {

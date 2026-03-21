@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Check, X } from "lucide-react";
 import type { AdminUser } from "../types";
 
 interface UserTableProps {
@@ -166,8 +167,8 @@ const UserTable = ({
                                                 }
                                                 className={`cursor-pointer appearance-none rounded-full border py-[3px] pl-[10px] pr-[22px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-opacity hover:opacity-80 ${ROLE_SELECT_CLS[u.role]}`}
                                             >
-                                                <option value="jury">⚖️ Jury</option>
-                                                <option value="moderateur">🛡️ Modérateur</option>
+                                                <option value="jury">Jury</option>
+                                                <option value="moderateur">Modérateur</option>
                                             </select>
                                             <span className="pointer-events-none absolute right-[7px] top-1/2 -translate-y-1/2 text-[0.5rem] opacity-60">
                                                 ▾
@@ -234,16 +235,16 @@ const UserTable = ({
                                                                 void onUnban(u.id);
                                                                 setConfirmUnbanId(null);
                                                             }}
-                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-aurora text-[0.65rem] font-black text-deep-sky shadow-[0_2px_10px_rgba(78,255,206,0.4)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(78,255,206,0.6)]"
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-aurora text-deep-sky shadow-[0_2px_10px_rgba(78,255,206,0.4)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(78,255,206,0.6)]"
                                                         >
-                                                            ✓
+                                                            <Check size={11} />
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => setConfirmUnbanId(null)}
-                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-[0.65rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
                                                         >
-                                                            ✕
+                                                            <X size={11} />
                                                         </button>
                                                     </div>
                                                 ) : (
@@ -277,16 +278,16 @@ const UserTable = ({
                                                             void onBan(u.id);
                                                             setConfirmBanId(null);
                                                         }}
-                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-coral text-[0.65rem] font-black text-white shadow-[0_2px_10px_rgba(255,82,82,0.5)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(255,82,82,0.7)]"
+                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-coral text-white shadow-[0_2px_10px_rgba(255,82,82,0.5)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(255,82,82,0.7)]"
                                                     >
-                                                        ✓
+                                                        <Check size={11} />
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => setConfirmBanId(null)}
-                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-[0.65rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
                                                     >
-                                                        ✕
+                                                        <X size={11} />
                                                     </button>
                                                 </div>
                                             ) : (

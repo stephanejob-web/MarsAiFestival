@@ -161,10 +161,10 @@ const CmsCalendar = (): React.JSX.Element => {
                     }`}
                 >
                     {saved
-                        ? "✓ Calendrier enregistré"
+                        ? "Calendrier enregistré"
                         : isSaving
                           ? "Enregistrement…"
-                          : "Enregistrer le calendrier →"}
+                          : "Enregistrer le calendrier"}
                 </button>
             </div>
         </div>

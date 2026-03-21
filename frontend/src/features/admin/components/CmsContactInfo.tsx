@@ -115,10 +115,10 @@ const CmsContactInfo = (): React.JSX.Element => {
                     }`}
                 >
                     {saved
-                        ? "✓ Informations enregistrées"
+                        ? "Informations enregistrées"
                         : isSaving
                           ? "Enregistrement…"
-                          : "Enregistrer les informations →"}
+                          : "Enregistrer les informations"}
                 </button>
             </div>
         </div>

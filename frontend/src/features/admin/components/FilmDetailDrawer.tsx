@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { X, Check } from "lucide-react";
 import { apiFetch } from "../../../services/api";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
@@ -213,9 +214,9 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                     <button
                         type="button"
                         onClick={onClose}
-                        className="mt-0.5 shrink-0 cursor-pointer p-1 text-[1rem] text-mist transition-colors hover:text-white-soft"
+                        className="mt-0.5 shrink-0 cursor-pointer p-1 text-mist transition-colors hover:text-white-soft"
                     >
-                        ✕
+                        <X size={15} />
                     </button>
                 </div>
 
@@ -236,7 +237,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                     {!loading && film && (
                         <div className="space-y-4">
                             {/* ── Film ── */}
-                            <Section title="🎬 Film">
+                            <Section title="Film">
                                 <Row label="Titre original" value={film.original_title} />
                                 {film.english_title && (
                                     <Row label="Titre anglais" value={film.english_title} />
@@ -267,7 +268,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
 
                             {/* ── Synopsis ── */}
                             {(film.original_synopsis || film.english_synopsis) && (
-                                <Section title="📄 Synopsis">
+                                <Section title="Synopsis">
                                     {film.original_synopsis && (
                                         <div className="mb-3">
                                             <div className="mb-1 text-[0.65rem] text-mist opacity-50">
@@ -293,7 +294,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
 
                             {/* ── Démarche & Outils ── */}
                             {(film.creative_workflow || film.tech_stack) && (
-                                <Section title="⚙️ Démarche & Outils">
+                                <Section title="Démarche & Outils">
                                     {film.creative_workflow && (
                                         <div className="mb-3">
                                             <div className="mb-1 text-[0.65rem] text-mist opacity-50">
@@ -318,7 +319,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                             )}
 
                             {/* ── Déclaration IA ── */}
-                            <Section title="🤖 Déclaration IA">
+                            <Section title="Déclaration IA">
                                 <div className="mb-3">
                                     <Row
                                         label="Classification"
@@ -344,7 +345,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                             </Section>
 
                             {/* ── Réalisateur ── */}
-                            <Section title="🎥 Réalisateur">
+                            <Section title="Réalisateur">
                                 <Row label="Nom" value={`${film.first_name} ${film.last_name}`} />
                                 <Row label="Email" value={film.realisator_email} />
                                 <Row label="Pays" value={film.country} />
@@ -380,7 +381,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                             </Section>
 
                             {/* ── Dépôt ── */}
-                            <Section title="📅 Dépôt">
+                            <Section title="Dépôt">
                                 <Row
                                     label="Date de dépôt"
                                     value={new Date(film.created_at).toLocaleDateString("fr-FR", {
@@ -390,7 +391,16 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                                     })}
                                 />
                                 <Row label="N° dossier" value={film.dossier_num} />
-                                {film.video_url && <Row label="Vidéo" value="✓ Uploadée" />}
+                                {film.video_url && (
+                                    <Row
+                                        label="Vidéo"
+                                        value={
+                                            <span className="flex items-center gap-1">
+                                                <Check size={12} /> Uploadée
+                                            </span>
+                                        }
+                                    />
+                                )}
                             </Section>
                         </div>
                     )}
@@ -400,7 +410,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                 {film && film.realisator_email && (
                     <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
                         <div className="mb-3 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-mist opacity-60">
-                            ✉ Email au réalisateur
+                            Email au réalisateur
                         </div>
                         <div className="space-y-2">
                             <input
@@ -419,13 +429,13 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                             />
                             <div className="flex items-center justify-between">
                                 {emailStatus === "ok" && (
-                                    <span className="text-[0.72rem] text-aurora">
-                                        ✓ Email envoyé
+                                    <span className="flex items-center gap-1 text-[0.72rem] text-aurora">
+                                        <Check size={12} /> Email envoyé
                                     </span>
                                 )}
                                 {emailStatus === "error" && (
-                                    <span className="text-[0.72rem] text-coral">
-                                        ✕ Échec de l'envoi
+                                    <span className="flex items-center gap-1 text-[0.72rem] text-coral">
+                                        <X size={12} /> Échec de l&apos;envoi
                                     </span>
                                 )}
                                 {emailStatus === "idle" && <span />}

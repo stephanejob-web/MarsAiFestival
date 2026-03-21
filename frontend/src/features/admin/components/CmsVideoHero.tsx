@@ -186,7 +186,7 @@ const CmsVideoHero = (): React.JSX.Element => {
                 {uploadError && <p className="w-full text-[0.72rem] text-coral">{uploadError}</p>}
                 {uploaded && (
                     <p className="w-full text-[0.72rem] text-aurora">
-                        ✓ Vidéo mise à jour avec succès
+                        Vidéo mise à jour avec succès
                     </p>
                 )}
             </div>

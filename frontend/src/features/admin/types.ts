@@ -1,7 +1,9 @@
+import React from "react";
+
 export interface AdminNavItem {
     label: string;
     to: string;
-    icon: string;
+    icon: React.ReactNode;
     count?: number;
     external?: boolean;
 }

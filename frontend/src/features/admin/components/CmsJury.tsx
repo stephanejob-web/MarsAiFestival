@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Check, X } from "lucide-react";
 import { API_BASE_URL } from "../../../constants/api";
 
 interface JuryShowcaseMember {
@@ -537,7 +538,7 @@ const CmsJury = (): React.JSX.Element => {
                                             >
                                                 {savingId === member.id
                                                     ? "Enregistrement…"
-                                                    : "✓ Enregistrer"}
+                                                    : "Enregistrer"}
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -632,9 +633,9 @@ const CmsJury = (): React.JSX.Element => {
                                                 </button>
                                                 <button
                                                     onClick={() => setConfirmDeleteId(member.id)}
-                                                    className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.72rem] text-mist transition-all hover:border-coral/30 hover:text-coral"
+                                                    className="flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 py-1 text-mist transition-all hover:border-coral/30 hover:text-coral"
                                                 >
-                                                    ✕
+                                                    <X size={13} />
                                                 </button>
                                             </div>
                                             <div className="flex gap-1">
@@ -756,7 +757,7 @@ const CmsJury = (): React.JSX.Element => {
                                 disabled={addSaving || !addForm.name || !addForm.display_role}
                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {addSaving ? "Ajout en cours…" : "✓ Ajouter le membre"}
+                                {addSaving ? "Ajout en cours…" : "Ajouter le membre"}
                             </button>
                             <button
                                 onClick={() => {
