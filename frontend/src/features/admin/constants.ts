@@ -9,20 +9,12 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
         ],
     },
     {
-        category: "Concours",
-        items: [{ label: "Phases & Dates", to: "/admin/phases", icon: "📅" }],
-    },
-    {
         category: "Suivi",
         items: [{ label: "Sélection & Votes", to: "/admin/selection", icon: "🏅" }],
     },
     {
         category: "Configuration",
         items: [{ label: "Étiquettes jury", to: "/admin/tags", icon: "🏷️" }],
-    },
-    {
-        category: "Festival",
-        items: [{ label: "Awards & Sponsors", to: "/admin/awards", icon: "🏆" }],
     },
     {
         category: "Site",

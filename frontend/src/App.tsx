@@ -25,24 +25,8 @@ const App = (): React.JSX.Element => {
                     <Route path="admin" element={<AdminLayout />}>
                         <Route index element={<AdminPage />} />
                         <Route path="films" element={<AdminFilmsPage />} />
-                        <Route
-                            path="phases"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Phases & Dates — en construction
-                                </div>
-                            }
-                        />
                         <Route path="selection" element={<AdminSelectionPage />} />
                         <Route path="tags" element={<AdminTagsPage />} />
-                        <Route
-                            path="awards"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Awards & Sponsors — en construction
-                                </div>
-                            }
-                        />
                         <Route path="/admin/cms" element={<AdminCmsPage />} />
                     </Route>
                 </Route>
