@@ -4,6 +4,7 @@ import {
     createEvent,
     updateEvent,
     deleteEvent,
+    type ProgrammeEvent,
 } from "../repositories/programme.repository";
 
 export const listProgramme = async (_req: Request, res: Response): Promise<void> => {
@@ -41,7 +42,7 @@ export const createProgrammeEvent = async (req: Request, res: Response): Promise
             time,
             title,
             description: description ?? null,
-            type: type as any,
+            type: type as ProgrammeEvent["type"],
             sort_order: sort_order ?? 0,
         });
         res.status(201).json({ success: true, data: { id } });
