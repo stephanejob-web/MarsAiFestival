@@ -32,7 +32,16 @@ const JURY_AVATARS = [
     "https://i.pravatar.cc/400?img=44",
     "https://i.pravatar.cc/400?img=32",
     "https://i.pravatar.cc/400?img=18",
+    "https://i.pravatar.cc/400?img=25",
+    "https://i.pravatar.cc/400?img=33",
 ];
+
+const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>, fallback: string): void => {
+    const img = e.currentTarget;
+    if (img.src !== fallback) {
+        img.src = fallback;
+    }
+};
 
 const GalaSection = (): React.JSX.Element => {
     const { t } = useTranslation();
@@ -221,6 +230,7 @@ const GalaSection = (): React.JSX.Element => {
                                     alt={featured.name}
                                     className="w-full h-64 md:h-full object-cover object-top"
                                     loading="lazy"
+                                    onError={(e) => handleImgError(e, JURY_AVATARS[0])}
                                 />
                             </div>
                             {/* Infos */}
@@ -256,6 +266,14 @@ const GalaSection = (): React.JSX.Element => {
                                         alt={member.name}
                                         className="w-full aspect-square object-cover object-top"
                                         loading="lazy"
+                                        onError={(e) =>
+                                            handleImgError(
+                                                e,
+                                                JURY_AVATARS[
+                                                    members.indexOf(member) % JURY_AVATARS.length
+                                                ],
+                                            )
+                                        }
                                     />
                                     <div className="p-3">
                                         <div className="font-mono text-[10px] text-aurora uppercase tracking-wider mb-1">
