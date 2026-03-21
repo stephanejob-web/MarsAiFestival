@@ -32,7 +32,17 @@ export const useCmsCalendar = () => {
         })
             .then((r) => r.json())
             .then((json) => {
-                if (json.success) setData({ ...empty, ...json.data });
+                if (json.success && json.data) {
+                    // MySQL DATE columns come back as ISO strings ("2026-02-19T00:00:00.000Z")
+                    // <input type="date"> requires "YYYY-MM-DD" — slice to normalize
+                    const normalized: CalendarConfig = { ...empty };
+                    for (const key of Object.keys(empty) as (keyof CalendarConfig)[]) {
+                        const raw = json.data[key];
+                        // datetime-local input needs "YYYY-MM-DDTHH:MM" (16 chars)
+                        normalized[key] = raw ? String(raw).slice(0, 16).replace(" ", "T") : "";
+                    }
+                    setData(normalized);
+                }
             })
             .catch(() => {});
     }, []);
