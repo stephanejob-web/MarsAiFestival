@@ -4497,3 +4497,198 @@ paths:
           description: Token manquant ou invalide
         "403":
           description: Rôle insuffisant
+
+  /api/films/{id}/video-url:
+    get:
+      tags: [Films]
+      summary: Récupérer l'URL de lecture d'une vidéo 🛡️
+      description: |
+        Retourne l'URL présignée S3 permettant de lire la vidéo du film.
+        Réservé aux administrateurs.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      responses:
+        "200":
+          description: URL de la vidéo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  url:
+                    type: string
+                    description: URL présignée S3
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+        "404":
+          description: Film introuvable
+
+  /api/admin/users/{id}/unban:
+    post:
+      tags: [Administration]
+      summary: Débannir un utilisateur 🛡️
+      description: |
+        Réactive le compte d'un utilisateur précédemment banni.
+        Envoie un événement Socket.IO `user:unbanned` si l'utilisateur est connecté.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de l'utilisateur à débannir
+      responses:
+        "200":
+          description: Utilisateur débanni
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: ID invalide
+        "500":
+          description: Erreur serveur
+
+  /api/admin/phase-films:
+    get:
+      tags: [CMS Admin]
+      summary: Lister les films par statut de phase 🛡️
+      description: |
+        Retourne la liste des films filtrés par leur `statut`.
+        Utilisé dans le panneau d'administration CMS pour gérer les phases (sélection, finalistes).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: statut
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [valide, selectionne, finaliste, soumis, admis, refuse]
+          description: Filtre par statut du film
+      responses:
+        "200":
+          description: Liste des films
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        original_title:
+                          type: string
+                        statut:
+                          type: string
+                        realisator_name:
+                          type: string
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/admin/films/{id}/phase:
+    patch:
+      tags: [CMS Admin]
+      summary: Mettre à jour le statut de phase d'un film 🛡️
+      description: |
+        Modifie le champ `statut` d'un film pour le faire passer d'une phase à une autre.
+
+        | Valeur | Signification |
+        |---|---|
+        | `valide` | Film validé, en attente de sélection |
+        | `selectionne` | Film dans la Sélection Officielle (Phase 1) |
+        | `finaliste` | Film finaliste (Phase 2) |
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID du film
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [statut]
+              properties:
+                statut:
+                  type: string
+                  enum: [valide, selectionne, finaliste, soumis, admis, refuse]
+            example:
+              statut: selectionne
+      responses:
+        "200":
+          description: Statut mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Statut invalide ou ID manquant
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
+
+  /api/admin/finalist-count:
+    put:
+      tags: [CMS Admin]
+      summary: Mettre à jour le nombre de finalistes 🛡️
+      description: |
+        Modifie la valeur `finalist_count` dans `cms_content` (id=1).
+        Ce nombre détermine combien de films sont affichés dans la Phase 2 (Finalistes) sur la page publique.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [finalist_count]
+              properties:
+                finalist_count:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  description: Nombre de finalistes à afficher (recommandé 5-10)
+            example:
+              finalist_count: 8
+      responses:
+        "200":
+          description: Nombre de finalistes mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Valeur invalide
+        "401":
+          description: Token manquant ou invalide
+        "403":
+          description: Rôle insuffisant
