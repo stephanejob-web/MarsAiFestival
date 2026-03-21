@@ -28,10 +28,10 @@ const DateRow = ({ label, sub, value, onChange, status }: DateRowProps): React.J
                 <div className="text-[0.67rem] text-mist">{sub}</div>
             </div>
             <input
-                type="date"
+                type="datetime-local"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-[140px] shrink-0 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-mono text-[0.75rem] text-white-soft outline-none transition-colors focus:border-aurora/40 scheme-dark"
+                className="w-[180px] shrink-0 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-mono text-[0.75rem] text-white-soft outline-none transition-colors focus:border-aurora/40 scheme-dark"
             />
         </div>
     );
