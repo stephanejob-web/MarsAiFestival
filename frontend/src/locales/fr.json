@@ -5,10 +5,11 @@
             "programme": "Programme",
             "films": "Films",
             "palmares": "Palmarès",
-            "jury": "Jury"
+            "jury": "Jury",
+            "sponsors": "Sponsors"
         },
         "cta": "Déposer un film",
-        "connexion": "Connexion",
+        "connexion": "Espace Jury",
         "langSwitch": "EN"
     },
     "hero": {
