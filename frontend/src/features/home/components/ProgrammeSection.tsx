@@ -20,6 +20,7 @@ interface Day {
 interface ApiEvent {
     id: number;
     day: number;
+    event_date: string | null;
     time: string;
     title: string;
     description: string | null;
@@ -78,28 +79,24 @@ const ProgrammeSection = (): React.JSX.Element => {
         default: t("programme.typeLabels.default"),
     };
 
-    const buildDays = (): Day[] =>
-        [0, 1].map((di) => {
-            let events: Event[] = [];
-            if (apiEvents !== null) {
-                events = apiEvents
-                    .filter((e) => e.day === di + 1)
-                    .map((e) => ({
-                        time: e.time,
-                        title: e.title,
-                        desc: e.description ?? undefined,
-                        type: e.type,
-                    }));
-            }
-            return {
-                label: t(`programme.days.${di}.label`),
-                date: t(`programme.days.${di}.date`),
-                events,
-            };
+    const buildDays = (): Day[] => {
+        if (!apiEvents || apiEvents.length === 0) return [];
+        const dateKeys = [...new Set(
+            apiEvents.map((e) => (e.event_date ? String(e.event_date).slice(0, 10) : null)).filter(Boolean) as string[]
+        )].sort();
+        return dateKeys.map((dk) => {
+            const d = new Date(dk + "T00:00:00");
+            const label = d.toLocaleDateString("fr-FR", { weekday: "long" });
+            const date = d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+            const events = apiEvents
+                .filter((e) => e.event_date && String(e.event_date).slice(0, 10) === dk)
+                .map((e) => ({ time: e.time, title: e.title, desc: e.description ?? undefined, type: e.type }));
+            return { label, date, events };
         });
+    };
 
     const DAYS: Day[] = buildDays();
-    const day = DAYS[activeDay];
+    const day = DAYS[activeDay] ?? { label: "", date: "", events: [] };
 
     return (
         <section id="programme" className="py-24 px-6">
@@ -115,30 +112,34 @@ const ProgrammeSection = (): React.JSX.Element => {
                     <p className="text-mist max-w-lg mx-auto">{t("programme.subtitle")}</p>
                 </div>
 
-                {/* Onglets jours */}
-                <div className="flex gap-2 justify-center mb-10">
-                    {DAYS.map((d, i) => (
-                        <button
-                            key={d.label}
-                            onClick={(): void => setActiveDay(i)}
-                            className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 ${
-                                activeDay === i
-                                    ? "bg-aurora text-[#0a0f2e]"
-                                    : "bg-surface border border-white/10 text-mist hover:text-white hover:border-white/25"
-                            }`}
-                        >
-                            {d.label}
-                            <span className="hidden sm:inline text-xs font-normal ml-2 opacity-70">
-                                {d.date.split(" ").slice(0, 2).join(" ")}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                {/* Onglets jours — cachés si 0 ou 1 jour */}
+                {DAYS.length > 1 && (
+                    <div className="flex gap-2 justify-center mb-10">
+                        {DAYS.map((d, i) => (
+                            <button
+                                key={i}
+                                onClick={(): void => setActiveDay(i)}
+                                className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 ${
+                                    activeDay === i
+                                        ? "bg-aurora text-[#0a0f2e]"
+                                        : "bg-surface border border-white/10 text-mist hover:text-white hover:border-white/25"
+                                }`}
+                            >
+                                {d.label}
+                                <span className="hidden sm:inline text-xs font-normal ml-2 opacity-70">
+                                    {d.date.split(" ").slice(0, 2).join(" ")}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Date complète */}
-                <div className="text-center font-mono text-xs text-white/30 uppercase tracking-widest mb-8">
-                    {day.date}
-                </div>
+                {day.date && (
+                    <div className="text-center font-mono text-xs text-white/30 uppercase tracking-widest mb-8">
+                        {day.date}
+                    </div>
+                )}
 
                 {/* Loading state */}
                 {loadingEvents && (
@@ -147,10 +148,19 @@ const ProgrammeSection = (): React.JSX.Element => {
                     </div>
                 )}
 
+                {/* Empty state */}
+                {!loadingEvents && (DAYS.length === 0 || day.events.length === 0) && (
+                    <div className="text-center py-16 border border-white/8 rounded-2xl">
+                        <div className="font-mono text-xs text-aurora/50 uppercase tracking-widest mb-2">
+                            {t("programme.overline")}
+                        </div>
+                        <p className="text-mist text-sm">{t("programme.empty", "Programme à venir")}</p>
+                    </div>
+                )}
+
                 {/* Timeline */}
-                {!loadingEvents && (
+                {!loadingEvents && day.events.length > 0 && (
                     <div className="relative">
-                        {/* Ligne verticale */}
                         <div
                             className="absolute left-[72px] top-0 bottom-0 w-px bg-white/8"
                             aria-hidden="true"
