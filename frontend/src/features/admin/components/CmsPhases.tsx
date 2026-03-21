@@ -33,6 +33,76 @@ interface PhaseInfo {
 
 const token = () => localStorage.getItem("jury_token") ?? "";
 
+const DEV_PHASES = [
+    { phase: 0, label: "Phase 0", sub: "Inscriptions", color: "border-white/20 text-mist hover:border-white/40" },
+    { phase: 1, label: "Phase 1", sub: "Sélection", color: "border-aurora/40 text-aurora hover:border-aurora" },
+    { phase: 2, label: "Phase 2", sub: "Finalistes", color: "border-lavande/40 text-lavande hover:border-lavande" },
+    { phase: 3, label: "Phase 3", sub: "Palmarès", color: "border-solar/40 text-solar hover:border-solar" },
+];
+
+const DevSimulator = ({ onSimulated }: { onSimulated: () => void }): React.JSX.Element => {
+    const [loading, setLoading] = useState<number | null>(null);
+    const [last, setLast] = useState<number | null>(null);
+
+    const simulate = async (phase: number) => {
+        setLoading(phase);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/phases/simulate`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("jury_token") ?? ""}`,
+                },
+                body: JSON.stringify({ phase }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setLast(phase);
+                onSimulated();
+            }
+        } catch {
+            /* */
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    return (
+        <div className="rounded-xl border border-dashed border-yellow-500/40 bg-yellow-500/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-yellow-400/70 bg-yellow-500/10 border border-yellow-500/20 rounded px-2 py-0.5">
+                    DEV ONLY
+                </span>
+                <span className="text-xs text-yellow-400/60">Simuler une phase — modifie les dates en base</span>
+                {last !== null && (
+                    <span className="ml-auto text-xs text-yellow-400/80 font-mono">
+                        ✓ Phase {last} active
+                    </span>
+                )}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+                {DEV_PHASES.map(({ phase, label, sub, color }) => (
+                    <button
+                        key={phase}
+                        onClick={() => void simulate(phase)}
+                        disabled={loading !== null}
+                        className={`flex flex-col items-center px-4 py-2 rounded-lg border text-xs font-semibold transition-all disabled:opacity-40 ${color} ${last === phase ? "opacity-100 ring-1 ring-current" : "opacity-70"}`}
+                    >
+                        {loading === phase ? (
+                            <span className="animate-pulse">…</span>
+                        ) : (
+                            <>
+                                <span>{label}</span>
+                                <span className="font-normal opacity-70">{sub}</span>
+                            </>
+                        )}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const CmsPhases = (): React.JSX.Element => {
     const [activeTab, setActiveTab] = useState<"phase1" | "phase2" | "phase3">("phase1");
     const [phaseInfo, setPhaseInfo] = useState<PhaseInfo | null>(null);
@@ -49,8 +119,7 @@ const CmsPhases = (): React.JSX.Element => {
     });
     const [editAward, setEditAward] = useState<Award | null>(null);
 
-    // Fetch phase info
-    useEffect(() => {
+    const fetchPhaseInfo = useCallback(() => {
         fetch(`${API_BASE_URL}/api/public/phase`)
             .then((r) => r.json())
             .then((j) => {
@@ -61,6 +130,8 @@ const CmsPhases = (): React.JSX.Element => {
             })
             .catch(() => {});
     }, []);
+
+    useEffect(() => { fetchPhaseInfo(); }, [fetchPhaseInfo]);
 
     const fetchFilms = useCallback(async (statut: string) => {
         setLoading(true);
@@ -164,6 +235,11 @@ const CmsPhases = (): React.JSX.Element => {
 
     return (
         <div className="space-y-6">
+            {/* DEV simulator — visible uniquement en développement */}
+            {import.meta.env.DEV && (
+                <DevSimulator onSimulated={fetchPhaseInfo} />
+            )}
+
             {/* Phase active badge */}
             {phaseInfo && (
                 <div className="bg-surface-2 border border-white/10 rounded-xl p-4 flex items-center gap-3">
