@@ -6,12 +6,21 @@ type EventType = "opening" | "projection" | "masterclass" | "pause" | "gala" | "
 interface ProgrammeEvent {
     id: number;
     day: number;
+    event_date: string | null;
     time: string;
     title: string;
     description: string | null;
     type: EventType;
     sort_order: number;
 }
+
+const formatDateTab = (dateStr: string): string => {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+};
+
+const toInputDate = (dateStr: string | null): string =>
+    dateStr ? String(dateStr).slice(0, 10) : "";
 
 const TYPE_LABELS: Record<EventType, string> = {
     opening: "Cérémonie",
@@ -49,7 +58,7 @@ const EVENT_TYPES: EventType[] = [
     "default",
 ];
 
-const emptyForm = { time: "", title: "", description: "", type: "default" as EventType };
+const emptyForm = { event_date: "", time: "", title: "", description: "", type: "default" as EventType };
 
 const inputClass =
     "w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-[0.78rem] text-white-soft outline-none transition-colors placeholder:text-mist/40 focus:border-aurora/40";
@@ -84,7 +93,7 @@ const TypeSelect = ({
 
 const CmsProgramme = (): React.JSX.Element => {
     const [events, setEvents] = useState<ProgrammeEvent[]>([]);
-    const [activeDay, setActiveDay] = useState<number>(1);
+    const [activeDate, setActiveDate] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const [addForm, setAddForm] = useState({ ...emptyForm });
@@ -93,6 +102,12 @@ const CmsProgramme = (): React.JSX.Element => {
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [savingId, setSavingId] = useState<number | null>(null);
     const [addSaving, setAddSaving] = useState<boolean>(false);
+    const [renamingDate, setRenamingDate] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState<string>("");
+    const [renameSaving, setRenameSaving] = useState<boolean>(false);
+    const [showNewDay, setShowNewDay] = useState<boolean>(false);
+    const [newDayDate, setNewDayDate] = useState<string>("");
+    const [apiError, setApiError] = useState<string | null>(null);
 
     const token = localStorage.getItem("jury_token");
 
@@ -100,7 +115,13 @@ const CmsProgramme = (): React.JSX.Element => {
         try {
             const res = await fetch(`${API_BASE_URL}/api/programme`);
             const json = await res.json();
-            if (json.success) setEvents(json.data);
+            if (json.success) {
+                const data: ProgrammeEvent[] = json.data;
+                setEvents(data);
+                // Auto-select first date tab
+                const dates = [...new Set(data.map((e) => toInputDate(e.event_date)).filter(Boolean))].sort();
+                if (dates.length > 0) setActiveDate((prev) => prev || dates[0]);
+            }
         } catch {
             // silently fail
         } finally {
@@ -112,24 +133,32 @@ const CmsProgramme = (): React.JSX.Element => {
         fetchEvents();
     }, []);
 
-    const dayEvents = events.filter((e) => e.day === activeDay);
+    const allDates = [...new Set(events.map((e) => toInputDate(e.event_date)).filter(Boolean))].sort();
+    const dayEvents = events.filter((e) => toInputDate(e.event_date) === activeDate);
 
     const handleAdd = async () => {
-        if (!addForm.time || !addForm.title) return;
+        if (!addForm.time || !addForm.title || !addForm.event_date) return;
         setAddSaving(true);
+        setApiError(null);
         try {
             const sort_order = dayEvents.length;
             const res = await fetch(`${API_BASE_URL}/api/programme`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ ...addForm, day: activeDay, sort_order }),
+                body: JSON.stringify({ ...addForm, day: 1, sort_order }),
             });
             const json = await res.json();
             if (json.success) {
+                const newDate = addForm.event_date;
                 setAddForm({ ...emptyForm });
                 setShowAddForm(false);
                 await fetchEvents();
+                if (newDate) setActiveDate(newDate);
+            } else {
+                setApiError(json.message ?? `Erreur ${res.status}`);
             }
+        } catch (e) {
+            setApiError("Impossible de contacter le serveur.");
         } finally {
             setAddSaving(false);
         }
@@ -138,6 +167,7 @@ const CmsProgramme = (): React.JSX.Element => {
     const startEdit = (event: ProgrammeEvent) => {
         setEditingId(event.id);
         setEditForm({
+            event_date: toInputDate(event.event_date),
             time: event.time,
             title: event.title,
             description: event.description ?? "",
@@ -162,6 +192,28 @@ const CmsProgramme = (): React.JSX.Element => {
             }
         } finally {
             setSavingId(null);
+        }
+    };
+
+    const handleRenameDate = async () => {
+        if (!renamingDate || !renameValue || renameValue === renamingDate) return;
+        setRenameSaving(true);
+        const ids = events.filter((e) => toInputDate(e.event_date) === renamingDate).map((e) => e.id);
+        try {
+            await Promise.all(
+                ids.map((id) =>
+                    fetch(`${API_BASE_URL}/api/programme/${id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ event_date: renameValue }),
+                    }),
+                ),
+            );
+            setActiveDate(renameValue);
+            setRenamingDate(null);
+            await fetchEvents();
+        } finally {
+            setRenameSaving(false);
         }
     };
 
@@ -206,16 +258,16 @@ const CmsProgramme = (): React.JSX.Element => {
                             : "Gérez les événements par jour"}
                     </div>
                 </div>
-                {/* Compteur par jour */}
+                {/* Compteur par date */}
                 <div className="hidden sm:flex items-center gap-2">
-                    {[1, 2].map((d) => {
-                        const count = events.filter((e) => e.day === d).length;
+                    {allDates.map((d) => {
+                        const count = events.filter((e) => toInputDate(e.event_date) === d).length;
                         return (
                             <span
                                 key={d}
                                 className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[0.65rem] text-mist"
                             >
-                                Jour {d} · {count}
+                                {d} · {count}
                             </span>
                         );
                     })}
@@ -224,30 +276,112 @@ const CmsProgramme = (): React.JSX.Element => {
 
             {/* Body */}
             <div className="border-t border-white/[0.05] px-5 pb-5 pt-4">
-                {/* Onglets jours */}
-                <div className="mb-4 flex gap-2">
-                    {[1, 2].map((d) => (
-                        <button
-                            key={d}
-                            onClick={() => {
-                                setActiveDay(d);
-                                setEditingId(null);
-                                setShowAddForm(false);
-                            }}
-                            className={`flex items-center gap-2 rounded-lg border px-4 py-2 font-display text-[0.78rem] font-bold transition-all ${
-                                activeDay === d
-                                    ? "border-aurora/40 bg-aurora/10 text-aurora"
-                                    : "border-white/10 bg-white/5 text-mist hover:border-white/20 hover:text-white-soft"
-                            }`}
-                        >
-                            <span>Jour {d}</span>
-                            <span
-                                className={`text-[0.68rem] font-normal ${activeDay === d ? "text-aurora/70" : "text-white/30"}`}
-                            >
-                                {d === 1 ? "Samedi 14" : "Dimanche 15"}
-                            </span>
-                        </button>
+                {/* Onglets par date */}
+                <div className="mb-4 flex flex-wrap gap-2">
+                    {allDates.map((d, i) => (
+                        <div key={d} className="flex items-center gap-1">
+                            {renamingDate === d ? (
+                                /* ── Mode renommage ── */
+                                <div className="flex items-center gap-1.5 rounded-lg border border-aurora/40 bg-aurora/5 px-3 py-1.5">
+                                    <input
+                                        type="date"
+                                        value={renameValue}
+                                        onChange={(e) => setRenameValue(e.target.value)}
+                                        className="w-[140px] rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-[0.72rem] text-white-soft outline-none focus:border-aurora/40 scheme-dark"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={handleRenameDate}
+                                        disabled={renameSaving || !renameValue}
+                                        className="rounded border border-aurora/30 bg-aurora/10 px-2.5 py-1 text-[0.7rem] font-bold text-aurora hover:bg-aurora/20 disabled:opacity-50"
+                                    >
+                                        {renameSaving ? "…" : "✓"}
+                                    </button>
+                                    <button
+                                        onClick={() => setRenamingDate(null)}
+                                        className="rounded border border-white/10 px-2 py-1 text-[0.7rem] text-mist hover:text-white-soft"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ) : (
+                                /* ── Onglet normal ── */
+                                <div className={`flex items-center gap-1.5 rounded-lg border transition-all ${activeDate === d ? "border-aurora/40 bg-aurora/10" : "border-white/10 bg-white/5"}`}>
+                                    <button
+                                        onClick={() => {
+                                            setActiveDate(d);
+                                            setEditingId(null);
+                                            setShowAddForm(false);
+                                        }}
+                                        className={`flex items-center gap-2 px-3 py-2 font-display text-[0.78rem] font-bold ${activeDate === d ? "text-aurora" : "text-mist hover:text-white-soft"}`}
+                                    >
+                                        <span>Jour {i + 1}</span>
+                                        <span className={`text-[0.68rem] font-normal ${activeDate === d ? "text-aurora/70" : "text-white/30"}`}>
+                                            {formatDateTab(d)}
+                                        </span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setRenamingDate(d);
+                                            setRenameValue(d);
+                                            setActiveDate(d);
+                                        }}
+                                        title="Changer la date"
+                                        className={`pr-2.5 py-2 text-[0.7rem] transition-colors ${activeDate === d ? "text-aurora/50 hover:text-aurora" : "text-white/20 hover:text-mist"}`}
+                                    >
+                                        <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3" stroke="currentColor" strokeWidth="1.5">
+                                            <path d="M11 2l3 3-8 8H3v-3l8-8z" strokeLinejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     ))}
+                    {allDates.length === 0 && !showNewDay && (
+                        <span className="text-[0.75rem] text-mist/50 italic">Aucune date — ajoutez un jour</span>
+                    )}
+
+                    {/* Bouton + Nouveau jour */}
+                    {showNewDay ? (
+                        <div className="flex items-center gap-1.5 rounded-lg border border-solar/30 bg-solar/5 px-3 py-1.5">
+                            <input
+                                type="date"
+                                value={newDayDate}
+                                onChange={(e) => setNewDayDate(e.target.value)}
+                                className="w-[140px] rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-[0.72rem] text-white-soft outline-none focus:border-solar/40 scheme-dark"
+                                autoFocus
+                            />
+                            <button
+                                disabled={!newDayDate || allDates.includes(newDayDate)}
+                                onClick={() => {
+                                    setActiveDate(newDayDate);
+                                    setAddForm({ ...emptyForm, event_date: newDayDate });
+                                    setShowAddForm(true);
+                                    setShowNewDay(false);
+                                    setNewDayDate("");
+                                    setEditingId(null);
+                                }}
+                                className="rounded border border-solar/30 bg-solar/10 px-2.5 py-1 text-[0.7rem] font-bold text-solar hover:bg-solar/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                title={allDates.includes(newDayDate) ? "Ce jour existe déjà" : ""}
+                            >
+                                ✓
+                            </button>
+                            <button
+                                onClick={() => { setShowNewDay(false); setNewDayDate(""); }}
+                                className="rounded border border-white/10 px-2 py-1 text-[0.7rem] text-mist hover:text-white-soft"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => { setShowNewDay(true); setRenamingDate(null); }}
+                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-white/15 px-3 py-2 font-display text-[0.75rem] font-bold text-white/30 transition-all hover:border-solar/30 hover:text-solar"
+                        >
+                            <span className="text-base leading-none">+</span>
+                            Nouveau jour
+                        </button>
+                    )}
                 </div>
 
                 {/* Liste des événements */}
@@ -295,7 +429,23 @@ const CmsProgramme = (): React.JSX.Element => {
                                         <div className="text-[0.68rem] font-bold uppercase tracking-widest text-aurora">
                                             Modifier l'événement
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2">
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                                    Date *
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={editForm.event_date ?? ""}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            event_date: e.target.value,
+                                                        }))
+                                                    }
+                                                    className={`${inputClass} scheme-dark`}
+                                                />
+                                            </div>
                                             <div>
                                                 <label className="mb-1 block text-[0.67rem] text-mist">
                                                     Heure
@@ -462,10 +612,22 @@ const CmsProgramme = (): React.JSX.Element => {
                 {showAddForm ? (
                     <div className="mt-3 flex flex-col gap-3 rounded-xl border border-aurora/20 bg-aurora/[0.04] p-4">
                         <div className="text-[0.68rem] font-bold uppercase tracking-widest text-aurora">
-                            Nouvel événement — Jour {activeDay} ·{" "}
-                            {activeDay === 1 ? "Samedi 14 mars" : "Dimanche 15 mars"}
+                            Nouvel événement
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
+                            <div>
+                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                    Date *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={addForm.event_date}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, event_date: e.target.value }))
+                                    }
+                                    className={`${inputClass} scheme-dark`}
+                                />
+                            </div>
                             <div>
                                 <label className="mb-1 block text-[0.67rem] text-mist">
                                     Heure *
@@ -517,10 +679,15 @@ const CmsProgramme = (): React.JSX.Element => {
                                 onChange={(v) => setAddForm((p) => ({ ...p, type: v }))}
                             />
                         </div>
+                        {apiError && (
+                            <div className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-2 text-[0.72rem] text-coral">
+                                {apiError}
+                            </div>
+                        )}
                         <div className="flex gap-2 pt-1">
                             <button
                                 onClick={handleAdd}
-                                disabled={addSaving || !addForm.time || !addForm.title}
+                                disabled={addSaving || !addForm.event_date || !addForm.time || !addForm.title}
                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {addSaving ? "Ajout en cours…" : "✓ Ajouter l'événement"}
@@ -542,7 +709,7 @@ const CmsProgramme = (): React.JSX.Element => {
                         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-aurora/25 bg-aurora/[0.04] py-2.5 text-[0.8rem] font-bold text-aurora/70 transition-all hover:border-aurora/40 hover:bg-aurora/10 hover:text-aurora"
                     >
                         <span className="text-lg leading-none">+</span>
-                        Ajouter un événement au Jour {activeDay}
+                        Ajouter un événement{activeDate ? ` — ${formatDateTab(activeDate)}` : ""}
                     </button>
                 )}
             </div>
