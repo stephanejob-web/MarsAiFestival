@@ -57,6 +57,9 @@ CREATE TABLE `cms_content` (
   `phase_top50_close_date` date DEFAULT NULL,
   `phase_award_open_date` date DEFAULT NULL,
   `phase_award_close_date` date DEFAULT NULL,
+  `submission_open_date` date DEFAULT NULL,
+  `submission_close_date` date DEFAULT NULL,
+  `ceremony_date` date DEFAULT NULL,
   `header_logo_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `hero_video_toggle` tinyint(1) NOT NULL DEFAULT '1',
   `is_jury_list_toggle` tinyint(1) NOT NULL DEFAULT '0',
@@ -68,6 +71,41 @@ CREATE TABLE `cms_content` (
 
 /*!40000 ALTER TABLE `cms_content` DISABLE KEYS */;
 /*!40000 ALTER TABLE `cms_content` ENABLE KEYS */;
+DROP TABLE IF EXISTS `programme_event`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `programme_event` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `day` tinyint NOT NULL COMMENT '1=Samedi 14, 2=Dimanche 15',
+  `time` varchar(5) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `type` enum('opening','projection','masterclass','pause','gala','default') NOT NULL DEFAULT 'default',
+  `sort_order` int NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40000 ALTER TABLE `programme_event` DISABLE KEYS */;
+INSERT INTO `programme_event` (`id`,`day`,`time`,`title`,`description`,`type`,`sort_order`) VALUES
+(1,1,'09:00','Accueil & accréditations','Ouverture des portes — Friches Belle de Mai, Marseille.','default',0),
+(2,1,'10:00','Ouverture officielle','Mot de la présidente du jury et présentation de l''édition 2026.','opening',1),
+(3,1,'10:45','Masterclass — Créer avec Sora & Runway','Techniques, prompts et workflow pour le court-métrage IA.','masterclass',2),
+(4,1,'12:30','Pause déjeuner',NULL,'pause',3),
+(5,1,'14:00','Projections — Sélection officielle (Bloc 1/4)','5 films en compétition. Séance suivie d''une discussion avec les créateurs.','projection',4),
+(6,1,'15:45','Table ronde — L''IA change-t-elle le regard du cinéaste ?','Avec des réalisateurs, producteurs et artistes numériques.','masterclass',5),
+(7,1,'17:00','Projections — Sélection officielle (Bloc 2/4)','5 films en compétition.','projection',6),
+(8,1,'18:30','Apéritif créateurs','Networking & rencontres entre participants.','default',7),
+(9,1,'20:00','Soirée d''ouverture — DJ set génératif','Musique générée en temps réel par IA. Entrée libre.','gala',8),
+(10,2,'09:30','Projections — Sélection officielle (Bloc 3/4)','5 films en compétition.','projection',0),
+(11,2,'11:00','Atelier live — Prompt to Screen en 60 minutes','Créez un court-métrage IA en direct avec les outils du festival.','masterclass',1),
+(12,2,'12:30','Pause déjeuner',NULL,'pause',2),
+(13,2,'14:00','Projections — Sélection officielle (Bloc 4/4)','5 films en compétition. Dernière séance avant délibération.','projection',3),
+(14,2,'15:30','Délibération du jury','Séance à huis clos — vote du public ouvert en ligne.','default',4),
+(15,2,'17:30','Clôture du vote public',NULL,'opening',5),
+(16,2,'19:00','Cérémonie des prix','Remise des prix — Friches Belle de Mai.','gala',6),
+(17,2,'20:30','Soirée de clôture — Performance IA live','Clôture artistique et cocktail final.','gala',7);
+/*!40000 ALTER TABLE `programme_event` ENABLE KEYS */;
 DROP TABLE IF EXISTS `collaborator`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -464,6 +502,26 @@ CREATE TABLE `vote_tags` (
 /*!40000 ALTER TABLE `vote_tags` DISABLE KEYS */;
 INSERT INTO `vote_tags` VALUES (1,'rights','Droits musicaux','🎵','aurora',1,0,'2026-03-20 12:16:02','Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux qui nécessite votre attention avant toute diffusion.\n\nCordialement,\nLe jury marsAI Festival 2026'),(2,'quality','Qualité','📋','solar',1,1,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été visionné par le jury. La qualité technique ou artistique ne correspond pas encore aux critères du festival. Nous vous encourageons à retravailler certains aspects.\n\nCordialement,\nLe jury marsAI Festival 2026'),(3,'content','Contenu','⚠️','coral',1,2,'2026-03-20 12:16:02','Bonjour,\n\nLe contenu de votre film soulève des réserves de la part du jury. Certains éléments ne sont pas conformes à la charte éditoriale du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(4,'tech','YouTube','📺','lavande',1,3,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été identifié comme déjà disponible sur des plateformes publiques (YouTube, etc.), ce qui ne correspond pas aux critères de première diffusion du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(5,'other','Autre','❓','mist',1,4,'2026-03-20 12:16:02','Bonjour,\n\nAprès évaluation, le jury a décidé de ne pas retenir votre film pour cette édition du festival marsAI 2026.\n\nCordialement,\nLe jury marsAI Festival 2026');
 /*!40000 ALTER TABLE `vote_tags` ENABLE KEYS */;
+
+DROP TABLE IF EXISTS `jury_showcase`;
+CREATE TABLE `jury_showcase` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `display_role` varchar(255) NOT NULL,
+  `badge` varchar(100) NOT NULL DEFAULT 'Membre du Jury',
+  `quote` text DEFAULT NULL,
+  `photo_url` varchar(500) DEFAULT NULL,
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  `sort_order` int NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `jury_showcase` (`name`, `display_role`, `badge`, `quote`, `photo_url`, `is_featured`, `sort_order`, `is_active`) VALUES
+('Justine Triet', 'Réalisatrice', 'Présidente du Jury', 'Palme d''Or 2023 pour Anatomie d''une chute. Elle préside le jury marsAI 2026 avec l''ambition d''élever la création IA au rang d''art majeur.', 'https://stephanejob-web.github.io/mars-AI/assets/j2.jpg', 1, 0, 1),
+('David Fincher', 'Réalisateur & Producteur', 'Membre du Jury', NULL, 'https://stephanejob-web.github.io/mars-AI/assets/j4.jpg', 0, 1, 1),
+('Cédric Jimenez', 'Réalisateur & Scénariste', 'Membre du Jury', NULL, 'https://stephanejob-web.github.io/mars-AI/assets/j3.jpg', 0, 2, 1);
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
