@@ -52,7 +52,9 @@ const CmsJury = (): React.JSX.Element => {
         }
     };
 
-    useEffect(() => { fetchMembers(); }, []);
+    useEffect(() => {
+        fetchMembers();
+    }, []);
 
     const handleAdd = async () => {
         if (!addForm.name || !addForm.display_role) return;
@@ -76,7 +78,9 @@ const CmsJury = (): React.JSX.Element => {
                 setShowAddForm(false);
                 await fetchMembers();
             }
-        } finally { setAddSaving(false); }
+        } finally {
+            setAddSaving(false);
+        }
     };
 
     const startEdit = (member: JuryShowcaseMember) => {
@@ -112,7 +116,9 @@ const CmsJury = (): React.JSX.Element => {
                 setEditForm({});
                 await fetchMembers();
             }
-        } finally { setSavingId(null); }
+        } finally {
+            setSavingId(null);
+        }
     };
 
     const handleDelete = async (id: number) => {
@@ -126,7 +132,9 @@ const CmsJury = (): React.JSX.Element => {
                 setConfirmDeleteId(null);
                 await fetchMembers();
             }
-        } catch { /* silently fail */ }
+        } catch {
+            /* silently fail */
+        }
     };
 
     const toggleActive = async (member: JuryShowcaseMember) => {
@@ -137,7 +145,9 @@ const CmsJury = (): React.JSX.Element => {
                 body: JSON.stringify({ is_active: member.is_active === 1 ? 0 : 1 }),
             });
             await fetchMembers();
-        } catch { /* silently fail */ }
+        } catch {
+            /* silently fail */
+        }
     };
 
     const toggleFeatured = async (member: JuryShowcaseMember) => {
@@ -150,10 +160,13 @@ const CmsJury = (): React.JSX.Element => {
                     .map((m) =>
                         fetch(`${API_BASE_URL}/api/jury-showcase/${m.id}`, {
                             method: "PUT",
-                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                            },
                             body: JSON.stringify({ is_featured: 0 }),
-                        })
-                    )
+                        }),
+                    ),
             );
             await fetch(`${API_BASE_URL}/api/jury-showcase/${member.id}`, {
                 method: "PUT",
@@ -161,7 +174,9 @@ const CmsJury = (): React.JSX.Element => {
                 body: JSON.stringify({ is_featured: 1 }),
             });
             await fetchMembers();
-        } catch { /* silently fail */ }
+        } catch {
+            /* silently fail */
+        }
     };
 
     return (
@@ -210,16 +225,34 @@ const CmsJury = (): React.JSX.Element => {
             <div className="border-t border-white/[0.05] px-5 pb-5 pt-4">
                 {loading ? (
                     <div className="flex items-center justify-center gap-2 py-8 text-[0.78rem] text-mist">
-                        <svg className="h-4 w-4 animate-spin opacity-50" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        <svg
+                            className="h-4 w-4 animate-spin opacity-50"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                        >
+                            <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            />
+                            <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8H4z"
+                            />
                         </svg>
                         Chargement…
                     </div>
                 ) : members.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-white/10 py-8 text-center text-[0.78rem] text-mist">
-                        Aucun membre dans le jury.<br />
-                        <span className="text-aurora/60">Cliquez sur « Ajouter » pour commencer.</span>
+                        Aucun membre dans le jury.
+                        <br />
+                        <span className="text-aurora/60">
+                            Cliquez sur « Ajouter » pour commencer.
+                        </span>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
@@ -240,54 +273,89 @@ const CmsJury = (): React.JSX.Element => {
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="mb-1 block text-[0.67rem] text-mist">Nom complet *</label>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                                    Nom complet *
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder="Ex: Justine Triet"
                                                     value={editForm.name ?? ""}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            name: e.target.value,
+                                                        }))
+                                                    }
                                                     className={inputClass}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-[0.67rem] text-mist">Rôle affiché *</label>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                                    Rôle affiché *
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder="Ex: Réalisatrice"
                                                     value={editForm.display_role ?? ""}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, display_role: e.target.value }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            display_role: e.target.value,
+                                                        }))
+                                                    }
                                                     className={inputClass}
                                                 />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="mb-1 block text-[0.67rem] text-mist">Badge</label>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                                    Badge
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder="Ex: Membre du Jury"
                                                     value={editForm.badge ?? ""}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, badge: e.target.value }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            badge: e.target.value,
+                                                        }))
+                                                    }
                                                     className={inputClass}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-[0.67rem] text-mist">URL photo</label>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                                    URL photo
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder="https://…"
                                                     value={editForm.photo_url ?? ""}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, photo_url: e.target.value }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            photo_url: e.target.value,
+                                                        }))
+                                                    }
                                                     className={inputClass}
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="mb-1 block text-[0.67rem] text-mist">Citation</label>
+                                            <label className="mb-1 block text-[0.67rem] text-mist">
+                                                Citation
+                                            </label>
                                             <textarea
                                                 placeholder="Citation ou biographie courte (optionnel)"
                                                 value={editForm.quote ?? ""}
-                                                onChange={(e) => setEditForm((p) => ({ ...p, quote: e.target.value }))}
+                                                onChange={(e) =>
+                                                    setEditForm((p) => ({
+                                                        ...p,
+                                                        quote: e.target.value,
+                                                    }))
+                                                }
                                                 rows={2}
                                                 className={`${inputClass} resize-none`}
                                             />
@@ -297,7 +365,12 @@ const CmsJury = (): React.JSX.Element => {
                                                 <input
                                                     type="checkbox"
                                                     checked={editForm.is_featured === 1}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, is_featured: e.target.checked ? 1 : 0 }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            is_featured: e.target.checked ? 1 : 0,
+                                                        }))
+                                                    }
                                                     className="accent-aurora"
                                                 />
                                                 <span>Carte vedette ⭐</span>
@@ -306,7 +379,12 @@ const CmsJury = (): React.JSX.Element => {
                                                 <input
                                                     type="checkbox"
                                                     checked={editForm.is_active === 1}
-                                                    onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.checked ? 1 : 0 }))}
+                                                    onChange={(e) =>
+                                                        setEditForm((p) => ({
+                                                            ...p,
+                                                            is_active: e.target.checked ? 1 : 0,
+                                                        }))
+                                                    }
                                                     className="accent-aurora"
                                                 />
                                                 <span>Visible publiquement</span>
@@ -318,10 +396,15 @@ const CmsJury = (): React.JSX.Element => {
                                                 disabled={savingId === member.id}
                                                 className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:opacity-60"
                                             >
-                                                {savingId === member.id ? "Enregistrement…" : "✓ Enregistrer"}
+                                                {savingId === member.id
+                                                    ? "Enregistrement…"
+                                                    : "✓ Enregistrer"}
                                             </button>
                                             <button
-                                                onClick={() => { setEditingId(null); setEditForm({}); }}
+                                                onClick={() => {
+                                                    setEditingId(null);
+                                                    setEditForm({});
+                                                }}
                                                 className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20 hover:text-white-soft"
                                             >
                                                 Annuler
@@ -332,8 +415,12 @@ const CmsJury = (): React.JSX.Element => {
                                     /* Delete confirmation */
                                     <div className="flex items-center justify-between gap-3 rounded-xl border border-coral/20 bg-coral/5 px-4 py-3">
                                         <div>
-                                            <div className="text-[0.78rem] font-semibold text-coral">Supprimer ce membre ?</div>
-                                            <div className="text-[0.7rem] text-mist">« {member.name} » sera retiré du jury.</div>
+                                            <div className="text-[0.78rem] font-semibold text-coral">
+                                                Supprimer ce membre ?
+                                            </div>
+                                            <div className="text-[0.7rem] text-mist">
+                                                « {member.name} » sera retiré du jury.
+                                            </div>
                                         </div>
                                         <div className="flex shrink-0 gap-2">
                                             <button
@@ -363,7 +450,9 @@ const CmsJury = (): React.JSX.Element => {
                                                 />
                                             ) : (
                                                 <div className="flex h-[52px] w-[44px] shrink-0 items-center justify-center rounded-[8px] border border-white/10 bg-white/5">
-                                                    <span className="text-[10px] text-mist">Photo</span>
+                                                    <span className="text-[10px] text-mist">
+                                                        Photo
+                                                    </span>
                                                 </div>
                                             )}
                                             <div>
@@ -382,8 +471,12 @@ const CmsJury = (): React.JSX.Element => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="mt-0.5 text-[0.72rem] text-mist">{member.display_role}</div>
-                                                <div className="mt-0.5 font-mono text-[0.62rem] text-white/30 uppercase tracking-wider">{member.badge}</div>
+                                                <div className="mt-0.5 text-[0.72rem] text-mist">
+                                                    {member.display_role}
+                                                </div>
+                                                <div className="mt-0.5 font-mono text-[0.62rem] text-white/30 uppercase tracking-wider">
+                                                    {member.badge}
+                                                </div>
                                                 {member.quote && (
                                                     <p className="mt-1 text-[0.69rem] leading-relaxed text-mist/60 italic line-clamp-1">
                                                         {member.quote}
@@ -411,7 +504,11 @@ const CmsJury = (): React.JSX.Element => {
                                             <div className="flex gap-1">
                                                 <button
                                                     onClick={() => toggleActive(member)}
-                                                    title={member.is_active === 1 ? "Masquer" : "Afficher"}
+                                                    title={
+                                                        member.is_active === 1
+                                                            ? "Masquer"
+                                                            : "Afficher"
+                                                    }
                                                     className={`rounded-md border px-2 py-0.5 text-[0.65rem] transition-all ${
                                                         member.is_active === 1
                                                             ? "border-aurora/20 bg-aurora/5 text-aurora hover:bg-aurora/10"
@@ -449,22 +546,30 @@ const CmsJury = (): React.JSX.Element => {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div>
-                                <label className="mb-1 block text-[0.67rem] text-mist">Nom complet *</label>
+                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                    Nom complet *
+                                </label>
                                 <input
                                     type="text"
                                     placeholder="Ex: Justine Triet"
                                     value={addForm.name}
-                                    onChange={(e) => setAddForm((p) => ({ ...p, name: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, name: e.target.value }))
+                                    }
                                     className={inputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-[0.67rem] text-mist">Rôle affiché *</label>
+                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                    Rôle affiché *
+                                </label>
                                 <input
                                     type="text"
                                     placeholder="Ex: Réalisatrice"
                                     value={addForm.display_role}
-                                    onChange={(e) => setAddForm((p) => ({ ...p, display_role: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, display_role: e.target.value }))
+                                    }
                                     className={inputClass}
                                 />
                             </div>
@@ -476,17 +581,23 @@ const CmsJury = (): React.JSX.Element => {
                                     type="text"
                                     placeholder="Membre du Jury"
                                     value={addForm.badge}
-                                    onChange={(e) => setAddForm((p) => ({ ...p, badge: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, badge: e.target.value }))
+                                    }
                                     className={inputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-[0.67rem] text-mist">URL photo</label>
+                                <label className="mb-1 block text-[0.67rem] text-mist">
+                                    URL photo
+                                </label>
                                 <input
                                     type="text"
                                     placeholder="https://…"
                                     value={addForm.photo_url}
-                                    onChange={(e) => setAddForm((p) => ({ ...p, photo_url: e.target.value }))}
+                                    onChange={(e) =>
+                                        setAddForm((p) => ({ ...p, photo_url: e.target.value }))
+                                    }
                                     className={inputClass}
                                 />
                             </div>
@@ -496,7 +607,9 @@ const CmsJury = (): React.JSX.Element => {
                             <textarea
                                 placeholder="Citation ou biographie courte (optionnel)"
                                 value={addForm.quote}
-                                onChange={(e) => setAddForm((p) => ({ ...p, quote: e.target.value }))}
+                                onChange={(e) =>
+                                    setAddForm((p) => ({ ...p, quote: e.target.value }))
+                                }
                                 rows={2}
                                 className={`${inputClass} resize-none`}
                             />
@@ -505,7 +618,12 @@ const CmsJury = (): React.JSX.Element => {
                             <input
                                 type="checkbox"
                                 checked={addForm.is_featured === 1}
-                                onChange={(e) => setAddForm((p) => ({ ...p, is_featured: e.target.checked ? 1 : 0 }))}
+                                onChange={(e) =>
+                                    setAddForm((p) => ({
+                                        ...p,
+                                        is_featured: e.target.checked ? 1 : 0,
+                                    }))
+                                }
                                 className="accent-aurora"
                             />
                             <span>Carte vedette ⭐ (Présidente du jury)</span>
@@ -519,7 +637,10 @@ const CmsJury = (): React.JSX.Element => {
                                 {addSaving ? "Ajout en cours…" : "✓ Ajouter le membre"}
                             </button>
                             <button
-                                onClick={() => { setShowAddForm(false); setAddForm({ ...emptyAddForm }); }}
+                                onClick={() => {
+                                    setShowAddForm(false);
+                                    setAddForm({ ...emptyAddForm });
+                                }}
                                 className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20 hover:text-white-soft"
                             >
                                 Annuler

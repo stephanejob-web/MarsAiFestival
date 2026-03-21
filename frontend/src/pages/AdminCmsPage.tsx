@@ -12,15 +12,15 @@ const SectionTitle = ({ icon, title, subtitle }: SectionTitleProps): React.JSX.E
     <div className="flex items-center gap-3">
         <span className="text-xl">{icon}</span>
         <div>
-            <div className="font-display text-[0.95rem] font-extrabold text-white-soft">{title}</div>
+            <div className="font-display text-[0.95rem] font-extrabold text-white-soft">
+                {title}
+            </div>
             <div className="text-[0.72rem] text-mist">{subtitle}</div>
         </div>
     </div>
 );
 
-const Divider = (): React.JSX.Element => (
-    <div className="my-6 h-px w-full bg-white/[0.05]" />
-);
+const Divider = (): React.JSX.Element => <div className="my-6 h-px w-full bg-white/[0.05]" />;
 
 const AdminCmsPage = (): React.JSX.Element => {
     return (
@@ -43,7 +43,9 @@ const AdminCmsPage = (): React.JSX.Element => {
 
             {/* Quick nav */}
             <div className="flex items-center gap-2 border-b border-white/[0.04] bg-surface/60 px-5 py-2">
-                <span className="text-[0.68rem] text-mist/50 uppercase tracking-widest font-mono mr-1">Aller à :</span>
+                <span className="text-[0.68rem] text-mist/50 uppercase tracking-widest font-mono mr-1">
+                    Aller à :
+                </span>
                 <a
                     href="#cms-programme"
                     className="rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"

@@ -27,12 +27,19 @@ export const getAllMembers = async (): Promise<JuryShowcaseMember[]> => {
     return rows as JuryShowcaseMember[];
 };
 
-export const createMember = async (
-    data: Omit<JuryShowcaseMember, "id">,
-): Promise<number> => {
+export const createMember = async (data: Omit<JuryShowcaseMember, "id">): Promise<number> => {
     const [result] = await pool.execute<ResultSetHeader>(
         "INSERT INTO jury_showcase (name, display_role, badge, quote, photo_url, is_featured, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [data.name, data.display_role, data.badge, data.quote, data.photo_url, data.is_featured, data.sort_order, data.is_active],
+        [
+            data.name,
+            data.display_role,
+            data.badge,
+            data.quote,
+            data.photo_url,
+            data.is_featured,
+            data.sort_order,
+            data.is_active,
+        ],
     );
     return result.insertId;
 };
@@ -41,7 +48,16 @@ export const updateMember = async (
     id: number,
     data: Partial<Omit<JuryShowcaseMember, "id">>,
 ): Promise<void> => {
-    const allowed = ["name", "display_role", "badge", "quote", "photo_url", "is_featured", "sort_order", "is_active"];
+    const allowed = [
+        "name",
+        "display_role",
+        "badge",
+        "quote",
+        "photo_url",
+        "is_featured",
+        "sort_order",
+        "is_active",
+    ];
     const entries = Object.entries(data).filter(([k]) => allowed.includes(k));
     if (entries.length === 0) return;
     const fields = entries.map(([k]) => `\`${k}\` = ?`).join(", ");

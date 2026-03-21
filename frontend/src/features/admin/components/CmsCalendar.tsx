@@ -10,8 +10,8 @@ interface DateRowProps {
 }
 
 const STATUS_DOT: Record<string, string> = {
-    past:     "bg-white/20",
-    active:   "bg-aurora",
+    past: "bg-white/20",
+    active: "bg-aurora",
     upcoming: "bg-solar",
 };
 
@@ -22,7 +22,9 @@ const DateRow = ({ label, sub, value, onChange, status }: DateRowProps): React.J
         <div className="flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 transition-colors hover:border-white/10">
             <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${dot}`} />
             <div className="min-w-0 flex-1">
-                <div className="text-[0.81rem] font-semibold leading-snug text-white-soft">{label}</div>
+                <div className="text-[0.81rem] font-semibold leading-snug text-white-soft">
+                    {label}
+                </div>
                 <div className="text-[0.67rem] text-mist">{sub}</div>
             </div>
             <input
@@ -60,25 +62,48 @@ const CmsCalendar = (): React.JSX.Element => {
             <div className="flex items-center gap-3 px-5 pb-3 pt-[18px]">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-solar/20 bg-solar/10">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <rect x="2" y="3" width="12" height="11" rx="2" stroke="#f5e642" strokeWidth="1.4" />
-                        <path d="M2 7h12M5 1v4M11 1v4" stroke="#f5e642" strokeWidth="1.4" strokeLinecap="round" />
+                        <rect
+                            x="2"
+                            y="3"
+                            width="12"
+                            height="11"
+                            rx="2"
+                            stroke="#f5e642"
+                            strokeWidth="1.4"
+                        />
+                        <path
+                            d="M2 7h12M5 1v4M11 1v4"
+                            stroke="#f5e642"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                        />
                     </svg>
                 </div>
                 <div className="flex-1">
-                    <div className="font-display text-[0.92rem] font-extrabold text-white-soft">Calendrier</div>
-                    <div className="text-[0.71rem] text-mist">Dates clés affichées publiquement</div>
+                    <div className="font-display text-[0.92rem] font-extrabold text-white-soft">
+                        Calendrier
+                    </div>
+                    <div className="text-[0.71rem] text-mist">
+                        Dates clés affichées publiquement
+                    </div>
                 </div>
                 {/* Légende */}
                 <div className="hidden sm:flex items-center gap-3 text-[0.65rem] text-mist">
-                    <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-aurora inline-block" /> En cours</span>
-                    <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-solar inline-block" /> À venir</span>
-                    <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-white/20 inline-block" /> Passé</span>
+                    <span className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-aurora inline-block" /> En
+                        cours
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-solar inline-block" /> À venir
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white/20 inline-block" /> Passé
+                    </span>
                 </div>
             </div>
 
             {/* Body */}
             <div className="border-t border-white/[0.05] px-5 pb-5 pt-3">
-
                 <GroupLabel>Candidatures</GroupLabel>
                 <div className="flex flex-col gap-1.5">
                     <DateRow
@@ -135,7 +160,11 @@ const CmsCalendar = (): React.JSX.Element => {
                             : "border-aurora/25 bg-aurora/10 text-aurora hover:border-aurora/40 hover:bg-aurora/15"
                     }`}
                 >
-                    {saved ? "✓ Calendrier enregistré" : isSaving ? "Enregistrement…" : "Enregistrer le calendrier →"}
+                    {saved
+                        ? "✓ Calendrier enregistré"
+                        : isSaving
+                          ? "Enregistrement…"
+                          : "Enregistrer le calendrier →"}
                 </button>
             </div>
         </div>

@@ -12,9 +12,12 @@ interface CalendarConfig {
 }
 
 const empty: CalendarConfig = {
-    submission_open: "", submission_close: "",
-    phase1_open: "", phase1_close: "",
-    phase2_open: "", phase2_close: "",
+    submission_open: "",
+    submission_close: "",
+    phase1_open: "",
+    phase1_close: "",
+    phase2_open: "",
+    phase2_close: "",
     ceremony_date: "",
 };
 
@@ -28,7 +31,9 @@ export const useCmsCalendar = () => {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
             .then((r) => r.json())
-            .then((json) => { if (json.success) setData({ ...empty, ...json.data }); })
+            .then((json) => {
+                if (json.success) setData({ ...empty, ...json.data });
+            })
             .catch(() => {});
     }, []);
 
@@ -48,7 +53,10 @@ export const useCmsCalendar = () => {
                 body: JSON.stringify(data),
             });
             const json = await res.json();
-            if (json.success) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+            if (json.success) {
+                setSaved(true);
+                setTimeout(() => setSaved(false), 2000);
+            }
         } finally {
             setIsSaving(false);
         }

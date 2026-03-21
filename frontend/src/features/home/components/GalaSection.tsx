@@ -46,21 +46,24 @@ const GalaSection = (): React.JSX.Element => {
                 const json = await res.json();
                 if (json.success && Array.isArray(json.data) && json.data.length > 0) {
                     const mapped: JuryMember[] = json.data.map(
-                        (m: {
-                            name: string;
-                            display_role: string;
-                            badge: string;
-                            quote: string | null;
-                            photo_url: string | null;
-                            is_featured: number;
-                        }, i: number) => ({
+                        (
+                            m: {
+                                name: string;
+                                display_role: string;
+                                badge: string;
+                                quote: string | null;
+                                photo_url: string | null;
+                                is_featured: number;
+                            },
+                            i: number,
+                        ) => ({
                             name: m.name,
                             role: m.display_role,
                             badge: m.badge,
                             quote: m.quote ?? undefined,
                             avatar: m.photo_url ?? JURY_AVATARS[i % JURY_AVATARS.length],
                             featured: m.is_featured === 1,
-                        })
+                        }),
                     );
                     setJuryMembers(mapped);
                 }
@@ -199,7 +202,10 @@ const GalaSection = (): React.JSX.Element => {
                             <div className="bg-surface border border-white/10 rounded-2xl overflow-hidden mb-10 h-64" />
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                                 {[1, 2].map((i) => (
-                                    <div key={i} className="bg-surface border border-white/8 rounded-xl h-48" />
+                                    <div
+                                        key={i}
+                                        className="bg-surface border border-white/8 rounded-xl h-48"
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -258,7 +264,9 @@ const GalaSection = (): React.JSX.Element => {
                                         <div className="font-semibold text-white-soft text-sm leading-tight">
                                             {member.name}
                                         </div>
-                                        <div className="text-mist text-xs mt-0.5">{member.role}</div>
+                                        <div className="text-mist text-xs mt-0.5">
+                                            {member.role}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

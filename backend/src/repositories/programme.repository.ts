@@ -18,9 +18,7 @@ export const getAllEvents = async (): Promise<ProgrammeEvent[]> => {
     return rows as ProgrammeEvent[];
 };
 
-export const createEvent = async (
-    data: Omit<ProgrammeEvent, "id">,
-): Promise<number> => {
+export const createEvent = async (data: Omit<ProgrammeEvent, "id">): Promise<number> => {
     const [result] = await pool.execute<ResultSetHeader>(
         "INSERT INTO programme_event (day, time, title, description, type, sort_order) VALUES (?, ?, ?, ?, ?, ?)",
         [data.day, data.time, data.title, data.description, data.type, data.sort_order],
