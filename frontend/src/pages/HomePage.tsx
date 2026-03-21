@@ -7,6 +7,7 @@ import HowSection from "../features/home/components/HowSection";
 import ProgrammeSection from "../features/home/components/ProgrammeSection";
 import FilmsSection from "../features/home/components/FilmsSection";
 import GalaSection from "../features/home/components/GalaSection";
+import SponsorsSection from "../features/home/components/SponsorsSection";
 import HomeFooter from "../features/home/components/HomeFooter";
 import SelectionGrid from "../features/home/components/SelectionGrid";
 import FinalistGrid from "../features/home/components/FinalistGrid";
@@ -44,6 +45,8 @@ const HomePage = (): React.JSX.Element => {
             {phase.phase === 2 && <FinalistGrid />}
             {phase.phase === 3 && <PalmaresSection />}
 
+            <Divider />
+            <SponsorsSection />
             <Divider />
             <GalaSection />
             <HomeFooter />

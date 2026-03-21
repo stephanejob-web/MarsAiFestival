@@ -1,5 +1,6 @@
 import React from "react";
 import HeroSection from "../features/home/components/HeroSection";
+import TickerSection from "../features/home/components/TickerSection";
 import ConceptSection from "../features/home/components/ConceptSection";
 import ManifesteSection from "../features/home/components/ManifesteSection";
 import AboutSection from "../features/home/components/AboutSection";
@@ -7,6 +8,7 @@ import HowSection from "../features/home/components/HowSection";
 import ProgrammeSection from "../features/home/components/ProgrammeSection";
 import FilmsSection from "../features/home/components/FilmsSection";
 import GalaSection from "../features/home/components/GalaSection";
+import SponsorsSection from "../features/home/components/SponsorsSection";
 import HomeFooter from "../features/home/components/HomeFooter";
 import SelectionGrid from "../features/home/components/SelectionGrid";
 import FinalistGrid from "../features/home/components/FinalistGrid";
@@ -26,6 +28,7 @@ const Home = (): React.JSX.Element => {
     return (
         <>
             <HeroSection />
+            <TickerSection />
             <Divider />
             <ConceptSection />
             <Divider />
@@ -46,6 +49,8 @@ const Home = (): React.JSX.Element => {
 
             <Divider />
             <GalaSection />
+            <Divider />
+            <SponsorsSection />
             <HomeFooter />
         </>
     );
