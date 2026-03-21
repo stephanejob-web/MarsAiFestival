@@ -11,11 +11,14 @@
     --color-lavande: #c084fc;
     --color-white-soft: #f0f4ff;
     --color-mist: #8892b0;
-    --font-display: "Syne", system-ui, sans-serif;
-    --font-body: "Inter", system-ui, sans-serif;
+    --font-display: "Clash Display", system-ui, sans-serif;
+    --font-body: "Cabinet Grotesk", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", monospace;
     --animate-marquee-left: marquee-left 40s linear infinite;
     --animate-marquee-right: marquee-right 40s linear infinite;
+    --animate-fade-in-up: fadeInUp 0.9s ease-out forwards;
+    --animate-fade-in: fadeIn 1s ease-out forwards;
+    --animate-float: float 4s ease-in-out infinite;
 }
 
 @keyframes marquee-left {
@@ -53,6 +56,55 @@
 
     to {
         transform: translate(-4%, -6%) scale(1.15);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes scroll-indicator {
+    0%, 100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0.3;
+        transform: translateY(6px);
     }
 }
 
