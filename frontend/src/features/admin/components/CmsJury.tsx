@@ -1,57 +1,173 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../../constants/api";
 
-interface JuryItemProps {
+interface JuryShowcaseMember {
+    id: number;
     name: string;
-    role: string;
-    photoSrc: string | null;
-    isStar?: boolean;
+    display_role: string;
+    badge: string;
+    quote: string | null;
+    photo_url: string | null;
+    is_featured: number;
+    sort_order: number;
+    is_active: number;
 }
 
-const JuryItem = ({ name, role, photoSrc, isStar = false }: JuryItemProps): React.JSX.Element => {
-    return (
-        <div className="flex flex-col items-start border-b border-white/5 py-2.5 sm:flex-row sm:items-center sm:gap-2.5 gap-2">
-            {photoSrc ? (
-                <img
-                    src={photoSrc}
-                    alt={name}
-                    className="h-[64px] w-[52px] shrink-0 cursor-pointer rounded-[10px] border-[1.5px] border-white/10 object-cover transition-all hover:border-aurora/45 hover:shadow-[0_0_12px_rgba(78,255,206,0.15)] sm:h-[64px] sm:w-[52px]"
-                />
-            ) : (
-                <div className="flex h-[64px] w-[52px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] border-[1.5px] border-white/10 bg-white/5 object-cover transition-all hover:border-aurora/45 hover:shadow-[0_0_12px_rgba(78,255,206,0.15)] sm:h-[64px] sm:w-[52px]">
-                    <span className="text-xs text-mist">Photo</span>
-                </div>
-            )}
-            <div className="flex w-full min-w-0 flex-1 flex-col gap-1.5 sm:w-auto">
-                <div className="flex flex-wrap items-center gap-1.5">
-                    <input
-                        className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-body text-[0.84rem] text-white-soft outline-none transition-colors focus:border-aurora/40 sm:w-auto sm:flex-1"
-                        type="text"
-                        defaultValue={name}
-                    />
-                    {isStar && <span className="shrink-0 text-[0.75rem] opacity-70">⭐</span>}
-                </div>
-                <input
-                    className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 font-body text-[0.75rem] text-mist outline-none transition-colors focus:border-aurora/40 sm:w-auto"
-                    type="text"
-                    defaultValue={role}
-                />
-            </div>
-            <button
-                type="button"
-                className="shrink-0 cursor-pointer bg-transparent px-0.5 py-1 text-[0.95rem] text-coral/40 transition-colors hover:text-coral"
-                title="Supprimer"
-            >
-                ×
-            </button>
-        </div>
-    );
+const emptyAddForm = {
+    name: "",
+    display_role: "",
+    badge: "Membre du Jury",
+    photo_url: "",
+    quote: "",
+    is_featured: 0,
 };
 
+const inputClass =
+    "w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-[0.78rem] text-white-soft outline-none transition-colors placeholder:text-mist/40 focus:border-aurora/40";
+
 const CmsJury = (): React.JSX.Element => {
+    const [members, setMembers] = useState<JuryShowcaseMember[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [showAddForm, setShowAddForm] = useState<boolean>(false);
+    const [addForm, setAddForm] = useState({ ...emptyAddForm });
+    const [addSaving, setAddSaving] = useState<boolean>(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editForm, setEditForm] = useState<Partial<JuryShowcaseMember>>({});
+    const [savingId, setSavingId] = useState<number | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+    const token = localStorage.getItem("token");
+
+    const fetchMembers = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/jury-showcase/admin`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const json = await res.json();
+            if (json.success) setMembers(json.data);
+        } catch {
+            // silently fail
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchMembers(); }, []);
+
+    const handleAdd = async () => {
+        if (!addForm.name || !addForm.display_role) return;
+        setAddSaving(true);
+        try {
+            const sort_order = members.length;
+            const res = await fetch(`${API_BASE_URL}/api/jury-showcase`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    ...addForm,
+                    photo_url: addForm.photo_url || null,
+                    quote: addForm.quote || null,
+                    sort_order,
+                    is_active: 1,
+                }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setAddForm({ ...emptyAddForm });
+                setShowAddForm(false);
+                await fetchMembers();
+            }
+        } finally { setAddSaving(false); }
+    };
+
+    const startEdit = (member: JuryShowcaseMember) => {
+        setEditingId(member.id);
+        setEditForm({
+            name: member.name,
+            display_role: member.display_role,
+            badge: member.badge,
+            quote: member.quote ?? "",
+            photo_url: member.photo_url ?? "",
+            is_featured: member.is_featured,
+            sort_order: member.sort_order,
+            is_active: member.is_active,
+        });
+    };
+
+    const handleUpdate = async (id: number) => {
+        setSavingId(id);
+        try {
+            const payload = {
+                ...editForm,
+                photo_url: editForm.photo_url || null,
+                quote: editForm.quote || null,
+            };
+            const res = await fetch(`${API_BASE_URL}/api/jury-showcase/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify(payload),
+            });
+            const json = await res.json();
+            if (json.success) {
+                setEditingId(null);
+                setEditForm({});
+                await fetchMembers();
+            }
+        } finally { setSavingId(null); }
+    };
+
+    const handleDelete = async (id: number) => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/jury-showcase/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const json = await res.json();
+            if (json.success) {
+                setConfirmDeleteId(null);
+                await fetchMembers();
+            }
+        } catch { /* silently fail */ }
+    };
+
+    const toggleActive = async (member: JuryShowcaseMember) => {
+        try {
+            await fetch(`${API_BASE_URL}/api/jury-showcase/${member.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ is_active: member.is_active === 1 ? 0 : 1 }),
+            });
+            await fetchMembers();
+        } catch { /* silently fail */ }
+    };
+
+    const toggleFeatured = async (member: JuryShowcaseMember) => {
+        if (member.is_featured === 1) return; // already featured, do nothing
+        try {
+            // Unfeature all then feature this one
+            await Promise.all(
+                members
+                    .filter((m) => m.is_featured === 1)
+                    .map((m) =>
+                        fetch(`${API_BASE_URL}/api/jury-showcase/${m.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ is_featured: 0 }),
+                        })
+                    )
+            );
+            await fetch(`${API_BASE_URL}/api/jury-showcase/${member.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ is_featured: 1 }),
+            });
+            await fetchMembers();
+        } catch { /* silently fail */ }
+    };
+
     return (
-        <div className="mb-4 overflow-hidden rounded-2xl border border-white/5 bg-surface-2 transition-colors hover:border-white/10">
+        <div className="overflow-hidden rounded-2xl border border-white/[0.05] bg-surface-2 transition-colors hover:border-white/10">
             {/* Header */}
-            <div className="flex items-center gap-3 px-5 pb-4 pt-[18px]">
+            <div className="flex items-center gap-3 px-5 pb-3 pt-[18px]">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-aurora/20 bg-aurora/10">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <circle cx="6" cy="5" r="2.5" stroke="#4effce" strokeWidth="1.4" />
@@ -74,49 +190,351 @@ const CmsJury = (): React.JSX.Element => {
                     <div className="font-display text-[0.92rem] font-extrabold text-white-soft">
                         Jury · Page d'accueil
                     </div>
-                    <div className="mt-0.5 text-[0.72rem] text-mist">
-                        Membres visibles publiquement
+                    <div className="text-[0.71rem] text-mist">
+                        {members.length > 0
+                            ? `${members.length} membres · modifiables en temps réel`
+                            : "Gérez les membres visibles publiquement"}
                     </div>
+                </div>
+                <div className="hidden sm:flex items-center gap-2">
+                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[0.65rem] text-mist">
+                        {members.filter((m) => m.is_active === 1).length} actifs
+                    </span>
+                    <span className="rounded-md border border-aurora/20 bg-aurora/5 px-2 py-0.5 font-mono text-[0.65rem] text-aurora">
+                        ⭐ {members.filter((m) => m.is_featured === 1).length} vedette
+                    </span>
                 </div>
             </div>
 
             {/* Body */}
-            <div className="border-t border-white/5 px-5 pb-5 pt-1">
-                <p className="my-3.5 text-[0.77rem] leading-[1.55] text-mist">
-                    <strong className="text-white-soft font-bold">
-                        Premier membre = carte vedette
-                    </strong>{" "}
-                    (Présidence du jury).
-                    <br />
-                    Modifiez nom, rôle, photo · Activez/désactivez la visibilité.
-                </p>
+            <div className="border-t border-white/[0.05] px-5 pb-5 pt-4">
+                {loading ? (
+                    <div className="flex items-center justify-center gap-2 py-8 text-[0.78rem] text-mist">
+                        <svg className="h-4 w-4 animate-spin opacity-50" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Chargement…
+                    </div>
+                ) : members.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-white/10 py-8 text-center text-[0.78rem] text-mist">
+                        Aucun membre dans le jury.<br />
+                        <span className="text-aurora/60">Cliquez sur « Ajouter » pour commencer.</span>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-2">
+                        {members.map((member) => (
+                            <div
+                                key={member.id}
+                                className={`rounded-xl border transition-all ${
+                                    editingId === member.id
+                                        ? "border-aurora/20 bg-aurora/5"
+                                        : "border-white/[0.05] bg-white/[0.02] hover:border-white/10"
+                                }`}
+                            >
+                                {editingId === member.id ? (
+                                    /* Edit form */
+                                    <div className="flex flex-col gap-3 p-4">
+                                        <div className="text-[0.68rem] font-bold uppercase tracking-widest text-aurora">
+                                            Modifier le membre
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">Nom complet *</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ex: Justine Triet"
+                                                    value={editForm.name ?? ""}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">Rôle affiché *</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ex: Réalisatrice"
+                                                    value={editForm.display_role ?? ""}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, display_role: e.target.value }))}
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">Badge</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ex: Membre du Jury"
+                                                    value={editForm.badge ?? ""}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, badge: e.target.value }))}
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-[0.67rem] text-mist">URL photo</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://…"
+                                                    value={editForm.photo_url ?? ""}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, photo_url: e.target.value }))}
+                                                    className={inputClass}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-[0.67rem] text-mist">Citation</label>
+                                            <textarea
+                                                placeholder="Citation ou biographie courte (optionnel)"
+                                                value={editForm.quote ?? ""}
+                                                onChange={(e) => setEditForm((p) => ({ ...p, quote: e.target.value }))}
+                                                rows={2}
+                                                className={`${inputClass} resize-none`}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <label className="flex cursor-pointer items-center gap-2 text-[0.75rem] text-mist">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editForm.is_featured === 1}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, is_featured: e.target.checked ? 1 : 0 }))}
+                                                    className="accent-aurora"
+                                                />
+                                                <span>Carte vedette ⭐</span>
+                                            </label>
+                                            <label className="flex cursor-pointer items-center gap-2 text-[0.75rem] text-mist">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editForm.is_active === 1}
+                                                    onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.checked ? 1 : 0 }))}
+                                                    className="accent-aurora"
+                                                />
+                                                <span>Visible publiquement</span>
+                                            </label>
+                                        </div>
+                                        <div className="flex gap-2 pt-1">
+                                            <button
+                                                onClick={() => handleUpdate(member.id)}
+                                                disabled={savingId === member.id}
+                                                className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:opacity-60"
+                                            >
+                                                {savingId === member.id ? "Enregistrement…" : "✓ Enregistrer"}
+                                            </button>
+                                            <button
+                                                onClick={() => { setEditingId(null); setEditForm({}); }}
+                                                className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20 hover:text-white-soft"
+                                            >
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : confirmDeleteId === member.id ? (
+                                    /* Delete confirmation */
+                                    <div className="flex items-center justify-between gap-3 rounded-xl border border-coral/20 bg-coral/5 px-4 py-3">
+                                        <div>
+                                            <div className="text-[0.78rem] font-semibold text-coral">Supprimer ce membre ?</div>
+                                            <div className="text-[0.7rem] text-mist">« {member.name} » sera retiré du jury.</div>
+                                        </div>
+                                        <div className="flex shrink-0 gap-2">
+                                            <button
+                                                onClick={() => handleDelete(member.id)}
+                                                className="rounded-lg border border-coral/30 bg-coral/10 px-3 py-1.5 text-[0.75rem] font-bold text-coral transition-all hover:bg-coral/20"
+                                            >
+                                                Supprimer
+                                            </button>
+                                            <button
+                                                onClick={() => setConfirmDeleteId(null)}
+                                                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20"
+                                            >
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* Normal display */
+                                    <div className="flex items-start justify-between gap-3 px-4 py-3">
+                                        <div className="flex items-start gap-3">
+                                            {/* Photo preview */}
+                                            {member.photo_url ? (
+                                                <img
+                                                    src={member.photo_url}
+                                                    alt={member.name}
+                                                    className="h-[52px] w-[44px] shrink-0 rounded-[8px] border border-white/10 object-cover object-top"
+                                                />
+                                            ) : (
+                                                <div className="flex h-[52px] w-[44px] shrink-0 items-center justify-center rounded-[8px] border border-white/10 bg-white/5">
+                                                    <span className="text-[10px] text-mist">Photo</span>
+                                                </div>
+                                            )}
+                                            <div>
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    <span className="text-[0.84rem] font-semibold leading-snug text-white-soft">
+                                                        {member.name}
+                                                    </span>
+                                                    {member.is_featured === 1 && (
+                                                        <span className="rounded border border-aurora/30 bg-aurora/10 px-1.5 py-0.5 font-mono text-[0.6rem] text-aurora">
+                                                            ⭐ Présidente
+                                                        </span>
+                                                    )}
+                                                    {member.is_active === 0 && (
+                                                        <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[0.6rem] text-mist">
+                                                            Masqué
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="mt-0.5 text-[0.72rem] text-mist">{member.display_role}</div>
+                                                <div className="mt-0.5 font-mono text-[0.62rem] text-white/30 uppercase tracking-wider">{member.badge}</div>
+                                                {member.quote && (
+                                                    <p className="mt-1 text-[0.69rem] leading-relaxed text-mist/60 italic line-clamp-1">
+                                                        {member.quote}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex shrink-0 flex-col gap-1">
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={() => startEdit(member)}
+                                                    title="Modifier"
+                                                    className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[0.72rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                                                >
+                                                    Éditer
+                                                </button>
+                                                <button
+                                                    onClick={() => setConfirmDeleteId(member.id)}
+                                                    title="Supprimer"
+                                                    className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.72rem] text-mist transition-all hover:border-coral/30 hover:text-coral"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                            <div className="flex gap-1">
+                                                <button
+                                                    onClick={() => toggleActive(member)}
+                                                    title={member.is_active === 1 ? "Masquer" : "Afficher"}
+                                                    className={`rounded-md border px-2 py-0.5 text-[0.65rem] transition-all ${
+                                                        member.is_active === 1
+                                                            ? "border-aurora/20 bg-aurora/5 text-aurora hover:bg-aurora/10"
+                                                            : "border-white/10 bg-white/5 text-mist hover:border-white/20"
+                                                    }`}
+                                                >
+                                                    {member.is_active === 1 ? "Actif" : "Inactif"}
+                                                </button>
+                                                <button
+                                                    onClick={() => toggleFeatured(member)}
+                                                    title="Définir comme vedette"
+                                                    disabled={member.is_featured === 1}
+                                                    className={`rounded-md border px-2 py-0.5 text-[0.65rem] transition-all disabled:cursor-default ${
+                                                        member.is_featured === 1
+                                                            ? "border-aurora/30 bg-aurora/10 text-aurora"
+                                                            : "border-white/10 bg-white/5 text-mist hover:border-aurora/20 hover:text-aurora/70"
+                                                    }`}
+                                                >
+                                                    ⭐
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-                <div className="mt-3">
-                    <JuryItem
-                        name="Justine Triet"
-                        role="Présidente du jury · Réalisatrice"
-                        photoSrc="https://stephanejob-web.github.io/mars-AI/assets/j2.jpg"
-                        isStar={true}
-                    />
-                    <JuryItem
-                        name="David Fincher"
-                        role="Réalisateur & Producteur"
-                        photoSrc="https://stephanejob-web.github.io/mars-AI/assets/j4.jpg"
-                    />
-                    <JuryItem
-                        name="Cédric Jimenez"
-                        role="Réalisateur & Scénariste"
-                        photoSrc="https://stephanejob-web.github.io/mars-AI/assets/j3.jpg"
-                    />
-                </div>
-
-                <button className="mt-3 w-full cursor-pointer rounded-lg border border-dashed border-white/15 bg-white/5 p-2 font-body text-[0.82rem] text-mist transition-all hover:border-aurora/30 hover:bg-aurora/5 hover:text-aurora">
-                    + Ajouter un membre
-                </button>
-
-                <button className="mt-[14px] block w-full shrink-0 cursor-pointer rounded-lg border border-aurora/25 bg-aurora/10 px-4.5 py-2 text-center font-display text-[0.8rem] font-extrabold text-aurora transition-all hover:border-aurora/40 hover:bg-aurora/15">
-                    Enregistrer le jury →
-                </button>
+                {/* Add form */}
+                {showAddForm ? (
+                    <div className="mt-3 flex flex-col gap-3 rounded-xl border border-aurora/20 bg-aurora/[0.04] p-4">
+                        <div className="text-[0.68rem] font-bold uppercase tracking-widest text-aurora">
+                            Nouveau membre du jury
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="mb-1 block text-[0.67rem] text-mist">Nom complet *</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: Justine Triet"
+                                    value={addForm.name}
+                                    onChange={(e) => setAddForm((p) => ({ ...p, name: e.target.value }))}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[0.67rem] text-mist">Rôle affiché *</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ex: Réalisatrice"
+                                    value={addForm.display_role}
+                                    onChange={(e) => setAddForm((p) => ({ ...p, display_role: e.target.value }))}
+                                    className={inputClass}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="mb-1 block text-[0.67rem] text-mist">Badge</label>
+                                <input
+                                    type="text"
+                                    placeholder="Membre du Jury"
+                                    value={addForm.badge}
+                                    onChange={(e) => setAddForm((p) => ({ ...p, badge: e.target.value }))}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-[0.67rem] text-mist">URL photo</label>
+                                <input
+                                    type="text"
+                                    placeholder="https://…"
+                                    value={addForm.photo_url}
+                                    onChange={(e) => setAddForm((p) => ({ ...p, photo_url: e.target.value }))}
+                                    className={inputClass}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-[0.67rem] text-mist">Citation</label>
+                            <textarea
+                                placeholder="Citation ou biographie courte (optionnel)"
+                                value={addForm.quote}
+                                onChange={(e) => setAddForm((p) => ({ ...p, quote: e.target.value }))}
+                                rows={2}
+                                className={`${inputClass} resize-none`}
+                            />
+                        </div>
+                        <label className="flex cursor-pointer items-center gap-2 text-[0.75rem] text-mist">
+                            <input
+                                type="checkbox"
+                                checked={addForm.is_featured === 1}
+                                onChange={(e) => setAddForm((p) => ({ ...p, is_featured: e.target.checked ? 1 : 0 }))}
+                                className="accent-aurora"
+                            />
+                            <span>Carte vedette ⭐ (Présidente du jury)</span>
+                        </label>
+                        <div className="flex gap-2 pt-1">
+                            <button
+                                onClick={handleAdd}
+                                disabled={addSaving || !addForm.name || !addForm.display_role}
+                                className="rounded-lg border border-aurora/30 bg-aurora/10 px-4 py-1.5 text-[0.75rem] font-bold text-aurora transition-all hover:bg-aurora/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {addSaving ? "Ajout en cours…" : "✓ Ajouter le membre"}
+                            </button>
+                            <button
+                                onClick={() => { setShowAddForm(false); setAddForm({ ...emptyAddForm }); }}
+                                className="rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[0.75rem] font-bold text-mist transition-all hover:border-white/20 hover:text-white-soft"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-aurora/25 bg-aurora/[0.04] py-2.5 text-[0.8rem] font-bold text-aurora/70 transition-all hover:border-aurora/40 hover:bg-aurora/10 hover:text-aurora"
+                    >
+                        <span className="text-lg leading-none">+</span>
+                        Ajouter un membre du jury
+                    </button>
+                )}
             </div>
         </div>
     );
