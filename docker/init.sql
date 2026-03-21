@@ -445,6 +445,18 @@ CREATE TABLE `sponsor` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 /*!40000 ALTER TABLE `sponsor` DISABLE KEYS */;
+INSERT INTO `sponsor` (`name`, `partnership_statut`, `sponsored_award`, `sponsor_link`, `sponsor_logo`) VALUES
+('La Plateforme_', 'main', 'Grand Prix marsAI', 'https://www.la-plateforme.fr', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/La_Plateforme_logo.svg/600px-La_Plateforme_logo.svg.png'),
+('Mobile Film Festival', 'lead', 'Prix du Mobile', 'https://mobilefilmfestival.com', 'https://mobilefilmfestival.com/wp-content/uploads/2023/09/mff-logo-white.png'),
+('Mistral AI', 'lead', 'Prix de l''Innovation IA', 'https://mistral.ai', 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Mistral_AI_logo.svg/600px-Mistral_AI_logo.svg.png'),
+('Ville de Marseille', 'premium', NULL, 'https://www.marseille.fr', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Blason_ville_fr_Marseille_%2813%29.svg/200px-Blason_ville_fr_Marseille_%2813%29.svg.png'),
+('ARTE', 'premium', 'Prix du Documentaire', 'https://www.arte.tv', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Arte_Logo_2019.svg/400px-Arte_Logo_2019.svg.png'),
+('CNC – Centre National du Cinéma', 'partner', NULL, 'https://www.cnc.fr', 'https://www.cnc.fr/documents/36995/0/logo-cnc.png'),
+('Aix-Marseille Université', 'partner', 'Prix Académique', 'https://www.univ-amu.fr', 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Aix-Marseille_University_logo.svg/400px-Aix-Marseille_University_logo.svg.png'),
+('France Télévisions', 'partner', NULL, 'https://www.france.tv', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/France_televisions_logo.svg/400px-France_televisions_logo.svg.png'),
+('Région Sud', 'supporter', NULL, 'https://www.maregionsud.fr', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Logo_région_Sud_Provence-Alpes-Côte_d%27Azur.svg/300px-Logo_région_Sud_Provence-Alpes-Côte_d%27Azur.svg.png'),
+('Dailymotion', 'supporter', NULL, 'https://www.dailymotion.com', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Dailymotion_logo_%282017%29.svg/400px-Dailymotion_logo_%282017%29.svg.png'),
+('Canson', 'supporter', NULL, 'https://www.canson.com', NULL);
 /*!40000 ALTER TABLE `sponsor` ENABLE KEYS */;
 DROP TABLE IF EXISTS `sponsor_award_film`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -528,9 +540,14 @@ CREATE TABLE `jury_showcase` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `jury_showcase` (`name`, `display_role`, `badge`, `quote`, `photo_url`, `is_featured`, `sort_order`, `is_active`) VALUES
-('Justine Triet', 'Réalisatrice', 'Présidente du Jury', 'Palme d''Or 2023 pour Anatomie d''une chute. Elle préside le jury marsAI 2026 avec l''ambition d''élever la création IA au rang d''art majeur.', 'https://stephanejob-web.github.io/mars-AI/assets/j2.jpg', 1, 0, 1),
-('David Fincher', 'Réalisateur & Producteur', 'Membre du Jury', NULL, 'https://stephanejob-web.github.io/mars-AI/assets/j4.jpg', 0, 1, 1),
-('Cédric Jimenez', 'Réalisateur & Scénariste', 'Membre du Jury', NULL, 'https://stephanejob-web.github.io/mars-AI/assets/j3.jpg', 0, 2, 1);
+('Justine Triet', 'Réalisatrice', 'Présidente du Jury', 'Palme d''Or 2023 pour Anatomie d''une chute. Elle préside le jury marsAI 2026 avec l''ambition d''élever la création IA au rang d''art majeur.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Justine_Triet_2016.jpg/440px-Justine_Triet_2016.jpg', 1, 0, 1),
+('David Fincher', 'Réalisateur & Producteur', 'Membre du Jury', NULL, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/David_Fincher_2011_CC.jpg/440px-David_Fincher_2011_CC.jpg', 0, 1, 1),
+('Cédric Jimenez', 'Réalisateur & Scénariste', 'Membre du Jury', NULL, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/C%C3%A9dric_Jimenez.jpg/440px-C%C3%A9dric_Jimenez.jpg', 0, 2, 1),
+('Valérie Donzelli', 'Réalisatrice & Actrice', 'Membre du Jury', 'La création sans frontières est la promesse de l''IA — c''est ce que nous voulons voir dans les films de cette édition.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Val%C3%A9rie_Donzelli_Cannes_2019.jpg/440px-Val%C3%A9rie_Donzelli_Cannes_2019.jpg', 0, 3, 1),
+('Yann LeCun', 'Directeur Scientifique Meta AI', 'Expert IA', 'L''intelligence artificielle n''est pas une menace pour le cinéma — c''est son prochain chapitre.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Yann_LeCun_-_2018_%28cropped%29.jpg/440px-Yann_LeCun_-_2018_%28cropped%29.jpg', 1, 4, 1),
+('Maïmouna Doucouré', 'Réalisatrice', 'Membre du Jury', 'Montrer des histoires vraies avec des outils nouveaux — c''est le défi de notre génération de cinéastes.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Maimouna_Doucoure_%28cropped%29.jpg/440px-Maimouna_Doucoure_%28cropped%29.jpg', 0, 5, 1),
+('Luc Julia', 'Co-inventeur de Siri, DG Renault', 'Expert IA', 'L''IA n''existe pas seule — elle n''existe qu''au service de l''humain et de sa créativité.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Luc_Julia_%282019%29.jpg/440px-Luc_Julia_%282019%29.jpg', 0, 6, 1),
+('Alice Diop', 'Réalisatrice & Documentariste', 'Membre du Jury', 'Le court-métrage IA ouvre des possibilités narratives inédites — j''ai hâte de les explorer avec vous.', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Alice_Diop_Berlinale_2022_%28cropped%29.jpg/440px-Alice_Diop_Berlinale_2022_%28cropped%29.jpg', 0, 7, 1);
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
