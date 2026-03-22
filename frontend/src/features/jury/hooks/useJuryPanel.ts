@@ -288,6 +288,11 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const progress = films.length > 0 ? Math.round((evaluatedCount / films.length) * 100) : 0;
 
+    const changeView = useCallback((view: ActiveView): void => {
+        setActiveView(view);
+        setActiveFilmId(0);
+    }, []);
+
     const showToast = useCallback((message: string): void => {
         setToast(message);
         if (toastTimerRef.current !== null) {
@@ -301,33 +306,47 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const applyDecision = useCallback(
         (decision: Exclude<Decision, null>, message?: string): void => {
+            const filmId = activeFilm.id;
+            const previousDecision = activeFilm.myDecision;
             setFilms((prev) =>
                 prev.map((film) => {
-                    if (film.id !== activeFilm.id) return film;
+                    if (film.id !== filmId) return film;
                     return { ...film, myDecision: decision };
                 }),
             );
-            // Persist vote to backend (fire and forget)
             const apiDecision = toApiDecision(decision);
             if (apiDecision) {
                 const token = localStorage.getItem("jury_token");
                 if (token) {
-                    void fetch(`${API}/api/votes`, {
+                    fetch(`${API}/api/votes`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${token}`,
                         },
                         body: JSON.stringify({
-                            filmId: activeFilm.id,
+                            filmId,
                             decision: apiDecision,
                             ...(message?.trim() ? { message: message.trim() } : {}),
                         }),
-                    });
+                    })
+                        .then((r) => {
+                            if (!r.ok) throw new Error("Vote failed");
+                        })
+                        .catch(() => {
+                            setFilms((prev) =>
+                                prev.map((film) =>
+                                    film.id !== filmId
+                                        ? film
+                                        : { ...film, myDecision: previousDecision },
+                                ),
+                            );
+                            showToast("Erreur : vote non enregistré");
+                        });
                 }
             }
         },
-        [activeFilm.id],
+        [activeFilm.id, activeFilm.myDecision, showToast],
     );
 
     const handleDecision = useCallback(
@@ -376,14 +395,14 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                         body: JSON.stringify({ filmId: activeFilm.id }),
                     });
                 }
-                setActiveView("discuter");
-                showToast("Film ajouté à la discussion 💬");
+                changeView("discuter");
+                showToast("Film ajouté à la discussion");
                 return;
             }
             applyDecision(decision);
-            showToast("Film validé ✓");
+            showToast("Film validé");
         },
-        [applyDecision, showToast, activeFilm.id, activeFilm.myDecision],
+        [applyDecision, changeView, showToast, activeFilm.id, activeFilm.myDecision],
     );
 
     const confirmARevoir = useCallback((): void => {
@@ -391,7 +410,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
-        showToast("Film mis en révision ↩");
+        showToast("Film mis en révision");
     }, [applyDecision, showToast, modalMessage]);
 
     const confirmRefuse = useCallback((): void => {
@@ -399,7 +418,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
-        showToast("Film refusé ✕");
+        showToast("Film refusé");
     }, [applyDecision, showToast, modalMessage]);
 
     const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -508,7 +527,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 );
                 setNotationComment("");
             });
-        showToast("Commentaire publié ✓");
+        showToast("Commentaire publié");
     }, [notationComment, user, activeFilm.id, showToast]);
 
     return {
@@ -533,7 +552,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveFilmId,
         setActiveTab,
         setCommentDraft,
-        setActiveView,
+        setActiveView: changeView,
         setActiveModal,
         setSelectedReason,
         setModalMessage,
