@@ -86,7 +86,6 @@ const AdminFilmsPage = (): React.JSX.Element => {
         unassignAll,
         assignAll,
         deleteFilm,
-        selectFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
     const [confirmUnassignAll, setConfirmUnassignAll] = useState(false);
@@ -626,33 +625,6 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         )}
                                                     </span>
                                                     <div className="flex items-center gap-2">
-                                                        {/* Bouton Top 50 */}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                void selectFilm(
-                                                                    film.id,
-                                                                    film.statut !== "selectionne",
-                                                                )
-                                                            }
-                                                            className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[0.68rem] font-bold transition-all ${
-                                                                isSelected
-                                                                    ? "bg-aurora text-deep-sky shadow-[0_1px_8px_rgba(78,255,206,0.3)] hover:opacity-90"
-                                                                    : "border border-white/[0.10] bg-white/[0.03] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
-                                                            }`}
-                                                        >
-                                                            {isSelected ? (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Check size={11} />
-                                                                    Top 50
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Star size={11} />
-                                                                    Sélectionner
-                                                                </span>
-                                                            )}
-                                                        </button>
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
                                                             style={{
