@@ -139,7 +139,17 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                                     : "text-mist hover:text-white-soft"
                             }`}
                         >
-                            {t === "avatar" ? <><ImageIcon size={14} className="inline mr-1" />Avatar</> : <><KeyRound size={14} className="inline mr-1" />Mot de passe</>}
+                            {t === "avatar" ? (
+                                <>
+                                    <ImageIcon size={14} className="inline mr-1" />
+                                    Avatar
+                                </>
+                            ) : (
+                                <>
+                                    <KeyRound size={14} className="inline mr-1" />
+                                    Mot de passe
+                                </>
+                            )}
                         </button>
                     ))}
                 </div>

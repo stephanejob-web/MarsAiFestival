@@ -14,9 +14,21 @@ const OPINION_BADGE_CLASS: Record<JuryOpinion["badge"], string> = {
 };
 
 const OPINION_BADGE_LABEL: Record<JuryOpinion["badge"], React.ReactNode> = {
-    like: <><Heart size={10} className="inline" /> J&apos;aime</>,
-    discuss: <><MessageCircle size={10} className="inline" /> À discuter</>,
-    pending: <><Clock size={10} className="inline" /> En attente</>,
+    like: (
+        <>
+            <Heart size={10} className="inline" /> J&apos;aime
+        </>
+    ),
+    discuss: (
+        <>
+            <MessageCircle size={10} className="inline" /> À discuter
+        </>
+    ),
+    pending: (
+        <>
+            <Clock size={10} className="inline" /> En attente
+        </>
+    ),
 };
 
 const OPINION_AVATAR_CLASS: Record<JuryOpinion["color"], string> = {
@@ -54,10 +66,30 @@ const DECISION_BADGE_CLASS: Record<string, string> = {
 };
 
 const getDecisionBadgeLabel = (decision: JuryFilm["myDecision"]): React.ReactNode => {
-    if (decision === "valide") return <><Check size={11} className="inline" /> Validé</>;
-    if (decision === "aRevoir") return <><RotateCcw size={11} className="inline" /> À revoir</>;
-    if (decision === "refuse") return <><X size={11} className="inline" /> Refusé</>;
-    if (decision === "discuter") return <><MessageCircle size={11} className="inline" /> À discuter</>;
+    if (decision === "valide")
+        return (
+            <>
+                <Check size={11} className="inline" /> Validé
+            </>
+        );
+    if (decision === "aRevoir")
+        return (
+            <>
+                <RotateCcw size={11} className="inline" /> À revoir
+            </>
+        );
+    if (decision === "refuse")
+        return (
+            <>
+                <X size={11} className="inline" /> Refusé
+            </>
+        );
+    if (decision === "discuter")
+        return (
+            <>
+                <MessageCircle size={11} className="inline" /> À discuter
+            </>
+        );
     return "— En attente";
 };
 
@@ -140,7 +172,9 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                     ) : (
                         <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
                             <div className="text-center">
-                                <div className="mb-2 opacity-30"><Clapperboard size={32} /></div>
+                                <div className="mb-2 opacity-30">
+                                    <Clapperboard size={32} />
+                                </div>
                                 <div className="text-[0.75rem] text-mist/50">
                                     Vidéo non disponible
                                 </div>

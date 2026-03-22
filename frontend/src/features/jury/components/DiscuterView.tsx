@@ -90,7 +90,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
         return (
             <div className="flex flex-1 items-center justify-center">
                 <div className="text-center">
-                    <div className="mb-3 flex justify-center"><MessageCircle size={28} className="text-mist/40" /></div>
+                    <div className="mb-3 flex justify-center">
+                        <MessageCircle size={28} className="text-mist/40" />
+                    </div>
                     <div className="text-[0.92rem] font-semibold text-white-soft/70">
                         Aucun film à discuter
                     </div>
@@ -229,7 +231,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                 ) : (
                                     <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
                                         <div className="text-center">
-                                            <div className="mb-2 opacity-30 flex justify-center"><Clapperboard size={28} /></div>
+                                            <div className="mb-2 opacity-30 flex justify-center">
+                                                <Clapperboard size={28} />
+                                            </div>
                                             <div className="text-[0.72rem] text-mist/50">
                                                 Vidéo non disponible
                                             </div>

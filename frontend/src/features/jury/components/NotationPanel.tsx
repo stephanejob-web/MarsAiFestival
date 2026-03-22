@@ -53,7 +53,12 @@ const NotationPanel = ({
             {/* Decision buttons */}
             <div className="mb-2.5 flex gap-2">
                 <DecisionButton
-                    label={<><Check size={14} /><span>Valider</span></>}
+                    label={
+                        <>
+                            <Check size={14} />
+                            <span>Valider</span>
+                        </>
+                    }
                     decision="valide"
                     isActive={currentDecision === "valide"}
                     baseClass="bg-aurora/10 border-aurora/35 text-aurora"
@@ -62,7 +67,12 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label={<><RotateCcw size={14} /><span>À revoir</span></>}
+                    label={
+                        <>
+                            <RotateCcw size={14} />
+                            <span>À revoir</span>
+                        </>
+                    }
                     decision="aRevoir"
                     isActive={currentDecision === "aRevoir"}
                     baseClass="bg-solar/8 border-solar/30 text-solar"
@@ -71,7 +81,12 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label={<><X size={14} /><span>Refuser</span></>}
+                    label={
+                        <>
+                            <X size={14} />
+                            <span>Refuser</span>
+                        </>
+                    }
                     decision="refuse"
                     isActive={currentDecision === "refuse"}
                     baseClass="bg-coral/8 border-coral/28 text-coral"
@@ -80,7 +95,12 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label={<><MessageCircle size={14} /><span>Discuter</span></>}
+                    label={
+                        <>
+                            <MessageCircle size={14} />
+                            <span>Discuter</span>
+                        </>
+                    }
                     decision="discuter"
                     isActive={currentDecision === "discuter"}
                     baseClass="bg-lavande/8 border-lavande/28 text-lavande"
