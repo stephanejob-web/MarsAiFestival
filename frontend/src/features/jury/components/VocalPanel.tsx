@@ -11,6 +11,7 @@ import {
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import type { Participant, TrackPublication } from "livekit-client";
+import { Camera, Maximize2, Mic, MicOff, Minimize2, Monitor, PhoneOff, Video } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL as string;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL as string;
@@ -81,7 +82,7 @@ const MiniTile = ({ participant }: { participant: Participant }): React.JSX.Elem
                     {displayName}
                 </span>
                 <div className="flex items-center gap-0.5">
-                    {isMuted && <span className="text-[0.5rem]">🔇</span>}
+                    {isMuted && <MicOff size={9} className="text-coral" />}
                     {isSpeaking && !isMuted && (
                         <span className="h-1 w-1 animate-pulse rounded-full bg-aurora" />
                     )}
@@ -155,7 +156,7 @@ const FullTile = ({ participant }: { participant: Participant }): React.JSX.Elem
                     {displayName}
                 </span>
                 <div className="flex items-center gap-1">
-                    {isMuted && <span className="text-[0.6rem]">🔇</span>}
+                    {isMuted && <MicOff size={10} className="text-coral" />}
                     {isSpeaking && !isMuted && (
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aurora" />
                     )}
@@ -249,7 +250,7 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
                         className="rounded-md p-1 text-[0.75rem] text-mist transition-colors hover:bg-white/[0.06] hover:text-white-soft"
                         title={expanded ? "Réduire" : "Agrandir"}
                     >
-                        {expanded ? "⊟" : "⊞"}
+                        {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
                     </button>
                 </div>
 
@@ -261,8 +262,8 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
                                 trackRef={screenTracks[0]}
                                 className="max-h-[200px] w-full rounded-xl object-contain"
                             />
-                            <div className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[0.6rem] text-aurora">
-                                🖥️ Partage d&apos;écran
+                            <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[0.6rem] text-aurora">
+                                <Monitor size={10} /> Partage d&apos;écran
                             </div>
                         </div>
                     </div>
@@ -292,35 +293,35 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
                         }`}
                         title={isMuted ? "Activer le micro" : "Couper le micro"}
                     >
-                        {isMuted ? "🔇" : "🎙️"}
+                        {isMuted ? <MicOff size={14} /> : <Mic size={14} />}
                     </button>
 
                     {/* Caméra */}
                     <button
                         type="button"
                         onClick={toggleCamera}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
                             isCameraOn
                                 ? "bg-aurora/15 text-aurora hover:bg-aurora/25"
                                 : "bg-white/[0.05] text-mist hover:bg-white/[0.10]"
                         }`}
                         title={isCameraOn ? "Éteindre la caméra" : "Activer la caméra"}
                     >
-                        {isCameraOn ? "📹" : "📷"}
+                        {isCameraOn ? <Video size={14} /> : <Camera size={14} />}
                     </button>
 
                     {/* Partage d'écran */}
                     <button
                         type="button"
                         onClick={toggleScreen}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition-all ${
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
                             isScreenSharing
                                 ? "bg-solar/20 text-solar hover:bg-solar/30"
                                 : "bg-white/[0.05] text-mist hover:bg-white/[0.10]"
                         }`}
                         title={isScreenSharing ? "Arrêter le partage" : "Partager l'écran"}
                     >
-                        🖥️
+                        <Monitor size={14} />
                     </button>
 
                     {/* Séparateur */}
@@ -332,7 +333,7 @@ const FloatingPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element 
                         onClick={onLeave}
                         className="flex h-8 items-center gap-1.5 rounded-full bg-coral px-3 text-[0.72rem] font-bold text-white transition-opacity hover:opacity-85"
                     >
-                        <span>📵</span>
+                        <PhoneOff size={14} />
                         <span>Quitter</span>
                     </button>
                 </div>
@@ -405,7 +406,7 @@ export const VocalJoinButton = ({
                         : "text-mist hover:text-white-soft"
                 }`}
             >
-                <span className="mr-1.5">{isJoined ? "🔴" : "🎙️"}</span>
+                <Mic size={14} className="mr-1.5" />
                 <span>
                     {loading ? "Connexion…" : isJoined ? "Vocal/Vidéo actif" : "Vocal & Vidéo"}
                 </span>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Check, MessageCircle, RotateCcw, Send, X } from "lucide-react";
 
 import type { Decision } from "../types";
 
@@ -11,7 +12,7 @@ interface NotationPanelProps {
 }
 
 interface DecisionButtonProps {
-    label: string;
+    label: React.ReactNode;
     decision: Exclude<Decision, null>;
     isActive: boolean;
     baseClass: string;
@@ -52,7 +53,7 @@ const NotationPanel = ({
             {/* Decision buttons */}
             <div className="mb-2.5 flex gap-2">
                 <DecisionButton
-                    label="✓ Valider"
+                    label={<><Check size={14} /><span>Valider</span></>}
                     decision="valide"
                     isActive={currentDecision === "valide"}
                     baseClass="bg-aurora/10 border-aurora/35 text-aurora"
@@ -61,7 +62,7 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label="↩ À revoir"
+                    label={<><RotateCcw size={14} /><span>À revoir</span></>}
                     decision="aRevoir"
                     isActive={currentDecision === "aRevoir"}
                     baseClass="bg-solar/8 border-solar/30 text-solar"
@@ -70,7 +71,7 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label="✕ Refuser"
+                    label={<><X size={14} /><span>Refuser</span></>}
                     decision="refuse"
                     isActive={currentDecision === "refuse"}
                     baseClass="bg-coral/8 border-coral/28 text-coral"
@@ -79,7 +80,7 @@ const NotationPanel = ({
                     onClick={onDecision}
                 />
                 <DecisionButton
-                    label="💬 Discuter"
+                    label={<><MessageCircle size={14} /><span>Discuter</span></>}
                     decision="discuter"
                     isActive={currentDecision === "discuter"}
                     baseClass="bg-lavande/8 border-lavande/28 text-lavande"
@@ -106,9 +107,10 @@ const NotationPanel = ({
                 <button
                     type="button"
                     onClick={onPublish}
-                    className="self-end whitespace-nowrap rounded-[9px] bg-aurora px-4 py-2 font-display text-[0.82rem] font-extrabold text-deep-sky transition-opacity hover:opacity-90"
+                    className="self-end flex items-center gap-1.5 whitespace-nowrap rounded-[9px] bg-aurora px-4 py-2 font-display text-[0.82rem] font-extrabold text-deep-sky transition-opacity hover:opacity-90"
                 >
-                    💬 Publier
+                    <Send size={14} />
+                    Publier
                 </button>
             </div>
         </div>

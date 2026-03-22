@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Clapperboard, Film, MessageCircle, Send } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useDiscussionSocket from "../hooks/useDiscussionSocket";
@@ -18,7 +19,7 @@ const THUMB_GRADIENTS = [
     "bg-gradient-to-br from-aurora/15 to-surface-2",
 ];
 
-const THUMB_EMOJIS = ["🎬", "🎥", "🎞️", "📽️", "🎦"];
+const THUMB_ICONS = [Film, Film, Film, Film, Film];
 
 const AVATAR_COLORS = [
     "bg-aurora/20 text-aurora",
@@ -89,12 +90,12 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
         return (
             <div className="flex flex-1 items-center justify-center">
                 <div className="text-center">
-                    <div className="mb-3 text-3xl">💬</div>
+                    <div className="mb-3 flex justify-center"><MessageCircle size={28} className="text-mist/40" /></div>
                     <div className="text-[0.92rem] font-semibold text-white-soft/70">
                         Aucun film à discuter
                     </div>
                     <div className="mt-1.5 text-[0.78rem] text-mist">
-                        Cliquez sur &quot;💬 Discuter&quot; depuis la vue évaluation
+                        Cliquez sur &quot;Discuter&quot; depuis la vue évaluation
                     </div>
                 </div>
             </div>
@@ -110,7 +111,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                 </div>
                 {discussFilms.map((film, index) => {
                     const gradient = THUMB_GRADIENTS[index % THUMB_GRADIENTS.length];
-                    const emoji = THUMB_EMOJIS[index % THUMB_EMOJIS.length];
+                    const ThumbIcon = THUMB_ICONS[index % THUMB_ICONS.length];
                     const isSelected = film.id === selectedFilmId;
                     return (
                         <div
@@ -130,9 +131,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
                             >
                                 <div
-                                    className={`flex h-[30px] w-[52px] flex-shrink-0 items-center justify-center rounded-[5px] text-[0.85rem] ${gradient}`}
+                                    className={`flex h-[30px] w-[52px] flex-shrink-0 items-center justify-center rounded-[5px] ${gradient}`}
                                 >
-                                    {emoji}
+                                    <ThumbIcon size={16} className="text-aurora/60" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
@@ -228,7 +229,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                 ) : (
                                     <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
                                         <div className="text-center">
-                                            <div className="mb-2 text-3xl opacity-30">🎬</div>
+                                            <div className="mb-2 opacity-30 flex justify-center"><Clapperboard size={28} /></div>
                                             <div className="text-[0.72rem] text-mist/50">
                                                 Vidéo non disponible
                                             </div>
@@ -376,9 +377,9 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                         type="button"
                                         onClick={handleSend}
                                         disabled={!isConnected || !input.trim()}
-                                        className="rounded-[9px] bg-lavande px-4 py-2 font-display text-[0.82rem] font-extrabold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                                        className="flex items-center justify-center rounded-[9px] bg-lavande px-4 py-2 text-white transition-opacity hover:opacity-90 disabled:opacity-40"
                                     >
-                                        ↑
+                                        <Send size={14} />
                                     </button>
                                 </div>
                             </div>

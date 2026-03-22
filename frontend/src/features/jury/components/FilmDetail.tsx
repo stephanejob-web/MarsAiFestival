@@ -1,4 +1,5 @@
 import React from "react";
+import { Check, Clapperboard, Clock, Heart, MessageCircle, RotateCcw, X } from "lucide-react";
 
 import type { JuryComment, JuryFilm, JuryOpinion, VoteRow } from "../types";
 
@@ -12,10 +13,10 @@ const OPINION_BADGE_CLASS: Record<JuryOpinion["badge"], string> = {
     pending: "bg-white/5 text-mist",
 };
 
-const OPINION_BADGE_LABEL: Record<JuryOpinion["badge"], string> = {
-    like: "❤️ J'aime",
-    discuss: "💬 À discuter",
-    pending: "⏳ En attente",
+const OPINION_BADGE_LABEL: Record<JuryOpinion["badge"], React.ReactNode> = {
+    like: <><Heart size={10} className="inline" /> J&apos;aime</>,
+    discuss: <><MessageCircle size={10} className="inline" /> À discuter</>,
+    pending: <><Clock size={10} className="inline" /> En attente</>,
 };
 
 const OPINION_AVATAR_CLASS: Record<JuryOpinion["color"], string> = {
@@ -52,11 +53,11 @@ const DECISION_BADGE_CLASS: Record<string, string> = {
     discuter: "bg-lavande/10 border border-lavande/25 text-lavande",
 };
 
-const getDecisionBadgeLabel = (decision: JuryFilm["myDecision"]): string => {
-    if (decision === "valide") return "✓ Validé";
-    if (decision === "aRevoir") return "↩ À revoir";
-    if (decision === "refuse") return "✕ Refusé";
-    if (decision === "discuter") return "💬 À discuter";
+const getDecisionBadgeLabel = (decision: JuryFilm["myDecision"]): React.ReactNode => {
+    if (decision === "valide") return <><Check size={11} className="inline" /> Validé</>;
+    if (decision === "aRevoir") return <><RotateCcw size={11} className="inline" /> À revoir</>;
+    if (decision === "refuse") return <><X size={11} className="inline" /> Refusé</>;
+    if (decision === "discuter") return <><MessageCircle size={11} className="inline" /> À discuter</>;
     return "— En attente";
 };
 
@@ -139,7 +140,7 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                     ) : (
                         <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-[#0d1b3e] via-[#1a0a3e] to-[#0a2e2e]">
                             <div className="text-center">
-                                <div className="mb-2 text-3xl opacity-30">🎬</div>
+                                <div className="mb-2 opacity-30"><Clapperboard size={32} /></div>
                                 <div className="text-[0.75rem] text-mist/50">
                                     Vidéo non disponible
                                 </div>

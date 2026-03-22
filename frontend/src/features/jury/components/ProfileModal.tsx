@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { Camera, ImageIcon, KeyRound, X } from "lucide-react";
 import useJuryUser from "../hooks/useJuryUser";
 
 const API = import.meta.env.VITE_API_URL as string;
@@ -121,7 +122,7 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                         onClick={onClose}
                         className="rounded-lg p-1.5 text-mist hover:bg-white/8 hover:text-white-soft"
                     >
-                        ✕
+                        <X size={16} />
                     </button>
                 </div>
 
@@ -138,7 +139,7 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                                     : "text-mist hover:text-white-soft"
                             }`}
                         >
-                            {t === "avatar" ? "🖼️ Avatar" : "🔑 Mot de passe"}
+                            {t === "avatar" ? <><ImageIcon size={14} className="inline mr-1" />Avatar</> : <><KeyRound size={14} className="inline mr-1" />Mot de passe</>}
                         </button>
                     ))}
                 </div>
@@ -164,7 +165,7 @@ const ProfileModal = ({ onClose }: ProfileModalProps): React.JSX.Element => {
                                     </div>
                                 )}
                                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100">
-                                    <span className="text-xl">📷</span>
+                                    <Camera size={22} className="text-white" />
                                 </div>
                             </div>
 

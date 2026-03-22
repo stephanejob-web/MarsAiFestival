@@ -1,4 +1,5 @@
 import React from "react";
+import { Clapperboard } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import FilmDetail from "./FilmDetail";
@@ -18,7 +19,7 @@ const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
         return (
             <div className="flex flex-1 items-center justify-center">
                 <div className="text-center">
-                    <div className="mb-3 text-4xl opacity-20">🎬</div>
+                    <div className="mb-3 flex justify-center opacity-20"><Clapperboard size={36} /></div>
                     <div className="text-[0.9rem] font-semibold text-white-soft">
                         Aucun film assigné
                     </div>
