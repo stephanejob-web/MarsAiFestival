@@ -38,6 +38,7 @@ interface NavItemProps {
     countVariant: "pending" | "selected" | "discuss" | "neutral";
     isActive: boolean;
     onClick: () => void;
+    disabled?: boolean;
 }
 
 const COUNT_VARIANT_CLASS: Record<NavItemProps["countVariant"], string> = {
@@ -54,15 +55,19 @@ const NavItem = ({
     countVariant,
     isActive,
     onClick,
+    disabled = false,
 }: NavItemProps): React.JSX.Element => {
     return (
         <button
             type="button"
-            onClick={onClick}
-            className={`flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] transition-all ${
-                isActive
-                    ? "bg-aurora/10 text-aurora"
-                    : "text-mist hover:bg-white/4 hover:text-white-soft"
+            onClick={disabled ? undefined : onClick}
+            disabled={disabled}
+            className={`flex w-full items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] transition-all ${
+                disabled
+                    ? "cursor-not-allowed opacity-35"
+                    : isActive
+                      ? "cursor-pointer bg-aurora/10 text-aurora"
+                      : "cursor-pointer text-mist hover:bg-white/4 hover:text-white-soft"
             }`}
         >
             <span>{icon}</span>
@@ -178,6 +183,7 @@ const JurySidebar = ({
                         countVariant="neutral"
                         isActive={activeView === "delib"}
                         onClick={() => onViewChange("delib")}
+                        disabled
                     />
 
                     <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
