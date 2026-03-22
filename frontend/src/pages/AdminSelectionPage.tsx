@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, X, MessageSquare, Trophy, Flag, ShieldCheck } from "lucide-react";
+import { Check, X, MessageSquare, Trophy, Flag, ShieldCheck, RefreshCw, ChevronRight, LayoutList, ListChecks } from "lucide-react";
 import StatCard from "../features/admin/components/StatCard";
 import useAdminSelection, {
     getConsensus,
@@ -79,8 +79,6 @@ const FILTER_BUTTONS: Array<{
     { key: "rejete", label: "Rejetés", countKey: "rejete" },
     { key: "attente", label: "En attente", countKey: "attente" },
     { key: "signale", label: "Signalements", countKey: "signale" },
-    { key: "selectionne", label: "Top 50", countKey: "selectionne" },
-    { key: "finaliste", label: "Top 5 — Finale", countKey: "finaliste" },
 ];
 
 const SORT_BUTTONS: Array<{ key: SortKey; label: string }> = [
@@ -1029,6 +1027,8 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+type Mode = "analyse" | "top50" | "top5";
+
 const AdminSelectionPage = (): React.JSX.Element => {
     const {
         allFilms,
@@ -1047,7 +1047,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
         reload,
     } = useAdminSelection();
 
+    const [mode, setMode] = useState<Mode>("analyse");
     const [expandedId, setExpandedId] = useState<number | null>(null);
+
+    const handleModeChange = (m: Mode): void => {
+        setMode(m);
+        setFilter("tous");
+        setExpandedId(null);
+    };
     const expandedFilm = allFilms.find((f) => f.film_id === expandedId) ?? null;
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -1206,7 +1213,13 @@ const AdminSelectionPage = (): React.JSX.Element => {
     // ── Top 5 special view ─────────────────────────────────────────────────────
     const renderTop5 = (): React.JSX.Element => {
         const finalists = allFilms.filter((f) => f.statut === "finaliste");
-        const medals = ["🥇", "🥈", "🥉", "④", "⑤"];
+        const medalColors = [
+            "text-solar",
+            "text-white-soft/70",
+            "text-[#cd8c52]",
+            "text-mist",
+            "text-mist",
+        ];
         const missing = 5 - finalists.length;
         return (
             <div className="overflow-hidden rounded-xl border border-lavande/25">
@@ -1278,8 +1291,12 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                         key={film.film_id}
                                         className="border-b border-white/[0.04] bg-lavande/[0.05] transition-colors hover:bg-lavande/[0.09]"
                                     >
-                                        <td className="px-4 py-3 text-center text-[1.1rem]">
-                                            {medals[idx] ?? idx + 1}
+                                        <td className="px-4 py-3 text-center">
+                                            <span
+                                                className={`font-display text-[1rem] font-extrabold ${medalColors[idx] ?? "text-mist"}`}
+                                            >
+                                                {idx + 1}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="text-[0.88rem] font-bold text-white-soft">
@@ -1439,9 +1456,10 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
                                         {/* Chevron */}
                                         <td className="w-8 px-2 py-3 text-right">
-                                            <span className="text-[1rem] text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora">
-                                                ›
-                                            </span>
+                                            <ChevronRight
+                                                size={14}
+                                                className="text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora"
+                                            />
                                         </td>
                                     </tr>
                                 </React.Fragment>
@@ -1478,10 +1496,10 @@ const AdminSelectionPage = (): React.JSX.Element => {
                     <button
                         type="button"
                         onClick={(): void => reload()}
-                        className="flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 font-mono text-[0.7rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                        className="flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[0.7rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
                         title="Rafraîchir les votes"
                     >
-                        ↺ Rafraîchir
+                        <RefreshCw size={12} /> Rafraîchir
                     </button>
                     <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
                         <ShieldCheck size={13} className="mr-1" /> Admin
@@ -1556,124 +1574,136 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             />
                         </div>
 
-                        {/* Phase / selection progress banner */}
-                        <div className="mb-5 flex items-center gap-4 rounded-xl border border-aurora/[0.15] bg-aurora/[0.03] px-5 py-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-aurora/[0.08] text-aurora">
-                                <Trophy size={18} />
-                            </div>
-                            <div className="flex-1">
-                                <div className="mb-2 flex items-center gap-2">
-                                    <span className="text-[0.8rem] font-bold text-aurora">
-                                        Sélection en cours
-                                    </span>
-                                    <span className="rounded-full border border-aurora/20 bg-aurora/[0.08] px-2 py-0.5 text-[0.65rem] font-bold text-aurora">
-                                        {stats.selectionne} / 50 sélectionnés
-                                    </span>
-                                    {stats.selectionne >= 50 && (
-                                        <span className="flex items-center gap-1 text-[0.72rem] font-bold text-aurora">
-                                            <Check size={11} /> Quota atteint
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="h-[5px] overflow-hidden rounded-full bg-aurora/[0.08]">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-aurora to-[#a8ffec] transition-all duration-500"
-                                        style={{
-                                            width: `${Math.min(100, (stats.selectionne / 50) * 100)}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="shrink-0 text-right">
-                                <div className="font-mono text-[1.4rem] font-black leading-none text-aurora">
-                                    {stats.selectionne}
-                                </div>
-                                <div className="mt-0.5 text-[0.65rem] text-mist">/ 50 films</div>
-                            </div>
-                            <div className="h-10 w-px shrink-0 bg-white/[0.06]" />
-                            <div className="shrink-0 text-right">
-                                <div className="font-mono text-[1.4rem] font-black leading-none text-lavande">
-                                    {stats.finaliste}
-                                </div>
-                                <div className="mt-0.5 text-[0.65rem] text-mist">
-                                    / 5 finalistes
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="mb-4 flex flex-wrap items-center gap-2">
-                            {FILTER_BUTTONS.map(({ key, label, countKey }) => (
+                        {/* Mode selector — 3 phases clairement séparées */}
+                        <div className="mb-6 grid grid-cols-3 gap-2">
+                            {(
+                                [
+                                    {
+                                        key: "analyse" as Mode,
+                                        icon: <LayoutList size={15} />,
+                                        label: "Analyse des votes",
+                                        sub: `${allFilms.length} films · filtres jury`,
+                                        active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
+                                        iconBg: "bg-aurora/[0.12] text-aurora",
+                                    },
+                                    {
+                                        key: "top50" as Mode,
+                                        icon: <ListChecks size={15} />,
+                                        label: "Top 50 — Shortlist",
+                                        sub: `${stats.selectionne} / 50 sélectionnés${stats.selectionne >= 50 ? " · Quota atteint" : ""}`,
+                                        active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
+                                        iconBg: "bg-aurora/[0.12] text-aurora",
+                                    },
+                                    {
+                                        key: "top5" as Mode,
+                                        icon: <Trophy size={15} />,
+                                        label: "Top 5 — Finale",
+                                        sub: `${stats.finaliste} / 5 finalistes${stats.finaliste >= 5 ? " · Finale constituée" : ""}`,
+                                        active: "border-lavande/30 bg-lavande/[0.08] text-lavande",
+                                        iconBg: "bg-lavande/[0.12] text-lavande",
+                                    },
+                                ] as const
+                            ).map(({ key, icon, label, sub, active, iconBg }) => (
                                 <button
                                     key={key}
                                     type="button"
-                                    onClick={(): void => setFilter(key)}
-                                    className={`rounded-lg border px-3 py-1.5 text-[0.78rem] font-semibold transition-all ${
-                                        filter === key
-                                            ? "border-aurora/30 bg-aurora/10 text-aurora"
-                                            : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                    onClick={() => handleModeChange(key)}
+                                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+                                        mode === key
+                                            ? active
+                                            : "border-white/[0.07] bg-white/[0.02] text-mist hover:border-white/[0.14] hover:text-white-soft"
                                     }`}
                                 >
-                                    {label}
-                                    {countKey !== undefined && (
-                                        <span className="ml-1.5 font-mono text-[0.65rem] opacity-70">
-                                            {stats[countKey]}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                            <div className="flex-1" />
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={handleSearchChange}
-                                placeholder="Rechercher un film…"
-                                className="min-w-[200px] rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 font-body text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
-                            />
-                        </div>
-
-                        {/* Sort + count (only for non-special views) */}
-                        {filter !== "selectionne" && filter !== "finaliste" && (
-                            <div className="mb-4 flex items-center gap-2">
-                                <span className="text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-mist">
-                                    Trier par :
-                                </span>
-                                {SORT_BUTTONS.map(({ key, label }) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        onClick={(): void => setSort(key)}
-                                        className={`rounded-lg border px-3 py-1.5 text-[0.75rem] font-semibold transition-all ${
-                                            sort === key
-                                                ? "border-aurora/30 bg-aurora/10 text-aurora"
-                                                : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                    <div
+                                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                                            mode === key ? iconBg : "bg-white/[0.04] text-mist"
                                         }`}
                                     >
-                                        {label}
-                                    </button>
-                                ))}
-                                <span className="ml-auto font-mono text-[0.72rem] text-mist">
-                                    {filtered.length} film{filtered.length !== 1 ? "s" : ""} /{" "}
-                                    {allFilms.length} total
-                                </span>
-                            </div>
+                                        {icon}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[0.82rem] font-bold leading-tight">
+                                            {label}
+                                        </div>
+                                        <div className="mt-0.5 truncate text-[0.68rem] opacity-55">
+                                            {sub}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Filtres de vote — uniquement en mode Analyse */}
+                        {mode === "analyse" && (
+                            <>
+                                <div className="mb-4 flex flex-wrap items-center gap-2">
+                                    {FILTER_BUTTONS.map(({ key, label, countKey }) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={(): void => setFilter(key)}
+                                            className={`rounded-lg border px-3 py-1.5 text-[0.78rem] font-semibold transition-all ${
+                                                filter === key
+                                                    ? "border-aurora/30 bg-aurora/10 text-aurora"
+                                                    : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                            }`}
+                                        >
+                                            {label}
+                                            {countKey !== undefined && (
+                                                <span className="ml-1.5 font-mono text-[0.65rem] opacity-70">
+                                                    {stats[countKey]}
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    <div className="flex-1" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={handleSearchChange}
+                                        placeholder="Rechercher un film…"
+                                        className="min-w-[200px] rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 font-body text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
+                                    />
+                                </div>
+                                <div className="mb-4 flex items-center gap-2">
+                                    <span className="text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-mist">
+                                        Trier par :
+                                    </span>
+                                    {SORT_BUTTONS.map(({ key, label }) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={(): void => setSort(key)}
+                                            className={`rounded-lg border px-3 py-1.5 text-[0.75rem] font-semibold transition-all ${
+                                                sort === key
+                                                    ? "border-aurora/30 bg-aurora/10 text-aurora"
+                                                    : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                    <span className="ml-auto font-mono text-[0.72rem] text-mist">
+                                        {filtered.length} film{filtered.length !== 1 ? "s" : ""} /{" "}
+                                        {allFilms.length} total
+                                    </span>
+                                </div>
+                            </>
                         )}
 
                         {/* Table / special views */}
-                        {filter === "selectionne"
+                        {mode === "top50"
                             ? renderTop50()
-                            : filter === "finaliste"
+                            : mode === "top5"
                               ? renderTop5()
                               : renderDefaultTable()}
 
                         {/* Row expand hint */}
-                        {filter !== "selectionne" &&
-                            filter !== "finaliste" &&
-                            filtered.length > 0 && (
-                                <p className="mt-3 text-center text-[0.68rem] text-mist opacity-40">
-                                    Cliquez sur une ligne pour voir le détail des votes
-                                </p>
-                            )}
+                        {mode === "analyse" && filtered.length > 0 && (
+                            <p className="mt-3 text-center text-[0.68rem] text-mist opacity-40">
+                                Cliquez sur une ligne pour voir le détail des votes
+                            </p>
+                        )}
                     </>
                 )}
             </div>
