@@ -9,6 +9,7 @@ interface UserTableProps {
     onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     onBan: (id: number) => Promise<void>;
     onUnban: (id: number) => Promise<void>;
+    onSendMessage: (id: number, message: string) => Promise<void>;
 }
 
 const AVATAR_GRADIENTS = [
@@ -58,9 +59,12 @@ const UserTable = ({
     onChangeRole,
     onBan,
     onUnban,
+    onSendMessage,
 }: UserTableProps): React.JSX.Element => {
     const [confirmBanId, setConfirmBanId] = useState<number | null>(null);
     const [confirmUnbanId, setConfirmUnbanId] = useState<number | null>(null);
+    const [messageUserId, setMessageUserId] = useState<number | null>(null);
+    const [messageText, setMessageText] = useState("");
 
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
@@ -310,6 +314,56 @@ const UserTable = ({
                                                         <line x1="2" y1="8" x2="8" y2="2" />
                                                     </svg>
                                                     Bannir
+                                                </button>
+                                            ))}
+                                        {u.role !== "admin" &&
+                                            (messageUserId === u.id ? (
+                                                <div className="flex flex-col gap-1.5 rounded-[8px] border border-lavande/30 bg-lavande/[0.08] p-2 shadow-[0_0_12px_rgba(139,92,246,0.1)]">
+                                                    <textarea
+                                                        className="w-full resize-none rounded-[6px] border border-white/[0.08] bg-white/[0.04] px-2 py-1.5 text-[0.75rem] text-white-soft placeholder-mist outline-none focus:border-lavande/40 focus:ring-0"
+                                                        rows={2}
+                                                        placeholder="Votre message..."
+                                                        value={messageText}
+                                                        onChange={(e) => setMessageText(e.target.value)}
+                                                        autoFocus
+                                                    />
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (messageText.trim()) {
+                                                                    void onSendMessage(u.id, messageText.trim());
+                                                                }
+                                                                setMessageUserId(null);
+                                                                setMessageText("");
+                                                            }}
+                                                            className="flex h-[20px] items-center gap-1 rounded-[5px] bg-lavande px-2 text-[0.6rem] font-bold text-white shadow-[0_2px_10px_rgba(139,92,246,0.4)] transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(139,92,246,0.6)]"
+                                                        >
+                                                            <Check size={10} /> Envoyer
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setMessageUserId(null);
+                                                                setMessageText("");
+                                                            }}
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                        >
+                                                            <X size={10} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMessageUserId(u.id)}
+                                                    title="Envoyer un message"
+                                                    className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-lavande/30 bg-lavande/[0.08] px-2.5 text-[0.62rem] font-semibold text-lavande/70 transition-all duration-200 hover:border-lavande/60 hover:bg-lavande/[0.16] hover:text-lavande hover:shadow-[0_0_12px_rgba(139,92,246,0.2)] active:scale-95"
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M9 1H1a.5.5 0 0 0-.5.5v5A.5.5 0 0 0 1 7h2l2 2.5L7 7h2a.5.5 0 0 0 .5-.5v-5A.5.5 0 0 0 9 1z" />
+                                                    </svg>
+                                                    Message
                                                 </button>
                                             ))}
                                     </div>

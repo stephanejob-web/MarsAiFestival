@@ -312,6 +312,37 @@ export const unbanUser = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// ── POST /api/admin/users/:id/message — Envoyer un message en temps réel ──────
+export const sendMessageToUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    const { message } = req.body as { message?: string };
+    if (!message?.trim()) {
+        res.status(400).json({ success: false, message: "Message vide." });
+        return;
+    }
+    try {
+        const io = req.app.locals.io as import("socket.io").Server;
+        const juryToSockets = req.app.locals.juryToSockets as Map<number, Set<string>>;
+        const sockets = juryToSockets.get(id);
+        if (sockets) {
+            for (const socketId of sockets) {
+                io.to(socketId).emit("admin:message", { message: message.trim() });
+            }
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'envoi.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
 // ── GET /api/admin/invite/verify?token= ───────────────────────────────────────
 // Vérifie le token d'invitation et retourne email + rôle (utilisé par la page d'inscription).
 export const verifyInvite = (_req: Request, res: Response): void => {

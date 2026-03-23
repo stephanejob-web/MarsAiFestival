@@ -17,6 +17,7 @@ export interface UseAdminUsersReturn {
     changeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     banUser: (id: number) => Promise<void>;
     unbanUser: (id: number) => Promise<void>;
+    sendMessage: (id: number, message: string) => Promise<void>;
     reload: () => void;
 }
 
@@ -102,7 +103,19 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, reload: load };
+    const sendMessage = async (id: number, message: string): Promise<void> => {
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/message`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: JSON.stringify({ message }),
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur d'envoi du message");
+        }
+    };
+
+    return { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, sendMessage, reload: load };
 };
 
 export default useAdminUsers;

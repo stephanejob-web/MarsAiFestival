@@ -14,6 +14,7 @@ import {
     removeUser,
     banUser,
     unbanUser,
+    sendMessageToUser,
     startAdminVocal,
     stopAdminVocal,
 } from "../controllers/admin.controller";
@@ -81,6 +82,7 @@ router.patch("/users/:id", requireAdmin, editUser);
 router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
 router.post("/users/:id/ban", requireAdmin, banUser);
 router.post("/users/:id/unban", requireAdmin, unbanUser);
+router.post("/users/:id/message", requireAdmin, sendMessageToUser);
 router.delete("/users/:id", requireAdmin, removeUser);
 
 // ── Vocal admin ───────────────────────────────────────────────────────────────

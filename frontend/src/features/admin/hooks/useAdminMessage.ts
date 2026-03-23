@@ -3,12 +3,7 @@ import { io } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ?? "";
 
-export const useBanProtection = (): {
-    isBanned: boolean;
-    adminMessage: string | null;
-    clearAdminMessage: () => void;
-} => {
-    const [isBanned, setIsBanned] = useState(false);
+export const useAdminMessage = (): { adminMessage: string | null; clearMessage: () => void } => {
     const [adminMessage, setAdminMessage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -20,11 +15,6 @@ export const useBanProtection = (): {
             auth: { token },
         });
 
-        socket.on("user:banned", () => {
-            setIsBanned(true);
-            localStorage.removeItem("jury_token");
-        });
-
         socket.on("admin:message", (data: { message: string }) => {
             setAdminMessage(data.message);
         });
@@ -34,5 +24,5 @@ export const useBanProtection = (): {
         };
     }, []);
 
-    return { isBanned, adminMessage, clearAdminMessage: () => setAdminMessage(null) };
+    return { adminMessage, clearMessage: () => setAdminMessage(null) };
 };
