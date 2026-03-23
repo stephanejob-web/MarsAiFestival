@@ -12,6 +12,7 @@ export interface JwtPayload {
     lastName: string;
     role: "jury" | "admin" | "moderateur";
     profilPicture: string | null;
+    sessionToken?: string;
 }
 
 declare global {
