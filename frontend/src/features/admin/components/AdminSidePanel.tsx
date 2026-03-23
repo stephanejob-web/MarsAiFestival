@@ -14,12 +14,37 @@ const AVATAR_COLORS = [
     "from-solar/70 to-coral/70",
 ];
 
+const getTokenPayload = (): { id: number; role: string } | null => {
+    try {
+        const token = localStorage.getItem("jury_token");
+        if (!token) return null;
+        return JSON.parse(atob(token.split(".")[1])) as { id: number; role: string };
+    } catch { return null; }
+};
+
 const AdminSidePanel = (): React.JSX.Element => {
     const navigate = useNavigate();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isVocalJoined, setIsVocalJoined] = useState(false);
+    const [canAccessAdmin, setCanAccessAdmin] = useState(false);
     const chat = useJuryChat(isChatOpen);
     const user = useJuryUser();
+
+    const me = getTokenPayload();
+    const isAdmin = me?.role === "admin";
+
+    React.useEffect(() => {
+        if (isAdmin) { setCanAccessAdmin(true); return; }
+        if (me?.role !== "moderateur") return;
+        const token = localStorage.getItem("jury_token") ?? "";
+        fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } })
+            .then((r) => r.json())
+            .then((data: { success: boolean; data?: Array<{ id: number; permissions?: { can_access_admin?: boolean } | null }> }) => {
+                const self = data.data?.find((u) => u.id === me.id);
+                setCanAccessAdmin(Boolean(self?.permissions?.can_access_admin));
+            })
+            .catch(() => {});
+    }, [isAdmin, me?.id, me?.role]);
 
     const handleLogout = (): void => {
         localStorage.removeItem("jury_token");
@@ -40,28 +65,43 @@ const AdminSidePanel = (): React.JSX.Element => {
 
             {/* Admin identity */}
             <div className="flex items-center gap-2.5 border-b border-white/[0.05] px-[18px] py-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-solar to-aurora text-[0.75rem] font-black text-deep-sky">
-                    AD
-                </div>
+                {user?.profilPicture ? (
+                    <img
+                        src={user.profilPicture}
+                        alt={user.initials}
+                        className="h-8 w-8 shrink-0 rounded-lg object-cover"
+                    />
+                ) : (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-solar to-aurora text-[0.75rem] font-black text-deep-sky">
+                        {user?.initials ?? "AD"}
+                    </div>
+                )}
                 <div>
                     <div className="text-[0.82rem] font-semibold text-white-soft">
-                        {ADMIN_LABELS.ADMIN_NAME}
+                        {user?.fullName ?? ADMIN_LABELS.ADMIN_NAME}
                     </div>
                     <div className="mt-px text-[0.67rem] font-semibold uppercase tracking-[0.04em] text-aurora">
-                        {ADMIN_LABELS.ADMIN_ROLE}
+                        {user?.roleLabel ?? ADMIN_LABELS.ADMIN_ROLE}
                     </div>
                 </div>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-[10px] py-3">
-                {ADMIN_NAV_LINKS.map((category: AdminNavCategory) => (
+                {ADMIN_NAV_LINKS.map((category: AdminNavCategory) => {
+                    const visibleItems = category.items.filter((item) => {
+                        if (!item.requiresPermission) return true;
+                        if (item.requiresPermission === "can_access_admin") return canAccessAdmin;
+                        return false;
+                    });
+                    if (visibleItems.length === 0) return null;
+                    return (
                     <div key={category.category} className="mb-1">
                         <div className="px-2 pb-1.5 pt-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                             {category.category}
                         </div>
                         <ul>
-                            {category.items.map((item: AdminNavItem) => (
+                            {visibleItems.map((item: AdminNavItem) => (
                                 <li key={item.to}>
                                     {item.external ? (
                                         <a
@@ -106,7 +146,8 @@ const AdminSidePanel = (): React.JSX.Element => {
                             ))}
                         </ul>
                     </div>
-                ))}
+                    );
+                })}
             </nav>
 
             {/* Vocal */}
