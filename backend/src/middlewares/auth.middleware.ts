@@ -72,9 +72,8 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
     });
 };
 
-export const requirePermissionOrAdmin = (
-    permission: keyof ModeratorPermissions,
-) =>
+export const requirePermissionOrAdmin =
+    (permission: keyof ModeratorPermissions) =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.juryUser?.role === "admin") {
             next();

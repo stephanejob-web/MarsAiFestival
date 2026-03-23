@@ -18,8 +18,17 @@ const decodeRole = (): { id: number; role: string } | null => {
 };
 
 const AdminPage = (): React.JSX.Element => {
-    const { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, sendMessage, updatePermissions } =
-        useAdminUsers();
+    const {
+        users,
+        isLoading,
+        error,
+        toggleStatus,
+        changeRole,
+        banUser,
+        unbanUser,
+        sendMessage,
+        updatePermissions,
+    } = useAdminUsers();
     const { isInVocal, joinVocal, leaveVocal } = useAdminVocal();
     const [search, setSearch] = useState<string>("");
     const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -27,7 +36,12 @@ const AdminPage = (): React.JSX.Element => {
     const me = decodeRole();
     const isAdmin = me?.role === "admin";
     const myPermissions = isAdmin
-        ? { can_access_admin: true, can_disable_accounts: true, can_ban_users: true, can_send_messages: true }
+        ? {
+              can_access_admin: true,
+              can_disable_accounts: true,
+              can_ban_users: true,
+              can_send_messages: true,
+          }
         : (users.find((u) => u.id === me?.id)?.permissions ?? null);
 
     const juryCount = users.filter((u) => u.role === "jury" && u.is_active).length;

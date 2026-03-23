@@ -7,7 +7,6 @@ import { usePhase } from "../hooks/usePhase";
 import { API_BASE_URL } from "../../../constants/api";
 import FlipCountdown from "./FlipCountdown";
 
-
 const getCountdownConfig = (
     phase: ReturnType<typeof usePhase>["phase"],
 ): {
@@ -131,7 +130,6 @@ const HeroSection = (): React.JSX.Element => {
         { value: "100%", label: t("hero.tags.gratuit") },
         { value: t("hero.tags.prix"), label: "Marseille" },
     ];
-
 
     return (
         <section

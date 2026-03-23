@@ -123,7 +123,10 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    const updatePermissions = async (id: number, permissions: ModeratorPermissions): Promise<void> => {
+    const updatePermissions = async (
+        id: number,
+        permissions: ModeratorPermissions,
+    ): Promise<void> => {
         setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, permissions } : u)));
         try {
             await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/permissions`, {
