@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import { findById } from "../repositories/jury.repository";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
 
@@ -35,6 +36,24 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
     } catch {
         res.status(401).json({ success: false, message: "Token invalide ou expiré." });
     }
+};
+
+export const requireNotBanned = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    const id = req.juryUser?.id;
+    if (!id) {
+        res.status(401).json({ success: false, message: "Non authentifié." });
+        return;
+    }
+    const row = await findById(id);
+    if (!row || row.is_banned) {
+        res.status(403).json({ success: false, message: "Votre compte a été suspendu." });
+        return;
+    }
+    next();
 };
 
 export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {

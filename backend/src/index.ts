@@ -95,6 +95,13 @@ io.on("connection", (socket: Socket) => {
         const freshRow = await findById(jury.id);
         const profilPicture = freshRow?.profil_picture ?? jury.profilPicture ?? null;
 
+        // Refuser la connexion si le jury est banni
+        if (freshRow?.is_banned) {
+            socket.emit("user:banned");
+            socket.disconnect(true);
+            return;
+        }
+
         // Reverse map juryId → socketIds (pour le ban en temps réel)
         const existingSockets = juryToSockets.get(jury.id);
         if (existingSockets) {
@@ -134,6 +141,13 @@ io.on("connection", (socket: Socket) => {
         socket.on("chat:send", async (msg: { text: string }) => {
             const text = msg.text?.trim();
             if (!text) return;
+
+            const row = await findById(jury.id);
+            if (row?.is_banned) {
+                socket.emit("user:banned");
+                socket.disconnect(true);
+                return;
+            }
 
             const id = await saveGlobalMessage(jury.id, fullName, initials, text);
 
@@ -228,6 +242,14 @@ io.on("connection", (socket: Socket) => {
                 const fid = Number(payload.filmId);
                 const text = payload.message?.trim();
                 if (!fid || !text) return;
+
+                const row = await findById(jury.id);
+                if (row?.is_banned) {
+                    socket.emit("user:banned");
+                    socket.disconnect(true);
+                    if (ack) ack(false);
+                    return;
+                }
 
                 try {
                     const id = await saveMessage(fid, jury.id, fullName, initials, text);

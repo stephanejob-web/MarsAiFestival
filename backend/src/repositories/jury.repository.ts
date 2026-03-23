@@ -12,6 +12,7 @@ export interface JuryRow extends RowDataPacket {
     profil_picture: string | null;
     jury_description: string | null;
     is_active: boolean;
+    is_banned: boolean;
 }
 
 export interface JuryInsert {
@@ -145,7 +146,7 @@ export const deleteJuryUser = async (id: number): Promise<boolean> => {
 
 export const findById = async (id: number): Promise<JuryRow | null> => {
     const [rows] = await pool.execute<JuryRow[]>(
-        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture
+        `SELECT id, first_name, last_name, email, password_hash, role, google_id, profil_picture, is_active, is_banned
          FROM jury WHERE id = ?`,
         [id],
     );
