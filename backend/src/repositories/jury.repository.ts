@@ -1,6 +1,13 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../config/db";
 
+export interface ModeratorPermissions {
+    can_access_admin: boolean;
+    can_disable_accounts: boolean;
+    can_ban_users: boolean;
+    can_send_messages: boolean;
+}
+
 export interface JuryRow extends RowDataPacket {
     id: number;
     first_name: string;
@@ -14,6 +21,7 @@ export interface JuryRow extends RowDataPacket {
     is_active: boolean;
     is_banned: boolean;
     session_token?: string | null;
+    permissions?: ModeratorPermissions | null;
 }
 
 export interface JuryInsert {
@@ -68,7 +76,7 @@ export const getAllJury = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
             j.id, j.first_name, j.last_name, j.email, j.role, j.is_active, j.is_banned,
-            j.profil_picture, j.jury_description, j.created_at,
+            j.profil_picture, j.jury_description, j.created_at, j.permissions,
             COUNT(DISTINCT jfa.film_id) AS films_assigned,
             COUNT(DISTINCT jfc.film_id) AS films_evaluated
          FROM jury j
@@ -159,6 +167,28 @@ export const updateProfilPicture = async (id: number, profilPicture: string): Pr
         `UPDATE jury SET profil_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [profilPicture, id],
     );
+};
+
+export const updateModeratorPermissions = async (
+    id: number,
+    permissions: ModeratorPermissions,
+): Promise<void> => {
+    await pool.execute(
+        `UPDATE jury SET permissions = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [JSON.stringify(permissions), id],
+    );
+};
+
+export const getModeratorPermissions = async (
+    id: number,
+): Promise<ModeratorPermissions | null> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT permissions FROM jury WHERE id = ?`,
+        [id],
+    );
+    const raw = (rows[0] as RowDataPacket | undefined)?.permissions;
+    if (!raw) return null;
+    return typeof raw === "string" ? (JSON.parse(raw) as ModeratorPermissions) : raw;
 };
 
 export const updateSessionToken = async (id: number, sessionToken: string): Promise<void> => {
