@@ -19,7 +19,9 @@ const getTokenPayload = (): { id: number; role: string } | null => {
         const token = localStorage.getItem("jury_token");
         if (!token) return null;
         return JSON.parse(atob(token.split(".")[1])) as { id: number; role: string };
-    } catch { return null; }
+    } catch {
+        return null;
+    }
 };
 
 const AdminSidePanel = (): React.JSX.Element => {
@@ -34,15 +36,26 @@ const AdminSidePanel = (): React.JSX.Element => {
     const isAdmin = me?.role === "admin";
 
     React.useEffect(() => {
-        if (isAdmin) { setCanAccessAdmin(true); return; }
+        if (isAdmin) {
+            setCanAccessAdmin(true);
+            return;
+        }
         if (me?.role !== "moderateur") return;
         const token = localStorage.getItem("jury_token") ?? "";
         fetch("/api/admin/users", { headers: { Authorization: `Bearer ${token}` } })
             .then((r) => r.json())
-            .then((data: { success: boolean; data?: Array<{ id: number; permissions?: { can_access_admin?: boolean } | null }> }) => {
-                const self = data.data?.find((u) => u.id === me.id);
-                setCanAccessAdmin(Boolean(self?.permissions?.can_access_admin));
-            })
+            .then(
+                (data: {
+                    success: boolean;
+                    data?: Array<{
+                        id: number;
+                        permissions?: { can_access_admin?: boolean } | null;
+                    }>;
+                }) => {
+                    const self = data.data?.find((u) => u.id === me.id);
+                    setCanAccessAdmin(Boolean(self?.permissions?.can_access_admin));
+                },
+            )
             .catch(() => {});
     }, [isAdmin, me?.id, me?.role]);
 
@@ -96,56 +109,56 @@ const AdminSidePanel = (): React.JSX.Element => {
                     });
                     if (visibleItems.length === 0) return null;
                     return (
-                    <div key={category.category} className="mb-1">
-                        <div className="px-2 pb-1.5 pt-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
-                            {category.category}
-                        </div>
-                        <ul>
-                            {visibleItems.map((item: AdminNavItem) => (
-                                <li key={item.to}>
-                                    {item.external ? (
-                                        <a
-                                            href={item.to}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] text-mist transition-all hover:bg-white/[0.04] hover:text-white-soft"
-                                        >
-                                            <span className="w-[17px] shrink-0 text-center">
-                                                {item.icon}
-                                            </span>
-                                            <span>{item.label}</span>
-                                            <ExternalLink
-                                                size={11}
-                                                className="ml-auto opacity-40"
-                                            />
-                                        </a>
-                                    ) : (
-                                        <NavLink
-                                            to={item.to}
-                                            end={item.to === "/admin"}
-                                            className={({ isActive }): string =>
-                                                `mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-all ${
-                                                    isActive
-                                                        ? "bg-aurora/10 text-aurora"
-                                                        : "text-mist hover:bg-white/[0.04] hover:text-white-soft"
-                                                }`
-                                            }
-                                        >
-                                            <span className="w-[17px] shrink-0 text-center">
-                                                {item.icon}
-                                            </span>
-                                            <span>{item.label}</span>
-                                            {item.count !== undefined && (
-                                                <span className="ml-auto rounded-full bg-white/[0.06] px-[7px] py-0.5 font-mono text-[0.65rem] font-semibold text-mist">
-                                                    {item.count}
+                        <div key={category.category} className="mb-1">
+                            <div className="px-2 pb-1.5 pt-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
+                                {category.category}
+                            </div>
+                            <ul>
+                                {visibleItems.map((item: AdminNavItem) => (
+                                    <li key={item.to}>
+                                        {item.external ? (
+                                            <a
+                                                href={item.to}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] text-mist transition-all hover:bg-white/[0.04] hover:text-white-soft"
+                                            >
+                                                <span className="w-[17px] shrink-0 text-center">
+                                                    {item.icon}
                                                 </span>
-                                            )}
-                                        </NavLink>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                                                <span>{item.label}</span>
+                                                <ExternalLink
+                                                    size={11}
+                                                    className="ml-auto opacity-40"
+                                                />
+                                            </a>
+                                        ) : (
+                                            <NavLink
+                                                to={item.to}
+                                                end={item.to === "/admin"}
+                                                className={({ isActive }): string =>
+                                                    `mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-all ${
+                                                        isActive
+                                                            ? "bg-aurora/10 text-aurora"
+                                                            : "text-mist hover:bg-white/[0.04] hover:text-white-soft"
+                                                    }`
+                                                }
+                                            >
+                                                <span className="w-[17px] shrink-0 text-center">
+                                                    {item.icon}
+                                                </span>
+                                                <span>{item.label}</span>
+                                                {item.count !== undefined && (
+                                                    <span className="ml-auto rounded-full bg-white/[0.06] px-[7px] py-0.5 font-mono text-[0.65rem] font-semibold text-mist">
+                                                        {item.count}
+                                                    </span>
+                                                )}
+                                            </NavLink>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     );
                 })}
             </nav>

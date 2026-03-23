@@ -48,5 +48,10 @@ export const useBanProtection = (): {
         };
     }, []);
 
-    return { isBanned, isSessionExpired, adminMessage, clearAdminMessage: () => setAdminMessage(null) };
+    return {
+        isBanned,
+        isSessionExpired,
+        adminMessage,
+        clearAdminMessage: () => setAdminMessage(null),
+    };
 };

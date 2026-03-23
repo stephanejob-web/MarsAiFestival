@@ -179,9 +179,7 @@ export const updateModeratorPermissions = async (
     );
 };
 
-export const getModeratorPermissions = async (
-    id: number,
-): Promise<ModeratorPermissions | null> => {
+export const getModeratorPermissions = async (id: number): Promise<ModeratorPermissions | null> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT permissions FROM jury WHERE id = ?`,
         [id],
