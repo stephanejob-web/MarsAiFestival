@@ -5,13 +5,7 @@ import heroVideoFallback from "../../../assets/hero-marsai.mp4";
 import useCountdown from "../hooks/useCountdown";
 import { usePhase } from "../hooks/usePhase";
 import { API_BASE_URL } from "../../../constants/api";
-
-interface CountdownUnit {
-    value: string;
-    label: string;
-}
-
-const pad = (n: number): string => String(n).padStart(2, "0");
+import FlipCountdown from "./FlipCountdown";
 
 const getCountdownConfig = (
     phase: ReturnType<typeof usePhase>["phase"],
@@ -137,13 +131,6 @@ const HeroSection = (): React.JSX.Element => {
         { value: t("hero.tags.prix"), label: "Marseille" },
     ];
 
-    const countdownUnits: CountdownUnit[] = [
-        { value: pad(days), label: t("hero.countdown.days") },
-        { value: pad(hours), label: t("hero.countdown.hours") },
-        { value: pad(minutes), label: t("hero.countdown.minutes") },
-        { value: pad(seconds), label: t("hero.countdown.seconds") },
-    ];
-
     return (
         <section
             id="home"
@@ -177,12 +164,12 @@ const HeroSection = (): React.JSX.Element => {
 
             {/* Gradient overlay bas */}
             <div
-                className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-deep-sky to-transparent z-[1] pointer-events-none"
+                className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-deep-sky to-transparent z-[1] pointer-events-none"
                 aria-hidden="true"
             />
 
             {/* Contenu principal centré */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-24 pb-40">
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-24 pb-72">
                 {/* Co-création label */}
                 <p
                     className="font-mono text-xs text-mist/60 mb-6 tracking-wider"
@@ -305,34 +292,16 @@ const HeroSection = (): React.JSX.Element => {
 
             {/* Countdown — ancré en bas */}
             <div
-                className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-center pb-12 px-6"
+                className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-8 px-6"
                 style={{ animation: "var(--animate-fade-in)", animationDelay: "0.5s" }}
             >
-                <p className="font-mono text-xs text-mist/60 uppercase tracking-widest mb-4">
-                    {countdownLabel}
-                </p>
-                <div className="flex items-center gap-2">
-                    {countdownUnits.map((unit, i) => (
-                        <React.Fragment key={unit.label}>
-                            {i > 0 && (
-                                <span
-                                    className="text-aurora text-2xl font-bold select-none"
-                                    aria-hidden="true"
-                                >
-                                    :
-                                </span>
-                            )}
-                            <div className="flex flex-col items-center bg-surface border border-white/10 rounded-xl px-4 py-3 min-w-[64px]">
-                                <span className="font-display text-3xl font-black text-white-soft tabular-nums leading-none">
-                                    {unit.value}
-                                </span>
-                                <span className="text-xs text-mist mt-1 leading-none">
-                                    {unit.label}
-                                </span>
-                            </div>
-                        </React.Fragment>
-                    ))}
-                </div>
+                <FlipCountdown
+                    days={days}
+                    hours={hours}
+                    minutes={minutes}
+                    seconds={seconds}
+                    label={countdownLabel}
+                />
             </div>
 
             {/* Scroll indicator */}
