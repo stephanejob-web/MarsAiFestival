@@ -199,7 +199,11 @@ const injectCSS = (): void => {
 };
 
 // ─── FlipDigit ────────────────────────────────────────────────────────────────
-interface DigitState { curr: string; prev: string; flip: boolean }
+interface DigitState {
+    curr: string;
+    prev: string;
+    flip: boolean;
+}
 
 const FlipDigit = ({ value }: { value: string }): React.JSX.Element => {
     const [state, setState] = useState<DigitState>({ curr: value, prev: value, flip: false });
