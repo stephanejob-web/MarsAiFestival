@@ -16,11 +16,12 @@ import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
+import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
-    const { isBanned } = useBanProtection();
+    const { isBanned, adminMessage, clearAdminMessage } = useBanProtection();
 
     if (!user) return <Navigate to="/jury" replace />;
 
@@ -71,6 +72,7 @@ const JuryPanel = (): React.JSX.Element => {
                 onConfirm={panel.confirmRefuse}
             />
             <JuryToast message={panel.toast} />
+            <AdminMessageToast message={adminMessage} onClose={clearAdminMessage} />
             <ToastContainer />
         </div>
     );
