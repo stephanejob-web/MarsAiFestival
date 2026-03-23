@@ -8,7 +8,7 @@ import {
     saveGlobalMessage,
     getRecentGlobalMessages,
 } from "./repositories/globalMessage.repository";
-import { findById } from "./repositories/jury.repository";
+import { findById, getSessionToken } from "./repositories/jury.repository";
 
 const PORT = Number(process.env.PORT) || 5500;
 const JWT_SECRET = process.env.JWT_SECRET ?? "secret";
@@ -28,6 +28,7 @@ interface JuryPayload {
     firstName: string;
     lastName: string;
     profilPicture?: string | null;
+    sessionToken?: string;
 }
 
 interface GlobalConnectedUser {
@@ -72,14 +73,24 @@ const broadcastOnline = (filmId: number): void => {
 };
 
 // ── Auth middleware (JWT dans handshake.auth.token, requis) ───────────────────
-io.use((socket: Socket, next) => {
+io.use(async (socket: Socket, next) => {
     const token = socket.handshake.auth.token as string | undefined;
     if (!token) return next(new Error("auth:missing_token"));
     try {
         const payload = jwt.verify(token, JWT_SECRET) as JuryPayload;
+        // Vérifier que la session est toujours valide
+        if (payload.sessionToken) {
+            const dbToken = await getSessionToken(payload.id);
+            if (dbToken !== payload.sessionToken) {
+                return next(new Error("auth:session_expired"));
+            }
+        }
         socket.data.jury = payload;
         next();
-    } catch {
+    } catch (err) {
+        if (err instanceof Error && err.message === "auth:session_expired") {
+            return next(err);
+        }
         next(new Error("auth:invalid_token"));
     }
 });
