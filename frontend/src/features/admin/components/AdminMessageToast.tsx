@@ -5,7 +5,10 @@ interface AdminMessageToastProps {
     onClose: () => void;
 }
 
-const AdminMessageToast = ({ message, onClose }: AdminMessageToastProps): React.JSX.Element | null => {
+const AdminMessageToast = ({
+    message,
+    onClose,
+}: AdminMessageToastProps): React.JSX.Element | null => {
     if (!message) return null;
 
     return (

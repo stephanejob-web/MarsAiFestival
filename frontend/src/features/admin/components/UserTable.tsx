@@ -324,7 +324,9 @@ const UserTable = ({
                                                         rows={2}
                                                         placeholder="Votre message..."
                                                         value={messageText}
-                                                        onChange={(e) => setMessageText(e.target.value)}
+                                                        onChange={(e) =>
+                                                            setMessageText(e.target.value)
+                                                        }
                                                         autoFocus
                                                     />
                                                     <div className="flex items-center justify-end gap-1.5">
@@ -332,7 +334,10 @@ const UserTable = ({
                                                             type="button"
                                                             onClick={() => {
                                                                 if (messageText.trim()) {
-                                                                    void onSendMessage(u.id, messageText.trim());
+                                                                    void onSendMessage(
+                                                                        u.id,
+                                                                        messageText.trim(),
+                                                                    );
                                                                 }
                                                                 setMessageUserId(null);
                                                                 setMessageText("");
@@ -360,7 +365,16 @@ const UserTable = ({
                                                     title="Envoyer un message"
                                                     className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-lavande/30 bg-lavande/[0.08] px-2.5 text-[0.62rem] font-semibold text-lavande/70 transition-all duration-200 hover:border-lavande/60 hover:bg-lavande/[0.16] hover:text-lavande hover:shadow-[0_0_12px_rgba(139,92,246,0.2)] active:scale-95"
                                                 >
-                                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                                                    <svg
+                                                        width="10"
+                                                        height="10"
+                                                        viewBox="0 0 10 10"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1.6"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
                                                         <path d="M9 1H1a.5.5 0 0 0-.5.5v5A.5.5 0 0 0 1 7h2l2 2.5L7 7h2a.5.5 0 0 0 .5-.5v-5A.5.5 0 0 0 9 1z" />
                                                     </svg>
                                                     Message
