@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { findById } from "../repositories/jury.repository";
+import {
+    findById,
+    getModeratorPermissions,
+    type ModeratorPermissions,
+} from "../repositories/jury.repository";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
 
@@ -59,10 +63,34 @@ export const requireNotBanned = async (
 
 export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
     requireAuth(req, res, () => {
-        if (req.juryUser?.role !== "admin" && req.juryUser?.role !== "moderateur") {
+        const role = req.juryUser?.role;
+        if (role !== "admin" && role !== "moderateur") {
             res.status(403).json({ success: false, message: "Accès réservé aux administrateurs." });
             return;
         }
         next();
     });
 };
+
+export const requirePermissionOrAdmin = (
+    permission: keyof ModeratorPermissions,
+) =>
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (req.juryUser?.role === "admin") {
+            next();
+            return;
+        }
+        if (req.juryUser?.role === "moderateur") {
+            const perms = await getModeratorPermissions(req.juryUser.id);
+            if (perms?.[permission]) {
+                next();
+                return;
+            }
+            res.status(403).json({
+                success: false,
+                message: "Permission insuffisante.",
+            });
+            return;
+        }
+        res.status(403).json({ success: false, message: "Accès réservé aux administrateurs." });
+    };

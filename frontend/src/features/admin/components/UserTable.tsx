@@ -1,16 +1,26 @@
 import React, { useState } from "react";
 import { Check, X } from "lucide-react";
-import type { AdminUser } from "../types";
+import type { AdminUser, ModeratorPermissions } from "../types";
 
 interface UserTableProps {
     users: AdminUser[];
     search: string;
+    isAdmin: boolean;
+    myPermissions: ModeratorPermissions | null;
     onToggleStatus: (id: number, isActive: boolean) => Promise<void>;
     onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     onBan: (id: number) => Promise<void>;
     onUnban: (id: number) => Promise<void>;
     onSendMessage: (id: number, message: string) => Promise<void>;
+    onUpdatePermissions: (id: number, permissions: ModeratorPermissions) => Promise<void>;
 }
+
+const PERMISSION_LABELS: { key: keyof ModeratorPermissions; label: string }[] = [
+    { key: "can_access_admin", label: "Administration du site" },
+    { key: "can_disable_accounts", label: "Désactiver des comptes" },
+    { key: "can_ban_users", label: "Bannir des utilisateurs" },
+    { key: "can_send_messages", label: "Envoyer des messages" },
+];
 
 const AVATAR_GRADIENTS = [
     "bg-gradient-to-br from-aurora to-lavande text-deep-sky",
@@ -55,12 +65,18 @@ const ROLE_SELECT_CLS: Record<"jury" | "admin" | "moderateur", string> = {
 const UserTable = ({
     users,
     search,
+    isAdmin,
+    myPermissions,
     onToggleStatus,
     onChangeRole,
     onBan,
     onUnban,
     onSendMessage,
+    onUpdatePermissions,
 }: UserTableProps): React.JSX.Element => {
+    const canDisable = isAdmin || Boolean(myPermissions?.can_disable_accounts);
+    const canBan = isAdmin || Boolean(myPermissions?.can_ban_users);
+    const canMessage = isAdmin || Boolean(myPermissions?.can_send_messages);
     const [confirmBanId, setConfirmBanId] = useState<number | null>(null);
     const [confirmUnbanId, setConfirmUnbanId] = useState<number | null>(null);
     const [messageUserId, setMessageUserId] = useState<number | null>(null);
@@ -104,8 +120,8 @@ const UserTable = ({
                         const avatarStyle = AVATAR_GRADIENTS[idx % AVATAR_GRADIENTS.length];
 
                         return (
+                            <React.Fragment key={u.id}>
                             <tr
-                                key={u.id}
                                 className={`border-b transition-colors last:border-b-0 ${
                                     u.is_banned
                                         ? "border-coral/10 bg-coral/[0.04] hover:bg-coral/[0.06]"
@@ -155,9 +171,9 @@ const UserTable = ({
 
                                 {/* Rôle */}
                                 <td className="px-4 py-3 align-middle">
-                                    {u.role === "admin" ? (
-                                        <span className="inline-flex w-fit items-center rounded-full border border-lavande/20 bg-lavande/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] text-lavande">
-                                            Admin
+                                    {u.role === "admin" || !isAdmin ? (
+                                        <span className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] ${ROLE_SELECT_CLS[u.role] ?? "border-white/10 bg-white/5 text-mist"}`}>
+                                            {u.role === "admin" ? "Admin" : u.role === "moderateur" ? "Modérateur" : "Jury"}
                                         </span>
                                     ) : (
                                         <div className="relative inline-flex">
@@ -211,7 +227,7 @@ const UserTable = ({
                                                 <div className="h-[6px] w-[6px] rounded-full bg-aurora/50" />
                                                 Actif
                                             </span>
-                                        ) : u.is_banned ? (
+                                        ) : u.is_banned && canBan ? (
                                             <div className="flex items-center gap-2">
                                                 <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
                                                     <svg
@@ -261,16 +277,21 @@ const UserTable = ({
                                                     </button>
                                                 )}
                                             </div>
-                                        ) : (
+                                        ) : canDisable ? (
                                             <StatusToggle
                                                 isActive={u.is_active}
                                                 onToggle={() =>
                                                     void onToggleStatus(u.id, !u.is_active)
                                                 }
                                             />
+                                        ) : (
+                                            <span className={`text-[0.75rem] ${u.is_active ? "text-aurora/60" : "text-mist"}`}>
+                                                {u.is_active ? "Actif" : "Désactivé"}
+                                            </span>
                                         )}
                                         {u.role !== "admin" &&
                                             !u.is_banned &&
+                                            canBan &&
                                             (confirmBanId === u.id ? (
                                                 <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
                                                     <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-coral/80">
@@ -317,6 +338,7 @@ const UserTable = ({
                                                 </button>
                                             ))}
                                         {u.role !== "admin" &&
+                                            canMessage &&
                                             (messageUserId === u.id ? (
                                                 <div className="flex flex-col gap-1.5 rounded-[8px] border border-lavande/30 bg-lavande/[0.08] p-2 shadow-[0_0_12px_rgba(139,92,246,0.1)]">
                                                     <textarea
@@ -383,6 +405,50 @@ const UserTable = ({
                                     </div>
                                 </td>
                             </tr>
+                            {u.role === "moderateur" && isAdmin && (
+                                <tr key={`${u.id}-perms`} className="border-b border-lavande/10 bg-lavande/[0.03] last:border-b-0">
+                                    <td colSpan={5} className="px-4 py-3">
+                                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                                            <span className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-lavande/60">
+                                                Permissions
+                                            </span>
+                                            {PERMISSION_LABELS.map(({ key, label }) => {
+                                                const checked = Boolean(u.permissions?.[key]);
+                                                return (
+                                                    <label
+                                                        key={key}
+                                                        className="flex cursor-pointer items-center gap-2"
+                                                    >
+                                                        <div
+                                                            onClick={() => {
+                                                                const next: ModeratorPermissions = {
+                                                                    can_access_admin: Boolean(u.permissions?.can_access_admin),
+                                                                    can_disable_accounts: Boolean(u.permissions?.can_disable_accounts),
+                                                                    can_ban_users: Boolean(u.permissions?.can_ban_users),
+                                                                    can_send_messages: Boolean(u.permissions?.can_send_messages),
+                                                                    [key]: !checked,
+                                                                };
+                                                                void onUpdatePermissions(u.id, next);
+                                                            }}
+                                                            className={`flex h-[16px] w-[16px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border transition-all ${
+                                                                checked
+                                                                    ? "border-lavande bg-lavande shadow-[0_0_8px_rgba(139,92,246,0.4)]"
+                                                                    : "border-white/20 bg-white/[0.04] hover:border-lavande/50"
+                                                            }`}
+                                                        >
+                                                            {checked && <Check size={9} className="text-white" />}
+                                                        </div>
+                                                        <span className={`text-[0.72rem] ${checked ? "text-white-soft" : "text-mist"}`}>
+                                                            {label}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                            </React.Fragment>
                         );
                     })}
                     {filtered.length === 0 && (

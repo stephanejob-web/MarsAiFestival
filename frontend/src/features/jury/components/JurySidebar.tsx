@@ -11,6 +11,7 @@ import {
     Scale,
     Send,
     Settings,
+    ShieldCheck,
 } from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
@@ -189,6 +190,16 @@ const JurySidebar = ({
                     <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Compte
                     </div>
+                    {(user?.role === "admin" || user?.role === "moderateur") && (
+                        <button
+                            type="button"
+                            onClick={() => navigate("/admin")}
+                            className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-lavande transition-all hover:bg-white/4"
+                        >
+                            <ShieldCheck size={14} />
+                            <span>Panel admin</span>
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={() => navigate("/jury")}

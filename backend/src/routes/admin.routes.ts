@@ -2,7 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import { requireAdmin } from "../middlewares/auth.middleware";
+import { requireAdmin, requirePermissionOrAdmin } from "../middlewares/auth.middleware";
 import {
     listAdminFilms,
     listS3Videos,
@@ -15,6 +15,7 @@ import {
     banUser,
     unbanUser,
     sendMessageToUser,
+    updatePermissions,
     startAdminVocal,
     stopAdminVocal,
 } from "../controllers/admin.controller";
@@ -79,10 +80,11 @@ router.get("/invite/verify", verifyInvite);
 // ── Utilisateurs ──────────────────────────────────────────────────────────────
 router.get("/users", requireAdmin, listUsers);
 router.patch("/users/:id", requireAdmin, editUser);
-router.patch("/users/:id/status", requireAdmin, toggleUserStatus);
-router.post("/users/:id/ban", requireAdmin, banUser);
-router.post("/users/:id/unban", requireAdmin, unbanUser);
-router.post("/users/:id/message", requireAdmin, sendMessageToUser);
+router.patch("/users/:id/status", requireAdmin, requirePermissionOrAdmin("can_disable_accounts"), toggleUserStatus);
+router.post("/users/:id/ban", requireAdmin, requirePermissionOrAdmin("can_ban_users"), banUser);
+router.post("/users/:id/unban", requireAdmin, requirePermissionOrAdmin("can_ban_users"), unbanUser);
+router.post("/users/:id/message", requireAdmin, requirePermissionOrAdmin("can_send_messages"), sendMessageToUser);
+router.put("/users/:id/permissions", requireAdmin, updatePermissions);
 router.delete("/users/:id", requireAdmin, removeUser);
 
 // ── Vocal admin ───────────────────────────────────────────────────────────────
@@ -90,42 +92,43 @@ router.post("/vocal/start", requireAdmin, startAdminVocal);
 router.post("/vocal/stop", requireAdmin, stopAdminVocal);
 
 // ── Calendrier ────────────────────────────────────────────────────────────────
-router.get("/calendar", requireAdmin, getCalendarHandler);
-router.put("/calendar", requireAdmin, updateCalendarHandler);
+router.get("/calendar", requireAdmin, requirePermissionOrAdmin("can_access_admin"), getCalendarHandler);
+router.put("/calendar", requireAdmin, requirePermissionOrAdmin("can_access_admin"), updateCalendarHandler);
 
 // ── Hero content ──────────────────────────────────────────────────────────────
-router.get("/hero", requireAdmin, getHeroHandler);
-router.put("/hero", requireAdmin, updateHeroHandler);
-router.post("/hero/video", requireAdmin, uploadHero.single("video"), uploadHeroVideoHandler);
+router.get("/hero", requireAdmin, requirePermissionOrAdmin("can_access_admin"), getHeroHandler);
+router.put("/hero", requireAdmin, requirePermissionOrAdmin("can_access_admin"), updateHeroHandler);
+router.post("/hero/video", requireAdmin, requirePermissionOrAdmin("can_access_admin"), uploadHero.single("video"), uploadHeroVideoHandler);
 
 // ── Contact ───────────────────────────────────────────────────────────────────
-router.get("/contact", requireAdmin, getContactHandler);
-router.put("/contact", requireAdmin, updateContactHandler);
+router.get("/contact", requireAdmin, requirePermissionOrAdmin("can_access_admin"), getContactHandler);
+router.put("/contact", requireAdmin, requirePermissionOrAdmin("can_access_admin"), updateContactHandler);
 
 // ── Sponsors ──────────────────────────────────────────────────────────────────
-router.get("/sponsors", requireAdmin, listSponsors);
-router.post("/sponsors", requireAdmin, createSponsorHandler);
-router.put("/sponsors/:id", requireAdmin, updateSponsorHandler);
-router.delete("/sponsors/:id", requireAdmin, deleteSponsorHandler);
+router.get("/sponsors", requireAdmin, requirePermissionOrAdmin("can_access_admin"), listSponsors);
+router.post("/sponsors", requireAdmin, requirePermissionOrAdmin("can_access_admin"), createSponsorHandler);
+router.put("/sponsors/:id", requireAdmin, requirePermissionOrAdmin("can_access_admin"), updateSponsorHandler);
+router.delete("/sponsors/:id", requireAdmin, requirePermissionOrAdmin("can_access_admin"), deleteSponsorHandler);
 router.post(
     "/sponsors/:id/logo",
     requireAdmin,
+    requirePermissionOrAdmin("can_access_admin"),
     uploadLogo.single("logo"),
     uploadSponsorLogoHandler,
 );
 
 // ── Awards (Palmarès) ─────────────────────────────────────────────────────────
-router.get("/awards", requireAdmin, listAwards);
-router.post("/awards", requireAdmin, createAwardHandler);
-router.put("/awards/:id", requireAdmin, updateAwardHandler);
-router.delete("/awards/:id", requireAdmin, deleteAwardHandler);
+router.get("/awards", requireAdmin, requirePermissionOrAdmin("can_access_admin"), listAwards);
+router.post("/awards", requireAdmin, requirePermissionOrAdmin("can_access_admin"), createAwardHandler);
+router.put("/awards/:id", requireAdmin, requirePermissionOrAdmin("can_access_admin"), updateAwardHandler);
+router.delete("/awards/:id", requireAdmin, requirePermissionOrAdmin("can_access_admin"), deleteAwardHandler);
 
 // ── Phases films ──────────────────────────────────────────────────────────────
 router.get("/phase-films", requireAdmin, listFilmsByPhase);
 router.patch("/films/:id/phase", requireAdmin, setFilmPhaseStatus);
 
 // ── Finalist count ────────────────────────────────────────────────────────────
-router.put("/finalist-count", requireAdmin, async (req, res): Promise<void> => {
+router.put("/finalist-count", requireAdmin, requirePermissionOrAdmin("can_access_admin"), async (req, res): Promise<void> => {
     const count = parseInt(req.body.finalist_count);
     if (!count || count < 1 || count > 50) {
         res.status(400).json({ success: false, message: "Valeur invalide (1-50)." });
