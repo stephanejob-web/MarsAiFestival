@@ -171,6 +171,17 @@ h1 {
         outline: 2px solid var(--color-aurora);
         outline-offset: 2px;
     }
+
+    select {
+        color-scheme: dark;
+        background-color: var(--color-surface-2);
+        color: var(--color-white-soft);
+    }
+
+    select option {
+        background-color: var(--color-surface-2);
+        color: var(--color-white-soft);
+    }
 }
 
 @layer utilities {

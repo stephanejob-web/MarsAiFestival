@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Check, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Shield, Star, X } from "lucide-react";
 import type { AdminUser, ModeratorPermissions } from "../types";
 
 interface UserTableProps {
@@ -60,6 +60,126 @@ const ROLE_SELECT_CLS: Record<"jury" | "admin" | "moderateur", string> = {
     jury: "border-aurora/20 bg-aurora/10 text-aurora",
     moderateur: "border-lavande/20 bg-lavande/10 text-lavande",
     admin: "border-lavande/20 bg-lavande/10 text-lavande",
+};
+
+const ROLE_OPTIONS: {
+    value: "jury" | "moderateur";
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+    hover: string;
+}[] = [
+    {
+        value: "jury",
+        label: "Jury",
+        icon: <Star size={11} />,
+        color: "text-aurora",
+        hover: "hover:bg-aurora/[0.06]",
+    },
+    {
+        value: "moderateur",
+        label: "Modérateur",
+        icon: <Shield size={11} />,
+        color: "text-lavande",
+        hover: "hover:bg-lavande/[0.06]",
+    },
+];
+
+interface RoleDropdownProps {
+    value: "jury" | "moderateur";
+    onChange: (role: "jury" | "moderateur") => void;
+}
+
+const RoleDropdown = ({ value, onChange }: RoleDropdownProps): React.JSX.Element => {
+    const [open, setOpen] = useState(false);
+    const [pos, setPos] = useState({ top: 0, left: 0 });
+    const btnRef = useRef<HTMLButtonElement>(null);
+    const dropRef = useRef<HTMLDivElement>(null);
+
+    const handleOpen = () => {
+        if (btnRef.current) {
+            const r = btnRef.current.getBoundingClientRect();
+            setPos({ top: r.bottom + 6, left: r.left });
+        }
+        setOpen((o) => !o);
+    };
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (
+                dropRef.current &&
+                !dropRef.current.contains(e.target as Node) &&
+                btnRef.current &&
+                !btnRef.current.contains(e.target as Node)
+            ) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const current = ROLE_OPTIONS.find((o) => o.value === value)!;
+
+    return (
+        <div className="inline-flex">
+            <button
+                ref={btnRef}
+                type="button"
+                onClick={handleOpen}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full border py-[3px] pl-[8px] pr-[8px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-all hover:opacity-90 ${ROLE_SELECT_CLS[value]}`}
+            >
+                <span className="opacity-80">{current.icon}</span>
+                {current.label}
+                <ChevronDown
+                    size={10}
+                    className={`opacity-50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                />
+            </button>
+            {open && (
+                <div
+                    ref={dropRef}
+                    style={{ top: pos.top, left: pos.left }}
+                    className="fixed z-[999] min-w-[145px] overflow-hidden rounded-[12px] border border-white/[0.08] bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+                >
+                    <div className="p-1">
+                        {ROLE_OPTIONS.map((opt) => {
+                            const isSelected = value === opt.value;
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        setOpen(false);
+                                    }}
+                                    className={`flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 text-[0.72rem] font-semibold transition-all ${opt.hover} ${
+                                        isSelected ? opt.color : "text-mist hover:text-white-soft"
+                                    }`}
+                                >
+                                    <span
+                                        className={`flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] ${
+                                            isSelected
+                                                ? opt.value === "jury"
+                                                    ? "bg-aurora/20 text-aurora"
+                                                    : "bg-lavande/20 text-lavande"
+                                                : "bg-white/[0.05] text-mist"
+                                        }`}
+                                    >
+                                        {opt.icon}
+                                    </span>
+                                    {opt.label}
+                                    {isSelected && (
+                                        <Check size={10} className="ml-auto shrink-0 opacity-70" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 const UserTable = ({
@@ -182,24 +302,12 @@ const UserTable = ({
                                                       : "Jury"}
                                             </span>
                                         ) : (
-                                            <div className="relative inline-flex">
-                                                <select
-                                                    value={u.role}
-                                                    onChange={(e) =>
-                                                        void onChangeRole(
-                                                            u.id,
-                                                            e.target.value as "jury" | "moderateur",
-                                                        )
-                                                    }
-                                                    className={`cursor-pointer appearance-none rounded-full border py-[3px] pl-[10px] pr-[22px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-opacity hover:opacity-80 ${ROLE_SELECT_CLS[u.role]}`}
-                                                >
-                                                    <option value="jury">Jury</option>
-                                                    <option value="moderateur">Modérateur</option>
-                                                </select>
-                                                <span className="pointer-events-none absolute right-[7px] top-1/2 -translate-y-1/2 text-[0.5rem] opacity-60">
-                                                    ▾
-                                                </span>
-                                            </div>
+                                            <RoleDropdown
+                                                value={u.role as "jury" | "moderateur"}
+                                                onChange={(role) =>
+                                                    void onChangeRole(u.id, role)
+                                                }
+                                            />
                                         )}
                                     </td>
 
