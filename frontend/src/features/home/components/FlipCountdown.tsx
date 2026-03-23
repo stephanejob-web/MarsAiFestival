@@ -199,10 +199,10 @@ const injectCSS = (): void => {
 };
 
 // ─── FlipDigit ────────────────────────────────────────────────────────────────
+interface DigitState { curr: string; prev: string; flip: boolean }
+
 const FlipDigit = ({ value }: { value: string }): React.JSX.Element => {
-    const [curr, setCurr] = useState(value);
-    const [prev, setPrev] = useState(value);
-    const [flip, setFlip] = useState(false);
+    const [state, setState] = useState<DigitState>({ curr: value, prev: value, flip: false });
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
@@ -210,18 +210,22 @@ const FlipDigit = ({ value }: { value: string }): React.JSX.Element => {
     }, []);
 
     useEffect(() => {
-        if (value === curr) return;
+        if (value === state.curr) return;
         if (timer.current) clearTimeout(timer.current);
-        setPrev(curr);
-        setFlip(true);
-        timer.current = setTimeout(() => {
-            setCurr(value);
-            setFlip(false);
-        }, DUR);
+        const prevValue = state.curr;
+        const t1 = setTimeout(() => {
+            setState({ curr: prevValue, prev: prevValue, flip: true });
+            timer.current = setTimeout(() => {
+                setState({ curr: value, prev: prevValue, flip: false });
+            }, DUR);
+        }, 0);
+        timer.current = t1;
         return () => {
             if (timer.current) clearTimeout(timer.current);
         };
-    }, [value, curr]);
+    }, [value, state.curr]);
+
+    const { curr, prev, flip } = state;
 
     return (
         <div className="fk-slot">
