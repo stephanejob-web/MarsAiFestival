@@ -13,6 +13,7 @@ export interface JuryRow extends RowDataPacket {
     jury_description: string | null;
     is_active: boolean;
     is_banned: boolean;
+    session_token?: string | null;
 }
 
 export interface JuryInsert {
@@ -158,6 +159,21 @@ export const updateProfilPicture = async (id: number, profilPicture: string): Pr
         `UPDATE jury SET profil_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
         [profilPicture, id],
     );
+};
+
+export const updateSessionToken = async (id: number, sessionToken: string): Promise<void> => {
+    await pool.execute(
+        `UPDATE jury SET session_token = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [sessionToken, id],
+    );
+};
+
+export const getSessionToken = async (id: number): Promise<string | null> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT session_token FROM jury WHERE id = ?`,
+        [id],
+    );
+    return (rows[0] as RowDataPacket | undefined)?.session_token ?? null;
 };
 
 export const updatePassword = async (id: number, passwordHash: string): Promise<void> => {
