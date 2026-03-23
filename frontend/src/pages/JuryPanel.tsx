@@ -16,18 +16,20 @@ import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
+import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
 import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
-    const { isBanned, adminMessage, clearAdminMessage } = useBanProtection();
+    const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
 
     if (!user) return <Navigate to="/jury" replace />;
 
     return (
         <div className="flex h-screen overflow-hidden">
             <BanModal visible={isBanned} />
+            <SessionExpiredModal visible={isSessionExpired} />
             <JurySidebar
                 activeView={panel.activeView}
                 onViewChange={panel.setActiveView}
