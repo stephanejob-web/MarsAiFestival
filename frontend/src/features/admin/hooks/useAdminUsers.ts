@@ -115,7 +115,17 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, sendMessage, reload: load };
+    return {
+        users,
+        isLoading,
+        error,
+        toggleStatus,
+        changeRole,
+        banUser,
+        unbanUser,
+        sendMessage,
+        reload: load,
+    };
 };
 
 export default useAdminUsers;
