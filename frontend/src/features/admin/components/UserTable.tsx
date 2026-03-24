@@ -304,9 +304,7 @@ const UserTable = ({
                                         ) : (
                                             <RoleDropdown
                                                 value={u.role as "jury" | "moderateur"}
-                                                onChange={(role) =>
-                                                    void onChangeRole(u.id, role)
-                                                }
+                                                onChange={(role) => void onChangeRole(u.id, role)}
                                             />
                                         )}
                                     </td>
