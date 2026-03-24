@@ -3,25 +3,26 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
+const backendTarget = process.env.BACKEND_URL ?? 'http://localhost:5500'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [tailwindcss(), react(), basicSsl()],
   server: {
     host: true,
-    https: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5500',
+        target: backendTarget,
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:5500',
+        target: backendTarget,
         changeOrigin: true,
         ws: true,
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:5500',
+        target: backendTarget,
         changeOrigin: true,
       },
     },
@@ -33,5 +34,6 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
     globals: true,
+    testTimeout: 15000,
   },
 })

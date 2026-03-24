@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { GoogleLogin } from "@react-oauth/google";
+import { User } from "lucide-react";
 
 import type { RegisterFormState } from "../types";
 
@@ -78,7 +79,7 @@ const RegisterForm = ({
                             onDrop={handleDrop}
                             className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-full border-2 border-dashed border-white/20 bg-white/5 transition-colors hover:border-aurora/40 hover:bg-aurora/5"
                         >
-                            <span className="text-2xl">👤</span>
+                            <User size={24} className="text-mist/60" />
                             <span className="mt-0.5 text-[0.6rem] text-mist">Ajouter</span>
                         </div>
                     )}

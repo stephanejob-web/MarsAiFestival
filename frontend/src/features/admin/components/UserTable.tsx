@@ -1,14 +1,26 @@
-import React, { useState } from "react";
-import type { AdminUser } from "../types";
+import React, { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Shield, Star, X } from "lucide-react";
+import type { AdminUser, ModeratorPermissions } from "../types";
 
 interface UserTableProps {
     users: AdminUser[];
     search: string;
+    isAdmin: boolean;
+    myPermissions: ModeratorPermissions | null;
     onToggleStatus: (id: number, isActive: boolean) => Promise<void>;
     onChangeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     onBan: (id: number) => Promise<void>;
     onUnban: (id: number) => Promise<void>;
+    onSendMessage: (id: number, message: string) => Promise<void>;
+    onUpdatePermissions: (id: number, permissions: ModeratorPermissions) => Promise<void>;
 }
+
+const PERMISSION_LABELS: { key: keyof ModeratorPermissions; label: string }[] = [
+    { key: "can_access_admin", label: "Administration du site" },
+    { key: "can_disable_accounts", label: "Désactiver des comptes" },
+    { key: "can_ban_users", label: "Bannir des utilisateurs" },
+    { key: "can_send_messages", label: "Envoyer des messages" },
+];
 
 const AVATAR_GRADIENTS = [
     "bg-gradient-to-br from-aurora to-lavande text-deep-sky",
@@ -50,16 +62,145 @@ const ROLE_SELECT_CLS: Record<"jury" | "admin" | "moderateur", string> = {
     admin: "border-lavande/20 bg-lavande/10 text-lavande",
 };
 
+const ROLE_OPTIONS: {
+    value: "jury" | "moderateur";
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+    hover: string;
+}[] = [
+    {
+        value: "jury",
+        label: "Jury",
+        icon: <Star size={11} />,
+        color: "text-aurora",
+        hover: "hover:bg-aurora/[0.06]",
+    },
+    {
+        value: "moderateur",
+        label: "Modérateur",
+        icon: <Shield size={11} />,
+        color: "text-lavande",
+        hover: "hover:bg-lavande/[0.06]",
+    },
+];
+
+interface RoleDropdownProps {
+    value: "jury" | "moderateur";
+    onChange: (role: "jury" | "moderateur") => void;
+}
+
+const RoleDropdown = ({ value, onChange }: RoleDropdownProps): React.JSX.Element => {
+    const [open, setOpen] = useState(false);
+    const [pos, setPos] = useState({ top: 0, left: 0 });
+    const btnRef = useRef<HTMLButtonElement>(null);
+    const dropRef = useRef<HTMLDivElement>(null);
+
+    const handleOpen = () => {
+        if (btnRef.current) {
+            const r = btnRef.current.getBoundingClientRect();
+            setPos({ top: r.bottom + 6, left: r.left });
+        }
+        setOpen((o) => !o);
+    };
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (
+                dropRef.current &&
+                !dropRef.current.contains(e.target as Node) &&
+                btnRef.current &&
+                !btnRef.current.contains(e.target as Node)
+            ) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    const current = ROLE_OPTIONS.find((o) => o.value === value)!;
+
+    return (
+        <div className="inline-flex">
+            <button
+                ref={btnRef}
+                type="button"
+                onClick={handleOpen}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full border py-[3px] pl-[8px] pr-[8px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-all hover:opacity-90 ${ROLE_SELECT_CLS[value]}`}
+            >
+                <span className="opacity-80">{current.icon}</span>
+                {current.label}
+                <ChevronDown
+                    size={10}
+                    className={`opacity-50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                />
+            </button>
+            {open && (
+                <div
+                    ref={dropRef}
+                    style={{ top: pos.top, left: pos.left }}
+                    className="fixed z-[999] min-w-[145px] overflow-hidden rounded-[12px] border border-white/[0.08] bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+                >
+                    <div className="p-1">
+                        {ROLE_OPTIONS.map((opt) => {
+                            const isSelected = value === opt.value;
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(opt.value);
+                                        setOpen(false);
+                                    }}
+                                    className={`flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 text-[0.72rem] font-semibold transition-all ${opt.hover} ${
+                                        isSelected ? opt.color : "text-mist hover:text-white-soft"
+                                    }`}
+                                >
+                                    <span
+                                        className={`flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] ${
+                                            isSelected
+                                                ? opt.value === "jury"
+                                                    ? "bg-aurora/20 text-aurora"
+                                                    : "bg-lavande/20 text-lavande"
+                                                : "bg-white/[0.05] text-mist"
+                                        }`}
+                                    >
+                                        {opt.icon}
+                                    </span>
+                                    {opt.label}
+                                    {isSelected && (
+                                        <Check size={10} className="ml-auto shrink-0 opacity-70" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const UserTable = ({
     users,
     search,
+    isAdmin,
+    myPermissions,
     onToggleStatus,
     onChangeRole,
     onBan,
     onUnban,
+    onSendMessage,
+    onUpdatePermissions,
 }: UserTableProps): React.JSX.Element => {
+    const canDisable = isAdmin || Boolean(myPermissions?.can_disable_accounts);
+    const canBan = isAdmin || Boolean(myPermissions?.can_ban_users);
+    const canMessage = isAdmin || Boolean(myPermissions?.can_send_messages);
     const [confirmBanId, setConfirmBanId] = useState<number | null>(null);
     const [confirmUnbanId, setConfirmUnbanId] = useState<number | null>(null);
+    const [messageUserId, setMessageUserId] = useState<number | null>(null);
+    const [messageText, setMessageText] = useState("");
 
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
@@ -99,221 +240,360 @@ const UserTable = ({
                         const avatarStyle = AVATAR_GRADIENTS[idx % AVATAR_GRADIENTS.length];
 
                         return (
-                            <tr
-                                key={u.id}
-                                className={`border-b transition-colors last:border-b-0 ${
-                                    u.is_banned
-                                        ? "border-coral/10 bg-coral/[0.04] hover:bg-coral/[0.06]"
-                                        : "border-white/[0.04] hover:bg-white/[0.02]"
-                                }`}
-                            >
-                                {/* Utilisateur */}
-                                <td className="px-4 py-3 align-middle">
-                                    <div className="flex items-center gap-3">
-                                        <div className="relative">
-                                            {u.profil_picture ? (
-                                                <img
-                                                    src={u.profil_picture}
-                                                    alt=""
-                                                    className={`h-[30px] w-[30px] rounded-lg object-cover ${u.is_banned ? "opacity-40 grayscale" : ""}`}
-                                                />
-                                            ) : (
-                                                <div
-                                                    className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-[0.7rem] font-extrabold ${avatarStyle} ${u.is_banned ? "opacity-40 grayscale" : ""}`}
-                                                >
-                                                    {initials}
-                                                </div>
-                                            )}
-                                            {u.is_banned && (
-                                                <span className="absolute -right-1 -top-1 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-coral text-[0.5rem]">
-                                                    ⊘
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div
-                                                className={`flex items-center gap-2 text-[0.84rem] font-semibold ${u.is_banned ? "text-mist/50 line-through" : "text-white-soft"}`}
-                                            >
-                                                {u.first_name} {u.last_name}
+                            <React.Fragment key={u.id}>
+                                <tr
+                                    className={`border-b transition-colors last:border-b-0 ${
+                                        u.is_banned
+                                            ? "border-coral/10 bg-coral/[0.04] hover:bg-coral/[0.06]"
+                                            : "border-white/[0.04] hover:bg-white/[0.02]"
+                                    }`}
+                                >
+                                    {/* Utilisateur */}
+                                    <td className="px-4 py-3 align-middle">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative">
+                                                {u.profil_picture ? (
+                                                    <img
+                                                        src={u.profil_picture}
+                                                        alt=""
+                                                        className={`h-[30px] w-[30px] rounded-lg object-cover ${u.is_banned ? "opacity-40 grayscale" : ""}`}
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-[0.7rem] font-extrabold ${avatarStyle} ${u.is_banned ? "opacity-40 grayscale" : ""}`}
+                                                    >
+                                                        {initials}
+                                                    </div>
+                                                )}
                                                 {u.is_banned && (
-                                                    <span className="inline-flex items-center gap-1 rounded-full border border-coral/30 bg-coral/10 px-1.5 py-px text-[0.58rem] font-bold uppercase tracking-[0.06em] text-coral no-underline">
-                                                        Banni
+                                                    <span className="absolute -right-1 -top-1 flex h-[14px] w-[14px] items-center justify-center rounded-full bg-coral text-[0.5rem]">
+                                                        ⊘
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="mt-0.5 font-mono text-[0.72rem] text-mist">
-                                                {u.email}
+                                            <div>
+                                                <div
+                                                    className={`flex items-center gap-2 text-[0.84rem] font-semibold ${u.is_banned ? "text-mist/50 line-through" : "text-white-soft"}`}
+                                                >
+                                                    {u.first_name} {u.last_name}
+                                                    {u.is_banned && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full border border-coral/30 bg-coral/10 px-1.5 py-px text-[0.58rem] font-bold uppercase tracking-[0.06em] text-coral no-underline">
+                                                            Banni
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="mt-0.5 font-mono text-[0.72rem] text-mist">
+                                                    {u.email}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                {/* Rôle */}
-                                <td className="px-4 py-3 align-middle">
-                                    {u.role === "admin" ? (
-                                        <span className="inline-flex w-fit items-center rounded-full border border-lavande/20 bg-lavande/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] text-lavande">
-                                            Admin
-                                        </span>
-                                    ) : (
-                                        <div className="relative inline-flex">
-                                            <select
-                                                value={u.role}
-                                                onChange={(e) =>
-                                                    void onChangeRole(
-                                                        u.id,
-                                                        e.target.value as "jury" | "moderateur",
-                                                    )
-                                                }
-                                                className={`cursor-pointer appearance-none rounded-full border py-[3px] pl-[10px] pr-[22px] text-[0.65rem] font-bold uppercase tracking-[0.05em] outline-none transition-opacity hover:opacity-80 ${ROLE_SELECT_CLS[u.role]}`}
+                                    {/* Rôle */}
+                                    <td className="px-4 py-3 align-middle">
+                                        {u.role === "admin" || !isAdmin ? (
+                                            <span
+                                                className={`inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.05em] ${ROLE_SELECT_CLS[u.role] ?? "border-white/10 bg-white/5 text-mist"}`}
                                             >
-                                                <option value="jury">⚖️ Jury</option>
-                                                <option value="moderateur">🛡️ Modérateur</option>
-                                            </select>
-                                            <span className="pointer-events-none absolute right-[7px] top-1/2 -translate-y-1/2 text-[0.5rem] opacity-60">
-                                                ▾
+                                                {u.role === "admin"
+                                                    ? "Admin"
+                                                    : u.role === "moderateur"
+                                                      ? "Modérateur"
+                                                      : "Jury"}
                                             </span>
-                                        </div>
-                                    )}
-                                </td>
-
-                                {/* Films assignés */}
-                                <td className="px-4 py-3 align-middle">
-                                    <div className="font-mono text-[0.72rem] text-solar">
-                                        {u.films_assigned} films
-                                    </div>
-                                    {u.films_assigned > 0 && (
-                                        <div className="mt-0.5 h-[3px] w-[100px] overflow-hidden rounded-full bg-white/[0.08]">
-                                            <div
-                                                className="h-full rounded-full bg-solar transition-all duration-500"
-                                                style={{
-                                                    width: `${Math.min(100, Math.round((u.films_evaluated / u.films_assigned) * 100))}%`,
-                                                }}
+                                        ) : (
+                                            <RoleDropdown
+                                                value={u.role as "jury" | "moderateur"}
+                                                onChange={(role) => void onChangeRole(u.id, role)}
                                             />
+                                        )}
+                                    </td>
+
+                                    {/* Films assignés */}
+                                    <td className="px-4 py-3 align-middle">
+                                        <div className="font-mono text-[0.72rem] text-solar">
+                                            {u.films_assigned} films
                                         </div>
-                                    )}
-                                </td>
+                                        {u.films_assigned > 0 && (
+                                            <div className="mt-0.5 h-[3px] w-[100px] overflow-hidden rounded-full bg-white/[0.08]">
+                                                <div
+                                                    className="h-full rounded-full bg-solar transition-all duration-500"
+                                                    style={{
+                                                        width: `${Math.min(100, Math.round((u.films_evaluated / u.films_assigned) * 100))}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </td>
 
-                                {/* Accès */}
-                                <td className="px-4 py-3 align-middle text-[0.75rem] text-mist">
-                                    Email / mdp
-                                </td>
+                                    {/* Accès */}
+                                    <td className="px-4 py-3 align-middle text-[0.75rem] text-mist">
+                                        Email / mdp
+                                    </td>
 
-                                {/* Statut */}
-                                <td className="px-4 py-3 align-middle">
-                                    <div className="flex items-center gap-2.5">
-                                        {u.role === "admin" ? (
-                                            <span className="inline-flex items-center gap-1.5 text-[0.75rem] text-aurora/60">
-                                                <div className="h-[6px] w-[6px] rounded-full bg-aurora/50" />
-                                                Actif
-                                            </span>
-                                        ) : u.is_banned ? (
-                                            <div className="flex items-center gap-2">
-                                                <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
-                                                    <svg
-                                                        width="10"
-                                                        height="10"
-                                                        viewBox="0 0 10 10"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="1.6"
-                                                        strokeLinecap="round"
-                                                    >
-                                                        <circle cx="5" cy="5" r="4" />
-                                                        <line x1="2" y1="8" x2="8" y2="2" />
-                                                    </svg>
-                                                    Banni
+                                    {/* Statut */}
+                                    <td className="px-4 py-3 align-middle">
+                                        <div className="flex items-center gap-2.5">
+                                            {u.role === "admin" ? (
+                                                <span className="inline-flex items-center gap-1.5 text-[0.75rem] text-aurora/60">
+                                                    <div className="h-[6px] w-[6px] rounded-full bg-aurora/50" />
+                                                    Actif
                                                 </span>
-                                                {confirmUnbanId === u.id ? (
-                                                    <div className="flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.08] px-2 py-1">
-                                                        <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-aurora/80">
-                                                            Réactiver ?
+                                            ) : u.is_banned && canBan ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="inline-flex items-center gap-1.5 rounded-[7px] border border-coral/25 bg-coral/[0.08] px-2 py-[3px] text-[0.7rem] font-bold text-coral shadow-[0_0_8px_rgba(255,82,82,0.1)]">
+                                                        <svg
+                                                            width="10"
+                                                            height="10"
+                                                            viewBox="0 0 10 10"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                        >
+                                                            <circle cx="5" cy="5" r="4" />
+                                                            <line x1="2" y1="8" x2="8" y2="2" />
+                                                        </svg>
+                                                        Banni
+                                                    </span>
+                                                    {confirmUnbanId === u.id ? (
+                                                        <div className="flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.08] px-2 py-1">
+                                                            <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-aurora/80">
+                                                                Réactiver ?
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    void onUnban(u.id);
+                                                                    setConfirmUnbanId(null);
+                                                                }}
+                                                                className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-aurora text-deep-sky shadow-[0_2px_10px_rgba(78,255,206,0.4)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(78,255,206,0.6)]"
+                                                            >
+                                                                <Check size={11} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setConfirmUnbanId(null)
+                                                                }
+                                                                className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                            >
+                                                                <X size={11} />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setConfirmUnbanId(u.id)}
+                                                            className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-aurora/20 bg-aurora/[0.06] px-2.5 text-[0.62rem] font-semibold text-aurora/60 transition-all duration-200 hover:border-aurora/50 hover:bg-aurora/[0.14] hover:text-aurora hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
+                                                        >
+                                                            ↺ Réactiver
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : canDisable ? (
+                                                <StatusToggle
+                                                    isActive={u.is_active}
+                                                    onToggle={() =>
+                                                        void onToggleStatus(u.id, !u.is_active)
+                                                    }
+                                                />
+                                            ) : (
+                                                <span
+                                                    className={`text-[0.75rem] ${u.is_active ? "text-aurora/60" : "text-mist"}`}
+                                                >
+                                                    {u.is_active ? "Actif" : "Désactivé"}
+                                                </span>
+                                            )}
+                                            {u.role !== "admin" &&
+                                                !u.is_banned &&
+                                                canBan &&
+                                                (confirmBanId === u.id ? (
+                                                    <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
+                                                        <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-coral/80">
+                                                            Confirmer ?
                                                         </span>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
-                                                                void onUnban(u.id);
-                                                                setConfirmUnbanId(null);
+                                                                void onBan(u.id);
+                                                                setConfirmBanId(null);
                                                             }}
-                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-aurora text-[0.65rem] font-black text-deep-sky shadow-[0_2px_10px_rgba(78,255,206,0.4)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(78,255,206,0.6)]"
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-coral text-white shadow-[0_2px_10px_rgba(255,82,82,0.5)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(255,82,82,0.7)]"
                                                         >
-                                                            ✓
+                                                            <Check size={11} />
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => setConfirmUnbanId(null)}
-                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-[0.65rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                            onClick={() => setConfirmBanId(null)}
+                                                            className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
                                                         >
-                                                            ✕
+                                                            <X size={11} />
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <button
                                                         type="button"
-                                                        onClick={() => setConfirmUnbanId(u.id)}
-                                                        className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-aurora/20 bg-aurora/[0.06] px-2.5 text-[0.62rem] font-semibold text-aurora/60 transition-all duration-200 hover:border-aurora/50 hover:bg-aurora/[0.14] hover:text-aurora hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
+                                                        onClick={() => setConfirmBanId(u.id)}
+                                                        title="Bannir ce compte"
+                                                        className="group flex h-[26px] items-center gap-1.5 rounded-[7px] border border-coral/30 bg-coral/[0.08] px-2.5 text-[0.62rem] font-semibold text-coral/70 shadow-[0_0_8px_rgba(255,82,82,0.08)] transition-all duration-200 hover:border-coral/60 hover:bg-coral/[0.16] hover:text-coral hover:shadow-[0_0_16px_rgba(255,82,82,0.25)] active:scale-95"
                                                     >
-                                                        ↺ Réactiver
+                                                        <svg
+                                                            width="10"
+                                                            height="10"
+                                                            viewBox="0 0 10 10"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                        >
+                                                            <circle cx="5" cy="5" r="4" />
+                                                            <line x1="2" y1="8" x2="8" y2="2" />
+                                                        </svg>
+                                                        Bannir
                                                     </button>
-                                                )}
+                                                ))}
+                                            {u.role !== "admin" &&
+                                                canMessage &&
+                                                (messageUserId === u.id ? (
+                                                    <div className="flex flex-col gap-1.5 rounded-[8px] border border-lavande/30 bg-lavande/[0.08] p-2 shadow-[0_0_12px_rgba(139,92,246,0.1)]">
+                                                        <textarea
+                                                            className="w-full resize-none rounded-[6px] border border-white/[0.08] bg-white/[0.04] px-2 py-1.5 text-[0.75rem] text-white-soft placeholder-mist outline-none focus:border-lavande/40 focus:ring-0"
+                                                            rows={2}
+                                                            placeholder="Votre message..."
+                                                            value={messageText}
+                                                            onChange={(e) =>
+                                                                setMessageText(e.target.value)
+                                                            }
+                                                            autoFocus
+                                                        />
+                                                        <div className="flex items-center justify-end gap-1.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (messageText.trim()) {
+                                                                        void onSendMessage(
+                                                                            u.id,
+                                                                            messageText.trim(),
+                                                                        );
+                                                                    }
+                                                                    setMessageUserId(null);
+                                                                    setMessageText("");
+                                                                }}
+                                                                className="flex h-[20px] items-center gap-1 rounded-[5px] bg-lavande px-2 text-[0.6rem] font-bold text-white shadow-[0_2px_10px_rgba(139,92,246,0.4)] transition-all hover:scale-105 hover:shadow-[0_4px_16px_rgba(139,92,246,0.6)]"
+                                                            >
+                                                                <Check size={10} /> Envoyer
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setMessageUserId(null);
+                                                                    setMessageText("");
+                                                                }}
+                                                                className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
+                                                            >
+                                                                <X size={10} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setMessageUserId(u.id)}
+                                                        title="Envoyer un message"
+                                                        className="flex h-[26px] items-center gap-1.5 rounded-[7px] border border-lavande/30 bg-lavande/[0.08] px-2.5 text-[0.62rem] font-semibold text-lavande/70 transition-all duration-200 hover:border-lavande/60 hover:bg-lavande/[0.16] hover:text-lavande hover:shadow-[0_0_12px_rgba(139,92,246,0.2)] active:scale-95"
+                                                    >
+                                                        <svg
+                                                            width="10"
+                                                            height="10"
+                                                            viewBox="0 0 10 10"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="1.6"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                        >
+                                                            <path d="M9 1H1a.5.5 0 0 0-.5.5v5A.5.5 0 0 0 1 7h2l2 2.5L7 7h2a.5.5 0 0 0 .5-.5v-5A.5.5 0 0 0 9 1z" />
+                                                        </svg>
+                                                        Message
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {u.role === "moderateur" && isAdmin && (
+                                    <tr
+                                        key={`${u.id}-perms`}
+                                        className="border-b border-lavande/10 bg-lavande/[0.03] last:border-b-0"
+                                    >
+                                        <td colSpan={5} className="px-4 py-3">
+                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                                                <span className="text-[0.62rem] font-bold uppercase tracking-[0.1em] text-lavande/60">
+                                                    Permissions
+                                                </span>
+                                                {PERMISSION_LABELS.map(({ key, label }) => {
+                                                    const checked = Boolean(u.permissions?.[key]);
+                                                    return (
+                                                        <label
+                                                            key={key}
+                                                            className="flex cursor-pointer items-center gap-2"
+                                                        >
+                                                            <div
+                                                                onClick={() => {
+                                                                    const next: ModeratorPermissions =
+                                                                        {
+                                                                            can_access_admin:
+                                                                                Boolean(
+                                                                                    u.permissions
+                                                                                        ?.can_access_admin,
+                                                                                ),
+                                                                            can_disable_accounts:
+                                                                                Boolean(
+                                                                                    u.permissions
+                                                                                        ?.can_disable_accounts,
+                                                                                ),
+                                                                            can_ban_users: Boolean(
+                                                                                u.permissions
+                                                                                    ?.can_ban_users,
+                                                                            ),
+                                                                            can_send_messages:
+                                                                                Boolean(
+                                                                                    u.permissions
+                                                                                        ?.can_send_messages,
+                                                                                ),
+                                                                            [key]: !checked,
+                                                                        };
+                                                                    void onUpdatePermissions(
+                                                                        u.id,
+                                                                        next,
+                                                                    );
+                                                                }}
+                                                                className={`flex h-[16px] w-[16px] shrink-0 cursor-pointer items-center justify-center rounded-[4px] border transition-all ${
+                                                                    checked
+                                                                        ? "border-lavande bg-lavande shadow-[0_0_8px_rgba(139,92,246,0.4)]"
+                                                                        : "border-white/20 bg-white/[0.04] hover:border-lavande/50"
+                                                                }`}
+                                                            >
+                                                                {checked && (
+                                                                    <Check
+                                                                        size={9}
+                                                                        className="text-white"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <span
+                                                                className={`text-[0.72rem] ${checked ? "text-white-soft" : "text-mist"}`}
+                                                            >
+                                                                {label}
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
                                             </div>
-                                        ) : (
-                                            <StatusToggle
-                                                isActive={u.is_active}
-                                                onToggle={() =>
-                                                    void onToggleStatus(u.id, !u.is_active)
-                                                }
-                                            />
-                                        )}
-                                        {u.role !== "admin" &&
-                                            !u.is_banned &&
-                                            (confirmBanId === u.id ? (
-                                                <div className="flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/[0.12] px-2.5 py-1.5 shadow-[0_0_16px_rgba(255,82,82,0.15)]">
-                                                    <span className="text-[0.6rem] font-bold uppercase tracking-[0.06em] text-coral/80">
-                                                        Confirmer ?
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            void onBan(u.id);
-                                                            setConfirmBanId(null);
-                                                        }}
-                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] bg-coral text-[0.65rem] font-black text-white shadow-[0_2px_10px_rgba(255,82,82,0.5)] transition-all hover:scale-110 hover:shadow-[0_4px_16px_rgba(255,82,82,0.7)]"
-                                                    >
-                                                        ✓
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setConfirmBanId(null)}
-                                                        className="flex h-[20px] w-[20px] items-center justify-center rounded-[5px] border border-white/[0.12] bg-white/[0.06] text-[0.65rem] text-mist transition-all hover:bg-white/[0.12] hover:text-white-soft"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setConfirmBanId(u.id)}
-                                                    title="Bannir ce compte"
-                                                    className="group flex h-[26px] items-center gap-1.5 rounded-[7px] border border-coral/30 bg-coral/[0.08] px-2.5 text-[0.62rem] font-semibold text-coral/70 shadow-[0_0_8px_rgba(255,82,82,0.08)] transition-all duration-200 hover:border-coral/60 hover:bg-coral/[0.16] hover:text-coral hover:shadow-[0_0_16px_rgba(255,82,82,0.25)] active:scale-95"
-                                                >
-                                                    <svg
-                                                        width="10"
-                                                        height="10"
-                                                        viewBox="0 0 10 10"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="1.6"
-                                                        strokeLinecap="round"
-                                                    >
-                                                        <circle cx="5" cy="5" r="4" />
-                                                        <line x1="2" y1="8" x2="8" y2="2" />
-                                                    </svg>
-                                                    Bannir
-                                                </button>
-                                            ))}
-                                    </div>
-                                </td>
-                            </tr>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
                         );
                     })}
                     {filtered.length === 0 && (

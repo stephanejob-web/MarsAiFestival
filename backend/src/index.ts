@@ -8,7 +8,7 @@ import {
     saveGlobalMessage,
     getRecentGlobalMessages,
 } from "./repositories/globalMessage.repository";
-import { findById } from "./repositories/jury.repository";
+import { findById, getSessionToken } from "./repositories/jury.repository";
 
 const PORT = Number(process.env.PORT) || 5500;
 const JWT_SECRET = process.env.JWT_SECRET ?? "secret";
@@ -28,6 +28,7 @@ interface JuryPayload {
     firstName: string;
     lastName: string;
     profilPicture?: string | null;
+    sessionToken?: string;
 }
 
 interface GlobalConnectedUser {
@@ -72,14 +73,24 @@ const broadcastOnline = (filmId: number): void => {
 };
 
 // ── Auth middleware (JWT dans handshake.auth.token, requis) ───────────────────
-io.use((socket: Socket, next) => {
+io.use(async (socket: Socket, next) => {
     const token = socket.handshake.auth.token as string | undefined;
     if (!token) return next(new Error("auth:missing_token"));
     try {
         const payload = jwt.verify(token, JWT_SECRET) as JuryPayload;
+        // Vérifier que la session est toujours valide
+        if (payload.sessionToken) {
+            const dbToken = await getSessionToken(payload.id);
+            if (dbToken !== payload.sessionToken) {
+                return next(new Error("auth:session_expired"));
+            }
+        }
         socket.data.jury = payload;
         next();
-    } catch {
+    } catch (err) {
+        if (err instanceof Error && err.message === "auth:session_expired") {
+            return next(err);
+        }
         next(new Error("auth:invalid_token"));
     }
 });
@@ -94,6 +105,13 @@ io.on("connection", (socket: Socket) => {
         // Profil_picture fraîche depuis la DB (le JWT peut être périmé après un changement d'avatar)
         const freshRow = await findById(jury.id);
         const profilPicture = freshRow?.profil_picture ?? jury.profilPicture ?? null;
+
+        // Refuser la connexion si le jury est banni
+        if (freshRow?.is_banned) {
+            socket.emit("user:banned");
+            socket.disconnect(true);
+            return;
+        }
 
         // Reverse map juryId → socketIds (pour le ban en temps réel)
         const existingSockets = juryToSockets.get(jury.id);
@@ -134,6 +152,13 @@ io.on("connection", (socket: Socket) => {
         socket.on("chat:send", async (msg: { text: string }) => {
             const text = msg.text?.trim();
             if (!text) return;
+
+            const row = await findById(jury.id);
+            if (row?.is_banned) {
+                socket.emit("user:banned");
+                socket.disconnect(true);
+                return;
+            }
 
             const id = await saveGlobalMessage(jury.id, fullName, initials, text);
 
@@ -228,6 +253,14 @@ io.on("connection", (socket: Socket) => {
                 const fid = Number(payload.filmId);
                 const text = payload.message?.trim();
                 if (!fid || !text) return;
+
+                const row = await findById(jury.id);
+                if (row?.is_banned) {
+                    socket.emit("user:banned");
+                    socket.disconnect(true);
+                    if (ack) ack(false);
+                    return;
+                }
 
                 try {
                     const id = await saveMessage(fid, jury.id, fullName, initials, text);

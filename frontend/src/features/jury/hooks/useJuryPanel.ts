@@ -48,9 +48,25 @@ interface ApiFilmRow {
     subtitle_fr_url: string | null;
     subtitle_en_url: string | null;
     film_year: number | null;
+    realisator_gender: string | null;
     realisator_first: string;
     realisator_last: string;
+    realisator_birth_date: string | null;
+    realisator_email: string;
+    realisator_profession: string | null;
+    realisator_phone: string | null;
+    realisator_mobile_phone: string | null;
+    realisator_street: string | null;
+    realisator_postal_code: string | null;
+    realisator_city: string | null;
     realisator_country: string | null;
+    realisator_youtube: string | null;
+    realisator_instagram: string | null;
+    realisator_linkedin: string | null;
+    realisator_facebook: string | null;
+    realisator_xtwitter: string | null;
+    realisator_how_did_you_know_us: string | null;
+    realisator_newsletter: number;
 }
 
 const formatDuration = (seconds: number | null): string => {
@@ -80,6 +96,27 @@ const mapApiFilm = (row: ApiFilmRow): JuryFilm => ({
     comments: [],
     opinions: [],
     votes: [],
+    realisator: {
+        gender: row.realisator_gender ?? null,
+        firstName: row.realisator_first,
+        lastName: row.realisator_last,
+        birthDate: row.realisator_birth_date ?? null,
+        email: row.realisator_email,
+        profession: row.realisator_profession ?? null,
+        phone: row.realisator_phone ?? null,
+        mobilePhone: row.realisator_mobile_phone ?? null,
+        street: row.realisator_street ?? null,
+        postalCode: row.realisator_postal_code ?? null,
+        city: row.realisator_city ?? null,
+        country: row.realisator_country ?? null,
+        youtube: row.realisator_youtube ?? null,
+        instagram: row.realisator_instagram ?? null,
+        linkedin: row.realisator_linkedin ?? null,
+        facebook: row.realisator_facebook ?? null,
+        xtwitter: row.realisator_xtwitter ?? null,
+        howDidYouKnowUs: row.realisator_how_did_you_know_us ?? null,
+        newsletter: !!row.realisator_newsletter,
+    },
 });
 
 // ── Shape returned by GET /api/comments/film?filmId=X ────────────────────────
@@ -282,11 +319,37 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 comments: [],
                 opinions: [],
                 votes: [],
+                realisator: {
+                    gender: null,
+                    firstName: "",
+                    lastName: "",
+                    birthDate: null,
+                    email: "",
+                    profession: null,
+                    phone: null,
+                    mobilePhone: null,
+                    street: null,
+                    postalCode: null,
+                    city: null,
+                    country: null,
+                    youtube: null,
+                    instagram: null,
+                    linkedin: null,
+                    facebook: null,
+                    xtwitter: null,
+                    howDidYouKnowUs: null,
+                    newsletter: false,
+                },
             }
         );
     }, [films, activeFilmId]);
 
     const progress = films.length > 0 ? Math.round((evaluatedCount / films.length) * 100) : 0;
+
+    const changeView = useCallback((view: ActiveView): void => {
+        setActiveView(view);
+        setActiveFilmId(0);
+    }, []);
 
     const showToast = useCallback((message: string): void => {
         setToast(message);
@@ -301,33 +364,47 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const applyDecision = useCallback(
         (decision: Exclude<Decision, null>, message?: string): void => {
+            const filmId = activeFilm.id;
+            const previousDecision = activeFilm.myDecision;
             setFilms((prev) =>
                 prev.map((film) => {
-                    if (film.id !== activeFilm.id) return film;
+                    if (film.id !== filmId) return film;
                     return { ...film, myDecision: decision };
                 }),
             );
-            // Persist vote to backend (fire and forget)
             const apiDecision = toApiDecision(decision);
             if (apiDecision) {
                 const token = localStorage.getItem("jury_token");
                 if (token) {
-                    void fetch(`${API}/api/votes`, {
+                    fetch(`${API}/api/votes`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: `Bearer ${token}`,
                         },
                         body: JSON.stringify({
-                            filmId: activeFilm.id,
+                            filmId,
                             decision: apiDecision,
                             ...(message?.trim() ? { message: message.trim() } : {}),
                         }),
-                    });
+                    })
+                        .then((r) => {
+                            if (!r.ok) throw new Error("Vote failed");
+                        })
+                        .catch(() => {
+                            setFilms((prev) =>
+                                prev.map((film) =>
+                                    film.id !== filmId
+                                        ? film
+                                        : { ...film, myDecision: previousDecision },
+                                ),
+                            );
+                            showToast("Erreur : vote non enregistré");
+                        });
                 }
             }
         },
-        [activeFilm.id],
+        [activeFilm.id, activeFilm.myDecision, showToast],
     );
 
     const handleDecision = useCallback(
@@ -376,14 +453,14 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                         body: JSON.stringify({ filmId: activeFilm.id }),
                     });
                 }
-                setActiveView("discuter");
-                showToast("Film ajouté à la discussion 💬");
+                changeView("discuter");
+                showToast("Film ajouté à la discussion");
                 return;
             }
             applyDecision(decision);
-            showToast("Film validé ✓");
+            showToast("Film validé");
         },
-        [applyDecision, showToast, activeFilm.id, activeFilm.myDecision],
+        [applyDecision, changeView, showToast, activeFilm.id, activeFilm.myDecision],
     );
 
     const confirmARevoir = useCallback((): void => {
@@ -391,7 +468,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
-        showToast("Film mis en révision ↩");
+        showToast("Film mis en révision");
     }, [applyDecision, showToast, modalMessage]);
 
     const confirmRefuse = useCallback((): void => {
@@ -399,7 +476,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveModal(null);
         setSelectedReason(null);
         setModalMessage("");
-        showToast("Film refusé ✕");
+        showToast("Film refusé");
     }, [applyDecision, showToast, modalMessage]);
 
     const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -508,7 +585,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 );
                 setNotationComment("");
             });
-        showToast("Commentaire publié ✓");
+        showToast("Commentaire publié");
     }, [notationComment, user, activeFilm.id, showToast]);
 
     return {
@@ -533,7 +610,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setActiveFilmId,
         setActiveTab,
         setCommentDraft,
-        setActiveView,
+        setActiveView: changeView,
         setActiveModal,
         setSelectedReason,
         setModalMessage,

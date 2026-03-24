@@ -54,11 +54,10 @@ const Jury = (): React.JSX.Element => {
                             🔐
                         </div>
                         <h1 className="font-display text-[1.45rem] font-extrabold leading-tight text-white-soft">
-                            Espace Jury
+                            Espace membres
                         </h1>
                         <p className="mt-2 text-sm leading-relaxed text-mist">
-                            Connectez-vous ou créez votre compte pour accéder à l&apos;interface
-                            jury.
+                            Accès réservé aux jury, modérateurs et administrateurs.
                         </p>
                     </header>
 

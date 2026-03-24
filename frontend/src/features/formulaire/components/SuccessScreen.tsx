@@ -56,7 +56,7 @@ const SuccessScreen = ({
                 setYtPct(100);
                 setYtSteps((prev) => prev.map((s) => ({ ...s, done: true })));
                 setYtStepLabel(t("form.success.ytDone"));
-                setYtResult("approved");
+                setYtResult(youtubeWarning ? "rejected" : "approved");
                 return;
             }
             setYtPct(step * 25);
@@ -67,8 +67,7 @@ const SuccessScreen = ({
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [t, youtubeWarning]);
 
     return (
         <div className="form-animate-in text-center max-w-lg mx-auto py-8">

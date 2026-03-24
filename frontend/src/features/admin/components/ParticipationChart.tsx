@@ -25,7 +25,7 @@ function getTextColor(pct: number): string {
 
 function getStatusLabel(pct: number, voted: number, total: number): string {
     if (total === 0) return "—";
-    if (pct === 100) return "✓ Complet";
+    if (pct === 100) return "Complet";
     if (voted === 0) return "Pas commencé";
     return `${pct}%`;
 }

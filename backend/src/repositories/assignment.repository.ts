@@ -50,9 +50,25 @@ export const getFilmsByJury = async (juryId: number): Promise<RowDataPacket[]> =
             f.creative_workflow, f.tech_stack,
             f.subtitle_fr_url, f.subtitle_en_url,
             YEAR(f.created_at) AS film_year,
-            r.first_name AS realisator_first,
-            r.last_name  AS realisator_last,
-            r.country    AS realisator_country
+            r.gender          AS realisator_gender,
+            r.first_name      AS realisator_first,
+            r.last_name       AS realisator_last,
+            r.birth_date      AS realisator_birth_date,
+            r.email           AS realisator_email,
+            r.profession      AS realisator_profession,
+            r.phone           AS realisator_phone,
+            r.mobile_phone    AS realisator_mobile_phone,
+            r.street          AS realisator_street,
+            r.postal_code     AS realisator_postal_code,
+            r.city            AS realisator_city,
+            r.country         AS realisator_country,
+            r.youtube         AS realisator_youtube,
+            r.instagram       AS realisator_instagram,
+            r.linkedin        AS realisator_linkedin,
+            r.facebook        AS realisator_facebook,
+            r.xtwitter        AS realisator_xtwitter,
+            r.how_did_you_know_us AS realisator_how_did_you_know_us,
+            r.newsletter      AS realisator_newsletter
          FROM jury_film_assignment jfa
          JOIN film       f ON f.id = jfa.film_id
          JOIN realisator r ON r.id = f.realisator_id

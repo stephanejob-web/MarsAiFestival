@@ -11,6 +11,9 @@ import AdminTagsPage from "./pages/AdminTagsPage";
 import Layout from "./components/ui/Layout";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedAdminRoute from "./components/ui/ProtectedAdminRoute";
+import ProtectedJuryRoute from "./components/ui/ProtectedJuryRoute";
+import AdminCmsPage from "./pages/AdminCmsPage";
+import AdminDocsPage from "./pages/AdminDocsPage";
 
 const App = (): React.JSX.Element => {
     return (
@@ -24,36 +27,16 @@ const App = (): React.JSX.Element => {
                     <Route path="admin" element={<AdminLayout />}>
                         <Route index element={<AdminPage />} />
                         <Route path="films" element={<AdminFilmsPage />} />
-                        <Route
-                            path="phases"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Phases & Dates — en construction
-                                </div>
-                            }
-                        />
                         <Route path="selection" element={<AdminSelectionPage />} />
                         <Route path="tags" element={<AdminTagsPage />} />
-                        <Route
-                            path="awards"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Awards & Sponsors — en construction
-                                </div>
-                            }
-                        />
-                        <Route
-                            path="site"
-                            element={
-                                <div className="p-8 text-zinc-500">
-                                    Administration site — en construction
-                                </div>
-                            }
-                        />
+                        <Route path="/admin/cms" element={<AdminCmsPage />} />
+                        <Route path="docs" element={<AdminDocsPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />
-                <Route path="jury/panel" element={<JuryPanel />} />
+                <Route element={<ProtectedJuryRoute />}>
+                    <Route path="jury/panel" element={<JuryPanel />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     );

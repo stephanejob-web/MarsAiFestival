@@ -1,4 +1,16 @@
 import React, { useEffect, useState } from "react";
+import {
+    Check,
+    X,
+    MessageSquare,
+    Trophy,
+    Flag,
+    ShieldCheck,
+    RefreshCw,
+    ChevronRight,
+    LayoutList,
+    ListChecks,
+} from "lucide-react";
 import StatCard from "../features/admin/components/StatCard";
 import useAdminSelection, {
     getConsensus,
@@ -45,23 +57,23 @@ interface VoteDetail {
 
 const CONSENSUS_CONFIG: Record<string, { label: string; cls: string }> = {
     unanime: {
-        label: "✅ Unanime",
+        label: "Unanime",
         cls: "bg-aurora/10 text-aurora border border-aurora/25",
     },
     majorite: {
-        label: "👍 Majorité",
+        label: "Majorité",
         cls: "bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25",
     },
     partage: {
-        label: "⚠️ Partagé",
+        label: "Partagé",
         cls: "bg-solar/10 text-solar border border-solar/25",
     },
     rejete: {
-        label: "❌ Rejeté",
+        label: "Rejeté",
         cls: "bg-coral/10 text-coral border border-coral/25",
     },
     attente: {
-        label: "⏳ En attente",
+        label: "En attente",
         cls: "bg-white/[0.04] text-mist border border-white/[0.08]",
     },
 };
@@ -72,20 +84,18 @@ const FILTER_BUTTONS: Array<{
     countKey?: keyof ReturnType<typeof useAdminSelection>["stats"];
 }> = [
     { key: "tous", label: "Tous" },
-    { key: "unanime", label: "✅ Unanimes", countKey: "unanime" },
-    { key: "majorite", label: "👍 Majorité", countKey: "majorite" },
-    { key: "partage", label: "⚠️ Partagés", countKey: "partage" },
-    { key: "rejete", label: "❌ Rejetés", countKey: "rejete" },
-    { key: "attente", label: "⏳ En attente", countKey: "attente" },
-    { key: "signale", label: "🚩 Signalements", countKey: "signale" },
-    { key: "selectionne", label: "★ Top 50", countKey: "selectionne" },
-    { key: "finaliste", label: "🏆 Top 5 — Finale", countKey: "finaliste" },
+    { key: "unanime", label: "Unanimes", countKey: "unanime" },
+    { key: "majorite", label: "Majorité", countKey: "majorite" },
+    { key: "partage", label: "Partagés", countKey: "partage" },
+    { key: "rejete", label: "Rejetés", countKey: "rejete" },
+    { key: "attente", label: "En attente", countKey: "attente" },
+    { key: "signale", label: "Signalements", countKey: "signale" },
 ];
 
 const SORT_BUTTONS: Array<{ key: SortKey; label: string }> = [
     { key: "score", label: "Score ↓" },
     { key: "title", label: "Titre A-Z" },
-    { key: "comments", label: "💬 Commentaires" },
+    { key: "comments", label: "Commentaires" },
 ];
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -97,25 +107,25 @@ const DECISION_STYLE: Record<
     valide: {
         border: "#4effce",
         bg: "rgba(78,255,206,0.15)",
-        label: "✓ Validé",
+        label: "Validé",
         labelCls: "text-aurora",
     },
     arevoir: {
         border: "#f5e642",
         bg: "rgba(245,230,66,0.12)",
-        label: "↩ À revoir",
+        label: "À revoir",
         labelCls: "text-solar",
     },
     refuse: {
         border: "#ff6b6b",
         bg: "rgba(255,107,107,0.12)",
-        label: "✕ Refusé",
+        label: "Refusé",
         labelCls: "text-coral",
     },
     in_discussion: {
         border: "#c084fc",
         bg: "rgba(192,132,252,0.12)",
-        label: "💬 Discussion",
+        label: "Discussion",
         labelCls: "text-lavande",
     },
 };
@@ -213,9 +223,20 @@ const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
                 <div className="h-full bg-solar" style={{ width: `${pA}%` }} />
                 <div className="h-full bg-coral" style={{ width: `${pR}%` }} />
             </div>
-            <span className="whitespace-nowrap font-mono text-[0.68rem] text-mist">
-                {film.votes_valide}✓ {film.votes_arevoir}↩ {film.votes_refuse}✕
-            </span>
+            <div className="flex items-center gap-1.5 font-mono text-[0.68rem]">
+                <span className="flex items-center gap-0.5 text-aurora">
+                    <Check size={9} />
+                    {film.votes_valide}
+                </span>
+                <span className="flex items-center gap-0.5 text-solar">
+                    <X size={9} className="rotate-180" />
+                    {film.votes_arevoir}
+                </span>
+                <span className="flex items-center gap-0.5 text-coral">
+                    <X size={9} />
+                    {film.votes_refuse}
+                </span>
+            </div>
         </div>
     );
 };
@@ -298,7 +319,13 @@ const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Elemen
                             : "border border-lavande/25 bg-lavande/[0.06] text-lavande hover:bg-lavande/[0.14]"
                     }`}
                 >
-                    {isFinaliste ? "🏆 Finaliste" : "→ Top 5"}
+                    {isFinaliste ? (
+                        <span className="flex items-center gap-1">
+                            <Trophy size={11} /> Finaliste
+                        </span>
+                    ) : (
+                        "Top 5"
+                    )}
                 </button>
             )}
         </div>
@@ -314,11 +341,11 @@ type InsightTab = "votes" | "commentaires" | "discussion" | "email";
 
 const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
     selectionne: {
-        label: "★ Sélectionné",
+        label: "Sélectionné",
         cls: "bg-aurora/10 text-aurora border border-aurora/25",
     },
     finaliste: {
-        label: "🏆 Finaliste",
+        label: "Finaliste",
         cls: "bg-lavande/10 text-lavande border border-lavande/25",
     },
     soumis: {
@@ -428,16 +455,16 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
     const voteRows = film
         ? [
               {
-                  label: "✓ Validé",
+                  label: "Validé",
                   count: film.votes_valide,
                   color: "text-aurora",
                   bg: "bg-aurora",
-                  icon: "✓",
+                  icon: <Check size={11} />,
                   cardCls: "border-aurora/20 bg-aurora/[0.06]",
                   iconCls: "text-aurora",
               },
               {
-                  label: "↩ À revoir",
+                  label: "À revoir",
                   count: film.votes_arevoir,
                   color: "text-solar",
                   bg: "bg-solar",
@@ -446,20 +473,20 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                   iconCls: "text-solar",
               },
               {
-                  label: "✕ Refusé",
+                  label: "Refusé",
                   count: film.votes_refuse,
                   color: "text-coral",
                   bg: "bg-coral",
-                  icon: "✕",
+                  icon: <X size={11} />,
                   cardCls: "border-coral/20 bg-coral/[0.06]",
                   iconCls: "text-coral",
               },
               {
-                  label: "💬 Discussion",
+                  label: "Discussion",
                   count: film.votes_discussion,
                   color: "text-lavande",
                   bg: "bg-lavande",
-                  icon: "💬",
+                  icon: <MessageSquare size={11} />,
                   cardCls: "border-lavande/20 bg-lavande/[0.06]",
                   iconCls: "text-lavande",
               },
@@ -503,9 +530,9 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] text-[0.85rem] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.04] text-mist transition-all hover:bg-white/[0.1] hover:text-white-soft"
                     >
-                        ✕
+                        <X size={14} />
                     </button>
                 </div>
 
@@ -653,10 +680,10 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                                             : null;
                                         const decisionIcon = d.decision
                                             ? ({
-                                                  valide: "✓",
+                                                  valide: <Check size={10} />,
                                                   arevoir: "↩",
-                                                  refuse: "✕",
-                                                  in_discussion: "💬",
+                                                  refuse: <X size={10} />,
+                                                  in_discussion: <MessageSquare size={10} />,
                                               }[d.decision] ?? "?")
                                             : null;
                                         const voteMsg = voteMessageByJury.get(d.jury_id);
@@ -728,8 +755,8 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                                                             }`}
                                                         >
                                                             {d.decision === "refuse"
-                                                                ? "✉ Message envoyé au réalisateur"
-                                                                : "💬 Motif de révision"}
+                                                                ? "Message envoyé au réalisateur"
+                                                                : "Motif de révision"}
                                                         </div>
                                                         <p className="text-[0.78rem] leading-relaxed text-white-soft/80">
                                                             {voteMsg.message}
@@ -895,13 +922,13 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                             />
 
                             {emailStatus === "sent" && (
-                                <div className="rounded-xl border border-aurora/25 bg-aurora/[0.06] px-4 py-3 text-[0.78rem] text-aurora">
-                                    ✓ Email envoyé avec succès.
+                                <div className="flex items-center gap-2 rounded-xl border border-aurora/25 bg-aurora/[0.06] px-4 py-3 text-[0.78rem] text-aurora">
+                                    <Check size={13} /> Email envoyé avec succès.
                                 </div>
                             )}
                             {emailStatus === "error" && (
-                                <div className="rounded-xl border border-coral/25 bg-coral/[0.06] px-4 py-3 text-[0.78rem] text-coral">
-                                    ✕ Erreur lors de l&apos;envoi. Réessayez.
+                                <div className="flex items-center gap-2 rounded-xl border border-coral/25 bg-coral/[0.06] px-4 py-3 text-[0.78rem] text-coral">
+                                    <X size={13} /> Erreur lors de l&apos;envoi. Réessayez.
                                 </div>
                             )}
 
@@ -933,8 +960,8 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                                     {emailStatus === "sending"
                                         ? "Envoi…"
                                         : emailStatus === "sent"
-                                          ? "✓ Envoyé !"
-                                          : "📧 Envoyer"}
+                                          ? "Envoyé !"
+                                          : "Envoyer"}
                                 </button>
                             </div>
                         </div>
@@ -949,7 +976,7 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                                 </div>
                             ) : messages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center gap-2 py-12">
-                                    <span className="text-[1.5rem] opacity-30">💬</span>
+                                    <MessageSquare size={24} className="opacity-30 text-mist" />
                                     <span className="text-[0.82rem] text-mist opacity-50">
                                         Aucun message de discussion pour ce film.
                                     </span>
@@ -1011,6 +1038,8 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
 
 // ── Main component ────────────────────────────────────────────────────────────
 
+type Mode = "analyse" | "top50" | "top5";
+
 const AdminSelectionPage = (): React.JSX.Element => {
     const {
         allFilms,
@@ -1029,7 +1058,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
         reload,
     } = useAdminSelection();
 
+    const [mode, setMode] = useState<Mode>("analyse");
     const [expandedId, setExpandedId] = useState<number | null>(null);
+
+    const handleModeChange = (m: Mode): void => {
+        setMode(m);
+        setFilter("tous");
+        setExpandedId(null);
+    };
     const expandedFilm = allFilms.find((f) => f.film_id === expandedId) ?? null;
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -1050,7 +1086,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
             <div className="overflow-hidden rounded-xl border border-aurora/20">
                 {/* Header progress */}
                 <div className="flex items-center gap-4 border-b border-aurora/10 bg-aurora/[0.04] px-5 py-3">
-                    <span className="text-[0.75rem] font-bold text-aurora">★ Top 50</span>
+                    <span className="text-[0.75rem] font-bold text-aurora">Top 50</span>
                     <div
                         className="flex-1 overflow-hidden rounded-full bg-aurora/[0.08]"
                         style={{ height: 5 }}
@@ -1065,8 +1101,8 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         <span className="font-normal text-mist"> / 50</span>
                     </span>
                     {top50.length >= 50 && (
-                        <span className="text-[0.72rem] font-bold text-aurora">
-                            ✓ Quota atteint
+                        <span className="flex items-center gap-1 text-[0.72rem] font-bold text-aurora">
+                            <Check size={11} /> Quota atteint
                         </span>
                     )}
                 </div>
@@ -1098,7 +1134,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                     Top 5
                                 </th>
                                 <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
-                                    ✕
+                                    Retirer
                                 </th>
                             </tr>
                         </thead>
@@ -1123,9 +1159,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                             <div className="flex items-center gap-1.5 text-[0.82rem] font-semibold text-white-soft">
                                                 {film.original_title}
                                                 {isFinal && (
-                                                    <span className="text-[0.65rem] text-lavande">
-                                                        🏆
-                                                    </span>
+                                                    <Trophy size={11} className="text-lavande" />
                                                 )}
                                             </div>
                                             <div className="mt-0.5 font-mono text-[0.62rem] text-mist">
@@ -1157,7 +1191,13 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                         : "border border-lavande/20 bg-lavande/[0.05] text-lavande hover:bg-lavande/[0.14]"
                                                 }`}
                                             >
-                                                {isFinal ? "🏆 Finaliste" : "→ Top 5"}
+                                                {isFinal ? (
+                                                    <span className="flex items-center gap-1">
+                                                        <Trophy size={11} /> Finaliste
+                                                    </span>
+                                                ) : (
+                                                    "Top 5"
+                                                )}
                                             </button>
                                         </td>
                                         <td className="px-4 py-3">
@@ -1166,9 +1206,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 onClick={(): void => {
                                                     void updateStatut(film.film_id, "soumis");
                                                 }}
-                                                className="rounded-lg border border-coral/20 bg-coral/[0.04] px-2.5 py-1.5 font-display text-[0.72rem] font-bold text-coral transition-all hover:bg-coral/[0.1]"
+                                                className="flex items-center justify-center rounded-lg border border-coral/20 bg-coral/[0.04] px-2.5 py-1.5 font-display text-[0.72rem] font-bold text-coral transition-all hover:bg-coral/[0.1]"
                                             >
-                                                ✕
+                                                <X size={13} />
                                             </button>
                                         </td>
                                     </tr>
@@ -1184,13 +1224,21 @@ const AdminSelectionPage = (): React.JSX.Element => {
     // ── Top 5 special view ─────────────────────────────────────────────────────
     const renderTop5 = (): React.JSX.Element => {
         const finalists = allFilms.filter((f) => f.statut === "finaliste");
-        const medals = ["🥇", "🥈", "🥉", "④", "⑤"];
+        const medalColors = [
+            "text-solar",
+            "text-white-soft/70",
+            "text-[#cd8c52]",
+            "text-mist",
+            "text-mist",
+        ];
         const missing = 5 - finalists.length;
         return (
             <div className="overflow-hidden rounded-xl border border-lavande/25">
                 {/* Header progress */}
                 <div className="flex items-center gap-4 border-b border-lavande/15 bg-lavande/[0.04] px-5 py-3">
-                    <span className="text-[0.75rem] font-bold text-lavande">🏆 Top 5 — Finale</span>
+                    <span className="flex items-center gap-1 text-[0.75rem] font-bold text-lavande">
+                        <Trophy size={13} /> Top 5 — Finale
+                    </span>
                     <div
                         className="flex-1 overflow-hidden rounded-full bg-lavande/[0.08]"
                         style={{ height: 5 }}
@@ -1205,8 +1253,8 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         <span className="font-normal text-mist"> / 5</span>
                     </span>
                     {finalists.length >= 5 ? (
-                        <span className="text-[0.72rem] font-bold text-lavande">
-                            ✓ Finale constituée
+                        <span className="flex items-center gap-1 text-[0.72rem] font-bold text-lavande">
+                            <Check size={11} /> Finale constituée
                         </span>
                     ) : (
                         <span className="text-[0.72rem] text-solar">
@@ -1219,9 +1267,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         Aucun finaliste désigné.
                         <br />
                         <span className="text-[0.75rem] opacity-60">
-                            Allez dans <strong className="text-solar">★ Top 50</strong> et cliquez
-                            sur <strong className="text-lavande">→ Top 5</strong> pour désigner vos
-                            5 finalistes.
+                            Allez dans <strong className="text-solar">Top 50</strong> et cliquez sur{" "}
+                            <strong className="text-lavande">Top 5</strong> pour désigner vos 5
+                            finalistes.
                         </span>
                     </div>
                 ) : (
@@ -1254,8 +1302,12 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                         key={film.film_id}
                                         className="border-b border-white/[0.04] bg-lavande/[0.05] transition-colors hover:bg-lavande/[0.09]"
                                     >
-                                        <td className="px-4 py-3 text-center text-[1.1rem]">
-                                            {medals[idx] ?? idx + 1}
+                                        <td className="px-4 py-3 text-center">
+                                            <span
+                                                className={`font-display text-[1rem] font-extrabold ${medalColors[idx] ?? "text-mist"}`}
+                                            >
+                                                {idx + 1}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="text-[0.88rem] font-bold text-white-soft">
@@ -1281,9 +1333,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 onClick={(): void => {
                                                     void updateStatut(film.film_id, "selectionne");
                                                 }}
-                                                className="rounded-lg border border-coral/20 bg-coral/[0.04] px-2.5 py-1.5 font-display text-[0.72rem] font-bold text-coral transition-all hover:bg-coral/[0.1]"
+                                                className="flex items-center gap-1 rounded-lg border border-coral/20 bg-coral/[0.04] px-2.5 py-1.5 font-display text-[0.72rem] font-bold text-coral transition-all hover:bg-coral/[0.1]"
                                             >
-                                                ✕ Retirer
+                                                <X size={11} /> Retirer
                                             </button>
                                         </td>
                                     </tr>
@@ -1318,7 +1370,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             Jurés
                         </th>
                         <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
-                            💬
+                            Cmts
                         </th>
                         <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
                             Décision admin
@@ -1396,8 +1448,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 <span className="text-mist opacity-40">—</span>
                                             )}
                                             {film.total_tickets > 0 && (
-                                                <span className="ml-1.5 rounded-full bg-solar/10 px-1.5 py-0.5 text-[0.62rem] text-solar">
-                                                    🚩{film.total_tickets}
+                                                <span className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-solar/10 px-1.5 py-0.5 text-[0.62rem] text-solar">
+                                                    <Flag size={9} />
+                                                    {film.total_tickets}
                                                 </span>
                                             )}
                                         </td>
@@ -1414,9 +1467,10 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
                                         {/* Chevron */}
                                         <td className="w-8 px-2 py-3 text-right">
-                                            <span className="text-[1rem] text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora">
-                                                ›
-                                            </span>
+                                            <ChevronRight
+                                                size={14}
+                                                className="text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora"
+                                            />
                                         </td>
                                     </tr>
                                 </React.Fragment>
@@ -1453,13 +1507,13 @@ const AdminSelectionPage = (): React.JSX.Element => {
                     <button
                         type="button"
                         onClick={(): void => reload()}
-                        className="flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 font-mono text-[0.7rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
+                        className="flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[0.7rem] text-mist transition-all hover:border-aurora/30 hover:text-aurora"
                         title="Rafraîchir les votes"
                     >
-                        ↺ Rafraîchir
+                        <RefreshCw size={12} /> Rafraîchir
                     </button>
-                    <span className="rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                        🛡️ Admin
+                    <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
+                        <ShieldCheck size={13} className="mr-1" /> Admin
                     </span>
                 </div>
             </div>
@@ -1494,161 +1548,173 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         {/* Stats */}
                         <div className="mb-6 grid grid-cols-6 gap-3">
                             <StatCard
-                                label="Unanimes ✅"
+                                label="Unanimes"
                                 value={stats.unanime}
                                 sub="tous valident"
                                 color="aurora"
                             />
                             <StatCard
-                                label="Majorité 👍"
+                                label="Majorité"
                                 value={stats.majorite}
                                 sub="+50% valident"
                                 color="aurora"
                             />
                             <StatCard
-                                label="Partagés ⚠️"
+                                label="Partagés"
                                 value={stats.partage}
                                 sub="nécessitent attention"
                                 color="solar"
                             />
                             <StatCard
-                                label="Rejetés ❌"
+                                label="Rejetés"
                                 value={stats.rejete}
                                 sub="majorité refuse"
                                 color="coral"
                             />
                             <StatCard
-                                label="En attente ⏳"
+                                label="En attente"
                                 value={stats.attente}
                                 sub="pas encore évalués"
                                 color="lavande"
                             />
                             <StatCard
-                                label="Signalements 🚩"
+                                label="Signalements"
                                 value={stats.signale}
                                 sub="tickets ouverts"
                                 color="solar"
                             />
                         </div>
 
-                        {/* Phase / selection progress banner */}
-                        <div className="mb-5 flex items-center gap-4 rounded-xl border border-aurora/[0.15] bg-aurora/[0.03] px-5 py-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-aurora/[0.08] text-lg">
-                                ★
-                            </div>
-                            <div className="flex-1">
-                                <div className="mb-2 flex items-center gap-2">
-                                    <span className="text-[0.8rem] font-bold text-aurora">
-                                        Sélection en cours
-                                    </span>
-                                    <span className="rounded-full border border-aurora/20 bg-aurora/[0.08] px-2 py-0.5 text-[0.65rem] font-bold text-aurora">
-                                        {stats.selectionne} / 50 sélectionnés
-                                    </span>
-                                    {stats.selectionne >= 50 && (
-                                        <span className="text-[0.72rem] font-bold text-aurora">
-                                            ✓ Quota atteint
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="h-[5px] overflow-hidden rounded-full bg-aurora/[0.08]">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-aurora to-[#a8ffec] transition-all duration-500"
-                                        style={{
-                                            width: `${Math.min(100, (stats.selectionne / 50) * 100)}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="shrink-0 text-right">
-                                <div className="font-mono text-[1.4rem] font-black leading-none text-aurora">
-                                    {stats.selectionne}
-                                </div>
-                                <div className="mt-0.5 text-[0.65rem] text-mist">/ 50 films</div>
-                            </div>
-                            <div className="h-10 w-px shrink-0 bg-white/[0.06]" />
-                            <div className="shrink-0 text-right">
-                                <div className="font-mono text-[1.4rem] font-black leading-none text-lavande">
-                                    {stats.finaliste}
-                                </div>
-                                <div className="mt-0.5 text-[0.65rem] text-mist">
-                                    / 5 finalistes
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="mb-4 flex flex-wrap items-center gap-2">
-                            {FILTER_BUTTONS.map(({ key, label, countKey }) => (
+                        {/* Mode selector — 3 phases clairement séparées */}
+                        <div className="mb-6 grid grid-cols-3 gap-2">
+                            {(
+                                [
+                                    {
+                                        key: "analyse" as Mode,
+                                        icon: <LayoutList size={15} />,
+                                        label: "Analyse des votes",
+                                        sub: `${allFilms.length} films · filtres jury`,
+                                        active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
+                                        iconBg: "bg-aurora/[0.12] text-aurora",
+                                    },
+                                    {
+                                        key: "top50" as Mode,
+                                        icon: <ListChecks size={15} />,
+                                        label: "Top 50 — Shortlist",
+                                        sub: `${stats.selectionne} / 50 sélectionnés${stats.selectionne >= 50 ? " · Quota atteint" : ""}`,
+                                        active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
+                                        iconBg: "bg-aurora/[0.12] text-aurora",
+                                    },
+                                    {
+                                        key: "top5" as Mode,
+                                        icon: <Trophy size={15} />,
+                                        label: "Top 5 — Finale",
+                                        sub: `${stats.finaliste} / 5 finalistes${stats.finaliste >= 5 ? " · Finale constituée" : ""}`,
+                                        active: "border-lavande/30 bg-lavande/[0.08] text-lavande",
+                                        iconBg: "bg-lavande/[0.12] text-lavande",
+                                    },
+                                ] as const
+                            ).map(({ key, icon, label, sub, active, iconBg }) => (
                                 <button
                                     key={key}
                                     type="button"
-                                    onClick={(): void => setFilter(key)}
-                                    className={`rounded-lg border px-3 py-1.5 text-[0.78rem] font-semibold transition-all ${
-                                        filter === key
-                                            ? "border-aurora/30 bg-aurora/10 text-aurora"
-                                            : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                    onClick={() => handleModeChange(key)}
+                                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+                                        mode === key
+                                            ? active
+                                            : "border-white/[0.07] bg-white/[0.02] text-mist hover:border-white/[0.14] hover:text-white-soft"
                                     }`}
                                 >
-                                    {label}
-                                    {countKey !== undefined && (
-                                        <span className="ml-1.5 font-mono text-[0.65rem] opacity-70">
-                                            {stats[countKey]}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
-                            <div className="flex-1" />
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={handleSearchChange}
-                                placeholder="🔍 Rechercher un film…"
-                                className="min-w-[200px] rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 font-body text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
-                            />
-                        </div>
-
-                        {/* Sort + count (only for non-special views) */}
-                        {filter !== "selectionne" && filter !== "finaliste" && (
-                            <div className="mb-4 flex items-center gap-2">
-                                <span className="text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-mist">
-                                    Trier par :
-                                </span>
-                                {SORT_BUTTONS.map(({ key, label }) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        onClick={(): void => setSort(key)}
-                                        className={`rounded-lg border px-3 py-1.5 text-[0.75rem] font-semibold transition-all ${
-                                            sort === key
-                                                ? "border-aurora/30 bg-aurora/10 text-aurora"
-                                                : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                    <div
+                                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                                            mode === key ? iconBg : "bg-white/[0.04] text-mist"
                                         }`}
                                     >
-                                        {label}
-                                    </button>
-                                ))}
-                                <span className="ml-auto font-mono text-[0.72rem] text-mist">
-                                    {filtered.length} film{filtered.length !== 1 ? "s" : ""} /{" "}
-                                    {allFilms.length} total
-                                </span>
-                            </div>
+                                        {icon}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[0.82rem] font-bold leading-tight">
+                                            {label}
+                                        </div>
+                                        <div className="mt-0.5 truncate text-[0.68rem] opacity-55">
+                                            {sub}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Filtres de vote — uniquement en mode Analyse */}
+                        {mode === "analyse" && (
+                            <>
+                                <div className="mb-4 flex flex-wrap items-center gap-2">
+                                    {FILTER_BUTTONS.map(({ key, label, countKey }) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={(): void => setFilter(key)}
+                                            className={`rounded-lg border px-3 py-1.5 text-[0.78rem] font-semibold transition-all ${
+                                                filter === key
+                                                    ? "border-aurora/30 bg-aurora/10 text-aurora"
+                                                    : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                            }`}
+                                        >
+                                            {label}
+                                            {countKey !== undefined && (
+                                                <span className="ml-1.5 font-mono text-[0.65rem] opacity-70">
+                                                    {stats[countKey]}
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    <div className="flex-1" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={handleSearchChange}
+                                        placeholder="Rechercher un film…"
+                                        className="min-w-[200px] rounded-lg border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 font-body text-[0.82rem] text-white-soft outline-none placeholder:text-mist focus:border-aurora/40"
+                                    />
+                                </div>
+                                <div className="mb-4 flex items-center gap-2">
+                                    <span className="text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-mist">
+                                        Trier par :
+                                    </span>
+                                    {SORT_BUTTONS.map(({ key, label }) => (
+                                        <button
+                                            key={key}
+                                            type="button"
+                                            onClick={(): void => setSort(key)}
+                                            className={`rounded-lg border px-3 py-1.5 text-[0.75rem] font-semibold transition-all ${
+                                                sort === key
+                                                    ? "border-aurora/30 bg-aurora/10 text-aurora"
+                                                    : "border-white/[0.08] bg-white/[0.03] text-mist hover:bg-white/[0.06] hover:text-white-soft"
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                    <span className="ml-auto font-mono text-[0.72rem] text-mist">
+                                        {filtered.length} film{filtered.length !== 1 ? "s" : ""} /{" "}
+                                        {allFilms.length} total
+                                    </span>
+                                </div>
+                            </>
                         )}
 
                         {/* Table / special views */}
-                        {filter === "selectionne"
+                        {mode === "top50"
                             ? renderTop50()
-                            : filter === "finaliste"
+                            : mode === "top5"
                               ? renderTop5()
                               : renderDefaultTable()}
 
                         {/* Row expand hint */}
-                        {filter !== "selectionne" &&
-                            filter !== "finaliste" &&
-                            filtered.length > 0 && (
-                                <p className="mt-3 text-center text-[0.68rem] text-mist opacity-40">
-                                    Cliquez sur une ligne pour voir le détail des votes
-                                </p>
-                            )}
+                        {mode === "analyse" && filtered.length > 0 && (
+                            <p className="mt-3 text-center text-[0.68rem] text-mist opacity-40">
+                                Cliquez sur une ligne pour voir le détail des votes
+                            </p>
+                        )}
                     </>
                 )}
             </div>

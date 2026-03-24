@@ -1,10 +1,32 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import AdminSidePanel from "./AdminSidePanel";
 import { ADMIN_LABELS, ADMIN_NAV_LINKS } from "../constants";
 
+const FAKE_ADMIN_TOKEN = [
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+    btoa(
+        JSON.stringify({
+            id: 1,
+            email: "admin@test.com",
+            firstName: "Admin",
+            lastName: "Test",
+            role: "admin",
+            profilPicture: null,
+        }),
+    ),
+    "fakesig",
+].join(".");
+
 describe("AdminSidePanel", () => {
+    beforeEach(() => {
+        localStorage.setItem("jury_token", FAKE_ADMIN_TOKEN);
+    });
+    afterEach(() => {
+        localStorage.removeItem("jury_token");
+    });
+
     it("affiche le titre et le sous-titre", () => {
         render(
             <MemoryRouter>
