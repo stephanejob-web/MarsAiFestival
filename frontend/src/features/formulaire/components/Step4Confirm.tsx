@@ -89,7 +89,17 @@ const Step4Confirm = ({
             value:
                 formData.iaClass === "full" ? t("form.step4.prodFull") : t("form.step4.prodHybrid"),
         },
-        { key: t("form.step4.recapAiTools"), value: formData.iaImg || "—" },
+        {
+            key: t("form.step4.recapAiTools"),
+            value: [
+                formData.iaImg ? t("form.step3.iaImg") : null,
+                formData.iaSon ? t("form.step3.iaSon") : null,
+                formData.iaScenario ? t("form.step3.iaScenario") : null,
+                formData.iaPost ? t("form.step3.iaPost") : null,
+            ]
+                .filter(Boolean)
+                .join(", ") || "—",
+        },
         {
             key: t("form.step4.recapSubtitles"),
             value: [subtitleFR ? "FR ✓" : "FR ✗", subtitleEN ? "EN ✓" : "EN ✗"].join(" · "),
