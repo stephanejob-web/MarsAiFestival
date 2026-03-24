@@ -474,13 +474,18 @@ const useJuryPanel = (): UseJuryPanelReturn => {
 
     const voteDirect = useCallback(
         (filmId: number, decision: Exclude<Decision, null>): void => {
-            setFilms((prev) => prev.map((f) => (f.id !== filmId ? f : { ...f, myDecision: decision })));
+            setFilms((prev) =>
+                prev.map((f) => (f.id !== filmId ? f : { ...f, myDecision: decision })),
+            );
             const token = localStorage.getItem("jury_token");
             if (!token) return;
             if (decision === "discuter") {
                 void fetch(`${API}/api/discussion`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
                     body: JSON.stringify({ filmId }),
                 });
                 return;
