@@ -1,12 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-interface ProgLine {
-    dot: string;
-    day: string;
-    desc: string;
-}
-
 interface Stat {
     value: string;
     label: string;
@@ -15,12 +9,6 @@ interface Stat {
 const AboutSection = (): React.JSX.Element => {
     const { t } = useTranslation();
 
-    const PROG_LINES: ProgLine[] = [
-        { dot: "bg-aurora", day: t("about.prog.0.day"), desc: t("about.prog.0.desc") },
-        { dot: "bg-lavande", day: t("about.prog.1.day"), desc: t("about.prog.1.desc") },
-        { dot: "bg-solar", day: t("about.prog.2.day"), desc: t("about.prog.2.desc") },
-    ];
-
     const STATS: Stat[] = [
         { value: "50", label: t("about.stats.films") },
         { value: "120+", label: t("about.stats.pays") },
@@ -28,7 +16,7 @@ const AboutSection = (): React.JSX.Element => {
     ];
 
     return (
-        <section id="programme" className="relative py-24 px-6 overflow-hidden">
+        <section id="about" className="relative py-24 px-6 overflow-hidden">
             <div
                 className="aurora-2 absolute top-1/2 -right-40 w-[500px] h-[500px] -translate-y-1/2 bg-aurora/5 rounded-full blur-3xl pointer-events-none"
                 aria-hidden="true"
@@ -47,21 +35,6 @@ const AboutSection = (): React.JSX.Element => {
                             {t("about.title2")}
                         </h2>
                         <p className="text-mist mb-8 leading-relaxed">{t("about.description")}</p>
-
-                        {/* Program */}
-                        <div className="flex flex-col gap-3 mb-8">
-                            {PROG_LINES.map((line) => (
-                                <div key={line.day} className="flex items-center gap-3">
-                                    <span
-                                        className={`w-2 h-2 rounded-full flex-shrink-0 ${line.dot}`}
-                                    />
-                                    <span className="font-mono text-sm text-mist w-10 flex-shrink-0">
-                                        {line.day}
-                                    </span>
-                                    <span className="text-sm text-white-soft">{line.desc}</span>
-                                </div>
-                            ))}
-                        </div>
 
                         {/* Stats */}
                         <div className="flex gap-8">
@@ -89,7 +62,7 @@ const AboutSection = (): React.JSX.Element => {
                             href="https://www.google.com/maps/search/?api=1&query=La+Plateforme+Friches+Belle+de+Mai+Marseille"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-block text-sm bg-aurora text-deep-sky font-bold px-4 py-2 rounded-lg hover:bg-aurora/90 transition-colors"
+                            className="inline-block text-sm bg-aurora text-[#0a0f2e] font-bold px-4 py-2 rounded-lg hover:bg-aurora/90 transition-colors"
                         >
                             {t("about.venue.directions")}
                         </a>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { FormDepotData, FormDepotErrors, SubmissionState } from "../types";
 import { INITIAL_FORM_DATA, VIDEO_MIN_DURATION, VIDEO_MAX_DURATION } from "../constants";
 import { apiFetchForm, apiFetch } from "../../../services/api";
@@ -19,6 +19,14 @@ interface UseFormDepotReturn {
     dossierNum: string;
     otpEmail: string;
     youtubeWarning: string;
+
+    saveConsent: boolean | null;
+    hasSavedData: boolean;
+    restoreDismissed: boolean;
+    acceptSaveConsent: () => void;
+    refuseSaveConsent: () => void;
+    restoreSavedData: () => void;
+    dismissRestore: () => void;
 
     setCurrentStep: (step: number) => void;
     goToStep: (step: number) => void;
@@ -42,6 +50,46 @@ interface UseFormDepotReturn {
     resetVideo: () => void;
 }
 
+const LS_CONSENT_KEY = "marsai_save_consent";
+const LS_DATA_KEY = "marsai_realisator_data";
+
+const STEP1_FIELDS: (keyof FormDepotData)[] = [
+    "civilite",
+    "prenom",
+    "nom",
+    "dob",
+    "metier",
+    "email",
+    "tel",
+    "mobile",
+    "rue",
+    "cp",
+    "ville",
+    "pays",
+    "youtube",
+    "instagram",
+    "linkedin",
+    "facebook",
+    "xtwitter",
+    "discovery",
+    "newsletter",
+];
+
+const readConsent = (): boolean | null => {
+    const val = localStorage.getItem(LS_CONSENT_KEY);
+    if (val === "true") return true;
+    return null;
+};
+
+const readSavedData = (): Partial<FormDepotData> | null => {
+    try {
+        const raw = localStorage.getItem(LS_DATA_KEY);
+        return raw ? (JSON.parse(raw) as Partial<FormDepotData>) : null;
+    } catch {
+        return null;
+    }
+};
+
 const useFormDepot = (): UseFormDepotReturn => {
     const [currentStep, setCurrentStep] = useState<number>(1);
     const [maxUnlocked, setMaxUnlocked] = useState<number>(1);
@@ -54,6 +102,9 @@ const useFormDepot = (): UseFormDepotReturn => {
     const [subtitleFR, setSubtitleFR] = useState<File | null>(null);
     const [subtitleEN, setSubtitleEN] = useState<File | null>(null);
     const [rgpdChecked, setRgpdChecked] = useState<boolean[]>([false, false, false]);
+    const [saveConsent, setSaveConsent] = useState<boolean | null>(readConsent);
+    const [hasSavedData, setHasSavedData] = useState<boolean>(() => readSavedData() !== null);
+    const [restoreDismissed, setRestoreDismissed] = useState<boolean>(false);
     const [submissionState, setSubmissionState] = useState<SubmissionState>("idle");
     const [dossierNum, setDossierNum] = useState<string>("");
     const [otpEmail, setOtpEmail] = useState<string>("");
@@ -67,6 +118,52 @@ const useFormDepot = (): UseFormDepotReturn => {
             return next;
         });
     }, []);
+
+    // ── LocalStorage : consentement & restauration ────────────────────────────
+    const acceptSaveConsent = useCallback((): void => {
+        localStorage.setItem(LS_CONSENT_KEY, "true");
+        setSaveConsent(true);
+    }, []);
+
+    const refuseSaveConsent = useCallback((): void => {
+        // Ne pas persister le refus — la bannière réapparaîtra au prochain chargement
+        setSaveConsent(false);
+    }, []);
+
+    const restoreSavedData = useCallback((): void => {
+        const saved = readSavedData();
+        if (!saved) return;
+        setFormData((prev) => {
+            const next = { ...prev };
+            STEP1_FIELDS.forEach((field) => {
+                if (saved[field] !== undefined) {
+                    (next[field] as FormDepotData[typeof field]) = saved[
+                        field
+                    ] as FormDepotData[typeof field];
+                }
+            });
+            return next;
+        });
+        setRestoreDismissed(true);
+    }, []);
+
+    const dismissRestore = useCallback((): void => {
+        setRestoreDismissed(true);
+    }, []);
+
+    // Sauvegarde automatique — ne s'exécute que si au moins un champ a été modifié
+    // (évite d'écraser les données existantes avec le formulaire vide au montage)
+    useEffect(() => {
+        if (saveConsent !== true) return;
+        const hasData = STEP1_FIELDS.some((field) => formData[field] !== INITIAL_FORM_DATA[field]);
+        if (!hasData) return;
+        const dataToSave: Partial<FormDepotData> = {};
+        STEP1_FIELDS.forEach((field) => {
+            (dataToSave[field] as FormDepotData[typeof field]) = formData[field];
+        });
+        localStorage.setItem(LS_DATA_KEY, JSON.stringify(dataToSave));
+        setHasSavedData(true);
+    }, [saveConsent, formData]);
 
     const validateAge = useCallback((dob: string): boolean => {
         if (!dob) return false;
@@ -82,22 +179,70 @@ const useFormDepot = (): UseFormDepotReturn => {
         (step: number): boolean => {
             const newErrors: FormDepotErrors = {};
 
+            const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']{2,}$/;
+            const phoneRegex = /^[+\d][\d\s()\-.]{5,19}$/;
+            const urlOrHandleRegex = /^(https?:\/\/[^\s]+|@[\w.-]{2,}|[\w.-]{2,})$/;
+
+            const countDigits = (s: string): number => (s.match(/\d/g) ?? []).length;
+
             if (step === 1) {
                 if (!formData.prenom.trim()) newErrors.prenom = "Champ requis";
+                else if (!nameRegex.test(formData.prenom.trim()))
+                    newErrors.prenom = "Prénom invalide (lettres uniquement, 2 caractères minimum)";
+
                 if (!formData.nom.trim()) newErrors.nom = "Champ requis";
+                else if (!nameRegex.test(formData.nom.trim()))
+                    newErrors.nom = "Nom invalide (lettres uniquement, 2 caractères minimum)";
+
                 if (!formData.dob) newErrors.dob = "Champ requis";
                 else if (!validateAge(formData.dob))
                     newErrors.dob = "Vous devez avoir 18 ans révolus à la date de dépôt";
+
                 if (!formData.metier.trim()) newErrors.metier = "Champ requis";
+                else if (formData.metier.trim().length < 2)
+                    newErrors.metier = "Métier invalide (2 caractères minimum)";
+
                 if (!formData.email.trim()) newErrors.email = "Champ requis";
                 else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
                     newErrors.email =
                         "Adresse email invalide — vérifiez le format (ex : vous@domaine.com)";
+
+                if (formData.tel.trim()) {
+                    if (!phoneRegex.test(formData.tel.trim()) || countDigits(formData.tel) < 7)
+                        newErrors.tel = "Numéro de téléphone invalide (ex : +33 1 00 00 00 00)";
+                }
+
                 if (!formData.mobile.trim()) newErrors.mobile = "Numéro de mobile requis";
+                else if (
+                    !phoneRegex.test(formData.mobile.trim()) ||
+                    countDigits(formData.mobile) < 7
+                )
+                    newErrors.mobile = "Numéro de mobile invalide (ex : +33 6 00 00 00 00)";
+
                 if (!formData.rue.trim()) newErrors.rue = "Champ requis";
+                else if (formData.rue.trim().length < 3)
+                    newErrors.rue = "Adresse invalide (3 caractères minimum)";
+
                 if (!formData.cp.trim()) newErrors.cp = "Champ requis";
+                else if (!/^[a-zA-Z0-9\s-]{2,10}$/.test(formData.cp.trim()))
+                    newErrors.cp = "Code postal invalide";
+
                 if (!formData.ville.trim()) newErrors.ville = "Champ requis";
+                else if (formData.ville.trim().length < 2) newErrors.ville = "Ville invalide";
+
                 if (!formData.pays) newErrors.pays = "Sélectionnez votre pays";
+
+                for (const social of [
+                    "youtube",
+                    "instagram",
+                    "linkedin",
+                    "facebook",
+                    "xtwitter",
+                ] as const) {
+                    const val = formData[social].trim();
+                    if (val && !urlOrHandleRegex.test(val))
+                        newErrors[social] = "Format invalide (ex : @compte ou https://...)";
+                }
             }
 
             if (step === 2) {
@@ -107,19 +252,21 @@ const useFormDepot = (): UseFormDepotReturn => {
                 if (!formData.synopsis.trim()) newErrors.synopsis = "Champ requis";
                 if (!formData.synopsisEn.trim()) newErrors.synopsisEn = "English synopsis required";
                 if (!videoFile) newErrors.video = "Fichier vidéo requis";
+                else if (!videoValid)
+                    newErrors.video = "La vidéo dépasse la durée maximale autorisée (2 min 30 s)";
                 if (!formData.intention.trim())
                     newErrors.intention = "La note d'intention est requise";
                 if (!formData.outils.trim()) newErrors.outils = "Les outils utilisés sont requis";
             }
 
             if (step === 3) {
-                if (!formData.iaImg.trim()) newErrors.iaImg = "Champ requis";
+                if (!formData.iaImg) newErrors.iaImg = "Champ requis";
             }
 
             setErrors(newErrors);
             return Object.keys(newErrors).length === 0;
         },
-        [formData, videoFile, validateAge],
+        [formData, videoFile, videoValid, validateAge],
     );
 
     const goToStep = useCallback(
@@ -209,6 +356,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             Object.entries(formData).forEach(([key, value]) => {
                 data.append(key, String(value));
             });
+            if (videoDuration !== null) data.append("duration", String(Math.round(videoDuration)));
             if (videoFile) data.append("video", videoFile);
             if (subtitleFR) data.append("subtitleFR", subtitleFR);
             if (subtitleEN) data.append("subtitleEN", subtitleEN);
@@ -222,7 +370,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             if (result.youtubeWarning) setYoutubeWarning(result.youtubeWarning);
             setSubmissionState("success");
         },
-        [formData, videoFile, subtitleFR, subtitleEN],
+        [formData, videoDuration, videoFile, subtitleFR, subtitleEN],
     );
 
     return {
@@ -230,6 +378,13 @@ const useFormDepot = (): UseFormDepotReturn => {
         maxUnlocked,
         formData,
         errors,
+        saveConsent,
+        hasSavedData,
+        restoreDismissed,
+        acceptSaveConsent,
+        refuseSaveConsent,
+        restoreSavedData,
+        dismissRestore,
         videoFile,
         videoDuration,
         videoValid,

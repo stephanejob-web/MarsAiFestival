@@ -17,6 +17,7 @@ const Nav = (): React.JSX.Element => {
         { label: t("nav.links.films"), href: "#films" },
         { label: t("nav.links.palmares"), href: "#palmares" },
         { label: t("nav.links.jury"), href: "#jury" },
+        { label: t("nav.links.sponsors"), href: "#sponsors" },
     ];
 
     useEffect((): (() => void) => {
@@ -26,9 +27,16 @@ const Nav = (): React.JSX.Element => {
     }, []);
 
     const handleAnchor = (href: string): void => {
-        if (!isHome) return;
+        if (!isHome) {
+            window.location.assign("/" + href);
+            return;
+        }
         const el = document.querySelector(href);
-        el?.scrollIntoView({ behavior: "smooth" });
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+        } else {
+            window.location.replace(window.location.pathname + href);
+        }
     };
 
     const toggleLang = (): void => {
@@ -108,24 +116,13 @@ const Nav = (): React.JSX.Element => {
                         {t("nav.cta")}
                     </Link>
 
-                    {/* Liens dev — visibles uniquement en développement */}
-                    <div className="hidden md:flex items-center gap-1 ml-2 pl-2 border-l border-white/10">
-                        <span className="font-mono text-[9px] text-white/20 uppercase tracking-widest">
-                            dev
-                        </span>
-                        <Link
-                            to="/admin"
-                            className="text-xs px-2 py-1.5 rounded text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors font-mono"
-                        >
-                            admin
-                        </Link>
-                        <Link
-                            to="/jury"
-                            className="text-xs px-2 py-1.5 rounded text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors font-mono"
-                        >
-                            jury
-                        </Link>
-                    </div>
+                    {/* Connexion */}
+                    <Link
+                        to="/jury"
+                        className="text-sm px-4 py-2 border border-white/20 text-white/70 font-medium rounded-lg hover:border-aurora/50 hover:text-aurora transition-colors"
+                    >
+                        {t("nav.connexion")}
+                    </Link>
                 </div>
             </div>
         </nav>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 const ROLE_LABEL: Record<string, string> = {
     admin: "Administrateur",
+    moderateur: "Modérateur",
     jury: "Membre du Jury",
 };
 

@@ -24,7 +24,6 @@ const HomeFooter = (): React.JSX.Element => {
                 { label: t("footer.columns.festival.programme"), href: "#programme" },
                 { label: t("footer.columns.festival.jury"), href: "#jury" },
                 { label: "La Plateforme", href: "https://laplateforme.io", external: true },
-                { label: t("footer.columns.festival.presse"), href: "#presse" },
             ],
         },
         {
@@ -33,7 +32,6 @@ const HomeFooter = (): React.JSX.Element => {
                 { label: t("footer.columns.films.galerie"), href: "#films" },
                 { label: t("footer.columns.films.palmares"), href: "#palmares" },
                 { label: t("footer.columns.films.soumettre"), href: "/formulaire" },
-                { label: t("footer.columns.films.reglement"), href: "#" },
             ],
         },
         {
@@ -50,7 +48,6 @@ const HomeFooter = (): React.JSX.Element => {
                     href: "https://linkedin.com/company/marsai-festival",
                     external: true,
                 },
-                { label: t("footer.columns.contact.mentions"), href: "#" },
             ],
         },
     ];

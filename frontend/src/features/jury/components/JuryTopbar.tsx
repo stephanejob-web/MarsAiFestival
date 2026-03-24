@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, LogOut } from "lucide-react";
 
 import type { ActiveView } from "../types";
 
@@ -52,10 +53,18 @@ const JuryTopbar = ({ activeView, onDisconnect }: JuryTopbarProps): React.JSX.El
                 </span>
                 <button
                     type="button"
+                    onClick={() => navigate("/")}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-[8px] border border-white/12 bg-white/5 px-[13px] py-1.5 text-[0.78rem] font-semibold text-mist transition-all hover:bg-white/10 hover:text-white-soft"
+                >
+                    <ArrowLeft size={14} />
+                    <span>Retour au site</span>
+                </button>
+                <button
+                    type="button"
                     onClick={handleDisconnect}
                     className="flex cursor-pointer items-center gap-1.5 rounded-[8px] border border-coral/25 bg-coral/8 px-[13px] py-1.5 text-[0.78rem] font-semibold text-coral transition-all hover:bg-coral/16"
                 >
-                    <span>🔒</span>
+                    <LogOut size={14} />
                     <span>Déconnexion</span>
                 </button>
             </div>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../../services/api";
-import type { AdminUser } from "../types";
+import type { AdminUser, ModeratorPermissions } from "../types";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -17,10 +18,13 @@ export interface UseAdminUsersReturn {
     changeRole: (id: number, role: "jury" | "admin" | "moderateur") => Promise<void>;
     banUser: (id: number) => Promise<void>;
     unbanUser: (id: number) => Promise<void>;
+    sendMessage: (id: number, message: string) => Promise<void>;
+    updatePermissions: (id: number, permissions: ModeratorPermissions) => Promise<void>;
     reload: () => void;
 }
 
 const useAdminUsers = (): UseAdminUsersReturn => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -41,11 +45,16 @@ const useAdminUsers = (): UseAdminUsersReturn => {
                     })),
                 );
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur de chargement");
+            const msg = err instanceof Error ? err.message : "";
+            if (msg.includes("403")) {
+                navigate("/jury/panel", { replace: true });
+                return;
+            }
+            setError(msg || "Erreur de chargement");
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         void load();
@@ -102,7 +111,47 @@ const useAdminUsers = (): UseAdminUsersReturn => {
         }
     };
 
-    return { users, isLoading, error, toggleStatus, changeRole, banUser, unbanUser, reload: load };
+    const sendMessage = async (id: number, message: string): Promise<void> => {
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/message`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: JSON.stringify({ message }),
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur d'envoi du message");
+        }
+    };
+
+    const updatePermissions = async (
+        id: number,
+        permissions: ModeratorPermissions,
+    ): Promise<void> => {
+        setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, permissions } : u)));
+        try {
+            await apiFetch<{ success: boolean }>(`/api/admin/users/${id}/permissions`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${getToken()}` },
+                body: JSON.stringify(permissions),
+            });
+        } catch (err) {
+            await load();
+            setError(err instanceof Error ? err.message : "Erreur de mise à jour des permissions");
+        }
+    };
+
+    return {
+        users,
+        isLoading,
+        error,
+        toggleStatus,
+        changeRole,
+        banUser,
+        unbanUser,
+        sendMessage,
+        updatePermissions,
+        reload: load,
+    };
 };
 
 export default useAdminUsers;

@@ -40,6 +40,27 @@ const baseFilm: JuryFilm = {
             avatarVariant: 1,
         },
     ],
+    realisator: {
+        gender: "Mme",
+        firstName: "Lea",
+        lastName: "Fontaine",
+        birthDate: "1990-05-15",
+        email: "lea.fontaine@test.com",
+        profession: "Réalisatrice",
+        phone: null,
+        mobilePhone: "+33612345678",
+        street: "12 rue des Arts",
+        postalCode: "75001",
+        city: "Paris",
+        country: "FR",
+        youtube: null,
+        instagram: "@leafilms",
+        linkedin: null,
+        facebook: null,
+        xtwitter: null,
+        howDidYouKnowUs: "rs",
+        newsletter: false,
+    },
 };
 
 const filmWithDecision: JuryFilm = {
@@ -47,6 +68,7 @@ const filmWithDecision: JuryFilm = {
     myDecision: "valide",
     comments: [
         {
+            id: 1,
             juryId: 1,
             name: "Thomas Richard",
             initials: "TR",
@@ -55,6 +77,7 @@ const filmWithDecision: JuryFilm = {
             updatedAt: "2026-03-15T10:00:00Z",
         },
         {
+            id: 2,
             juryId: 2,
             name: "Marie Lefebvre",
             initials: "ML",

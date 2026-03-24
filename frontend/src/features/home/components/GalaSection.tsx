@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { API_BASE_URL } from "../../../constants/api";
 
 interface Award {
     icon: string;
@@ -31,10 +32,58 @@ const JURY_AVATARS = [
     "https://i.pravatar.cc/400?img=44",
     "https://i.pravatar.cc/400?img=32",
     "https://i.pravatar.cc/400?img=18",
+    "https://i.pravatar.cc/400?img=25",
+    "https://i.pravatar.cc/400?img=33",
 ];
+
+const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>, fallback: string): void => {
+    const img = e.currentTarget;
+    if (img.src !== fallback) {
+        img.src = fallback;
+    }
+};
 
 const GalaSection = (): React.JSX.Element => {
     const { t } = useTranslation();
+    const [juryMembers, setJuryMembers] = useState<JuryMember[] | null>(null);
+    const [juryLoading, setJuryLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const fetchJury = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/jury-showcase`);
+                const json = await res.json();
+                if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+                    const mapped: JuryMember[] = json.data.map(
+                        (
+                            m: {
+                                name: string;
+                                display_role: string;
+                                badge: string;
+                                quote: string | null;
+                                photo_url: string | null;
+                                is_featured: number;
+                            },
+                            i: number,
+                        ) => ({
+                            name: m.name,
+                            role: m.display_role,
+                            badge: m.badge,
+                            quote: m.quote ?? undefined,
+                            avatar: m.photo_url ?? JURY_AVATARS[i % JURY_AVATARS.length],
+                            featured: m.is_featured === 1,
+                        }),
+                    );
+                    setJuryMembers(mapped);
+                }
+            } catch {
+                // fall back to i18n data
+            } finally {
+                setJuryLoading(false);
+            }
+        };
+        fetchJury();
+    }, []);
 
     const awardsData = t("gala.awards", { returnObjects: true }) as Record<
         string,
@@ -47,18 +96,22 @@ const GalaSection = (): React.JSX.Element => {
         colorClass: AWARD_COLORS[Number(k)],
     }));
 
-    const juryData = t("gala.jury", { returnObjects: true }) as Record<
-        string,
-        { name: string; role: string; badge: string; quote?: string }
-    >;
-    const JURY: JuryMember[] = Object.keys(juryData).map((k, i) => ({
-        name: juryData[k].name,
-        role: juryData[k].role,
-        badge: juryData[k].badge,
-        quote: juryData[k].quote,
-        avatar: JURY_AVATARS[i],
-        featured: i === 0,
-    }));
+    // Build JURY from API data or fall back to i18n
+    const JURY: JuryMember[] = (() => {
+        if (juryMembers !== null) return juryMembers;
+        const juryData = t("gala.jury", { returnObjects: true }) as Record<
+            string,
+            { name: string; role: string; badge: string; quote?: string }
+        >;
+        return Object.keys(juryData).map((k, i) => ({
+            name: juryData[k].name,
+            role: juryData[k].role,
+            badge: juryData[k].badge,
+            quote: juryData[k].quote,
+            avatar: JURY_AVATARS[i],
+            featured: i === 0,
+        }));
+    })();
 
     const title2Full = t("gala.title2");
     const title2Highlight = t("gala.title2_highlight");
@@ -152,8 +205,23 @@ const GalaSection = (): React.JSX.Element => {
                         <p className="text-mist max-w-xl mx-auto">{t("gala.jurySubtitle")}</p>
                     </div>
 
+                    {/* Loading skeleton */}
+                    {juryLoading && (
+                        <div className="opacity-40 animate-pulse">
+                            <div className="bg-surface border border-white/10 rounded-2xl overflow-hidden mb-10 h-64" />
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                {[1, 2].map((i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-surface border border-white/8 rounded-xl h-48"
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Présidente — carte featured */}
-                    {featured && (
+                    {!juryLoading && featured && (
                         <div className="bg-surface border border-aurora/25 rounded-2xl overflow-hidden mb-10 flex flex-col md:flex-row">
                             {/* Photo */}
                             <div className="w-full md:w-64 flex-shrink-0">
@@ -162,6 +230,7 @@ const GalaSection = (): React.JSX.Element => {
                                     alt={featured.name}
                                     className="w-full h-64 md:h-full object-cover object-top"
                                     loading="lazy"
+                                    onError={(e) => handleImgError(e, JURY_AVATARS[0])}
                                 />
                             </div>
                             {/* Infos */}
@@ -185,30 +254,42 @@ const GalaSection = (): React.JSX.Element => {
                     )}
 
                     {/* Membres — grille */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {members.map((member) => (
-                            <div
-                                key={member.name}
-                                className="bg-surface border border-white/8 rounded-xl overflow-hidden text-center hover:border-white/20 transition-colors"
-                            >
-                                <img
-                                    src={member.avatar}
-                                    alt={member.name}
-                                    className="w-full aspect-square object-cover object-top"
-                                    loading="lazy"
-                                />
-                                <div className="p-3">
-                                    <div className="font-mono text-[10px] text-aurora uppercase tracking-wider mb-1">
-                                        {member.badge}
+                    {!juryLoading && members.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {members.map((member) => (
+                                <div
+                                    key={member.name}
+                                    className="bg-surface border border-white/8 rounded-xl overflow-hidden text-center hover:border-white/20 transition-colors"
+                                >
+                                    <img
+                                        src={member.avatar}
+                                        alt={member.name}
+                                        className="w-full aspect-square object-cover object-top"
+                                        loading="lazy"
+                                        onError={(e) =>
+                                            handleImgError(
+                                                e,
+                                                JURY_AVATARS[
+                                                    members.indexOf(member) % JURY_AVATARS.length
+                                                ],
+                                            )
+                                        }
+                                    />
+                                    <div className="p-3">
+                                        <div className="font-mono text-[10px] text-aurora uppercase tracking-wider mb-1">
+                                            {member.badge}
+                                        </div>
+                                        <div className="font-semibold text-white-soft text-sm leading-tight">
+                                            {member.name}
+                                        </div>
+                                        <div className="text-mist text-xs mt-0.5">
+                                            {member.role}
+                                        </div>
                                     </div>
-                                    <div className="font-semibold text-white-soft text-sm leading-tight">
-                                        {member.name}
-                                    </div>
-                                    <div className="text-mist text-xs mt-0.5">{member.role}</div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Film } from "lucide-react";
 
 import type { Decision, JuryFilm } from "../types";
 
@@ -16,7 +17,7 @@ const THUMB_GRADIENTS = [
     "bg-gradient-to-br from-aurora/15 to-surface-2",
 ];
 
-const THUMB_EMOJIS = ["🎬", "🎥", "🎞️", "📽️", "🎦"];
+const THUMB_ICONS = [Film, Film, Film, Film, Film];
 
 const STATUS_DOT_CLASS: Record<string, string> = {
     valide: "bg-aurora",
@@ -46,7 +47,7 @@ const FilmList = ({ films, activeFilm, onSelectFilm }: FilmListProps): React.JSX
         <div className="flex w-[300px] min-w-[300px] flex-col overflow-y-auto border-r border-white/6 bg-surface p-2">
             {films.map((film, index) => {
                 const gradientClass = THUMB_GRADIENTS[index % THUMB_GRADIENTS.length];
-                const emoji = THUMB_EMOJIS[index % THUMB_EMOJIS.length];
+                const ThumbIcon = THUMB_ICONS[index % THUMB_ICONS.length];
                 const dotClass = STATUS_DOT_CLASS[film.myDecision ?? "null"] ?? "bg-solar";
                 const isSelected = film.id === activeFilm.id;
 
@@ -61,9 +62,9 @@ const FilmList = ({ films, activeFilm, onSelectFilm }: FilmListProps): React.JSX
                     >
                         {/* Thumbnail */}
                         <div
-                            className={`relative flex h-[34px] w-[60px] flex-shrink-0 items-center justify-center rounded-[5px] text-[0.9rem] ${gradientClass}`}
+                            className={`relative flex h-[34px] w-[60px] flex-shrink-0 items-center justify-center rounded-[5px] ${gradientClass}`}
                         >
-                            {emoji}
+                            <ThumbIcon size={16} className="text-aurora/60" />
                             <span
                                 className={`absolute right-[3px] top-[3px] h-[6px] w-[6px] rounded-full ${dotClass}`}
                             />

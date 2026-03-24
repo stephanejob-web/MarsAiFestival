@@ -1,14 +1,24 @@
+import React from "react";
+
 export interface AdminNavItem {
     label: string;
     to: string;
-    icon: string;
+    icon: React.ReactNode;
     count?: number;
     external?: boolean;
+    requiresPermission?: "can_access_admin";
 }
 
 export interface AdminNavCategory {
     category: string;
     items: AdminNavItem[];
+}
+
+export interface ModeratorPermissions {
+    can_access_admin: boolean;
+    can_disable_accounts: boolean;
+    can_ban_users: boolean;
+    can_send_messages: boolean;
 }
 
 export interface AdminUser {
@@ -24,6 +34,7 @@ export interface AdminUser {
     created_at: string;
     films_assigned: number;
     films_evaluated: number;
+    permissions?: ModeratorPermissions | null;
 }
 
 export interface AdminFilm {

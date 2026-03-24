@@ -9,6 +9,7 @@ import Step3AI from "../features/formulaire/components/Step3AI";
 import Step4Confirm from "../features/formulaire/components/Step4Confirm";
 import SuccessScreen from "../features/formulaire/components/SuccessScreen";
 import VerificationEmail from "../features/formulaire/components/VerificationEmail";
+import SaveDataBanner from "../features/formulaire/components/SaveDataBanner";
 
 const Formulaire = (): React.JSX.Element => {
     const form = useFormDepot();
@@ -53,6 +54,16 @@ const Formulaire = (): React.JSX.Element => {
 
                 {/* Main content */}
                 <div className="flex-1 min-w-0 bg-white/2.5 border border-white/7 rounded-2xl p-7 max-[860px]:p-5">
+                    <SaveDataBanner
+                        consent={form.saveConsent}
+                        hasSavedData={form.hasSavedData}
+                        restoreDismissed={form.restoreDismissed}
+                        onAcceptConsent={form.acceptSaveConsent}
+                        onRefuseConsent={form.refuseSaveConsent}
+                        onRestoreData={form.restoreSavedData}
+                        onDismissRestore={form.dismissRestore}
+                    />
+
                     {form.currentStep === 1 && (
                         <Step1Profile
                             formData={form.formData}

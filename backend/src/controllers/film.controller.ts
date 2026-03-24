@@ -134,6 +134,7 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
             subtitle_en_url: urls["subtitleEN"] ?? null,
             creative_workflow: body.intention || null,
             tech_stack: body.outils || null,
+            duration: body.duration ? Math.round(Number(body.duration)) : null,
             ia_class: body.iaClass === "hybrid" ? "hybrid" : "full",
             ia_image: body.iaImg === "true",
             ia_son: body.iaSon === "true",

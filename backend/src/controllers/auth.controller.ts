@@ -9,10 +9,12 @@ import {
     findById,
     updateProfilPicture,
     updatePassword,
+    updateSessionToken,
 } from "../repositories/jury.repository";
 import { verifyInviteToken } from "../services/invite.service";
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 import "dotenv/config";
 
 const AVATARS_DIR = path.join(__dirname, "../../uploads/avatars");
@@ -22,14 +24,17 @@ const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-const makeToken = (jury: {
-    id: number;
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-    profil_picture?: string | null;
-}): string =>
+const makeToken = (
+    jury: {
+        id: number;
+        email: string;
+        first_name: string;
+        last_name: string;
+        role: string;
+        profil_picture?: string | null;
+    },
+    sessionToken: string,
+): string =>
     jwt.sign(
         {
             id: jury.id,
@@ -38,10 +43,22 @@ const makeToken = (jury: {
             lastName: jury.last_name,
             role: jury.role,
             profilPicture: jury.profil_picture ?? null,
+            sessionToken,
         },
         JWT_SECRET,
         { expiresIn: "7d" },
     );
+
+const invalidateOldSessions = (req: Request, juryId: number): void => {
+    const io = req.app.locals.io as import("socket.io").Server | undefined;
+    const juryToSockets = req.app.locals.juryToSockets as Map<number, Set<string>> | undefined;
+    const sockets = juryToSockets?.get(juryId);
+    if (io && sockets) {
+        for (const socketId of sockets) {
+            io.to(socketId).emit("user:session_invalidated");
+        }
+    }
+};
 
 // ── POST /api/auth/register ────────────────────────────────────────────────────
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -86,9 +103,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             profil_picture: profilPicture,
         });
 
+        const sessionToken = randomUUID();
+        await updateSessionToken(jury.id, sessionToken);
+
         res.status(201).json({
             success: true,
-            token: makeToken(jury),
+            token: makeToken(jury, sessionToken),
             user: {
                 id: jury.id,
                 email: jury.email,
@@ -136,9 +156,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         return;
     }
 
+    const sessionToken = randomUUID();
+    await updateSessionToken(jury.id, sessionToken);
+    invalidateOldSessions(req, jury.id);
+
     res.json({
         success: true,
-        token: makeToken(jury),
+        token: makeToken(jury, sessionToken),
         user: {
             id: jury.id,
             email: jury.email,
@@ -209,9 +233,12 @@ export const acceptInvite = async (req: Request, res: Response): Promise<void> =
             profil_picture: profilPicture,
         });
 
+        const sessionToken = randomUUID();
+        await updateSessionToken(jury.id, sessionToken);
+
         res.status(201).json({
             success: true,
-            token: makeToken(jury),
+            token: makeToken(jury, sessionToken),
             user: {
                 id: jury.id,
                 email: jury.email,
@@ -255,7 +282,10 @@ export const updateAvatar = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        const newToken = makeToken({ ...jury, profil_picture: profilPicture });
+        const newToken = makeToken(
+            { ...jury, profil_picture: profilPicture },
+            req.juryUser!.sessionToken ?? randomUUID(),
+        );
         res.json({ success: true, token: newToken, profilPicture });
     } catch (err) {
         res.status(500).json({
@@ -353,10 +383,14 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
+        const sessionToken = randomUUID();
+        await updateSessionToken(jury.id, sessionToken);
+        invalidateOldSessions(req, jury.id);
+
         res.status(isNew ? 201 : 200).json({
             success: true,
             isNew,
-            token: makeToken(jury),
+            token: makeToken(jury, sessionToken),
             user: {
                 id: jury.id,
                 email: jury.email,

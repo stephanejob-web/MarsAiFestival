@@ -1,5 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+    Clapperboard,
+    CheckCircle,
+    ChevronDown,
+    ChevronUp,
+    LogOut,
+    MessageCircle,
+    Mic,
+    Scale,
+    Send,
+    Settings,
+    ShieldCheck,
+} from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
@@ -20,12 +33,13 @@ interface JurySidebarProps {
 }
 
 interface NavItemProps {
-    icon: string;
+    icon: React.ReactNode;
     label: string;
     count: number;
     countVariant: "pending" | "selected" | "discuss" | "neutral";
     isActive: boolean;
     onClick: () => void;
+    disabled?: boolean;
 }
 
 const COUNT_VARIANT_CLASS: Record<NavItemProps["countVariant"], string> = {
@@ -42,15 +56,19 @@ const NavItem = ({
     countVariant,
     isActive,
     onClick,
+    disabled = false,
 }: NavItemProps): React.JSX.Element => {
     return (
         <button
             type="button"
-            onClick={onClick}
-            className={`flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] transition-all ${
-                isActive
-                    ? "bg-aurora/10 text-aurora"
-                    : "text-mist hover:bg-white/4 hover:text-white-soft"
+            onClick={disabled ? undefined : onClick}
+            disabled={disabled}
+            className={`flex w-full items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] transition-all ${
+                disabled
+                    ? "cursor-not-allowed opacity-35"
+                    : isActive
+                      ? "cursor-pointer bg-aurora/10 text-aurora"
+                      : "cursor-pointer text-mist hover:bg-white/4 hover:text-white-soft"
             }`}
         >
             <span>{icon}</span>
@@ -122,7 +140,7 @@ const JurySidebar = ({
                         className="flex-shrink-0 rounded-lg p-1.5 text-mist/50 transition-all hover:bg-white/8 hover:text-white-soft"
                         title="Modifier mon profil"
                     >
-                        ⚙️
+                        <Settings size={14} />
                     </button>
                 </div>
 
@@ -132,7 +150,7 @@ const JurySidebar = ({
                         Évaluation
                     </div>
                     <NavItem
-                        icon="🎬"
+                        icon={<Clapperboard size={14} />}
                         label="Films assignés"
                         count={pendingCount}
                         countVariant="pending"
@@ -140,7 +158,7 @@ const JurySidebar = ({
                         onClick={() => onViewChange("eval")}
                     />
                     <NavItem
-                        icon="✅"
+                        icon={<CheckCircle size={14} />}
                         label="Évalués"
                         count={evaluatedCount}
                         countVariant="selected"
@@ -148,7 +166,7 @@ const JurySidebar = ({
                         onClick={() => onViewChange("eval")}
                     />
                     <NavItem
-                        icon="💬"
+                        icon={<MessageCircle size={14} />}
                         label="À discuter"
                         count={discussCount}
                         countVariant="discuss"
@@ -160,23 +178,34 @@ const JurySidebar = ({
                         Sélection
                     </div>
                     <NavItem
-                        icon="⚖️"
+                        icon={<Scale size={14} />}
                         label="Délibération"
                         count={0}
                         countVariant="neutral"
                         isActive={activeView === "delib"}
                         onClick={() => onViewChange("delib")}
+                        disabled
                     />
 
                     <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Compte
                     </div>
+                    {(user?.role === "admin" || user?.role === "moderateur") && (
+                        <button
+                            type="button"
+                            onClick={() => navigate("/admin")}
+                            className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-lavande transition-all hover:bg-white/4"
+                        >
+                            <ShieldCheck size={14} />
+                            <span>Panel admin</span>
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={() => navigate("/jury")}
                         className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-coral transition-all hover:bg-white/4"
                     >
-                        <span>🔒</span>
+                        <LogOut size={14} />
                         <span>Se déconnecter</span>
                     </button>
                 </nav>
@@ -229,7 +258,7 @@ const JurySidebar = ({
                         onClick={onChatToggle}
                         className="flex w-full items-center px-2.5 py-2 text-[0.8rem] text-mist hover:text-white-soft"
                     >
-                        <span className="mr-1.5">💬</span>
+                        <MessageCircle size={14} className="mr-1.5" />
                         <span>Chat jury</span>
                         <span className="ml-1.5 flex items-center gap-1 text-[0.65rem] text-mist/70">
                             <span
@@ -243,8 +272,8 @@ const JurySidebar = ({
                                 {chat.unreadCount}
                             </span>
                         )}
-                        <span className="ml-auto text-[0.65rem] text-mist">
-                            {isChatOpen ? "▲" : "▼"}
+                        <span className="ml-auto text-mist">
+                            {isChatOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </span>
                     </button>
 
@@ -317,7 +346,7 @@ const JurySidebar = ({
                                                     key={msg.id}
                                                     className="flex items-center gap-1.5 rounded-lg border border-aurora/20 bg-aurora/[0.07] px-2 py-1.5"
                                                 >
-                                                    <span className="text-[0.75rem]">🎙️</span>
+                                                    <Mic size={12} className="text-aurora" />
                                                     <span className="flex-1 text-[0.68rem] font-semibold text-aurora">
                                                         {msg.text.replace("🎙️ ", "")}
                                                     </span>
@@ -385,9 +414,9 @@ const JurySidebar = ({
                                 <button
                                     type="button"
                                     onClick={chat.sendMessage}
-                                    className="flex items-center justify-center rounded-lg bg-aurora px-3 text-[0.8rem] font-bold text-deep-sky"
+                                    className="flex items-center justify-center rounded-lg bg-aurora px-3 text-deep-sky"
                                 >
-                                    ↑
+                                    <Send size={14} />
                                 </button>
                             </div>
                         </div>

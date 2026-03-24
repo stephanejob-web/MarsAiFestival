@@ -10,6 +10,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const s3 = new S3Client({
     region: process.env.SCALEWAY_REGION ?? "fr-par",
     endpoint: process.env.SCALEWAY_ENDPOINT ?? "https://s3.fr-par.scw.cloud",
+    forcePathStyle: true,
     credentials: {
         accessKeyId: process.env.SCALEWAY_ACCESS_KEY ?? "",
         secretAccessKey: process.env.SCALEWAY_SECRET_KEY ?? "",

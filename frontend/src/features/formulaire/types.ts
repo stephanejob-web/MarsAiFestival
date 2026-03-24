@@ -32,10 +32,10 @@ export interface FormDepotData {
 
     // Étape 3 — Déclaration IA
     iaClass: "full" | "hybrid";
-    iaImg: string;
-    iaSon: string;
-    iaScenario: string;
-    iaPost: string;
+    iaImg: boolean;
+    iaSon: boolean;
+    iaScenario: boolean;
+    iaPost: boolean;
 }
 
 export interface FormDepotErrors {

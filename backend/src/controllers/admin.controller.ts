@@ -14,6 +14,9 @@ import {
     banJuryUser,
     unbanJuryUser,
     deleteJuryUser,
+    updateModeratorPermissions,
+    getModeratorPermissions,
+    type ModeratorPermissions,
 } from "../repositories/jury.repository";
 
 // ── GET /api/admin/films — Films avec URLs vidéo pré-signées (1h) ─────────────
@@ -125,6 +128,19 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
         if (!updated) {
             res.status(404).json({ success: false, message: "Utilisateur introuvable." });
             return;
+        }
+        // Initialise les permissions si on passe un user en modérateur sans permissions
+        if (role === "moderateur") {
+            const existing = await getModeratorPermissions(id);
+            if (!existing) {
+                await updateModeratorPermissions(id, {
+                    can_manage_users: false,
+                    can_access_admin: false,
+                    can_disable_accounts: false,
+                    can_ban_users: false,
+                    can_send_messages: false,
+                });
+            }
         }
         res.json({ success: true });
     } catch (err) {
@@ -307,6 +323,66 @@ export const unbanUser = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: "Erreur lors de la réactivation.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── PUT /api/admin/users/:id/permissions — Définir les permissions d'un modérateur ──
+export const updatePermissions = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    const { can_disable_accounts, can_ban_users, can_send_messages, can_access_admin } =
+        req.body as Partial<ModeratorPermissions>;
+
+    const permissions: ModeratorPermissions = {
+        can_disable_accounts: Boolean(can_disable_accounts),
+        can_ban_users: Boolean(can_ban_users),
+        can_send_messages: Boolean(can_send_messages),
+        can_access_admin: Boolean(can_access_admin),
+    };
+
+    try {
+        await updateModeratorPermissions(id, permissions);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la mise à jour des permissions.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/users/:id/message — Envoyer un message en temps réel ──────
+export const sendMessageToUser = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+    const { message } = req.body as { message?: string };
+    if (!message?.trim()) {
+        res.status(400).json({ success: false, message: "Message vide." });
+        return;
+    }
+    try {
+        const io = req.app.locals.io as import("socket.io").Server;
+        const juryToSockets = req.app.locals.juryToSockets as Map<number, Set<string>>;
+        const sockets = juryToSockets.get(id);
+        if (sockets) {
+            for (const socketId of sockets) {
+                io.to(socketId).emit("admin:message", { message: message.trim() });
+            }
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'envoi.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

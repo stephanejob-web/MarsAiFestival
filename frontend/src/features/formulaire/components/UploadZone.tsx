@@ -153,7 +153,7 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                         {t("form.upload.browse")}
                     </div>
                     <div className="flex gap-2 justify-center flex-wrap">
-                        {["MP4", "MOV", "200–300 Mo", "16:9", "60 sec pile"].map((spec) => (
+                        {["MP4", "MOV", "200–300 Mo", "16:9", "1s – 2min30"].map((spec) => (
                             <span
                                 key={spec}
                                 className="bg-white/5 border border-white/10 rounded-md px-3 py-1 font-mono text-xs text-mist"
@@ -162,6 +162,9 @@ const UploadZone = ({ visible, onFileSelect }: UploadZoneProps): React.JSX.Eleme
                             </span>
                         ))}
                     </div>
+                    <p className="mt-3 text-[0.72rem] text-coral/70">
+                        Durée obligatoire : entre 1 seconde et 2 minutes 30
+                    </p>
                 </>
             )}
 
