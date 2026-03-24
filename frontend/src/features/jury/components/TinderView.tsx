@@ -86,13 +86,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         void video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }, [currentIndex]);
 
-    // Reset drag on film change
-    useEffect(() => {
-        setDragX(0);
-        setDragY(0);
-        setIsFlying(false);
-    }, [currentIndex]);
-
     const triggerFlash = (color: FlashColor): void => {
         setFlashColor(color);
         setTimeout(() => setFlashColor(null), 400);
@@ -105,9 +98,10 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             onVoteDirect(currentFilm.id, decision);
             showToast(DECISION_TOASTS[decision]);
             setIsDetailOpen(false);
-            setTimeout(() => {
-                setCurrentIndex((i) => i + 1);
-            }, 50);
+            setDragX(0);
+            setDragY(0);
+            setIsFlying(false);
+            setCurrentIndex((i) => i + 1);
         },
         [currentFilm, currentIndex, onVoteDirect, showToast],
     );
@@ -149,6 +143,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const handleSkip = useCallback((): void => {
         if (isFlying || !currentFilm) return;
         setHistory((h) => [...h, currentIndex]);
+        setDragX(0);
+        setDragY(0);
         setCurrentIndex((i) => i + 1);
         setIsDetailOpen(false);
     }, [isFlying, currentFilm, currentIndex]);
@@ -157,6 +153,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         if (history.length === 0) return;
         const prev = history[history.length - 1];
         setHistory((h) => h.slice(0, -1));
+        setDragX(0);
+        setDragY(0);
+        setIsFlying(false);
         setCurrentIndex(prev);
         setIsDetailOpen(false);
     }, [history]);
