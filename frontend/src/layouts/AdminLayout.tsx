@@ -7,14 +7,16 @@ import AdminSidePanel from "../features/admin/components/AdminSidePanel";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 import BanModal from "../features/admin/components/BanModal";
+import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
 
 const AdminLayout = (): React.JSX.Element => {
     const navigate = useNavigate();
-    const { isBanned, adminMessage, clearAdminMessage } = useBanProtection();
+    const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
 
     return (
         <div className="flex h-screen overflow-hidden bg-surface text-white-soft">
             <BanModal visible={isBanned} />
+            <SessionExpiredModal visible={isSessionExpired} />
             <AdminMessageToast message={adminMessage} onClose={clearAdminMessage} />
             <aside className="w-[240px] min-w-[240px] border-r border-white/[0.06]">
                 <AdminSidePanel />
