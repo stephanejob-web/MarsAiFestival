@@ -48,9 +48,25 @@ interface ApiFilmRow {
     subtitle_fr_url: string | null;
     subtitle_en_url: string | null;
     film_year: number | null;
+    realisator_gender: string | null;
     realisator_first: string;
     realisator_last: string;
+    realisator_birth_date: string | null;
+    realisator_email: string;
+    realisator_profession: string | null;
+    realisator_phone: string | null;
+    realisator_mobile_phone: string | null;
+    realisator_street: string | null;
+    realisator_postal_code: string | null;
+    realisator_city: string | null;
     realisator_country: string | null;
+    realisator_youtube: string | null;
+    realisator_instagram: string | null;
+    realisator_linkedin: string | null;
+    realisator_facebook: string | null;
+    realisator_xtwitter: string | null;
+    realisator_how_did_you_know_us: string | null;
+    realisator_newsletter: number;
 }
 
 const formatDuration = (seconds: number | null): string => {
@@ -80,6 +96,27 @@ const mapApiFilm = (row: ApiFilmRow): JuryFilm => ({
     comments: [],
     opinions: [],
     votes: [],
+    realisator: {
+        gender: row.realisator_gender ?? null,
+        firstName: row.realisator_first,
+        lastName: row.realisator_last,
+        birthDate: row.realisator_birth_date ?? null,
+        email: row.realisator_email,
+        profession: row.realisator_profession ?? null,
+        phone: row.realisator_phone ?? null,
+        mobilePhone: row.realisator_mobile_phone ?? null,
+        street: row.realisator_street ?? null,
+        postalCode: row.realisator_postal_code ?? null,
+        city: row.realisator_city ?? null,
+        country: row.realisator_country ?? null,
+        youtube: row.realisator_youtube ?? null,
+        instagram: row.realisator_instagram ?? null,
+        linkedin: row.realisator_linkedin ?? null,
+        facebook: row.realisator_facebook ?? null,
+        xtwitter: row.realisator_xtwitter ?? null,
+        howDidYouKnowUs: row.realisator_how_did_you_know_us ?? null,
+        newsletter: !!row.realisator_newsletter,
+    },
 });
 
 // ── Shape returned by GET /api/comments/film?filmId=X ────────────────────────
@@ -282,6 +319,27 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 comments: [],
                 opinions: [],
                 votes: [],
+                realisator: {
+                    gender: null,
+                    firstName: "",
+                    lastName: "",
+                    birthDate: null,
+                    email: "",
+                    profession: null,
+                    phone: null,
+                    mobilePhone: null,
+                    street: null,
+                    postalCode: null,
+                    city: null,
+                    country: null,
+                    youtube: null,
+                    instagram: null,
+                    linkedin: null,
+                    facebook: null,
+                    xtwitter: null,
+                    howDidYouKnowUs: null,
+                    newsletter: false,
+                },
             }
         );
     }, [films, activeFilmId]);
