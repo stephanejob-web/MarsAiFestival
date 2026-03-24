@@ -133,8 +133,10 @@ info:
     name: Équipe marsAI
 
 servers:
+  - url: https://192.168.10.166:5173
+    description: Serveur réseau local (via proxy Vite)
   - url: http://localhost:5500
-    description: Serveur de développement local
+    description: Serveur de développement local (direct)
 
 tags:
   - name: Authentification

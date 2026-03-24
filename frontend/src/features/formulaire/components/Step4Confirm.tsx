@@ -91,14 +91,15 @@ const Step4Confirm = ({
         },
         {
             key: t("form.step4.recapAiTools"),
-            value: [
-                formData.iaImg ? t("form.step3.iaImg") : null,
-                formData.iaSon ? t("form.step3.iaSon") : null,
-                formData.iaScenario ? t("form.step3.iaScenario") : null,
-                formData.iaPost ? t("form.step3.iaPost") : null,
-            ]
-                .filter(Boolean)
-                .join(", ") || "—",
+            value:
+                [
+                    formData.iaImg ? t("form.step3.iaImg") : null,
+                    formData.iaSon ? t("form.step3.iaSon") : null,
+                    formData.iaScenario ? t("form.step3.iaScenario") : null,
+                    formData.iaPost ? t("form.step3.iaPost") : null,
+                ]
+                    .filter(Boolean)
+                    .join(", ") || "—",
         },
         {
             key: t("form.step4.recapSubtitles"),

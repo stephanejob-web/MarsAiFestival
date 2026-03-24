@@ -275,52 +275,101 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                 <SectionCard title="Informations réalisateur">
                     <div className="grid grid-cols-2 gap-2">
                         <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Civilité</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.gender || "—"}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Nom</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.firstName} {film.realisator.lastName}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Date de naissance</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.birthDate ? new Date(film.realisator.birthDate).toLocaleDateString("fr") : "—"}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Email</div>
-                            <div className="text-[0.75rem] text-mist break-all">{film.realisator.email || "—"}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Profession</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.profession || "—"}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Téléphone</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.phone || film.realisator.mobilePhone || "—"}</div>
-                        </div>
-                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
-                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Adresse</div>
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Civilité
+                            </div>
                             <div className="text-[0.75rem] text-mist">
-                                {[film.realisator.street, film.realisator.postalCode, film.realisator.city, film.realisator.country].filter(Boolean).join(", ") || "—"}
+                                {film.realisator.gender || "—"}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Nom
+                            </div>
+                            <div className="text-[0.75rem] text-mist">
+                                {film.realisator.firstName} {film.realisator.lastName}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Date de naissance
+                            </div>
+                            <div className="text-[0.75rem] text-mist">
+                                {film.realisator.birthDate
+                                    ? new Date(film.realisator.birthDate).toLocaleDateString("fr")
+                                    : "—"}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Email
+                            </div>
+                            <div className="text-[0.75rem] text-mist break-all">
+                                {film.realisator.email || "—"}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Profession
+                            </div>
+                            <div className="text-[0.75rem] text-mist">
+                                {film.realisator.profession || "—"}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Téléphone
+                            </div>
+                            <div className="text-[0.75rem] text-mist">
+                                {film.realisator.phone || film.realisator.mobilePhone || "—"}
+                            </div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">
+                                Adresse
+                            </div>
+                            <div className="text-[0.75rem] text-mist">
+                                {[
+                                    film.realisator.street,
+                                    film.realisator.postalCode,
+                                    film.realisator.city,
+                                    film.realisator.country,
+                                ]
+                                    .filter(Boolean)
+                                    .join(", ") || "—"}
                             </div>
                         </div>
                     </div>
-                    {(film.realisator.instagram || film.realisator.youtube || film.realisator.linkedin || film.realisator.facebook || film.realisator.xtwitter) && (
+                    {(film.realisator.instagram ||
+                        film.realisator.youtube ||
+                        film.realisator.linkedin ||
+                        film.realisator.facebook ||
+                        film.realisator.xtwitter) && (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {film.realisator.instagram && (
-                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">Instagram: {film.realisator.instagram}</span>
+                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">
+                                    Instagram: {film.realisator.instagram}
+                                </span>
                             )}
                             {film.realisator.youtube && (
-                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">YouTube: {film.realisator.youtube}</span>
+                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">
+                                    YouTube: {film.realisator.youtube}
+                                </span>
                             )}
                             {film.realisator.linkedin && (
-                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">LinkedIn: {film.realisator.linkedin}</span>
+                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">
+                                    LinkedIn: {film.realisator.linkedin}
+                                </span>
                             )}
                             {film.realisator.facebook && (
-                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">Facebook: {film.realisator.facebook}</span>
+                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">
+                                    Facebook: {film.realisator.facebook}
+                                </span>
                             )}
                             {film.realisator.xtwitter && (
-                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">X/Twitter: {film.realisator.xtwitter}</span>
+                                <span className="rounded-[5px] bg-white/6 px-[9px] py-[3px] text-[0.68rem] text-mist">
+                                    X/Twitter: {film.realisator.xtwitter}
+                                </span>
                             )}
                         </div>
                     )}

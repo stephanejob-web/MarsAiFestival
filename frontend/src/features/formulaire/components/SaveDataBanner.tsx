@@ -1,7 +1,6 @@
 import React from "react";
 
-const BANNER_BASE =
-    "mb-5 rounded-[12px] border px-4 py-3.5 flex items-start gap-3 text-sm";
+const BANNER_BASE = "mb-5 rounded-[12px] border px-4 py-3.5 flex items-start gap-3 text-sm";
 
 interface SaveDataBannerProps {
     /** null = pas encore décidé, true = accepté, false = refusé */
@@ -66,9 +65,10 @@ const SaveDataBanner = ({
                         Faciliter vos prochains dépôts ?
                     </div>
                     <div className="text-mist text-xs leading-relaxed">
-                        Vos informations personnelles (nom, email, adresse) peuvent être sauvegardées
-                        dans ce navigateur pour pré-remplir ce formulaire lors d'une prochaine soumission.
-                        Ces données restent sur votre appareil et ne sont jamais transmises à des tiers.
+                        Vos informations personnelles (nom, email, adresse) peuvent être
+                        sauvegardées dans ce navigateur pour pré-remplir ce formulaire lors d'une
+                        prochaine soumission. Ces données restent sur votre appareil et ne sont
+                        jamais transmises à des tiers.
                     </div>
                     <div className="flex gap-2 mt-2.5">
                         <button

@@ -54,10 +54,25 @@ const LS_CONSENT_KEY = "marsai_save_consent";
 const LS_DATA_KEY = "marsai_realisator_data";
 
 const STEP1_FIELDS: (keyof FormDepotData)[] = [
-    "civilite", "prenom", "nom", "dob", "metier", "email",
-    "tel", "mobile", "rue", "cp", "ville", "pays",
-    "youtube", "instagram", "linkedin", "facebook", "xtwitter",
-    "discovery", "newsletter",
+    "civilite",
+    "prenom",
+    "nom",
+    "dob",
+    "metier",
+    "email",
+    "tel",
+    "mobile",
+    "rue",
+    "cp",
+    "ville",
+    "pays",
+    "youtube",
+    "instagram",
+    "linkedin",
+    "facebook",
+    "xtwitter",
+    "discovery",
+    "newsletter",
 ];
 
 const readConsent = (): boolean | null => {
@@ -122,7 +137,9 @@ const useFormDepot = (): UseFormDepotReturn => {
             const next = { ...prev };
             STEP1_FIELDS.forEach((field) => {
                 if (saved[field] !== undefined) {
-                    (next[field] as FormDepotData[typeof field]) = saved[field] as FormDepotData[typeof field];
+                    (next[field] as FormDepotData[typeof field]) = saved[
+                        field
+                    ] as FormDepotData[typeof field];
                 }
             });
             return next;
@@ -138,9 +155,7 @@ const useFormDepot = (): UseFormDepotReturn => {
     // (évite d'écraser les données existantes avec le formulaire vide au montage)
     useEffect(() => {
         if (saveConsent !== true) return;
-        const hasData = STEP1_FIELDS.some(
-            (field) => formData[field] !== INITIAL_FORM_DATA[field],
-        );
+        const hasData = STEP1_FIELDS.some((field) => formData[field] !== INITIAL_FORM_DATA[field]);
         if (!hasData) return;
         const dataToSave: Partial<FormDepotData> = {};
         STEP1_FIELDS.forEach((field) => {
@@ -166,7 +181,7 @@ const useFormDepot = (): UseFormDepotReturn => {
 
             const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']{2,}$/;
             const phoneRegex = /^[+\d][\d\s()\-.]{5,19}$/;
-            const urlOrHandleRegex = /^(https?:\/\/[^\s]+|@[\w.\-]{2,}|[\w.\-]{2,})$/;
+            const urlOrHandleRegex = /^(https?:\/\/[^\s]+|@[\w.-]{2,}|[\w.-]{2,})$/;
 
             const countDigits = (s: string): number => (s.match(/\d/g) ?? []).length;
 
@@ -194,30 +209,36 @@ const useFormDepot = (): UseFormDepotReturn => {
 
                 if (formData.tel.trim()) {
                     if (!phoneRegex.test(formData.tel.trim()) || countDigits(formData.tel) < 7)
-                        newErrors.tel =
-                            "Numéro de téléphone invalide (ex : +33 1 00 00 00 00)";
+                        newErrors.tel = "Numéro de téléphone invalide (ex : +33 1 00 00 00 00)";
                 }
 
                 if (!formData.mobile.trim()) newErrors.mobile = "Numéro de mobile requis";
-                else if (!phoneRegex.test(formData.mobile.trim()) || countDigits(formData.mobile) < 7)
-                    newErrors.mobile =
-                        "Numéro de mobile invalide (ex : +33 6 00 00 00 00)";
+                else if (
+                    !phoneRegex.test(formData.mobile.trim()) ||
+                    countDigits(formData.mobile) < 7
+                )
+                    newErrors.mobile = "Numéro de mobile invalide (ex : +33 6 00 00 00 00)";
 
                 if (!formData.rue.trim()) newErrors.rue = "Champ requis";
                 else if (formData.rue.trim().length < 3)
                     newErrors.rue = "Adresse invalide (3 caractères minimum)";
 
                 if (!formData.cp.trim()) newErrors.cp = "Champ requis";
-                else if (!/^[a-zA-Z0-9\s\-]{2,10}$/.test(formData.cp.trim()))
+                else if (!/^[a-zA-Z0-9\s-]{2,10}$/.test(formData.cp.trim()))
                     newErrors.cp = "Code postal invalide";
 
                 if (!formData.ville.trim()) newErrors.ville = "Champ requis";
-                else if (formData.ville.trim().length < 2)
-                    newErrors.ville = "Ville invalide";
+                else if (formData.ville.trim().length < 2) newErrors.ville = "Ville invalide";
 
                 if (!formData.pays) newErrors.pays = "Sélectionnez votre pays";
 
-                for (const social of ["youtube", "instagram", "linkedin", "facebook", "xtwitter"] as const) {
+                for (const social of [
+                    "youtube",
+                    "instagram",
+                    "linkedin",
+                    "facebook",
+                    "xtwitter",
+                ] as const) {
                     const val = formData[social].trim();
                     if (val && !urlOrHandleRegex.test(val))
                         newErrors[social] = "Format invalide (ex : @compte ou https://...)";
