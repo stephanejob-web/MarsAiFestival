@@ -58,6 +58,27 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
         comments: [],
         opinions: [],
         votes: [],
+        realisator: {
+            gender: null,
+            firstName: f.realisator_first,
+            lastName: f.realisator_last,
+            birthDate: null,
+            email: "",
+            profession: null,
+            phone: null,
+            mobilePhone: null,
+            street: null,
+            postalCode: null,
+            city: null,
+            country: f.realisator_country ?? null,
+            youtube: null,
+            instagram: null,
+            linkedin: null,
+            facebook: null,
+            xtwitter: null,
+            howDidYouKnowUs: null,
+            newsletter: false,
+        },
     }));
 
     const firstFilmId = discussFilms[0]?.id ?? null;

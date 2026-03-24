@@ -59,6 +59,28 @@ export interface JuryComment {
     updatedAt: string;
 }
 
+export interface Realisator {
+    gender: string | null;
+    firstName: string;
+    lastName: string;
+    birthDate: string | null;
+    email: string;
+    profession: string | null;
+    phone: string | null;
+    mobilePhone: string | null;
+    street: string | null;
+    postalCode: string | null;
+    city: string | null;
+    country: string | null;
+    youtube: string | null;
+    instagram: string | null;
+    linkedin: string | null;
+    facebook: string | null;
+    xtwitter: string | null;
+    howDidYouKnowUs: string | null;
+    newsletter: boolean;
+}
+
 export interface JuryFilm {
     id: number;
     title: string;
@@ -79,4 +101,5 @@ export interface JuryFilm {
     comments: JuryComment[];
     opinions: JuryOpinion[];
     votes: VoteRow[];
+    realisator: Realisator;
 }
