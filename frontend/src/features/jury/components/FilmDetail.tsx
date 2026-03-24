@@ -275,8 +275,12 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                 <SectionCard title="Informations réalisateur">
                     <div className="grid grid-cols-2 gap-2">
                         <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
+                            <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Civilité</div>
+                            <div className="text-[0.75rem] text-mist">{film.realisator.gender || "—"}</div>
+                        </div>
+                        <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
                             <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Nom</div>
-                            <div className="text-[0.75rem] text-mist">{film.realisator.gender} {film.realisator.firstName} {film.realisator.lastName}</div>
+                            <div className="text-[0.75rem] text-mist">{film.realisator.firstName} {film.realisator.lastName}</div>
                         </div>
                         <div className="rounded-[6px] border border-white/5 bg-white/3 px-3 py-2.5">
                             <div className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-aurora">Date de naissance</div>
