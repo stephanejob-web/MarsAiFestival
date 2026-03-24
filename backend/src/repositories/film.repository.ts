@@ -15,6 +15,7 @@ export interface FilmInsert {
     subtitle_en_url: string | null;
     creative_workflow: string | null;
     tech_stack: string | null;
+    duration: number | null;
     ia_class: "full" | "hybrid";
     ia_image: boolean;
     ia_son: boolean;
@@ -30,9 +31,10 @@ export const insertFilm = async (data: FilmInsert): Promise<number> => {
             original_synopsis, english_synopsis,
             video_url, subtitle_fr_url, subtitle_en_url,
             creative_workflow, tech_stack,
+            duration,
             ia_class, ia_image, ia_son, ia_scenario, ia_post,
             statut
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'to_review')`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'to_review')`,
         [
             data.realisator_id,
             data.dossier_num,
@@ -47,6 +49,7 @@ export const insertFilm = async (data: FilmInsert): Promise<number> => {
             data.subtitle_en_url ?? null,
             data.creative_workflow ?? null,
             data.tech_stack ?? null,
+            data.duration ?? null,
             data.ia_class,
             data.ia_image ? 1 : 0,
             data.ia_son ? 1 : 0,
