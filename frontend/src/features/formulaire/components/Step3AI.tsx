@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { FormDepotData, FormDepotErrors } from "../types";
-import { getInputClass } from "./formUtils";
 import { FormFieldError } from "./formHelpers";
 
 interface SubtitleUploadProps {
@@ -96,15 +95,13 @@ const Step3AI = ({
 }: Step3AIProps): React.JSX.Element => {
     const { t } = useTranslation();
 
-    const handleInput = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        onChange(e.target.name as keyof FormDepotData, e.target.value);
+    const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>): void => {
+        onChange(e.target.name as keyof FormDepotData, e.target.checked);
     };
 
     const handleClassChange = (value: "full" | "hybrid"): void => {
         onChange("iaClass", value);
     };
-
-    const inputClass = (field: string): string => getInputClass(field, errors);
 
     const renderError = (field: string): React.JSX.Element | null => (
         <FormFieldError errors={errors} field={field} />
@@ -206,73 +203,57 @@ const Step3AI = ({
             </div>
 
             {/* Outils IA */}
-            <div className="grid gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step3.iaImg")}{" "}
-                        <span className="text-coral text-[0.65rem]">{t("form.required")}</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="iaImg"
-                        value={formData.iaImg}
-                        onChange={handleInput}
-                        placeholder={t("form.step3.iaImgPlaceholder")}
-                        className={inputClass("iaImg")}
-                    />
-                    {renderError("iaImg")}
+            <div className="mb-2">
+                <p className="text-xs text-mist leading-relaxed mb-4">
+                    {t("form.step3.toolsHint")}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {(
+                        [
+                            { name: "iaImg", label: t("form.step3.iaImg"), required: true },
+                            { name: "iaSon", label: t("form.step3.iaSon"), required: false },
+                            { name: "iaScenario", label: t("form.step3.iaScenario"), required: false },
+                            { name: "iaPost", label: t("form.step3.iaPost"), required: false },
+                        ] as const
+                    ).map(({ name, label, required }) => (
+                        <label
+                            key={name}
+                            className={`flex items-center gap-3.5 p-4 rounded-xl border-[1.5px] cursor-pointer transition-all duration-200 ${
+                                formData[name]
+                                    ? "border-aurora/30 bg-aurora/[0.04]"
+                                    : "border-white/8 bg-white/[0.02] hover:border-white/15"
+                            } ${errors[name] ? "border-coral/40" : ""}`}
+                        >
+                            <input
+                                type="checkbox"
+                                name={name}
+                                checked={formData[name]}
+                                onChange={handleCheckbox}
+                                className="sr-only"
+                            />
+                            <div
+                                className={`w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center transition-all ${
+                                    formData[name]
+                                        ? "border-aurora bg-aurora"
+                                        : "border-white/25"
+                                }`}
+                            >
+                                {formData[name] && (
+                                    <svg className="w-3 h-3 text-deep-sky" viewBox="0 0 12 10" fill="none">
+                                        <path d="M1 5l3.5 3.5L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                )}
+                            </div>
+                            <span className="text-sm font-semibold text-white-soft">
+                                {label}
+                                {required && (
+                                    <span className="text-coral text-[0.65rem] ml-1.5">{t("form.required")}</span>
+                                )}
+                            </span>
+                        </label>
+                    ))}
                 </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step3.iaSon")}{" "}
-                        <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            {t("form.optional")}
-                        </span>
-                    </label>
-                    <input
-                        type="text"
-                        name="iaSon"
-                        value={formData.iaSon}
-                        onChange={handleInput}
-                        placeholder={t("form.step3.iaSonPlaceholder")}
-                        className={inputClass("iaSon")}
-                    />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step3.iaScenario")}{" "}
-                        <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            {t("form.optional")}
-                        </span>
-                    </label>
-                    <input
-                        type="text"
-                        name="iaScenario"
-                        value={formData.iaScenario}
-                        onChange={handleInput}
-                        placeholder={t("form.step3.iaScenarioPlaceholder")}
-                        className={inputClass("iaScenario")}
-                    />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wide text-mist">
-                        {t("form.step3.iaPost")}{" "}
-                        <span className="text-mist text-[0.65rem] font-normal normal-case opacity-70">
-                            {t("form.optional")}
-                        </span>
-                    </label>
-                    <input
-                        type="text"
-                        name="iaPost"
-                        value={formData.iaPost}
-                        onChange={handleInput}
-                        placeholder={t("form.step3.iaPostPlaceholder")}
-                        className={inputClass("iaPost")}
-                    />
-                </div>
+                {renderError("iaImg")}
             </div>
 
             <hr className="border-white/5 my-6" />
