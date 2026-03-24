@@ -253,6 +253,7 @@ const Step1Profile = ({
                         autoComplete="tel-national"
                         className={inputClass("tel")}
                     />
+                    {renderError("tel")}
                 </div>
 
                 {/* Mobile */}
@@ -368,8 +369,9 @@ const Step1Profile = ({
                             value={formData[social.name as keyof FormDepotData] as string}
                             onChange={handleInput}
                             placeholder={social.placeholder}
-                            className="w-full bg-white/4 border-[1.5px] border-white/9 rounded-[10px] py-2.5 pr-3.5 pl-8 font-body text-sm text-white-soft outline-none transition-colors focus:border-aurora/40 placeholder:text-mist/45"
+                            className={`w-full bg-white/4 border-[1.5px] rounded-[10px] py-2.5 pr-3.5 pl-8 font-body text-sm text-white-soft outline-none transition-colors focus:border-aurora/40 placeholder:text-mist/45 ${errors[social.name] ? "border-coral/50" : "border-white/9"}`}
                         />
+                        {renderError(social.name)}
                     </div>
                 ))}
             </div>
