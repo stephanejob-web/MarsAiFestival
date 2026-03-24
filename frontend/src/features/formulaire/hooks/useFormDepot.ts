@@ -181,7 +181,7 @@ const useFormDepot = (): UseFormDepotReturn => {
 
             const nameRegex = /^[a-zA-ZÀ-ÿ\s\-']{2,}$/;
             const phoneRegex = /^[+\d][\d\s()\-.]{5,19}$/;
-            const urlOrHandleRegex = /^(https?:\/\/[^\s]+|@[\w.\-]{2,}|[\w.\-]{2,})$/;
+            const urlOrHandleRegex = /^(https?:\/\/[^\s]+|@[\w.-]{2,}|[\w.-]{2,})$/;
 
             const countDigits = (s: string): number => (s.match(/\d/g) ?? []).length;
 
@@ -224,7 +224,7 @@ const useFormDepot = (): UseFormDepotReturn => {
                     newErrors.rue = "Adresse invalide (3 caractères minimum)";
 
                 if (!formData.cp.trim()) newErrors.cp = "Champ requis";
-                else if (!/^[a-zA-Z0-9\s\-]{2,10}$/.test(formData.cp.trim()))
+                else if (!/^[a-zA-Z0-9\s-]{2,10}$/.test(formData.cp.trim()))
                     newErrors.cp = "Code postal invalide";
 
                 if (!formData.ville.trim()) newErrors.ville = "Champ requis";
