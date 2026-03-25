@@ -11,7 +11,8 @@ class IntersectionObserverMock {
     observe = vi.fn();
     unobserve = vi.fn();
     disconnect = vi.fn();
-    constructor(_cb: unknown, _opts?: unknown) {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    constructor(..._args: unknown[]) {}
 }
 Object.defineProperty(window, "IntersectionObserver", {
     writable: true,
