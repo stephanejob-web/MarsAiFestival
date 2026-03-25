@@ -526,6 +526,37 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                         </div>
                     </div>
 
+                    {/* Demo card */}
+                    <div className="mb-6 flex justify-center overflow-visible py-2">
+                        <div className="demo-card-swing relative h-24 w-48 rounded-xl border border-white/12 bg-surface shadow-xl">
+                            {/* Right hint — valider */}
+                            <div className="demo-hint-right absolute inset-0 flex items-center justify-end rounded-xl bg-aurora/20 pr-5 opacity-0">
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <Check size={26} className="text-aurora" strokeWidth={2.5} />
+                                    <span className="font-mono text-[0.58rem] font-bold text-aurora">
+                                        VALIDER
+                                    </span>
+                                </div>
+                            </div>
+                            {/* Left hint — refuser */}
+                            <div className="demo-hint-left absolute inset-0 flex items-center justify-start rounded-xl bg-coral/20 pl-5 opacity-0">
+                                <div className="flex flex-col items-center gap-0.5">
+                                    <X size={26} className="text-coral" strokeWidth={2.5} />
+                                    <span className="font-mono text-[0.58rem] font-bold text-coral">
+                                        REFUSER
+                                    </span>
+                                </div>
+                            </div>
+                            {/* Card content */}
+                            <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1.5">
+                                <Film size={18} className="text-mist/30" />
+                                <span className="text-[0.68rem] text-mist/40">
+                                    Glissez pour voter
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Warning */}
                     <div className="mb-5 rounded-xl border border-solar/25 bg-solar/8 px-4 py-3">
                         <p className="text-[0.78rem] leading-relaxed text-solar/90">
