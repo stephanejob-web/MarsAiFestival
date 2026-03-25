@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import {
     Check,
     X,
@@ -40,7 +40,8 @@ interface DetailRowProps {
     label: string;
     value: string | null | undefined;
 }
-const DetailRow = ({ label, value }: DetailRowProps): React.JSX.Element | null => {
+
+const DetailRow = memo(({ label, value }: DetailRowProps): React.JSX.Element | null => {
     if (!value || value === "—") return null;
     return (
         <div className="flex flex-col gap-0.5">
@@ -50,21 +51,33 @@ const DetailRow = ({ label, value }: DetailRowProps): React.JSX.Element | null =
             <span className="text-[0.82rem] text-white-soft">{value}</span>
         </div>
     );
-};
+});
+DetailRow.displayName = "DetailRow";
 
 const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.JSX.Element => {
     const [pendingFilms] = useState<JuryFilm[]>(() => films.filter((f) => f.myDecision === null));
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
 
-    // Drag state
+    // Drag state — only used for snap-back and fly-out animations (not during active drag)
     const [dragX, setDragX] = useState(0);
     const [dragY, setDragY] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
-    const [isFlying, setIsFlying] = useState(false); // card animating out
+    const [isFlying, setIsFlying] = useState(false);
+
+    // Drag refs — updated every mousemove without triggering re-renders
+    const dragXRef = useRef(0);
+    const dragYRef = useRef(0);
+    const isDraggingRef = useRef(false);
     const dragStartX = useRef(0);
     const dragStartY = useRef(0);
+    const rafId = useRef<number | null>(null);
+
+    // DOM refs for direct manipulation during drag (avoids re-renders for hint opacities)
     const cardRef = useRef<HTMLDivElement>(null);
+    const rightHintRef = useRef<HTMLDivElement>(null);
+    const leftHintRef = useRef<HTMLDivElement>(null);
+    const upHintRef = useRef<HTMLDivElement>(null);
 
     // Video state
     const [isPlaying, setIsPlaying] = useState(false);
@@ -78,7 +91,12 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
     const [showShortcuts, setShowShortcuts] = useState(false);
 
+    // Timeout refs for cleanup on unmount
+    const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const currentFilm = pendingFilms[currentIndex];
+    const nextFilm = pendingFilms[currentIndex + 1];
+    const afterNextFilm = pendingFilms[currentIndex + 2];
 
     // Autoplay on film change
     useEffect(() => {
@@ -91,10 +109,19 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             .catch(() => setIsPlaying(false));
     }, [currentIndex]);
 
-    const triggerFlash = (color: FlashColor): void => {
+    // Cleanup RAF and timeouts on unmount
+    useEffect(() => {
+        return () => {
+            if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+            if (flashTimeoutRef.current !== null) clearTimeout(flashTimeoutRef.current);
+        };
+    }, []);
+
+    const triggerFlash = useCallback((color: FlashColor): void => {
         setFlashColor(color);
-        setTimeout(() => setFlashColor(null), 400);
-    };
+        if (flashTimeoutRef.current !== null) clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = setTimeout(() => setFlashColor(null), 400);
+    }, []);
 
     const commitVote = useCallback(
         (decision: Exclude<Decision, null>): void => {
@@ -103,6 +130,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             onVoteDirect(currentFilm.id, decision);
             showToast(DECISION_TOASTS[decision]);
             setIsDetailOpen(false);
+            dragXRef.current = 0;
+            dragYRef.current = 0;
             setDragX(0);
             setDragY(0);
             setIsFlying(false);
@@ -111,7 +140,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         [currentFilm, currentIndex, onVoteDirect, showToast],
     );
 
-    // Fly card out in a direction, then commit vote
     const flyAndVote = useCallback(
         (decision: Exclude<Decision, null>, toX: number, toY: number): void => {
             if (isFlying) return;
@@ -127,7 +155,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             triggerFlash(colorMap[decision]);
             setTimeout(() => commitVote(decision), 350);
         },
-        [isFlying, commitVote],
+        [isFlying, commitVote, triggerFlash],
     );
 
     const handleVoteButton = useCallback(
@@ -148,6 +176,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const handleSkip = useCallback((): void => {
         if (isFlying || !currentFilm) return;
         setHistory((h) => [...h, currentIndex]);
+        dragXRef.current = 0;
+        dragYRef.current = 0;
         setDragX(0);
         setDragY(0);
         setCurrentIndex((i) => i + 1);
@@ -158,6 +188,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         if (history.length === 0) return;
         const prev = history[history.length - 1];
         setHistory((h) => h.slice(0, -1));
+        dragXRef.current = 0;
+        dragYRef.current = 0;
         setDragX(0);
         setDragY(0);
         setIsFlying(false);
@@ -165,10 +197,37 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         setIsDetailOpen(false);
     }, [history]);
 
+    // ── Direct DOM update via RAF — zero re-renders during drag ──────────────
+    const applyDragToDom = useCallback((): void => {
+        const dx = dragXRef.current;
+        const dy = dragYRef.current;
+        if (cardRef.current) {
+            cardRef.current.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.08}deg)`;
+            cardRef.current.style.transition = "none";
+            cardRef.current.style.cursor = "grabbing";
+        }
+        if (rightHintRef.current) {
+            rightHintRef.current.style.opacity = String(
+                Math.min(Math.max(dx / SWIPE_THRESHOLD, 0), 1),
+            );
+        }
+        if (leftHintRef.current) {
+            leftHintRef.current.style.opacity = String(
+                Math.min(Math.max(-dx / SWIPE_THRESHOLD, 0), 1),
+            );
+        }
+        if (upHintRef.current) {
+            upHintRef.current.style.opacity = String(
+                Math.min(Math.max(-dy / SWIPE_THRESHOLD, 0), 1),
+            );
+        }
+    }, []);
+
     // ── Drag handlers ────────────────────────────────────────────────────────
     const onDragStart = useCallback(
         (clientX: number, clientY: number): void => {
             if (isFlying) return;
+            isDraggingRef.current = true;
             setIsDragging(true);
             dragStartX.current = clientX;
             dragStartY.current = clientY;
@@ -178,36 +237,46 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
     const onDragMove = useCallback(
         (clientX: number, clientY: number): void => {
-            if (!isDragging) return;
-            setDragX(clientX - dragStartX.current);
-            setDragY(clientY - dragStartY.current);
+            if (!isDraggingRef.current) return;
+            dragXRef.current = clientX - dragStartX.current;
+            dragYRef.current = clientY - dragStartY.current;
+            if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+            rafId.current = requestAnimationFrame(applyDragToDom);
         },
-        [isDragging],
+        [applyDragToDom],
     );
 
     const onDragEnd = useCallback((): void => {
-        if (!isDragging) return;
+        if (!isDraggingRef.current) return;
+        isDraggingRef.current = false;
         setIsDragging(false);
 
-        const absX = Math.abs(dragX);
-        const absY = Math.abs(dragY);
+        // Reset hint opacities
+        if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
+        if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
+        if (upHintRef.current) upHintRef.current.style.opacity = "0";
+
+        const dx = dragXRef.current;
+        const dy = dragYRef.current;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
 
         if (absX > SWIPE_THRESHOLD && absX > absY) {
-            // Horizontal swipe
             flyAndVote(
-                dragX > 0 ? "valide" : "refuse",
-                dragX > 0 ? window.innerWidth * 1.5 : -window.innerWidth * 1.5,
-                dragY,
+                dx > 0 ? "valide" : "refuse",
+                dx > 0 ? window.innerWidth * 1.5 : -window.innerWidth * 1.5,
+                dy,
             );
-        } else if (dragY < -SWIPE_THRESHOLD && absY > absX) {
-            // Swipe up
-            flyAndVote("aRevoir", dragX, -window.innerHeight * 1.5);
+        } else if (dy < -SWIPE_THRESHOLD && absY > absX) {
+            flyAndVote("aRevoir", dx, -window.innerHeight * 1.5);
         } else {
-            // Snap back
+            // Snap back — React takes over with the spring transition
+            dragXRef.current = 0;
+            dragYRef.current = 0;
             setDragX(0);
             setDragY(0);
         }
-    }, [isDragging, dragX, dragY, flyAndVote]);
+    }, [flyAndVote]);
 
     // Mouse events
     const onMouseDown = (e: React.MouseEvent): void => {
@@ -263,7 +332,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     // Keyboard shortcuts
     useEffect(() => {
         const onKey = (e: KeyboardEvent): void => {
-            if ((e.target as HTMLElement).tagName === "INPUT") return;
+            const tag = (e.target as HTMLElement).tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA") return;
             switch (e.key) {
                 case "ArrowRight":
                     handleVoteButton("valide");
@@ -427,11 +497,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         );
     }
 
-    const nextFilm = pendingFilms[currentIndex + 1];
-    const afterNextFilm = pendingFilms[currentIndex + 2];
-
-    // Card transform
-    const rotate = dragX * 0.08; // degrees
+    // Card transform — used for snap-back and fly-out (not during active drag)
+    const rotate = dragX * 0.08;
     const cardStyle: React.CSSProperties = {
         transform: `translate(${dragX}px, ${dragY}px) rotate(${rotate}deg)`,
         transition: isDragging
@@ -442,11 +509,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         cursor: isDragging ? "grabbing" : "grab",
         userSelect: "none",
     };
-
-    // Swipe hint overlays — opacity based on drag distance
-    const rightOpacity = Math.min(Math.max(dragX / SWIPE_THRESHOLD, 0), 1);
-    const leftOpacity = Math.min(Math.max(-dragX / SWIPE_THRESHOLD, 0), 1);
-    const upOpacity = Math.min(Math.max(-dragY / SWIPE_THRESHOLD, 0), 1);
 
     const flashClass =
         flashColor === "green"
@@ -461,6 +523,17 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
     return (
         <div className="relative flex flex-1 overflow-hidden bg-black">
+            {/* Preload next video — hidden, starts buffering while user watches current */}
+            {nextFilm?.videoUrl && (
+                <video
+                    key={nextFilm.id}
+                    src={nextFilm.videoUrl}
+                    preload="auto"
+                    className="hidden"
+                    aria-hidden="true"
+                />
+            )}
+
             {/* Flash overlay */}
             {flashColor && (
                 <div className={`pointer-events-none absolute inset-0 z-50 ${flashClass}`} />
@@ -524,10 +597,11 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                         </div>
                     )}
 
-                    {/* Swipe hint — VALIDE (right) */}
+                    {/* Swipe hint — VALIDE (right) — opacity driven by direct DOM ref */}
                     <div
+                        ref={rightHintRef}
                         className="pointer-events-none absolute inset-0 flex items-center justify-start pl-10"
-                        style={{ opacity: rightOpacity }}
+                        style={{ opacity: 0 }}
                     >
                         <div className="rounded-2xl border-4 border-aurora px-5 py-3 rotate-[-15deg]">
                             <span className="text-3xl font-black tracking-widest text-aurora drop-shadow-lg">
@@ -538,8 +612,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
                     {/* Swipe hint — REFUSÉ (left) */}
                     <div
+                        ref={leftHintRef}
                         className="pointer-events-none absolute inset-0 flex items-center justify-end pr-10"
-                        style={{ opacity: leftOpacity }}
+                        style={{ opacity: 0 }}
                     >
                         <div className="rounded-2xl border-4 border-coral px-5 py-3 rotate-[15deg]">
                             <span className="text-3xl font-black tracking-widest text-coral drop-shadow-lg">
@@ -550,8 +625,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
                     {/* Swipe hint — À REVOIR (up) */}
                     <div
+                        ref={upHintRef}
                         className="pointer-events-none absolute inset-0 flex items-start justify-center pt-14"
-                        style={{ opacity: upOpacity }}
+                        style={{ opacity: 0 }}
                     >
                         <div className="rounded-2xl border-4 border-solar px-5 py-3">
                             <span className="text-3xl font-black tracking-widest text-solar drop-shadow-lg">
