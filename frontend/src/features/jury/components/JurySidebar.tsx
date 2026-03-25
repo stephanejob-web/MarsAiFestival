@@ -5,6 +5,7 @@ import {
     CheckCircle,
     ChevronDown,
     ChevronUp,
+    LayoutList,
     LogOut,
     MessageCircle,
     Mic,
@@ -12,11 +13,13 @@ import {
     Send,
     Settings,
     ShieldCheck,
+    Zap,
 } from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
+import type { VoteMode } from "../hooks/useVoteMode";
 import ProfileModal from "./ProfileModal";
 import { VocalJoinButton } from "./VocalPanel";
 
@@ -30,6 +33,8 @@ interface JurySidebarProps {
     totalFilms: number;
     isChatOpen: boolean;
     onChatToggle: () => void;
+    voteMode: VoteMode;
+    onVoteModeChange: (mode: VoteMode) => void;
 }
 
 interface NavItemProps {
@@ -92,6 +97,8 @@ const JurySidebar = ({
     totalFilms,
     isChatOpen,
     onChatToggle,
+    voteMode,
+    onVoteModeChange,
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
@@ -157,6 +164,53 @@ const JurySidebar = ({
                         isActive={activeView === "eval"}
                         onClick={() => onViewChange("eval")}
                     />
+
+                    {/* Vote mode toggle — visible only when Films assignés is active */}
+                    {activeView === "eval" && (
+                        <div className="relative mx-1 mb-1 mt-0.5 flex p-0.5 rounded-lg bg-black/25 border border-white/6">
+                            {/* Sliding pill */}
+                            <div
+                                className="absolute inset-0.5 rounded-md transition-all duration-200 ease-out pointer-events-none"
+                                style={{
+                                    left: voteMode === "normal" ? "2px" : "calc(50% + 1px)",
+                                    right: voteMode === "normal" ? "calc(50% + 1px)" : "2px",
+                                    background:
+                                        voteMode === "normal"
+                                            ? "rgba(255,255,255,0.06)"
+                                            : "rgba(78,255,206,0.88)",
+                                    boxShadow:
+                                        voteMode === "rapide"
+                                            ? "0 0 8px rgba(78,255,206,0.3)"
+                                            : "none",
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => onVoteModeChange("normal")}
+                                className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
+                                    voteMode === "normal"
+                                        ? "text-white-soft"
+                                        : "text-mist hover:text-white/60"
+                                }`}
+                            >
+                                <LayoutList size={11} />
+                                Normal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onVoteModeChange("rapide")}
+                                className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
+                                    voteMode === "rapide"
+                                        ? "text-deep-sky"
+                                        : "text-mist hover:text-white/60"
+                                }`}
+                            >
+                                <Zap size={11} />
+                                Rapide
+                            </button>
+                        </div>
+                    )}
+
                     <NavItem
                         icon={<CheckCircle size={14} />}
                         label="Évalués"
