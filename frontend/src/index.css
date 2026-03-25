@@ -80,7 +80,8 @@
 }
 
 @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0px);
     }
     50% {
@@ -98,7 +99,8 @@
 }
 
 @keyframes scroll-indicator {
-    0%, 100% {
+    0%,
+    100% {
         opacity: 1;
         transform: translateY(0);
     }
@@ -224,6 +226,77 @@ h1 {
     will-change: transform;
 }
 
+/* ── TinderView — demo card swing animation ────────────────────── */
+@keyframes demo-card-swing {
+    0% {
+        transform: translateX(0) rotate(0deg);
+    }
+    18% {
+        transform: translateX(62px) rotate(8deg);
+    }
+    36% {
+        transform: translateX(0) rotate(0deg);
+    }
+    50% {
+        transform: translateX(0) rotate(0deg);
+    }
+    68% {
+        transform: translateX(-62px) rotate(-8deg);
+    }
+    86% {
+        transform: translateX(0) rotate(0deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg);
+    }
+}
+@keyframes demo-hint-right {
+    0%,
+    3% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    30% {
+        opacity: 1;
+    }
+    40% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes demo-hint-left {
+    0%,
+    55% {
+        opacity: 0;
+    }
+    62% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+.demo-card-swing {
+    animation: demo-card-swing 3.6s ease-in-out infinite;
+    will-change: transform;
+}
+.demo-hint-right {
+    animation: demo-hint-right 3.6s ease-in-out infinite;
+}
+.demo-hint-left {
+    animation: demo-hint-left 3.6s ease-in-out infinite;
+}
+
 /* ── Timeline line draw ────────────────────────────────────────── */
 .timeline-draw {
     position: absolute;
@@ -231,11 +304,7 @@ h1 {
     top: 0;
     width: 1px;
     height: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(78, 255, 206, 0.25),
-        rgba(255, 255, 255, 0.04)
-    );
+    background: linear-gradient(to bottom, rgba(78, 255, 206, 0.25), rgba(255, 255, 255, 0.04));
     transition: height 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s;
 }
 .timeline-draw[data-visible="true"] {
