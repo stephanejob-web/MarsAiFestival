@@ -32,9 +32,10 @@ interface TinderViewProps {
 
 type PanelType = "refuse" | "aRevoir" | null;
 
-type FlashColor = "green" | "red" | null;
+type FlashColor = "green" | "red" | "yellow" | null;
 
 const SWIPE_THRESHOLD = 100; // px before triggering vote
+const SWIPE_Y_THRESHOLD = 100; // px upward before triggering aRevoir
 
 const DECISION_TOASTS: Record<Exclude<Decision, null>, string> = {
     valide: "✓ Film validé",
@@ -122,6 +123,7 @@ const TinderView = ({
     const bgRef = useRef<HTMLDivElement>(null);
     const rightHintRef = useRef<HTMLDivElement>(null);
     const leftHintRef = useRef<HTMLDivElement>(null);
+    const upHintRef = useRef<HTMLDivElement>(null);
 
     // Video state
     const [isPlaying, setIsPlaying] = useState(false);
@@ -133,7 +135,7 @@ const TinderView = ({
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [detailTab, setDetailTab] = useState<"film" | "realisateur">("film");
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
-    const [voteAnim, setVoteAnim] = useState<{ color: "green" | "red"; key: number } | null>(null);
+    const [voteAnim, setVoteAnim] = useState<{ color: "green" | "red" | "yellow"; key: number } | null>(null);
 
     // Bottom sheet panel state
     const [panelType, setPanelType] = useState<PanelType>(null);
@@ -202,9 +204,12 @@ const TinderView = ({
             const colorMap: Partial<Record<Exclude<Decision, null>, FlashColor>> = {
                 valide: "green",
                 refuse: "red",
+                aRevoir: "yellow",
             };
             triggerFlash(colorMap[decision] ?? null);
-            setVoteAnim({ color: decision === "valide" ? "green" : "red", key: Date.now() });
+            const animColor =
+                decision === "valide" ? "green" : decision === "aRevoir" ? "yellow" : "red";
+            setVoteAnim({ color: animColor, key: Date.now() });
             setTimeout(() => commitVote(decision, message), 350);
         },
         [isFlying, commitVote, triggerFlash],
@@ -301,6 +306,27 @@ const TinderView = ({
     // ── Direct DOM update via RAF — zero re-renders during drag ──────────────
     const applyDragToDom = useCallback((): void => {
         const dx = dragXRef.current;
+        const dy = dragYRef.current;
+        const isUpward = Math.abs(dy) > Math.abs(dx) && dy < -20;
+
+        if (isUpward) {
+            const ratio = Math.min(Math.abs(dy) / SWIPE_Y_THRESHOLD, 1);
+            if (cardRef.current) {
+                cardRef.current.style.transform = `translate(${dx * 0.3}px, ${dy}px) rotate(${dx * 0.03}deg)`;
+                cardRef.current.style.transition = "none";
+                cardRef.current.style.cursor = "grabbing";
+                cardRef.current.style.boxShadow = `0 0 ${60 * ratio}px ${20 * ratio}px rgba(245,230,66,${0.55 * ratio}), inset 0 0 ${40 * ratio}px rgba(245,230,66,${0.12 * ratio})`;
+            }
+            if (bgRef.current) {
+                const bgIntensity = Math.min(ratio * 0.22, 0.22);
+                bgRef.current.style.background = `radial-gradient(ellipse at 50% 10%, rgba(245,230,66,${bgIntensity}) 0%, transparent 65%)`;
+            }
+            if (upHintRef.current) upHintRef.current.style.opacity = String(ratio);
+            if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
+            if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
+            return;
+        }
+
         const ratio = Math.min(Math.abs(dx) / SWIPE_THRESHOLD, 1);
         const isRight = dx > 0;
 
@@ -330,12 +356,9 @@ const TinderView = ({
             }
         }
 
-        if (rightHintRef.current) {
-            rightHintRef.current.style.opacity = isRight ? String(ratio) : "0";
-        }
-        if (leftHintRef.current) {
-            leftHintRef.current.style.opacity = !isRight ? String(ratio) : "0";
-        }
+        if (upHintRef.current) upHintRef.current.style.opacity = "0";
+        if (rightHintRef.current) rightHintRef.current.style.opacity = isRight ? String(ratio) : "0";
+        if (leftHintRef.current) leftHintRef.current.style.opacity = !isRight ? String(ratio) : "0";
     }, []);
 
     // ── Drag handlers ────────────────────────────────────────────────────────
@@ -369,13 +392,19 @@ const TinderView = ({
         // Reset hint opacities + glow + bg
         if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
         if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
+        if (upHintRef.current) upHintRef.current.style.opacity = "0";
         if (cardRef.current) cardRef.current.style.boxShadow = "";
         if (bgRef.current) bgRef.current.style.background = "transparent";
 
         const dx = dragXRef.current;
+        const dy = dragYRef.current;
         const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+        const isUpwardSwipe = absY > absX && dy < -SWIPE_Y_THRESHOLD;
 
-        if (absX > SWIPE_THRESHOLD) {
+        if (isUpwardSwipe) {
+            flyAndVote("aRevoir", 0, -window.innerHeight * 1.5);
+        } else if (absX > SWIPE_THRESHOLD) {
             if (dx > 0) {
                 flyAndVote("valide", window.innerWidth * 1.5, 0);
             } else {
@@ -556,6 +585,12 @@ const TinderView = ({
                                 </div>
                                 <span className="font-mono text-[0.58rem] font-bold text-aurora">VALIDER</span>
                             </div>
+                            <div className="absolute top-[-52px] flex flex-col items-center gap-1">
+                                <span className="font-mono text-[0.58rem] font-bold text-solar">À REVOIR</span>
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-solar/40 bg-solar/12">
+                                    <ArrowRight size={18} className="text-solar rotate-[-90deg]" />
+                                </div>
+                            </div>
 
                             {/* The demo card */}
                             <div
@@ -637,14 +672,14 @@ const TinderView = ({
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-lavande/30 bg-lavande/10">
-                                    <RotateCcw size={16} className="text-lavande" />
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-solar/30 bg-solar/10">
+                                    <ArrowRight size={16} className="text-solar rotate-[-90deg]" />
                                 </div>
                                 <div>
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
-                                        Bouton ↻ ou touche <kbd className="rounded border border-lavande/30 bg-lavande/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-lavande">R</kbd>
+                                        Haut ou touche <kbd className="rounded border border-solar/30 bg-solar/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-solar">R</kbd>
                                     </p>
-                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Mettre en révision</p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Mettre en révision (à revoir)</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
@@ -779,11 +814,9 @@ const TinderView = ({
             ? "bg-aurora/25"
             : flashColor === "red"
               ? "bg-coral/25"
-              : flashColor === "orange"
+              : flashColor === "yellow"
                 ? "bg-solar/25"
-                : flashColor === "purple"
-                  ? "bg-lavande/25"
-                  : "";
+                : "";
 
     return (
         <div className="relative flex flex-1 overflow-hidden bg-black">
@@ -826,7 +859,9 @@ const TinderView = ({
                             background:
                                 voteAnim.color === "green"
                                     ? "rgba(78,255,206,0.6)"
-                                    : "rgba(255,107,107,0.6)",
+                                    : voteAnim.color === "yellow"
+                                      ? "rgba(245,230,66,0.6)"
+                                      : "rgba(255,107,107,0.6)",
                             animation: "vote-explode 0.5s ease-out forwards",
                         }}
                     />
@@ -838,7 +873,9 @@ const TinderView = ({
                             background:
                                 voteAnim.color === "green"
                                     ? "rgba(78,255,206,0.3)"
-                                    : "rgba(255,107,107,0.3)",
+                                    : voteAnim.color === "yellow"
+                                      ? "rgba(245,230,66,0.3)"
+                                      : "rgba(255,107,107,0.3)",
                             animation: "vote-explode-2 0.5s ease-out 0.05s forwards",
                         }}
                     />
@@ -948,6 +985,19 @@ const TinderView = ({
                         <div className="rounded-2xl border-4 border-coral px-5 py-3 rotate-[15deg]">
                             <span className="text-3xl font-black tracking-widest text-coral drop-shadow-lg">
                                 REFUSÉ
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Swipe hint — À REVOIR (up) */}
+                    <div
+                        ref={upHintRef}
+                        className="pointer-events-none absolute inset-0 flex items-start justify-center pt-12"
+                        style={{ opacity: 0 }}
+                    >
+                        <div className="rounded-2xl border-4 border-solar px-5 py-3">
+                            <span className="text-3xl font-black tracking-widest text-solar drop-shadow-lg">
+                                À REVOIR
                             </span>
                         </div>
                     </div>
