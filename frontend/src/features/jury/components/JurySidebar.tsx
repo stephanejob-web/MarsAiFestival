@@ -12,7 +12,6 @@ import {
     Send,
     Settings,
     ShieldCheck,
-    Zap,
 } from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
@@ -173,14 +172,6 @@ const JurySidebar = ({
                         countVariant="discuss"
                         isActive={activeView === "discuter"}
                         onClick={() => onViewChange("discuter")}
-                    />
-                    <NavItem
-                        icon={<Zap size={14} />}
-                        label="Vote rapide"
-                        count={pendingCount}
-                        countVariant="pending"
-                        isActive={activeView === "tinder"}
-                        onClick={() => onViewChange("tinder")}
                     />
 
                     <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
