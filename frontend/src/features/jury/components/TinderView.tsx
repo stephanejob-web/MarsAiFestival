@@ -54,6 +54,17 @@ const DetailRow = memo(({ label, value }: DetailRowProps): React.JSX.Element | n
 });
 DetailRow.displayName = "DetailRow";
 
+const COLORS = ["#4effce", "#ff6b6b", "#ffd166", "#a78bfa", "#38bdf8"];
+const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
+    left: `${(i * 37 + 7) % 100}%`,
+    color: COLORS[i % 5],
+    width: 6 + (i % 9),
+    height: 6 + ((i * 3) % 9),
+    duration: `${2 + (i % 3)}s`,
+    delay: `${(i % 5) * 0.4}s`,
+    round: i % 2 === 0,
+}));
+
 const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.JSX.Element => {
     const [pendingFilms] = useState<JuryFilm[]>(() => films.filter((f) => f.myDecision === null));
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -75,6 +86,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
     // DOM refs for direct manipulation during drag (avoids re-renders for hint opacities)
     const cardRef = useRef<HTMLDivElement>(null);
+    const bgRef = useRef<HTMLDivElement>(null);
     const rightHintRef = useRef<HTMLDivElement>(null);
     const leftHintRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +101,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const [detailTab, setDetailTab] = useState<"film" | "realisateur">("film");
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
     const [showShortcuts, setShowShortcuts] = useState(false);
+    const [voteAnim, setVoteAnim] = useState<{ color: "green" | "red"; key: number } | null>(null);
 
     // Timeout refs for cleanup on unmount
     const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -150,6 +163,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                 refuse: "red",
             };
             triggerFlash(colorMap[decision] ?? null);
+            setVoteAnim({ color: decision === "valide" ? "green" : "red", key: Date.now() });
             setTimeout(() => commitVote(decision), 350);
         },
         [isFlying, commitVote, triggerFlash],
@@ -196,24 +210,41 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     // ── Direct DOM update via RAF — zero re-renders during drag ──────────────
     const applyDragToDom = useCallback((): void => {
         const dx = dragXRef.current;
-        const dy = dragYRef.current;
+        const ratio = Math.min(Math.abs(dx) / SWIPE_THRESHOLD, 1);
+        const isRight = dx > 0;
+
         if (cardRef.current) {
-            cardRef.current.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.08}deg)`;
+            cardRef.current.style.transform = `translate(${dx}px, 0px) rotate(${dx * 0.08}deg)`;
             cardRef.current.style.transition = "none";
             cardRef.current.style.cursor = "grabbing";
+            // Neon glow matching swipe direction
+            if (dx > 10) {
+                cardRef.current.style.boxShadow = `0 0 ${60 * ratio}px ${20 * ratio}px rgba(78,255,206,${0.55 * ratio}), inset 0 0 ${40 * ratio}px rgba(78,255,206,${0.12 * ratio})`;
+            } else if (dx < -10) {
+                cardRef.current.style.boxShadow = `0 0 ${60 * ratio}px ${20 * ratio}px rgba(255,107,107,${0.55 * ratio}), inset 0 0 ${40 * ratio}px rgba(255,107,107,${0.12 * ratio})`;
+            } else {
+                cardRef.current.style.boxShadow = "none";
+            }
         }
+
+        // Background ambient color shift
+        if (bgRef.current) {
+            const bgIntensity = Math.min(ratio * 0.22, 0.22);
+            if (dx > 10) {
+                bgRef.current.style.background = `radial-gradient(ellipse at 80% 50%, rgba(78,255,206,${bgIntensity}) 0%, transparent 65%)`;
+            } else if (dx < -10) {
+                bgRef.current.style.background = `radial-gradient(ellipse at 20% 50%, rgba(255,107,107,${bgIntensity}) 0%, transparent 65%)`;
+            } else {
+                bgRef.current.style.background = "transparent";
+            }
+        }
+
         if (rightHintRef.current) {
-            rightHintRef.current.style.opacity = String(
-                Math.min(Math.max(dx / SWIPE_THRESHOLD, 0), 1),
-            );
+            rightHintRef.current.style.opacity = isRight ? String(ratio) : "0";
         }
         if (leftHintRef.current) {
-            leftHintRef.current.style.opacity = String(
-                Math.min(Math.max(-dx / SWIPE_THRESHOLD, 0), 1),
-            );
+            leftHintRef.current.style.opacity = !isRight ? String(ratio) : "0";
         }
-        // dragY ignored — no upward swipe action
-        void dy;
     }, []);
 
     // ── Drag handlers ────────────────────────────────────────────────────────
@@ -244,9 +275,11 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         isDraggingRef.current = false;
         setIsDragging(false);
 
-        // Reset hint opacities
+        // Reset hint opacities + glow + bg
         if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
         if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
+        if (cardRef.current) cardRef.current.style.boxShadow = "";
+        if (bgRef.current) bgRef.current.style.background = "transparent";
 
         const dx = dragXRef.current;
         const absX = Math.abs(dx);
@@ -453,21 +486,52 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
     if (currentIndex >= pendingFilms.length) {
         return (
-            <div className="flex flex-1 items-center justify-center">
-                <div className="text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-aurora/10">
-                        <Check size={32} className="text-aurora" />
+            <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-black">
+                {/* Confetti particles */}
+                <style>{`
+                    @keyframes confetti-fall {
+                        0%   { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+                        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+                    }
+                    .confetti-particle {
+                        position: absolute;
+                        top: 0;
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 2px;
+                        animation: confetti-fall linear infinite;
+                    }
+                `}</style>
+                {CONFETTI.map((p, i) => (
+                    <div
+                        key={i}
+                        className="confetti-particle"
+                        style={{
+                            left: p.left,
+                            background: p.color,
+                            width: `${p.width}px`,
+                            height: `${p.height}px`,
+                            animationDuration: p.duration,
+                            animationDelay: p.delay,
+                            borderRadius: p.round ? "50%" : "2px",
+                        }}
+                    />
+                ))}
+                <div className="relative z-10 text-center">
+                    <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-aurora/20 ring-4 ring-aurora/30">
+                        <Check size={48} className="text-aurora" strokeWidth={3} />
                     </div>
-                    <h2 className="text-lg font-bold text-white-soft">Session terminée !</h2>
-                    <p className="mt-1.5 text-sm text-mist">
-                        Tu as voté sur {pendingFilms.length} film
-                        {pendingFilms.length > 1 ? "s" : ""}.
+                    <h2 className="mb-2 text-3xl font-black tracking-tight text-white-soft">
+                        Session terminée !
+                    </h2>
+                    <p className="text-base text-mist">
+                        {pendingFilms.length} film{pendingFilms.length > 1 ? "s" : ""} évalués
                     </p>
                     {history.length > 0 && (
                         <button
                             type="button"
                             onClick={handleUndo}
-                            className="mx-auto mt-4 flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-mist hover:bg-white/10"
+                            className="mx-auto mt-6 flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-mist hover:bg-white/10"
                         >
                             <Undo2 size={14} />
                             Revenir au dernier film
@@ -504,31 +568,96 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
     return (
         <div className="relative flex flex-1 overflow-hidden bg-black">
-            {/* Preload next video — hidden, starts buffering while user watches current */}
-            {nextFilm?.videoUrl && (
-                <video
-                    key={nextFilm.id}
-                    src={nextFilm.videoUrl}
-                    preload="auto"
-                    className="hidden"
-                    aria-hidden="true"
-                />
-            )}
+            {/* Keyframes for vote explosion */}
+            <style>{`
+                @keyframes vote-explode {
+                    0%   { transform: scale(0.2); opacity: 0.7; }
+                    100% { transform: scale(12);  opacity: 0; }
+                }
+                @keyframes vote-explode-2 {
+                    0%   { transform: scale(0.2); opacity: 0.4; }
+                    100% { transform: scale(8);   opacity: 0; }
+                }
+            `}</style>
+
+            {/* Reactive background — driven by drag via bgRef */}
+            <div
+                ref={bgRef}
+                className="pointer-events-none absolute inset-0 z-0"
+                style={{ background: "transparent", transition: "background 0.1s ease" }}
+            />
 
             {/* Flash overlay */}
             {flashColor && (
                 <div className={`pointer-events-none absolute inset-0 z-50 ${flashClass}`} />
             )}
 
+            {/* Vote explosion burst */}
+            {voteAnim && (
+                <div
+                    key={voteAnim.key}
+                    className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center"
+                    onAnimationEnd={() => setVoteAnim(null)}
+                >
+                    <div
+                        className="absolute rounded-full"
+                        style={{
+                            width: 120,
+                            height: 120,
+                            background:
+                                voteAnim.color === "green"
+                                    ? "rgba(78,255,206,0.6)"
+                                    : "rgba(255,107,107,0.6)",
+                            animation: "vote-explode 0.5s ease-out forwards",
+                        }}
+                    />
+                    <div
+                        className="absolute rounded-full"
+                        style={{
+                            width: 120,
+                            height: 120,
+                            background:
+                                voteAnim.color === "green"
+                                    ? "rgba(78,255,206,0.3)"
+                                    : "rgba(255,107,107,0.3)",
+                            animation: "vote-explode-2 0.5s ease-out 0.05s forwards",
+                        }}
+                    />
+                </div>
+            )}
+
             {/* Card stack */}
             <div className="absolute inset-0">
                 {/* 3rd card */}
                 {afterNextFilm && (
-                    <div className="absolute inset-0 translate-y-4 scale-95 bg-surface opacity-20" />
+                    <div className="absolute inset-0 translate-y-4 scale-95 overflow-hidden opacity-15">
+                        <div className="h-full w-full bg-gradient-to-br from-aurora/10 to-lavande/10" />
+                    </div>
                 )}
-                {/* 2nd card */}
+                {/* 2nd card — real next film preview */}
                 {nextFilm && (
-                    <div className="absolute inset-0 translate-y-2 scale-[0.98] bg-surface opacity-35" />
+                    <div className="absolute inset-0 translate-y-2 scale-[0.98] overflow-hidden">
+                        {nextFilm.videoUrl ? (
+                            <video
+                                src={nextFilm.videoUrl}
+                                className="h-full w-full object-contain opacity-40"
+                                preload="metadata"
+                                muted
+                            />
+                        ) : (
+                            <div className="h-full w-full bg-gradient-to-br from-aurora/10 to-lavande/10 opacity-40" />
+                        )}
+                        {/* Film info on next card */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-6 pb-6 pt-20">
+                            <p className="truncate text-sm font-bold text-white/50">
+                                {nextFilm.title}
+                            </p>
+                            <p className="text-xs text-white/30">
+                                {nextFilm.author} · {nextFilm.country}
+                            </p>
+                        </div>
+                        <div className="absolute inset-0 bg-black/40" />
+                    </div>
                 )}
 
                 {/* Current card — draggable */}
