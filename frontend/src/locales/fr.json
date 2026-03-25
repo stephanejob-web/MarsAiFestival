@@ -69,10 +69,10 @@
         "toolsOther": "+ tous les autres"
     },
     "about": {
-        "overline": "L'Événement · Marseille 2026",
-        "title1": "Vivez la naissance",
-        "title2": "d'un nouveau cinéma",
-        "description": "Trois jours aux Friches Belle de Mai — projections, jury international et créateurs qui réinventent le 7e art avec l'IA.",
+        "overline": "3 jours · Friches Belle de Mai · Marseille 2026",
+        "title1": "60 secondes",
+        "title2": "pour changer le 7ᵉ art",
+        "description": "Trois jours pour découvrir comment l'IA transforme le cinéma. Projections, jury international, rencontres avec des créateurs du monde entier — entrée libre.",
         "prog": {
             "0": {
                 "day": "Ven.",
@@ -95,7 +95,7 @@
         },
         "venue": {
             "address": "Friches Belle de Mai · Marseille, 13003",
-            "directions": "Itinéraire"
+            "directions": "Comment venir"
         }
     },
     "how": {

@@ -170,6 +170,7 @@ export interface UseJuryPanelReturn {
     setNotationComment: (comment: string) => void;
     setIsChatOpen: (open: boolean) => void;
     handleDecision: (decision: Exclude<Decision, null>) => void;
+    voteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
     removeFromDiscussion: (filmId: number) => void;
     handleCommentSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     addDiscussionComment: (filmId: number, comment: string) => void;
@@ -471,6 +472,45 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         showToast("Film mis en révision");
     }, [applyDecision, showToast, modalMessage]);
 
+    const voteDirect = useCallback(
+        (filmId: number, decision: Exclude<Decision, null>, message?: string): void => {
+            setFilms((prev) =>
+                prev.map((f) => (f.id !== filmId ? f : { ...f, myDecision: decision })),
+            );
+            const token = localStorage.getItem("jury_token");
+            if (!token) return;
+            if (decision === "discuter") {
+                void fetch(`${API}/api/discussion`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ filmId }),
+                });
+                return;
+            }
+            const apiDecision = toApiDecision(decision);
+            if (!apiDecision) return;
+            void fetch(`${API}/api/votes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                    filmId,
+                    decision: apiDecision,
+                    ...(message ? { message } : {}),
+                }),
+            })
+                .then((r) => {
+                    if (!r.ok) throw new Error("Vote failed");
+                })
+                .catch(() => {
+                    showToast("Erreur : vote non enregistré");
+                });
+        },
+        [showToast],
+    );
+
     const confirmRefuse = useCallback((): void => {
         applyDecision("refuse", modalMessage);
         setActiveModal(null);
@@ -617,6 +657,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
         setNotationComment,
         setIsChatOpen,
         handleDecision,
+        voteDirect,
         removeFromDiscussion,
         handleCommentSubmit,
         handleCommentDraftChange,
