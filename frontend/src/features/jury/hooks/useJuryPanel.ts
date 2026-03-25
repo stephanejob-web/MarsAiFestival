@@ -170,7 +170,7 @@ export interface UseJuryPanelReturn {
     setNotationComment: (comment: string) => void;
     setIsChatOpen: (open: boolean) => void;
     handleDecision: (decision: Exclude<Decision, null>) => void;
-    voteDirect: (filmId: number, decision: Exclude<Decision, null>) => void;
+    voteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
     removeFromDiscussion: (filmId: number) => void;
     handleCommentSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     addDiscussionComment: (filmId: number, comment: string) => void;
@@ -473,7 +473,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
     }, [applyDecision, showToast, modalMessage]);
 
     const voteDirect = useCallback(
-        (filmId: number, decision: Exclude<Decision, null>): void => {
+        (filmId: number, decision: Exclude<Decision, null>, message?: string): void => {
             setFilms((prev) =>
                 prev.map((f) => (f.id !== filmId ? f : { ...f, myDecision: decision })),
             );
@@ -495,7 +495,11 @@ const useJuryPanel = (): UseJuryPanelReturn => {
             void fetch(`${API}/api/votes`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ filmId, decision: apiDecision }),
+                body: JSON.stringify({
+                    filmId,
+                    decision: apiDecision,
+                    ...(message ? { message } : {}),
+                }),
             })
                 .then((r) => {
                     if (!r.ok) throw new Error("Vote failed");
