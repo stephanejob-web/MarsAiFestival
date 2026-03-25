@@ -1805,6 +1805,10 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 message: data.message,
                                             });
                                             reload();
+                                            setTimeout(() => {
+                                                setResetConfirm(false);
+                                                setResetFeedback(null);
+                                            }, 1500);
                                         })
                                         .catch(() => {
                                             setResetFeedback({
