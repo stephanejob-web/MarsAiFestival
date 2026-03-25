@@ -120,10 +120,6 @@ const HeroSection = (): React.JSX.Element => {
         return (): void => mq.removeEventListener("change", handleChange);
     }, []);
 
-    const handleDemoClick = (): void => {
-        window.open("/assets/video.mp4", "_blank");
-    };
-
     const STATS = [
         { value: "60s", label: t("hero.tags.chrono") },
         { value: "120+", label: t("hero.tags.pays") },
