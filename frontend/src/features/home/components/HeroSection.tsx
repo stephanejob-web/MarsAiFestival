@@ -252,7 +252,6 @@ const HeroSection = (): React.JSX.Element => {
                             )}
                         </div>
                     )}
-
                 </div>
 
                 {/* Stats row */}
