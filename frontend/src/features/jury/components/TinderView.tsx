@@ -577,6 +577,15 @@ const TinderView = ({
                         </div>
                     </div>
 
+                    {/* Finger swipe indicator */}
+                    <div className="mb-2 flex justify-center overflow-visible">
+                        <div className="demo-card-swing relative flex items-center">
+                            <div className="demo-hint-right absolute right-full mr-1 h-px w-14 origin-right bg-gradient-to-r from-transparent to-aurora/55 opacity-0" />
+                            <div className="demo-hint-left absolute left-full ml-1 h-px w-14 origin-left bg-gradient-to-l from-transparent to-coral/55 opacity-0" />
+                            <DemoFinger />
+                        </div>
+                    </div>
+
                     {/* Warning */}
                     <div className="mb-5 rounded-xl border border-solar/25 bg-solar/8 px-4 py-3">
                         <p className="text-[0.78rem] leading-relaxed text-solar/90">
