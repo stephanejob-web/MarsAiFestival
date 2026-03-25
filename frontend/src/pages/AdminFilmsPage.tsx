@@ -3,6 +3,7 @@ import { Film, Search, Check, Star, X } from "lucide-react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
 import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
+import AssignDistributionModal from "../features/admin/components/AssignDistributionModal";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -84,12 +85,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
         undoDistribution,
         clearDistribution,
         unassignAll,
-        assignAll,
+        customDistribute,
         deleteFilm,
     } = useAdminFilms();
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
     const [confirmUnassignAll, setConfirmUnassignAll] = useState(false);
     const [detailFilmId, setDetailFilmId] = useState<number | null>(null);
+    const [isAssignModalOpen, setIsAssignModalOpen] = useState<boolean>(false);
 
     const [search, setSearch] = useState<string>("");
     const [filter, setFilter] = useState<FilterMode>("all");
@@ -106,7 +108,6 @@ const AdminFilmsPage = (): React.JSX.Element => {
     const unassignedCount = films.filter((f) => !assignedFilmIds.has(f.id)).length;
     const assignedCount = films.filter((f) => assignedFilmIds.has(f.id)).length;
     const activeJuryCount = juryMembers.length;
-    const perJury = activeJuryCount > 0 ? Math.round(unassignedCount / activeJuryCount) : 0;
 
     const filteredFilms = films.filter((f) => {
         const q = search.toLowerCase();
@@ -143,30 +144,43 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     assignations
                 </span>
                 <div className="ml-auto flex items-center gap-2">
-                    {/* Assign all films to all jury */}
+                    {/* Auto-distribute — compact topbar button */}
                     <button
                         type="button"
-                        onClick={() => void assignAll()}
-                        disabled={isDistributing || films.length === 0 || activeJuryCount === 0}
+                        onClick={() => void autoDistribute()}
+                        disabled={isDistributing || unassignedCount === 0 || activeJuryCount === 0}
                         className="flex items-center gap-1.5 rounded-lg border border-aurora/25 bg-aurora/[0.07] px-3 py-1 text-[0.73rem] font-semibold text-aurora transition-all hover:border-aurora/50 hover:bg-aurora/15 disabled:cursor-not-allowed disabled:opacity-30"
                     >
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <circle cx="6" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.3" />
-                            <path
-                                d="M1.5 10c0-2 2-3.5 4.5-3.5s4.5 1.5 4.5 3.5"
+                            <circle cx="3" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.3" />
+                            <circle
+                                cx="9"
+                                cy="2.5"
+                                r="1.5"
                                 stroke="currentColor"
                                 strokeWidth="1.3"
+                            />
+                            <circle
+                                cx="9"
+                                cy="9.5"
+                                r="1.5"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                            />
+                            <path
+                                d="M4.5 5.5C5.5 5.5 6 3 7.5 3"
+                                stroke="currentColor"
+                                strokeWidth="1.2"
                                 strokeLinecap="round"
                             />
                             <path
-                                d="M8.5 6.5l1.5 1.5 2.5-2.5"
+                                d="M4.5 6.5C5.5 6.5 6 9 7.5 9"
                                 stroke="currentColor"
-                                strokeWidth="1.3"
+                                strokeWidth="1.2"
                                 strokeLinecap="round"
-                                strokeLinejoin="round"
                             />
                         </svg>
-                        {isDistributing ? "En cours…" : "Assigner à tous les jurés"}
+                        {isDistributing ? "En cours…" : "Répartir équitablement"}
                     </button>
                     {/* Unassign all */}
                     {confirmUnassignAll ? (
@@ -220,61 +234,49 @@ const AdminFilmsPage = (): React.JSX.Element => {
                     </div>
                 ) : (
                     <>
-                        {/* Auto-distribute banner */}
+                        {/* Assign modal banner */}
                         <button
                             type="button"
-                            onClick={() => void autoDistribute()}
-                            disabled={isDistributing}
+                            onClick={() => setIsAssignModalOpen(true)}
+                            disabled={isDistributing || films.length === 0 || activeJuryCount === 0}
                             className="relative mb-5 flex w-full cursor-pointer items-center justify-between gap-4 overflow-hidden rounded-[14px] border-[1.5px] border-aurora/25 bg-gradient-to-r from-aurora/[0.05] to-aurora/[0.10] px-6 py-[18px] text-left transition-all duration-[220ms] hover:-translate-y-px hover:border-aurora/45 hover:shadow-[0_0_0_1px_rgba(78,255,206,0.08),0_6px_24px_rgba(78,255,206,0.10)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <div className="flex flex-1 items-center gap-4">
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-aurora/20 bg-aurora/10 text-aurora">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <circle
-                                            cx="3.5"
-                                            cy="10"
-                                            r="2"
-                                            stroke="currentColor"
-                                            strokeWidth="1.6"
-                                        />
-                                        <circle
-                                            cx="16.5"
-                                            cy="4.5"
-                                            r="2"
-                                            stroke="currentColor"
-                                            strokeWidth="1.6"
-                                        />
-                                        <circle
-                                            cx="16.5"
-                                            cy="15.5"
-                                            r="2"
+                                            cx="10"
+                                            cy="6"
+                                            r="3"
                                             stroke="currentColor"
                                             strokeWidth="1.6"
                                         />
                                         <path
-                                            d="M5.5 10C7 10 8 4.5 14.5 4.5"
+                                            d="M3 17c0-3.5 3-6 7-6s7 2.5 7 6"
                                             stroke="currentColor"
-                                            strokeWidth="1.4"
+                                            strokeWidth="1.6"
                                             strokeLinecap="round"
                                         />
                                         <path
-                                            d="M5.5 10C7 10 8 15.5 14.5 15.5"
+                                            d="M14 9l1.5 1.5 3-3"
                                             stroke="currentColor"
-                                            strokeWidth="1.4"
+                                            strokeWidth="1.6"
                                             strokeLinecap="round"
+                                            strokeLinejoin="round"
                                         />
                                     </svg>
                                 </div>
                                 <div>
                                     <div className="font-display text-[0.95rem] font-extrabold tracking-[-0.01em] text-aurora">
                                         {isDistributing
-                                            ? "Distribution en cours…"
-                                            : "Répartir équitablement"}
+                                            ? "Assignation en cours…"
+                                            : "distribution \u00A0 \u00A0personnalisée"}
                                     </div>
                                     <div className="mt-0.5 text-[0.73rem] leading-snug text-mist">
-                                        Distribuer automatiquement les{" "}
+                                        Définir manuellement combien de films chaque juré reçoit
+                                        parmi les{" "}
                                         <span className="text-white-soft">{unassignedCount}</span>{" "}
-                                        films non assignés entre les jurés actifs
+                                        non assignés
                                     </div>
                                 </div>
                             </div>
@@ -282,7 +284,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                 <div className="flex items-center rounded-full border border-aurora/18 bg-aurora/[0.08] px-3 py-[5px] font-mono text-[0.72rem] font-bold text-aurora">
                                     <span>{activeJuryCount} jurés</span>
                                     <span className="mx-1 opacity-40">·</span>
-                                    <span>~{perJury} films/juré</span>
+                                    <span>{unassignedCount} films</span>
                                 </div>
                                 <svg
                                     width="16"
@@ -406,9 +408,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                         {/* Cards grid */}
                         {filteredFilms.length === 0 ? (
                             <div className="py-16 text-center">
-                                <div className="mb-4 text-5xl">🎉</div>
                                 <div className="font-display text-[1.1rem] font-extrabold text-white-soft">
-                                    Tous les films sont assignés !
+                                    Aucun Résultat
                                 </div>
                                 <div className="mt-2 text-[0.8rem] text-mist">
                                     Retrouvez-les dans l'onglet "Assignés".
@@ -780,6 +781,16 @@ const AdminFilmsPage = (): React.JSX.Element => {
             </div>
 
             <FilmDetailDrawer filmId={detailFilmId} onClose={() => setDetailFilmId(null)} />
+
+            {isAssignModalOpen && (
+                <AssignDistributionModal
+                    juryMembers={juryMembers}
+                    totalUnassigned={unassignedCount}
+                    isDistributing={isDistributing}
+                    onClose={() => setIsAssignModalOpen(false)}
+                    onCustomDistribute={customDistribute}
+                />
+            )}
         </div>
     );
 };

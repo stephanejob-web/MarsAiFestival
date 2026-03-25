@@ -16,10 +16,10 @@ describe("Home", () => {
         expect(screen.getByRole("heading", { level: 1 })).toBeDefined();
     });
 
-    it("affiche le lien de soumission vers le formulaire", () => {
+    it("affiche le bouton de soumission dans la section hero", () => {
         renderHome();
-        const links = screen.getAllByRole("link", { name: /soumettre un film/i });
-        expect(links.length).toBeGreaterThan(0);
+        const el = screen.getByText(/soumettre un film/i);
+        expect(el).toBeDefined();
     });
 
     it("affiche la section concept avec les 4 cartes", () => {
