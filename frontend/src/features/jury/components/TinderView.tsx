@@ -515,131 +515,172 @@ const TinderView = ({
         tags,
     ]);
 
-    // ── Intro modal ─────────────────────────────────────────────────────────
+    // ── Intro ────────────────────────────────────────────────────────────────
     if (showIntro) {
         return (
-            <div className="flex flex-1 items-center justify-center bg-black/60 backdrop-blur-sm">
-                <div className="mx-4 w-full max-w-md rounded-2xl border border-white/10 bg-[rgba(8,12,36,0.97)] p-8 shadow-2xl">
-                    {/* Header */}
-                    <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-aurora/15">
-                            <Zap size={20} className="text-aurora" />
+            <div className="relative flex flex-1 overflow-hidden">
+                {/* Ambient background */}
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute left-1/4 top-1/4 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-aurora/8 blur-[100px]" />
+                    <div className="absolute bottom-1/4 right-1/4 h-72 w-72 translate-x-1/2 translate-y-1/2 rounded-full bg-coral/8 blur-[100px]" />
+                    <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lavande/5 blur-[120px]" />
+                </div>
+
+                {/* Split layout */}
+                <div className="relative z-10 flex flex-1">
+                    {/* ── Left — Demo visuelle ────────────────────────────── */}
+                    <div className="flex flex-1 flex-col items-center justify-center gap-8 px-12">
+                        {/* Badge */}
+                        <div className="flex items-center gap-2 rounded-full border border-aurora/25 bg-aurora/8 px-4 py-1.5">
+                            <Zap size={13} className="text-aurora" />
+                            <span className="font-mono text-[0.7rem] font-bold uppercase tracking-widest text-aurora">
+                                Vote Rapide
+                            </span>
                         </div>
-                        <div>
-                            <h2 className="text-[1rem] font-bold text-white-soft">
-                                Mode Vote Rapide
-                            </h2>
-                            <p className="text-[0.72rem] text-mist">
-                                Les votes sont enregistrés immédiatement
+
+                        {/* Demo card zone */}
+                        <div className="relative flex items-center justify-center" style={{ height: 220, width: 340 }}>
+                            {/* Glow behind card */}
+                            <div className="absolute inset-0 rounded-3xl bg-aurora/5 blur-2xl" />
+
+                            {/* Swipe arrows */}
+                            <div className="demo-hint-left absolute left-[-52px] flex flex-col items-center gap-1 opacity-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-coral/40 bg-coral/12">
+                                    <ArrowLeft size={18} className="text-coral" />
+                                </div>
+                                <span className="font-mono text-[0.58rem] font-bold text-coral">REFUSER</span>
+                            </div>
+                            <div className="demo-hint-right absolute right-[-52px] flex flex-col items-center gap-1 opacity-0">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-aurora/40 bg-aurora/12">
+                                    <ArrowRight size={18} className="text-aurora" />
+                                </div>
+                                <span className="font-mono text-[0.58rem] font-bold text-aurora">VALIDER</span>
+                            </div>
+
+                            {/* The demo card */}
+                            <div
+                                className="demo-card-swing relative h-[180px] w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] shadow-2xl"
+                                style={{ boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
+                            >
+                                {/* Right hint overlay */}
+                                <div className="demo-hint-right absolute inset-0 flex items-center justify-end rounded-2xl bg-aurora/25 pr-8 opacity-0">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Check size={34} className="text-aurora" strokeWidth={2.5} />
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-aurora">VALIDER</span>
+                                    </div>
+                                </div>
+                                {/* Left hint overlay */}
+                                <div className="demo-hint-left absolute inset-0 flex items-center justify-start rounded-2xl bg-coral/25 pl-8 opacity-0">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <X size={34} className="text-coral" strokeWidth={2.5} />
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-coral">REFUSER</span>
+                                    </div>
+                                </div>
+                                {/* Card content */}
+                                <div className="relative z-10 flex h-full flex-col items-center justify-center gap-3">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5">
+                                        <Film size={26} className="text-mist/30" />
+                                    </div>
+                                    <span className="text-[0.72rem] font-medium text-mist/40">
+                                        Glissez pour voter
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Films count */}
+                        <div className="rounded-full border border-white/8 bg-white/[0.03] px-5 py-2">
+                            <span className="font-mono text-[0.75rem] font-bold text-white-soft">
+                                {pendingFilms.length}
+                            </span>
+                            <span className="ml-1.5 text-[0.72rem] text-mist/60">
+                                film{pendingFilms.length > 1 ? "s" : ""} en attente
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="my-12 w-px bg-white/[0.06]" />
+
+                    {/* ── Right — Instructions + CTA ──────────────────────── */}
+                    <div className="flex flex-1 flex-col justify-center px-12">
+                        <h2 className="mb-2 font-display text-[1.5rem] font-extrabold leading-tight text-white-soft">
+                            Évaluez les films<br />
+                            <span className="text-aurora">en un geste</span>
+                        </h2>
+                        <p className="mb-8 text-[0.82rem] text-mist/70">
+                            Chaque décision est enregistrée instantanément. Vous pouvez toujours annuler le dernier vote.
+                        </p>
+
+                        {/* Steps */}
+                        <div className="mb-8 flex flex-col gap-4">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-aurora/30 bg-aurora/10">
+                                    <ArrowRight size={16} className="text-aurora" />
+                                </div>
+                                <div>
+                                    <p className="text-[0.85rem] font-semibold text-white-soft">
+                                        Droite ou <kbd className="rounded border border-aurora/30 bg-aurora/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-aurora">✓</kbd>
+                                    </p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Valider le film</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-coral/30 bg-coral/10">
+                                    <ArrowLeft size={16} className="text-coral" />
+                                </div>
+                                <div>
+                                    <p className="text-[0.85rem] font-semibold text-white-soft">
+                                        Gauche ou <kbd className="rounded border border-coral/30 bg-coral/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-coral">✗</kbd>
+                                    </p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Refuser — avec message optionnel</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-lavande/30 bg-lavande/10">
+                                    <RotateCcw size={16} className="text-lavande" />
+                                </div>
+                                <div>
+                                    <p className="text-[0.85rem] font-semibold text-white-soft">
+                                        Bouton ↻ ou touche <kbd className="rounded border border-lavande/30 bg-lavande/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-lavande">R</kbd>
+                                    </p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Mettre en révision</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-white/5">
+                                    <Info size={16} className="text-mist/60" />
+                                </div>
+                                <div>
+                                    <p className="text-[0.85rem] font-semibold text-white-soft">
+                                        Bouton Détails
+                                    </p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Fiche complète du film</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Warning */}
+                        <div className="mb-8 flex items-start gap-3 rounded-xl border border-solar/20 bg-solar/[0.06] px-4 py-3">
+                            <span className="mt-px text-[0.9rem]">⚠️</span>
+                            <p className="text-[0.75rem] leading-relaxed text-solar/80">
+                                Chaque décision est <span className="font-bold text-solar">sauvegardée instantanément</span> — pas de confirmation. Utilisez le bouton <strong>Annuler</strong> pour revenir en arrière.
                             </p>
                         </div>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowIntro(false);
+                                onIntroComplete?.();
+                            }}
+                            className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-aurora px-6 py-3.5 text-[0.9rem] font-bold text-deep-sky transition-all hover:brightness-110 active:scale-[0.98]"
+                        >
+                            <Zap size={16} />
+                            Commencer
+                            <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                        </button>
                     </div>
-
-                    {/* Demo card */}
-                    <div className="mb-6 flex justify-center overflow-visible py-2">
-                        <div className="demo-card-swing relative h-24 w-48 rounded-xl border border-white/12 bg-surface shadow-xl">
-                            {/* Right hint — valider */}
-                            <div className="demo-hint-right absolute inset-0 flex items-center justify-end rounded-xl bg-aurora/20 pr-5 opacity-0">
-                                <div className="flex flex-col items-center gap-0.5">
-                                    <Check size={26} className="text-aurora" strokeWidth={2.5} />
-                                    <span className="font-mono text-[0.58rem] font-bold text-aurora">
-                                        VALIDER
-                                    </span>
-                                </div>
-                            </div>
-                            {/* Left hint — refuser */}
-                            <div className="demo-hint-left absolute inset-0 flex items-center justify-start rounded-xl bg-coral/20 pl-5 opacity-0">
-                                <div className="flex flex-col items-center gap-0.5">
-                                    <X size={26} className="text-coral" strokeWidth={2.5} />
-                                    <span className="font-mono text-[0.58rem] font-bold text-coral">
-                                        REFUSER
-                                    </span>
-                                </div>
-                            </div>
-                            {/* Card content */}
-                            <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1.5">
-                                <Film size={18} className="text-mist/30" />
-                                <span className="text-[0.68rem] text-mist/40">
-                                    Glissez pour voter
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Warning */}
-                    <div className="mb-5 rounded-xl border border-solar/25 bg-solar/8 px-4 py-3">
-                        <p className="text-[0.78rem] leading-relaxed text-solar/90">
-                            ⚠️ Attention — chaque décision est{" "}
-                            <span className="font-bold">sauvegardée instantanément</span>, sans
-                            confirmation. Vous pouvez annuler le dernier vote avec le bouton{" "}
-                            <span className="font-bold">Annuler</span>.
-                        </p>
-                    </div>
-
-                    {/* How it works */}
-                    <div className="mb-6 flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-aurora/30 bg-aurora/10">
-                                <ArrowRight size={14} className="text-aurora" />
-                            </div>
-                            <span className="text-[0.8rem] text-white/75">
-                                Glissez à <span className="font-semibold text-aurora">droite</span>{" "}
-                                ou cliquez ✓ pour{" "}
-                                <span className="font-semibold text-aurora">valider</span>
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-coral/30 bg-coral/10">
-                                <ArrowLeft size={14} className="text-coral" />
-                            </div>
-                            <span className="text-[0.8rem] text-white/75">
-                                Glissez à <span className="font-semibold text-coral">gauche</span>{" "}
-                                ou cliquez ✗ pour{" "}
-                                <span className="font-semibold text-coral">refuser</span>{" "}
-                                <span className="text-mist/50">(message optionnel)</span>
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-lavande/30 bg-lavande/10">
-                                <RotateCcw size={14} className="text-lavande" />
-                            </div>
-                            <span className="text-[0.8rem] text-white/75">
-                                Bouton ↻ ou touche{" "}
-                                <span className="font-semibold text-lavande">R</span> pour{" "}
-                                <span className="font-semibold text-lavande">
-                                    mettre en révision
-                                </span>{" "}
-                                <span className="text-mist/50">(message optionnel)</span>
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5">
-                                <Info size={14} className="text-mist" />
-                            </div>
-                            <span className="text-[0.8rem] text-white/75">
-                                Bouton{" "}
-                                <span className="font-semibold text-white-soft">Détails</span> pour
-                                voir la fiche complète du film
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Films count */}
-                    <p className="mb-5 text-center text-[0.75rem] text-mist/60">
-                        {pendingFilms.length} film{pendingFilms.length > 1 ? "s" : ""} en attente de
-                        vote
-                    </p>
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setShowIntro(false);
-                            onIntroComplete?.();
-                        }}
-                        className="w-full rounded-xl bg-aurora px-5 py-3 text-[0.88rem] font-bold text-deep-sky transition-all hover:brightness-110"
-                    >
-                        Commencer
-                    </button>
                 </div>
             </div>
         );
