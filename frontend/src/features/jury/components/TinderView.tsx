@@ -80,17 +80,6 @@ const HudLabel = ({ children }: { children: React.ReactNode }): React.JSX.Elemen
     <span className="ml-1 text-[0.58rem] uppercase tracking-wider text-white/28">{children}</span>
 );
 
-const DemoFinger = (): React.JSX.Element => (
-    <img
-        src="/finger.png"
-        alt="Doigt swipe"
-        width={120}
-        height={140}
-        aria-hidden="true"
-        className="drop-shadow-lg"
-        style={{ objectFit: "contain" }}
-    />
-);
 
 const COLORS = ["#4effce", "#ff6b6b", "#ffd166", "#a78bfa", "#38bdf8"];
 const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
@@ -574,15 +563,6 @@ const TinderView = ({
                                     Glissez pour voter
                                 </span>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Finger swipe indicator */}
-                    <div className="mb-2 flex justify-center overflow-visible">
-                        <div className="demo-card-swing relative flex items-center">
-                            <div className="demo-hint-right absolute right-full mr-1 h-px w-14 origin-right bg-gradient-to-r from-transparent to-aurora/55 opacity-0" />
-                            <div className="demo-hint-left absolute left-full ml-1 h-px w-14 origin-left bg-gradient-to-l from-transparent to-coral/55 opacity-0" />
-                            <DemoFinger />
                         </div>
                     </div>
 
