@@ -408,9 +408,8 @@ const AdminFilmsPage = (): React.JSX.Element => {
                         {/* Cards grid */}
                         {filteredFilms.length === 0 ? (
                             <div className="py-16 text-center">
-                                <div className="mb-4 text-5xl">🎉</div>
                                 <div className="font-display text-[1.1rem] font-extrabold text-white-soft">
-                                    Tous les films sont assignés !
+                                    Aucun Résultat
                                 </div>
                                 <div className="mt-2 text-[0.8rem] text-mist">
                                     Retrouvez-les dans l'onglet "Assignés".
