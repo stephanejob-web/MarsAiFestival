@@ -226,75 +226,51 @@ h1 {
     will-change: transform;
 }
 
-/* ── TinderView — demo card swing animation ────────────────────── */
+/* ── TinderView — demo card swing animation (3 phases: right, left, up) ── */
 @keyframes demo-card-swing {
-    0% {
-        transform: translateX(0) rotate(0deg);
-    }
-    18% {
-        transform: translateX(62px) rotate(8deg);
-    }
-    36% {
-        transform: translateX(0) rotate(0deg);
-    }
-    50% {
-        transform: translateX(0) rotate(0deg);
-    }
-    68% {
-        transform: translateX(-62px) rotate(-8deg);
-    }
-    86% {
-        transform: translateX(0) rotate(0deg);
-    }
-    100% {
-        transform: translateX(0) rotate(0deg);
-    }
+    /* Phase 1 — swing RIGHT */
+    0%        { transform: translate(0,     0)    rotate(0deg);   }
+    9%        { transform: translate(70px,  0)    rotate(9deg);   }
+    20%,33%   { transform: translate(0,     0)    rotate(0deg);   }
+    /* Phase 2 — swing LEFT */
+    43%       { transform: translate(-70px, 0)    rotate(-9deg);  }
+    54%,67%   { transform: translate(0,     0)    rotate(0deg);   }
+    /* Phase 3 — swing UP */
+    77%       { transform: translate(0,    -72px) rotate(0deg);   }
+    88%,100%  { transform: translate(0,     0)    rotate(0deg);   }
 }
+
 @keyframes demo-hint-right {
-    0%,
-    3% {
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    30% {
-        opacity: 1;
-    }
-    40% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 0;
-    }
+    0%,4%  { opacity: 0; }
+    10%    { opacity: 1; }
+    19%    { opacity: 0; }
+    100%   { opacity: 0; }
 }
 @keyframes demo-hint-left {
-    0%,
-    55% {
-        opacity: 0;
-    }
-    62% {
-        opacity: 1;
-    }
-    80% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 0;
-    }
+    0%,37%  { opacity: 0; }
+    43%     { opacity: 1; }
+    53%     { opacity: 0; }
+    100%    { opacity: 0; }
 }
+@keyframes demo-hint-up {
+    0%,71%  { opacity: 0; }
+    77%     { opacity: 1; }
+    87%     { opacity: 0; }
+    100%    { opacity: 0; }
+}
+
 .demo-card-swing {
-    animation: demo-card-swing 3.6s ease-in-out infinite;
+    animation: demo-card-swing 5.4s ease-in-out infinite;
     will-change: transform;
 }
 .demo-hint-right {
-    animation: demo-hint-right 3.6s ease-in-out infinite;
+    animation: demo-hint-right 5.4s ease-in-out infinite;
 }
 .demo-hint-left {
-    animation: demo-hint-left 3.6s ease-in-out infinite;
+    animation: demo-hint-left 5.4s ease-in-out infinite;
+}
+.demo-hint-up {
+    animation: demo-hint-up 5.4s ease-in-out infinite;
 }
 
 /* ── Timeline line draw ────────────────────────────────────────── */

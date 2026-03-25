@@ -585,7 +585,7 @@ const TinderView = ({
                                 </div>
                                 <span className="font-mono text-[0.58rem] font-bold text-aurora">VALIDER</span>
                             </div>
-                            <div className="absolute top-[-52px] flex flex-col items-center gap-1">
+                            <div className="demo-hint-up absolute top-[-62px] flex flex-col items-center gap-1 opacity-0">
                                 <span className="font-mono text-[0.58rem] font-bold text-solar">À REVOIR</span>
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-solar/40 bg-solar/12">
                                     <ArrowRight size={18} className="text-solar rotate-[-90deg]" />
@@ -609,6 +609,13 @@ const TinderView = ({
                                     <div className="flex flex-col items-center gap-1">
                                         <X size={34} className="text-coral" strokeWidth={2.5} />
                                         <span className="font-mono text-[0.62rem] font-bold tracking-wider text-coral">REFUSER</span>
+                                    </div>
+                                </div>
+                                {/* Up hint overlay */}
+                                <div className="demo-hint-up absolute inset-0 flex items-center justify-center rounded-2xl bg-solar/25 opacity-0">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <RotateCcw size={34} className="text-solar" strokeWidth={2.5} />
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-solar">À REVOIR</span>
                                     </div>
                                 </div>
                                 {/* Card content */}
