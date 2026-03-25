@@ -67,3 +67,6 @@ backend/uploads/
 ## ── Maquette ─────────────────────────────────────────────────────
 # Assets binaires (vidéos, images lourdes) — partager via Drive/Notion
 frontend/src/maquette/assets/
+
+## ── AI ─────────────────────────────────────────────────────
+CLAUDE.md
