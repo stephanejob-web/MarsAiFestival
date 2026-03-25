@@ -30,6 +30,7 @@ export interface UseAdminFilmsReturn {
     unassignFilm: (filmId: number) => Promise<void>;
     unassignAll: () => Promise<void>;
     assignAll: () => Promise<void>;
+    customDistribute: (allocations: { juryId: number; count: number }[]) => Promise<void>;
     deleteFilm: (filmId: number) => Promise<void>;
     selectFilm: (filmId: number, selected: boolean) => Promise<void>;
     reload: () => void;
@@ -207,6 +208,34 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         }
     };
 
+    const customDistribute = async (
+        allocations: { juryId: number; count: number }[],
+    ): Promise<void> => {
+        const authHeader = { Authorization: `Bearer ${getToken()}` };
+        setIsDistributing(true);
+        setLastDistribution(null);
+        try {
+            const res = await apiFetch<{
+                success: boolean;
+                assigned: number;
+                pairs: { juryId: number; filmId: number }[];
+                message: string;
+            }>("/api/assignments/custom-distribute", {
+                method: "POST",
+                headers: authHeader,
+                body: JSON.stringify({ allocations }),
+            });
+            if (res.success) {
+                setLastDistribution({ assigned: res.assigned, pairs: res.pairs ?? [] });
+            }
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur de distribution personnalisée");
+        } finally {
+            setIsDistributing(false);
+        }
+    };
+
     const unassignAll = async (): Promise<void> => {
         const authHeader = { Authorization: `Bearer ${getToken()}` };
         const pairs = assignments.map((a) => ({ juryId: a.jury_id, filmId: a.film_id }));
@@ -269,6 +298,7 @@ const useAdminFilms = (): UseAdminFilmsReturn => {
         unassignFilm,
         unassignAll,
         assignAll,
+        customDistribute,
         deleteFilm,
         selectFilm,
         reload: load,

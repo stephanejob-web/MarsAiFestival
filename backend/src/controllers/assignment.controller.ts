@@ -243,6 +243,61 @@ export const assignAll = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// ── POST /api/assignments/custom-distribute — Distribution manuelle (admin) ────
+// Distribue les films non-assignés selon les quotas définis par l'admin.
+export const customDistribute = async (req: Request, res: Response): Promise<void> => {
+    const adminId = req.juryUser!.id;
+    const { allocations } = req.body as {
+        allocations?: { juryId: number; count: number }[];
+    };
+
+    if (!Array.isArray(allocations) || allocations.length === 0) {
+        res.status(400).json({ success: false, message: "allocations est obligatoire." });
+        return;
+    }
+
+    try {
+        const unassigned = await getUnassignedFilms();
+        const filmIds = (unassigned as { id: number }[]).map((f) => f.id);
+
+        for (let i = filmIds.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [filmIds[i], filmIds[j]] = [filmIds[j], filmIds[i]];
+        }
+
+        let cursor = 0;
+        let assigned = 0;
+        const pairs: { juryId: number; filmId: number }[] = [];
+
+        for (const { juryId, count } of allocations) {
+            const slice = filmIds.slice(cursor, cursor + count);
+            cursor += count;
+            for (const filmId of slice) {
+                try {
+                    await assignFilmToJury(juryId, filmId, adminId);
+                    assigned++;
+                    pairs.push({ juryId, filmId });
+                } catch {
+                    // duplicate — skip
+                }
+            }
+        }
+
+        res.json({
+            success: true,
+            assigned,
+            pairs,
+            message: `${assigned} film(s) distribué(s) manuellement.`,
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la distribution personnalisée.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
 // ── DELETE /api/assignments/batch — Annuler une répartition (admin) ───────────
 export const batchUnassign = async (req: Request, res: Response): Promise<void> => {
     const { pairs } = req.body as { pairs?: { juryId: number; filmId: number }[] };

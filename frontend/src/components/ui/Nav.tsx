@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import { usePhase } from "../../features/home/hooks/usePhase";
 
 const Nav = (): React.JSX.Element => {
     const [scrolled, setScrolled] = useState<boolean>(false);
@@ -10,6 +11,8 @@ const Nav = (): React.JSX.Element => {
     const { t } = useTranslation();
 
     const currentLang = i18n.language === "fr" ? "fr" : "en";
+    const { phase } = usePhase();
+    const ctaEnabled = phase.submissionOpen;
 
     const NAV_LINKS = [
         { label: t("nav.links.festival"), href: "#home" },
@@ -108,13 +111,27 @@ const Nav = (): React.JSX.Element => {
                         </span>
                     </button>
 
-                    {/* CTA principal */}
-                    <Link
-                        to="/formulaire"
-                        className="text-sm px-4 py-2 bg-aurora text-deep-sky font-bold rounded-lg hover:bg-aurora/90 transition-colors"
-                    >
-                        {t("nav.cta")}
-                    </Link>
+                    {/* CTA principal — actif seulement si les candidatures sont ouvertes */}
+                    {ctaEnabled ? (
+                        <Link
+                            to="/formulaire"
+                            className="text-sm px-4 py-2 bg-aurora text-deep-sky font-bold rounded-lg hover:bg-aurora/90 transition-colors"
+                        >
+                            {t("nav.cta")}
+                        </Link>
+                    ) : (
+                        <div className="relative group">
+                            <button
+                                disabled
+                                className="text-sm px-4 py-2 bg-surface border border-white/10 text-mist/40 font-bold rounded-lg cursor-not-allowed select-none"
+                            >
+                                {t("nav.cta")}
+                            </button>
+                            <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-surface border border-white/10 px-2.5 py-1 font-mono text-[0.62rem] text-mist/70 opacity-0 transition-opacity group-hover:opacity-100">
+                                Candidatures closes
+                            </div>
+                        </div>
+                    )}
 
                     {/* Connexion */}
                     <Link
