@@ -10,6 +10,7 @@ import {
     listJuryMembers,
     autoDistribute,
     assignAll,
+    customDistribute,
 } from "../controllers/assignment.controller";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get("/jury-members", requireAdmin, listJuryMembers);
 router.post("/", requireAdmin, assign);
 router.post("/auto-distribute", requireAdmin, autoDistribute);
 router.post("/assign-all", requireAdmin, assignAll);
+router.post("/custom-distribute", requireAdmin, customDistribute);
 router.delete("/batch", requireAdmin, batchUnassign);
 router.delete("/", requireAdmin, unassign);
 
