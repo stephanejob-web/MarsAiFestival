@@ -10,9 +10,9 @@ const AboutSection = (): React.JSX.Element => {
     const { t } = useTranslation();
 
     const STATS: Stat[] = [
-        { value: "50", label: t("about.stats.films") },
-        { value: "120+", label: t("about.stats.pays") },
         { value: t("about.stats.gratuit"), label: t("about.stats.acces") },
+        { value: "120+", label: t("about.stats.pays") },
+        { value: "50", label: t("about.stats.films") },
     ];
 
     return (

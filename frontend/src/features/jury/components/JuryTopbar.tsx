@@ -31,6 +31,10 @@ const VIEW_META: Record<ActiveView, ViewMeta> = {
         title: "Délibération",
         subtitle: "Vote final du jury",
     },
+    tinder: {
+        title: "Vote rapide",
+        subtitle: "Swipe pour voter sur les films un par un",
+    },
 };
 
 const JuryTopbar = ({ activeView, onDisconnect }: JuryTopbarProps): React.JSX.Element => {
