@@ -11,19 +11,24 @@ import {
     Info,
     Undo2,
     ChevronRight,
-    Keyboard,
     Zap,
     ArrowRight,
     ArrowLeft,
+    RotateCcw,
+    Send,
 } from "lucide-react";
 
 import type { Decision, JuryFilm } from "../types";
+import useVoteTags from "../hooks/useVoteTags";
+import type { VoteTag } from "../hooks/useVoteTags";
 
 interface TinderViewProps {
     films: JuryFilm[];
-    onVoteDirect: (filmId: number, decision: Exclude<Decision, null>) => void;
+    onVoteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
     showToast: (message: string) => void;
 }
+
+type PanelType = "refuse" | "aRevoir" | null;
 
 type FlashColor = "green" | "red" | null;
 
@@ -53,6 +58,23 @@ const DetailRow = memo(({ label, value }: DetailRowProps): React.JSX.Element | n
     );
 });
 DetailRow.displayName = "DetailRow";
+
+const HUD_COLORS: Record<string, string> = {
+    coral:   "border-coral/50   bg-coral/12   text-coral",
+    aurora:  "border-aurora/50  bg-aurora/12  text-aurora",
+    lavande: "border-lavande/50 bg-lavande/12 text-lavande",
+    mist:    "border-white/18   bg-white/5    text-white/40",
+};
+
+const HudKey = ({ label, color }: { label: string; color: string }): React.JSX.Element => (
+    <kbd className={`inline-flex items-center justify-center rounded border px-1.5 py-0.5 font-mono text-[0.6rem] font-bold leading-none ${HUD_COLORS[color] ?? HUD_COLORS.mist}`}>
+        {label}
+    </kbd>
+);
+
+const HudLabel = ({ children }: { children: React.ReactNode }): React.JSX.Element => (
+    <span className="ml-1 text-[0.58rem] uppercase tracking-wider text-white/28">{children}</span>
+);
 
 const COLORS = ["#4effce", "#ff6b6b", "#ffd166", "#a78bfa", "#38bdf8"];
 const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
@@ -100,8 +122,16 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [detailTab, setDetailTab] = useState<"film" | "realisateur">("film");
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
-    const [showShortcuts, setShowShortcuts] = useState(false);
     const [voteAnim, setVoteAnim] = useState<{ color: "green" | "red"; key: number } | null>(null);
+
+    // Bottom sheet panel state
+    const [panelType, setPanelType] = useState<PanelType>(null);
+    const [panelMessage, setPanelMessage] = useState("");
+    const [panelTag, setPanelTag] = useState<VoteTag | null>(null);
+    const panelTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Tags for the panel
+    const tags = useVoteTags();
 
     // Timeout refs for cleanup on unmount
     const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -136,10 +166,10 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     }, []);
 
     const commitVote = useCallback(
-        (decision: Exclude<Decision, null>): void => {
+        (decision: Exclude<Decision, null>, message?: string): void => {
             if (!currentFilm) return;
             setHistory((h) => [...h, currentIndex]);
-            onVoteDirect(currentFilm.id, decision);
+            onVoteDirect(currentFilm.id, decision, message);
             showToast(DECISION_TOASTS[decision]);
             setIsDetailOpen(false);
             dragXRef.current = 0;
@@ -153,7 +183,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     );
 
     const flyAndVote = useCallback(
-        (decision: Exclude<Decision, null>, toX: number, toY: number): void => {
+        (decision: Exclude<Decision, null>, toX: number, toY: number, message?: string): void => {
             if (isFlying) return;
             setIsFlying(true);
             setDragX(toX);
@@ -164,23 +194,73 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             };
             triggerFlash(colorMap[decision] ?? null);
             setVoteAnim({ color: decision === "valide" ? "green" : "red", key: Date.now() });
-            setTimeout(() => commitVote(decision), 350);
+            setTimeout(() => commitVote(decision, message), 350);
         },
         [isFlying, commitVote, triggerFlash],
+    );
+
+    // ── Panel (bottom sheet) ─────────────────────────────────────────────────
+    const openPanel = useCallback(
+        (type: "refuse" | "aRevoir"): void => {
+            if (isFlying) return;
+            // Snap card back
+            dragXRef.current = 0;
+            dragYRef.current = 0;
+            if (cardRef.current) {
+                cardRef.current.style.boxShadow = "";
+                cardRef.current.style.cursor = "grab";
+            }
+            if (bgRef.current) bgRef.current.style.background = "transparent";
+            if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
+            if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
+            setDragX(0);
+            setDragY(0);
+            setPanelType(type);
+            setPanelMessage("");
+            setPanelTag(null);
+            setTimeout(() => panelTextareaRef.current?.focus(), 320);
+        },
+        [isFlying],
+    );
+
+    const selectTag = useCallback((tag: VoteTag): void => {
+        setPanelTag((prev) => {
+            if (prev?.key === tag.key) {
+                setPanelMessage("");
+                return null;
+            }
+            if (tag.message_template) setPanelMessage(tag.message_template);
+            return tag;
+        });
+    }, []);
+
+    const confirmPanel = useCallback(
+        (withMessage: boolean): void => {
+            if (!panelType || isFlying || !currentFilm) return;
+            const decision = panelType === "refuse" ? ("refuse" as const) : ("aRevoir" as const);
+            const msg = withMessage && panelMessage.trim() ? panelMessage.trim() : undefined;
+            const toX = decision === "refuse" ? -window.innerWidth * 1.5 : 0;
+            const toY = decision === "aRevoir" ? -window.innerHeight * 1.5 : 0;
+            setPanelType(null);
+            setPanelMessage("");
+            setPanelTag(null);
+            flyAndVote(decision, toX, toY, msg);
+        },
+        [panelType, isFlying, currentFilm, panelMessage, flyAndVote],
     );
 
     const handleVoteButton = useCallback(
         (decision: Exclude<Decision, null>): void => {
             if (isFlying) return;
-            const dirs: Partial<Record<Exclude<Decision, null>, [number, number]>> = {
-                valide: [window.innerWidth, -60],
-                refuse: [-window.innerWidth, -60],
-            };
-            if (!dirs[decision]) return;
-            const [tx, ty] = dirs[decision];
-            flyAndVote(decision, tx, ty);
+            if (decision === "refuse") {
+                openPanel("refuse");
+                return;
+            }
+            if (decision === "valide") {
+                flyAndVote("valide", window.innerWidth * 1.5, -60);
+            }
         },
-        [isFlying, flyAndVote],
+        [isFlying, flyAndVote, openPanel],
     );
 
     const handleSkip = useCallback((): void => {
@@ -285,11 +365,11 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         const absX = Math.abs(dx);
 
         if (absX > SWIPE_THRESHOLD) {
-            flyAndVote(
-                dx > 0 ? "valide" : "refuse",
-                dx > 0 ? window.innerWidth * 1.5 : -window.innerWidth * 1.5,
-                0,
-            );
+            if (dx > 0) {
+                flyAndVote("valide", window.innerWidth * 1.5, 0);
+            } else {
+                openPanel("refuse");
+            }
         } else {
             // Snap back — React takes over with the spring transition
             dragXRef.current = 0;
@@ -297,7 +377,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             setDragX(0);
             setDragY(0);
         }
-    }, [flyAndVote]);
+    }, [flyAndVote, openPanel]);
 
     // Mouse events
     const onMouseDown = (e: React.MouseEvent): void => {
@@ -354,13 +434,43 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     useEffect(() => {
         const onKey = (e: KeyboardEvent): void => {
             const tag = (e.target as HTMLElement).tagName;
+
+            // Panel open — intercept shortcuts
+            if (panelType) {
+                switch (e.key) {
+                    case "Escape":
+                        e.preventDefault();
+                        confirmPanel(false);
+                        break;
+                    case "Enter":
+                        if (!e.shiftKey && tag !== "TEXTAREA") {
+                            e.preventDefault();
+                            confirmPanel(true);
+                        }
+                        break;
+                    default:
+                        if (tag !== "INPUT" && tag !== "TEXTAREA") {
+                            const num = parseInt(e.key);
+                            if (!isNaN(num) && num >= 1 && num <= tags.length) {
+                                selectTag(tags[num - 1]);
+                            }
+                        }
+                        break;
+                }
+                return;
+            }
+
             if (tag === "INPUT" || tag === "TEXTAREA") return;
             switch (e.key) {
                 case "ArrowRight":
                     handleVoteButton("valide");
                     break;
                 case "ArrowLeft":
-                    handleVoteButton("refuse");
+                    openPanel("refuse");
+                    break;
+                case "r":
+                case "R":
+                    openPanel("aRevoir");
                     break;
                 case "i":
                 case "I":
@@ -383,7 +493,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [handleVoteButton, togglePlay, handleUndo]);
+    }, [handleVoteButton, openPanel, togglePlay, handleUndo, panelType, confirmPanel, selectTag, tags]);
 
     // ── Intro modal ─────────────────────────────────────────────────────────
     if (showIntro) {
@@ -434,7 +544,19 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                             <span className="text-[0.8rem] text-white/75">
                                 Glissez à <span className="font-semibold text-coral">gauche</span>{" "}
                                 ou cliquez ✗ pour{" "}
-                                <span className="font-semibold text-coral">refuser</span>
+                                <span className="font-semibold text-coral">refuser</span>{" "}
+                                <span className="text-mist/50">(message optionnel)</span>
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-lavande/30 bg-lavande/10">
+                                <RotateCcw size={14} className="text-lavande" />
+                            </div>
+                            <span className="text-[0.8rem] text-white/75">
+                                Bouton ↻ ou touche{" "}
+                                <span className="font-semibold text-lavande">R</span> pour{" "}
+                                <span className="font-semibold text-lavande">mettre en révision</span>{" "}
+                                <span className="text-mist/50">(message optionnel)</span>
                             </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -779,7 +901,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                     )}
 
                     {/* Bottom overlay — info + buttons */}
-                    <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-6 pb-5 pt-24">
+                    <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-6 pb-10 pt-24">
                         <div className="mb-4 flex items-end justify-between gap-4">
                             <div className="min-w-0">
                                 <h2 className="text-[1.1rem] font-bold text-white drop-shadow">
@@ -821,7 +943,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                             <span className="text-[0.6rem] font-semibold uppercase tracking-wider text-coral/55">
                                 ← Refuser
                             </span>
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-4">
                                 <button
                                     type="button"
                                     onMouseDown={(e) => e.stopPropagation()}
@@ -834,6 +956,19 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                                     title="Refuser (←)"
                                 >
                                     <X size={26} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openPanel("aRevoir");
+                                    }}
+                                    disabled={isFlying}
+                                    className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-lavande/50 bg-lavande/15 text-lavande backdrop-blur-sm transition-all hover:scale-110 hover:bg-lavande/30 disabled:opacity-40"
+                                    title="À revoir (R)"
+                                >
+                                    <RotateCcw size={20} />
                                 </button>
                                 <button
                                     type="button"
@@ -888,9 +1023,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                 </div>
             </div>
 
-            {/* Progress + shortcuts — floats at top */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center gap-3 px-4 pt-2">
-                <div className="flex flex-1 flex-col gap-1">
+            {/* Progress bar — floats at top */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 px-4 pt-2">
+                <div className="flex flex-col gap-1">
                     <div className="flex justify-between text-[0.62rem] text-white/40">
                         <span>Films restants</span>
                         <span className="font-mono font-semibold text-white/55">
@@ -904,41 +1039,22 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                         />
                     </div>
                 </div>
-                <button
-                    type="button"
-                    className="pointer-events-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 text-white/40 backdrop-blur-sm hover:bg-black/60 hover:text-white/70"
-                    onClick={() => setShowShortcuts((v) => !v)}
-                    title="Raccourcis clavier"
-                >
-                    <Keyboard size={13} />
-                </button>
             </div>
 
-            {/* Shortcuts tooltip */}
-            {showShortcuts && (
-                <div
-                    className="absolute right-4 top-10 z-30 rounded-xl border border-white/10 bg-black/85 p-4 backdrop-blur-md"
-                    style={{ minWidth: 230 }}
-                >
-                    <div className="mb-2 text-[0.65rem] font-bold uppercase tracking-wider text-mist/60">
-                        Raccourcis
-                    </div>
-                    {[
-                        ["→", "Valider"],
-                        ["←", "Refuser"],
-                        ["I", "Détails"],
-                        ["Espace", "Play / Pause"],
-                        ["⌫ / Ctrl+Z", "Annuler le vote"],
-                    ].map(([key, label]) => (
-                        <div key={key} className="flex items-center justify-between gap-6 py-0.5">
-                            <span className="text-[0.75rem] text-white/60">{label}</span>
-                            <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-white/50">
-                                {key}
-                            </kbd>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {/* HUD — shortcuts strip */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-1 border-t border-white/5 bg-black/75 px-3 py-1.5 backdrop-blur-md">
+                <HudKey label="←" color="coral" /><HudLabel>Refuser</HudLabel>
+                <div className="mx-2 h-3 w-px bg-white/10" />
+                <HudKey label="R" color="lavande" /><HudLabel>À revoir</HudLabel>
+                <div className="mx-2 h-3 w-px bg-white/10" />
+                <HudKey label="→" color="aurora" /><HudLabel>Valider</HudLabel>
+                <div className="mx-3 h-3 w-px bg-white/15" />
+                <HudKey label="I" color="mist" /><HudLabel>Infos</HudLabel>
+                <div className="mx-2 h-3 w-px bg-white/10" />
+                <HudKey label="␣" color="mist" /><HudLabel>Play</HudLabel>
+                <div className="mx-2 h-3 w-px bg-white/10" />
+                <HudKey label="⌫" color="mist" /><HudLabel>Annuler</HudLabel>
+            </div>
 
             {/* Details panel */}
             <div
@@ -1058,6 +1174,105 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
             {isDetailOpen && (
                 <div className="absolute inset-0 z-30" onClick={() => setIsDetailOpen(false)} />
+            )}
+
+            {/* Bottom sheet — Refuser / À revoir avec message */}
+            {panelType && (
+                <>
+                    <style>{`
+                        @keyframes panel-slide-up {
+                            from { transform: translateY(100%); }
+                            to   { transform: translateY(0); }
+                        }
+                    `}</style>
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                        onClick={() => confirmPanel(false)}
+                    />
+                    {/* Sheet */}
+                    <div
+                        className="absolute inset-x-0 bottom-0 z-50 rounded-t-2xl border-t border-white/10 bg-[rgba(8,12,36,0.97)] p-5 shadow-2xl"
+                        style={{ animation: "panel-slide-up 0.25s cubic-bezier(0.175,0.885,0.32,1.1)" }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="mb-4 flex items-center gap-3">
+                            <div
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${panelType === "refuse" ? "bg-coral/15" : "bg-lavande/15"}`}
+                            >
+                                {panelType === "refuse" ? (
+                                    <X size={18} className="text-coral" />
+                                ) : (
+                                    <RotateCcw size={18} className="text-lavande" />
+                                )}
+                            </div>
+                            <div>
+                                <div className="text-[0.88rem] font-bold text-white-soft">
+                                    {panelType === "refuse"
+                                        ? "Refuser ce film"
+                                        : "Mettre en révision"}
+                                </div>
+                                <div className="text-[0.7rem] text-mist/60">
+                                    Message optionnel au réalisateur
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tags */}
+                        {tags.length > 0 && (
+                            <div className="mb-3 flex flex-wrap gap-2">
+                                {tags.map((tag, idx) => (
+                                    <button
+                                        key={tag.key}
+                                        type="button"
+                                        onClick={() => selectTag(tag)}
+                                        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[0.75rem] font-semibold transition-all ${panelTag?.key === tag.key ? "border-aurora/50 bg-aurora/15 text-aurora" : "border-white/10 bg-white/5 text-mist hover:border-white/25 hover:bg-white/10"}`}
+                                    >
+                                        <kbd className="font-mono text-[0.65rem] opacity-50">
+                                            {idx + 1}
+                                        </kbd>
+                                        {tag.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Textarea */}
+                        <textarea
+                            ref={panelTextareaRef}
+                            value={panelMessage}
+                            onChange={(e) => setPanelMessage(e.target.value)}
+                            placeholder="Ajouter un message… (optionnel)"
+                            rows={3}
+                            className="mb-4 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[0.82rem] text-white-soft placeholder-mist/30 outline-none focus:border-aurora/40 focus:ring-1 focus:ring-aurora/20"
+                        />
+
+                        {/* Actions */}
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => confirmPanel(false)}
+                                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-[0.82rem] font-semibold text-mist transition-all hover:bg-white/10"
+                                title="Confirmer sans message (Échap)"
+                            >
+                                Confirmer
+                                <kbd className="font-mono text-[0.65rem] opacity-50">Échap</kbd>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => confirmPanel(true)}
+                                disabled={!panelMessage.trim()}
+                                className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[0.82rem] font-semibold transition-all disabled:opacity-40 ${panelType === "refuse" ? "bg-coral/80 text-white hover:bg-coral" : "bg-lavande/80 text-white hover:bg-lavande"}`}
+                                title="Envoyer avec message (Entrée)"
+                            >
+                                <Send size={14} />
+                                Envoyer
+                                <kbd className="font-mono text-[0.65rem] opacity-70">↵</kbd>
+                            </button>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );
