@@ -25,7 +25,7 @@ interface TinderViewProps {
     showToast: (message: string) => void;
 }
 
-type FlashColor = "green" | "red" | "orange" | "purple" | null;
+type FlashColor = "green" | "red" | null;
 
 const SWIPE_THRESHOLD = 100; // px before triggering vote
 
@@ -77,7 +77,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const cardRef = useRef<HTMLDivElement>(null);
     const rightHintRef = useRef<HTMLDivElement>(null);
     const leftHintRef = useRef<HTMLDivElement>(null);
-    const upHintRef = useRef<HTMLDivElement>(null);
 
     // Video state
     const [isPlaying, setIsPlaying] = useState(false);
@@ -146,13 +145,11 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
             setIsFlying(true);
             setDragX(toX);
             setDragY(toY);
-            const colorMap: Record<Exclude<Decision, null>, FlashColor> = {
+            const colorMap: Partial<Record<Exclude<Decision, null>, FlashColor>> = {
                 valide: "green",
                 refuse: "red",
-                aRevoir: "orange",
-                discuter: "purple",
             };
-            triggerFlash(colorMap[decision]);
+            triggerFlash(colorMap[decision] ?? null);
             setTimeout(() => commitVote(decision), 350);
         },
         [isFlying, commitVote, triggerFlash],
@@ -161,12 +158,11 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const handleVoteButton = useCallback(
         (decision: Exclude<Decision, null>): void => {
             if (isFlying) return;
-            const dirs: Record<Exclude<Decision, null>, [number, number]> = {
+            const dirs: Partial<Record<Exclude<Decision, null>, [number, number]>> = {
                 valide: [window.innerWidth, -60],
                 refuse: [-window.innerWidth, -60],
-                aRevoir: [0, -window.innerHeight],
-                discuter: [0, -window.innerHeight],
             };
+            if (!dirs[decision]) return;
             const [tx, ty] = dirs[decision];
             flyAndVote(decision, tx, ty);
         },
@@ -216,11 +212,8 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                 Math.min(Math.max(-dx / SWIPE_THRESHOLD, 0), 1),
             );
         }
-        if (upHintRef.current) {
-            upHintRef.current.style.opacity = String(
-                Math.min(Math.max(-dy / SWIPE_THRESHOLD, 0), 1),
-            );
-        }
+        // dragY ignored — no upward swipe action
+        void dy;
     }, []);
 
     // ── Drag handlers ────────────────────────────────────────────────────────
@@ -254,21 +247,16 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         // Reset hint opacities
         if (rightHintRef.current) rightHintRef.current.style.opacity = "0";
         if (leftHintRef.current) leftHintRef.current.style.opacity = "0";
-        if (upHintRef.current) upHintRef.current.style.opacity = "0";
 
         const dx = dragXRef.current;
-        const dy = dragYRef.current;
         const absX = Math.abs(dx);
-        const absY = Math.abs(dy);
 
-        if (absX > SWIPE_THRESHOLD && absX > absY) {
+        if (absX > SWIPE_THRESHOLD) {
             flyAndVote(
                 dx > 0 ? "valide" : "refuse",
                 dx > 0 ? window.innerWidth * 1.5 : -window.innerWidth * 1.5,
-                dy,
+                0,
             );
-        } else if (dy < -SWIPE_THRESHOLD && absY > absX) {
-            flyAndVote("aRevoir", dx, -window.innerHeight * 1.5);
         } else {
             // Snap back — React takes over with the spring transition
             dragXRef.current = 0;
@@ -340,13 +328,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                     break;
                 case "ArrowLeft":
                     handleVoteButton("refuse");
-                    break;
-                case "ArrowUp":
-                    handleVoteButton("aRevoir");
-                    break;
-                case "d":
-                case "D":
-                    handleVoteButton("discuter");
                     break;
                 case "i":
                 case "I":
@@ -623,19 +604,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                         </div>
                     </div>
 
-                    {/* Swipe hint — À REVOIR (up) */}
-                    <div
-                        ref={upHintRef}
-                        className="pointer-events-none absolute inset-0 flex items-start justify-center pt-14"
-                        style={{ opacity: 0 }}
-                    >
-                        <div className="rounded-2xl border-4 border-solar px-5 py-3">
-                            <span className="text-3xl font-black tracking-widest text-solar drop-shadow-lg">
-                                À REVOIR
-                            </span>
-                        </div>
-                    </div>
-
                     {/* Top-right video controls */}
                     {currentFilm.videoUrl && (
                         <div className="absolute right-3 top-10 z-20 flex items-center gap-1.5">
@@ -829,8 +797,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                     {[
                         ["→", "Valider"],
                         ["←", "Refuser"],
-                        ["↑", "À revoir"],
-                        ["D", "Discuter"],
                         ["I", "Détails"],
                         ["Espace", "Play / Pause"],
                         ["⌫ / Ctrl+Z", "Annuler le vote"],
