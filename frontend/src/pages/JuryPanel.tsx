@@ -14,6 +14,7 @@ import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
+import useVoteMode from "../features/jury/hooks/useVoteMode";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
 import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
@@ -22,6 +23,7 @@ import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
+    const { mode: voteMode, setMode: setVoteMode } = useVoteMode();
     const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
 
     if (!user) return <Navigate to="/jury" replace />;
@@ -40,6 +42,8 @@ const JuryPanel = (): React.JSX.Element => {
                 totalFilms={panel.films.length}
                 isChatOpen={panel.isChatOpen}
                 onChatToggle={() => panel.setIsChatOpen(!panel.isChatOpen)}
+                voteMode={voteMode}
+                onVoteModeChange={setVoteMode}
             />
             <div className="flex flex-1 flex-col overflow-hidden">
                 <JuryTopbar
@@ -53,6 +57,7 @@ const JuryPanel = (): React.JSX.Element => {
                         panel={panel}
                         onVoteDirect={panel.voteDirect}
                         showToast={panel.showToast}
+                        voteMode={voteMode}
                     />
                 )}
                 {panel.activeView === "listes" && <ListesView />}
