@@ -69,10 +69,10 @@
         "toolsOther": "+ all others"
     },
     "about": {
-        "overline": "The Event · Marseille 2026",
-        "title1": "Experience the birth",
-        "title2": "of a new cinema",
-        "description": "Three days at Friches Belle de Mai — screenings, an international jury and creators reinventing the 7th art with AI.",
+        "overline": "3 days · Friches Belle de Mai · Marseille 2026",
+        "title1": "60 seconds",
+        "title2": "to change the 7th art",
+        "description": "Three days to discover how AI is transforming cinema. Screenings, an international jury, and creators from around the world — free entry.",
         "prog": {
             "0": {
                 "day": "Fri.",
@@ -95,7 +95,7 @@
         },
         "venue": {
             "address": "Friches Belle de Mai · Marseille, 13003",
-            "directions": "Get directions"
+            "directions": "How to get there"
         }
     },
     "how": {

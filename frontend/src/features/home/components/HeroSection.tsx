@@ -256,12 +256,7 @@ const HeroSection = (): React.JSX.Element => {
                             )}
                         </div>
                     )}
-                    <button
-                        onClick={handleDemoClick}
-                        className="inline-flex items-center gap-2 border border-white/20 text-white-soft px-8 py-4 rounded-xl hover:border-aurora/50 hover:text-aurora transition-all duration-300"
-                    >
-                        {t("hero.demo")}
-                    </button>
+
                 </div>
 
                 {/* Stats row */}
