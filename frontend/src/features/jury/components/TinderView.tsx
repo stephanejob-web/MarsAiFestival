@@ -26,6 +26,8 @@ interface TinderViewProps {
     films: JuryFilm[];
     onVoteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
     showToast: (message: string) => void;
+    skipIntro?: boolean;
+    onIntroComplete?: () => void;
 }
 
 type PanelType = "refuse" | "aRevoir" | null;
@@ -79,96 +81,15 @@ const HudLabel = ({ children }: { children: React.ReactNode }): React.JSX.Elemen
 );
 
 const DemoFinger = (): React.JSX.Element => (
-    <svg
-        viewBox="0 0 44 68"
-        width="44"
-        height="68"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+    <img
+        src="/finger.png"
+        alt="Doigt swipe"
+        width={120}
+        height={140}
         aria-hidden="true"
-    >
-        <defs>
-            <linearGradient
-                id="fSkin"
-                x1="22"
-                y1="0"
-                x2="22"
-                y2="68"
-                gradientUnits="userSpaceOnUse"
-            >
-                <stop offset="0%" stopColor="rgba(255,255,255,0.32)" />
-                <stop offset="60%" stopColor="rgba(255,255,255,0.18)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0.10)" />
-            </linearGradient>
-            <radialGradient id="fGlow" cx="50%" cy="30%" r="55%">
-                <stop offset="0%" stopColor="rgba(78,255,206,0.22)" />
-                <stop offset="100%" stopColor="rgba(78,255,206,0)" />
-            </radialGradient>
-            <filter id="fBlur">
-                <feGaussianBlur stdDeviation="2.5" />
-            </filter>
-        </defs>
-        {/* Outer glow ring */}
-        <ellipse cx="22" cy="22" rx="21" ry="20" fill="url(#fGlow)" filter="url(#fBlur)" />
-        <ellipse
-            cx="22"
-            cy="22"
-            rx="18"
-            ry="17"
-            fill="none"
-            stroke="rgba(78,255,206,0.22)"
-            strokeWidth="0.8"
-        />
-        {/* Finger body */}
-        <rect
-            x="8"
-            y="13"
-            width="28"
-            height="50"
-            rx="14"
-            fill="url(#fSkin)"
-            stroke="rgba(255,255,255,0.25)"
-            strokeWidth="0.6"
-        />
-        {/* Fingernail */}
-        <path
-            d="M14,17 Q22,12 30,17 Q30,26 22,27.5 Q14,26 14,17Z"
-            fill="rgba(255,255,255,0.16)"
-            stroke="rgba(255,255,255,0.22)"
-            strokeWidth="0.5"
-        />
-        {/* Nail highlight */}
-        <path
-            d="M16,18 Q22,14.5 28,18"
-            fill="none"
-            stroke="rgba(255,255,255,0.30)"
-            strokeWidth="0.8"
-            strokeLinecap="round"
-        />
-        {/* Knuckle lines */}
-        <path
-            d="M11,42 Q22,44 33,42"
-            fill="none"
-            stroke="rgba(255,255,255,0.10)"
-            strokeWidth="1"
-            strokeLinecap="round"
-        />
-        <path
-            d="M11,52 Q22,54 33,52"
-            fill="none"
-            stroke="rgba(255,255,255,0.07)"
-            strokeWidth="1"
-            strokeLinecap="round"
-        />
-        {/* Side highlight */}
-        <path
-            d="M9,26 Q8,40 10,58"
-            fill="none"
-            stroke="rgba(255,255,255,0.14)"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-        />
-    </svg>
+        className="drop-shadow-lg"
+        style={{ objectFit: "contain" }}
+    />
 );
 
 const COLORS = ["#4effce", "#ff6b6b", "#ffd166", "#a78bfa", "#38bdf8"];
@@ -182,7 +103,13 @@ const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
     round: i % 2 === 0,
 }));
 
-const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.JSX.Element => {
+const TinderView = ({
+    films,
+    onVoteDirect,
+    showToast,
+    skipIntro = false,
+    onIntroComplete,
+}: TinderViewProps): React.JSX.Element => {
     const [pendingFilms] = useState<JuryFilm[]>(() => films.filter((f) => f.myDecision === null));
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
@@ -213,7 +140,7 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
     const videoRef = useRef<HTMLVideoElement>(null);
 
     // UI state
-    const [showIntro, setShowIntro] = useState(true);
+    const [showIntro, setShowIntro] = useState(!skipIntro);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [detailTab, setDetailTab] = useState<"film" | "realisateur">("film");
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
@@ -650,17 +577,6 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                         </div>
                     </div>
 
-                    {/* Finger swipe indicator */}
-                    <div className="flex justify-center pb-1">
-                        <div className="demo-card-swing relative flex items-center">
-                            {/* Trail — direction gauche (quand le doigt part à droite) */}
-                            <div className="demo-hint-right absolute right-full mr-1 h-px w-14 origin-right bg-gradient-to-r from-transparent to-aurora/55 opacity-0" />
-                            {/* Trail — direction droite (quand le doigt part à gauche) */}
-                            <div className="demo-hint-left absolute left-full ml-1 h-px w-14 origin-left bg-gradient-to-l from-transparent to-coral/55 opacity-0" />
-                            <DemoFinger />
-                        </div>
-                    </div>
-
                     {/* Warning */}
                     <div className="mb-5 rounded-xl border border-solar/25 bg-solar/8 px-4 py-3">
                         <p className="text-[0.78rem] leading-relaxed text-solar/90">
@@ -727,7 +643,10 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
                     <button
                         type="button"
-                        onClick={() => setShowIntro(false)}
+                        onClick={() => {
+                            setShowIntro(false);
+                            onIntroComplete?.();
+                        }}
                         className="w-full rounded-xl bg-aurora px-5 py-3 text-[0.88rem] font-bold text-deep-sky transition-all hover:brightness-110"
                     >
                         Commencer
