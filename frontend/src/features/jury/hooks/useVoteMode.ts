@@ -11,7 +11,7 @@ interface UseVoteModeReturn {
 
 const useVoteMode = (): UseVoteModeReturn => {
     const [mode, setModeState] = useState<VoteMode>(
-        () => (localStorage.getItem(MODE_KEY) as VoteMode | null) ?? "normal",
+        () => (localStorage.getItem(MODE_KEY) as VoteMode | null) ?? "rapide",
     );
 
     const setMode = (newMode: VoteMode): void => {
