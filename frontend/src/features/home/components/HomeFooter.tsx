@@ -31,7 +31,6 @@ const HomeFooter = (): React.JSX.Element => {
             links: [
                 { label: t("footer.columns.films.galerie"), href: "#films" },
                 { label: t("footer.columns.films.palmares"), href: "#palmares" },
-                { label: t("footer.columns.films.soumettre"), href: "/formulaire" },
             ],
         },
         {

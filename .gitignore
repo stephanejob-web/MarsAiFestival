@@ -61,6 +61,9 @@ $RECYCLE.BIN/
 ## ── Docker ───────────────────────────────────────────────────────
 mysql_data/
 
+## ── Uploads backend (fichiers générés — vidéos, images) ─────────
+backend/uploads/
+
 ## ── Maquette ─────────────────────────────────────────────────────
 # Assets binaires (vidéos, images lourdes) — partager via Drive/Notion
 frontend/src/maquette/assets/

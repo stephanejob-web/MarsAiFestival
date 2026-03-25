@@ -82,6 +82,7 @@ const getCountdownConfig = (
 
 const HeroSection = (): React.JSX.Element => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const parallaxRef = useRef<HTMLDivElement>(null);
     const { phase } = usePhase();
     const {
         targetDate,
@@ -120,6 +121,19 @@ const HeroSection = (): React.JSX.Element => {
         return (): void => mq.removeEventListener("change", handleChange);
     }, []);
 
+    // Parallax on video background
+    useEffect((): (() => void) => {
+        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+        if (mq.matches) return (): void => {};
+        const onScroll = (): void => {
+            if (parallaxRef.current) {
+                parallaxRef.current.style.transform = `translateY(${window.scrollY * 0.28}px)`;
+            }
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return (): void => window.removeEventListener("scroll", onScroll);
+    }, []);
+
     const STATS = [
         { value: "60s", label: t("hero.tags.chrono") },
         { value: "120+", label: t("hero.tags.pays") },
@@ -132,20 +146,27 @@ const HeroSection = (): React.JSX.Element => {
             id="home"
             className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-deep-sky"
         >
-            {/* Video background */}
-            <video
-                key={videoSrc}
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover opacity-[0.12] z-0"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
+            {/* Video background — parallax wrapper */}
+            <div
+                ref={parallaxRef}
+                className="absolute inset-0 z-0 will-change-transform"
+                style={{ willChange: "transform" }}
                 aria-hidden="true"
             >
-                <source src={videoSrc} type="video/mp4" />
-            </video>
+                <video
+                    key={videoSrc}
+                    ref={videoRef}
+                    className="w-full h-full object-cover opacity-[0.12]"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-hidden="true"
+                >
+                    <source src={videoSrc} type="video/mp4" />
+                </video>
+            </div>
 
             {/* Aurora orb — gauche */}
             <div
@@ -186,20 +207,27 @@ const HeroSection = (): React.JSX.Element => {
                     {t("hero.badge")}
                 </div>
 
-                {/* Titre massif */}
+                {/* Titre massif — clip-path reveal par mot */}
                 <h1
                     className="font-display font-black leading-none tracking-tighter my-6 lg:my-8"
-                    style={{
-                        fontSize: "clamp(5rem, 15vw, 14rem)",
-                        animation: "var(--animate-fade-in-up)",
-                    }}
+                    style={{ fontSize: "clamp(5rem, 15vw, 14rem)" }}
                 >
-                    <span className="text-white-soft">mars</span>
                     <span
-                        className="text-aurora"
+                        className="inline-block text-white-soft"
+                        style={{
+                            animation:
+                                "title-reveal 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s both",
+                        }}
+                    >
+                        mars
+                    </span>
+                    <span
+                        className="inline-block text-aurora"
                         style={{
                             textShadow:
                                 "0 0 40px rgba(78, 255, 206, 0.4), 0 0 80px rgba(78, 255, 206, 0.15)",
+                            animation:
+                                "title-reveal 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.28s both",
                         }}
                     >
                         AI
