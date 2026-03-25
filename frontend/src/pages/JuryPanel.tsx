@@ -10,7 +10,6 @@ import JurySidebar from "../features/jury/components/JurySidebar";
 import JuryToast from "../features/jury/components/JuryToast";
 import JuryTopbar from "../features/jury/components/JuryTopbar";
 import ListesView from "../features/jury/components/ListesView";
-import TinderView from "../features/jury/components/TinderView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
@@ -49,17 +48,16 @@ const JuryPanel = (): React.JSX.Element => {
                         // Navigation handled inside JuryTopbar
                     }}
                 />
-                {panel.activeView === "eval" && <EvalView panel={panel} />}
-                {panel.activeView === "listes" && <ListesView />}
-                {panel.activeView === "discuter" && <DiscuterView panel={panel} />}
-                {panel.activeView === "delib" && <DelibView />}
-                {panel.activeView === "tinder" && (
-                    <TinderView
-                        films={panel.films}
+                {(panel.activeView === "eval" || panel.activeView === "tinder") && (
+                    <EvalView
+                        panel={panel}
                         onVoteDirect={panel.voteDirect}
                         showToast={panel.showToast}
                     />
                 )}
+                {panel.activeView === "listes" && <ListesView />}
+                {panel.activeView === "discuter" && <DiscuterView panel={panel} />}
+                {panel.activeView === "delib" && <DelibView />}
             </div>
             <ModalARevoir
                 isOpen={panel.activeModal === "arevoir"}
