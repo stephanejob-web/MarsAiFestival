@@ -60,14 +60,16 @@ const DetailRow = memo(({ label, value }: DetailRowProps): React.JSX.Element | n
 DetailRow.displayName = "DetailRow";
 
 const HUD_COLORS: Record<string, string> = {
-    coral:   "border-coral/50   bg-coral/12   text-coral",
-    aurora:  "border-aurora/50  bg-aurora/12  text-aurora",
+    coral: "border-coral/50   bg-coral/12   text-coral",
+    aurora: "border-aurora/50  bg-aurora/12  text-aurora",
     lavande: "border-lavande/50 bg-lavande/12 text-lavande",
-    mist:    "border-white/18   bg-white/5    text-white/40",
+    mist: "border-white/18   bg-white/5    text-white/40",
 };
 
 const HudKey = ({ label, color }: { label: string; color: string }): React.JSX.Element => (
-    <kbd className={`inline-flex items-center justify-center rounded border px-1.5 py-0.5 font-mono text-[0.6rem] font-bold leading-none ${HUD_COLORS[color] ?? HUD_COLORS.mist}`}>
+    <kbd
+        className={`inline-flex items-center justify-center rounded border px-1.5 py-0.5 font-mono text-[0.6rem] font-bold leading-none ${HUD_COLORS[color] ?? HUD_COLORS.mist}`}
+    >
         {label}
     </kbd>
 );
@@ -493,7 +495,16 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [handleVoteButton, openPanel, togglePlay, handleUndo, panelType, confirmPanel, selectTag, tags]);
+    }, [
+        handleVoteButton,
+        openPanel,
+        togglePlay,
+        handleUndo,
+        panelType,
+        confirmPanel,
+        selectTag,
+        tags,
+    ]);
 
     // ── Intro modal ─────────────────────────────────────────────────────────
     if (showIntro) {
@@ -555,7 +566,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                             <span className="text-[0.8rem] text-white/75">
                                 Bouton ↻ ou touche{" "}
                                 <span className="font-semibold text-lavande">R</span> pour{" "}
-                                <span className="font-semibold text-lavande">mettre en révision</span>{" "}
+                                <span className="font-semibold text-lavande">
+                                    mettre en révision
+                                </span>{" "}
                                 <span className="text-mist/50">(message optionnel)</span>
                             </span>
                         </div>
@@ -1043,17 +1056,23 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
 
             {/* HUD — shortcuts strip */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-1 border-t border-white/5 bg-black/75 px-3 py-1.5 backdrop-blur-md">
-                <HudKey label="←" color="coral" /><HudLabel>Refuser</HudLabel>
+                <HudKey label="←" color="coral" />
+                <HudLabel>Refuser</HudLabel>
                 <div className="mx-2 h-3 w-px bg-white/10" />
-                <HudKey label="R" color="lavande" /><HudLabel>À revoir</HudLabel>
+                <HudKey label="R" color="lavande" />
+                <HudLabel>À revoir</HudLabel>
                 <div className="mx-2 h-3 w-px bg-white/10" />
-                <HudKey label="→" color="aurora" /><HudLabel>Valider</HudLabel>
+                <HudKey label="→" color="aurora" />
+                <HudLabel>Valider</HudLabel>
                 <div className="mx-3 h-3 w-px bg-white/15" />
-                <HudKey label="I" color="mist" /><HudLabel>Infos</HudLabel>
+                <HudKey label="I" color="mist" />
+                <HudLabel>Infos</HudLabel>
                 <div className="mx-2 h-3 w-px bg-white/10" />
-                <HudKey label="␣" color="mist" /><HudLabel>Play</HudLabel>
+                <HudKey label="␣" color="mist" />
+                <HudLabel>Play</HudLabel>
                 <div className="mx-2 h-3 w-px bg-white/10" />
-                <HudKey label="⌫" color="mist" /><HudLabel>Annuler</HudLabel>
+                <HudKey label="⌫" color="mist" />
+                <HudLabel>Annuler</HudLabel>
             </div>
 
             {/* Details panel */}
@@ -1193,7 +1212,9 @@ const TinderView = ({ films, onVoteDirect, showToast }: TinderViewProps): React.
                     {/* Sheet */}
                     <div
                         className="absolute inset-x-0 bottom-0 z-50 rounded-t-2xl border-t border-white/10 bg-[rgba(8,12,36,0.97)] p-5 shadow-2xl"
-                        style={{ animation: "panel-slide-up 0.25s cubic-bezier(0.175,0.885,0.32,1.1)" }}
+                        style={{
+                            animation: "panel-slide-up 0.25s cubic-bezier(0.175,0.885,0.32,1.1)",
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
