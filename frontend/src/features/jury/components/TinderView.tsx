@@ -82,7 +82,6 @@ const HudLabel = ({ children }: { children: React.ReactNode }): React.JSX.Elemen
     <span className="ml-1 text-[0.58rem] uppercase tracking-wider text-white/28">{children}</span>
 );
 
-
 const COLORS = ["#4effce", "#ff6b6b", "#ffd166", "#a78bfa", "#38bdf8"];
 const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
     left: `${(i * 37 + 7) % 100}%`,
@@ -136,7 +135,10 @@ const TinderView = ({
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [detailTab, setDetailTab] = useState<"film" | "realisateur">("film");
     const [flashColor, setFlashColor] = useState<FlashColor>(null);
-    const [voteAnim, setVoteAnim] = useState<{ color: "green" | "red" | "yellow"; key: number } | null>(null);
+    const [voteAnim, setVoteAnim] = useState<{
+        color: "green" | "red" | "yellow";
+        key: number;
+    } | null>(null);
 
     // Bottom sheet panel state
     const [panelType, setPanelType] = useState<PanelType>(null);
@@ -358,7 +360,8 @@ const TinderView = ({
         }
 
         if (upHintRef.current) upHintRef.current.style.opacity = "0";
-        if (rightHintRef.current) rightHintRef.current.style.opacity = isRight ? String(ratio) : "0";
+        if (rightHintRef.current)
+            rightHintRef.current.style.opacity = isRight ? String(ratio) : "0";
         if (leftHintRef.current) leftHintRef.current.style.opacity = !isRight ? String(ratio) : "0";
     }, []);
 
@@ -569,7 +572,10 @@ const TinderView = ({
                         </div>
 
                         {/* Demo card zone */}
-                        <div className="relative flex items-center justify-center" style={{ height: 220, width: 340 }}>
+                        <div
+                            className="relative flex items-center justify-center"
+                            style={{ height: 220, width: 340 }}
+                        >
                             {/* Glow behind card */}
                             <div className="absolute inset-0 rounded-3xl bg-aurora/5 blur-2xl" />
 
@@ -578,45 +584,68 @@ const TinderView = ({
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-coral/40 bg-coral/12">
                                     <ArrowLeft size={18} className="text-coral" />
                                 </div>
-                                <span className="font-mono text-[0.58rem] font-bold text-coral">REFUSER</span>
+                                <span className="font-mono text-[0.58rem] font-bold text-coral">
+                                    REFUSER
+                                </span>
                             </div>
                             <div className="demo-hint-right absolute right-[-52px] flex flex-col items-center gap-1 opacity-0">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-aurora/40 bg-aurora/12">
                                     <ArrowRight size={18} className="text-aurora" />
                                 </div>
-                                <span className="font-mono text-[0.58rem] font-bold text-aurora">VALIDER</span>
+                                <span className="font-mono text-[0.58rem] font-bold text-aurora">
+                                    VALIDER
+                                </span>
                             </div>
                             <div className="demo-hint-up absolute top-[-68px] flex flex-col items-center gap-1 opacity-0">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-solar/40 bg-solar/12">
                                     <ArrowUp size={18} className="text-solar" />
                                 </div>
-                                <span className="font-mono text-[0.58rem] font-bold text-solar">À REVOIR</span>
+                                <span className="font-mono text-[0.58rem] font-bold text-solar">
+                                    À REVOIR
+                                </span>
                             </div>
 
                             {/* The demo card */}
                             <div
                                 className="demo-card-swing relative h-[180px] w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] shadow-2xl"
-                                style={{ boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}
+                                style={{
+                                    boxShadow:
+                                        "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+                                }}
                             >
                                 {/* Right hint overlay */}
                                 <div className="demo-hint-right absolute inset-0 flex items-center justify-end rounded-2xl bg-aurora/25 pr-8 opacity-0">
                                     <div className="flex flex-col items-center gap-1">
-                                        <Check size={34} className="text-aurora" strokeWidth={2.5} />
-                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-aurora">VALIDER</span>
+                                        <Check
+                                            size={34}
+                                            className="text-aurora"
+                                            strokeWidth={2.5}
+                                        />
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-aurora">
+                                            VALIDER
+                                        </span>
                                     </div>
                                 </div>
                                 {/* Left hint overlay */}
                                 <div className="demo-hint-left absolute inset-0 flex items-center justify-start rounded-2xl bg-coral/25 pl-8 opacity-0">
                                     <div className="flex flex-col items-center gap-1">
                                         <X size={34} className="text-coral" strokeWidth={2.5} />
-                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-coral">REFUSER</span>
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-coral">
+                                            REFUSER
+                                        </span>
                                     </div>
                                 </div>
                                 {/* Up hint overlay */}
                                 <div className="demo-hint-up absolute inset-0 flex items-center justify-center rounded-2xl bg-solar/25 opacity-0">
                                     <div className="flex flex-col items-center gap-1">
-                                        <RotateCcw size={34} className="text-solar" strokeWidth={2.5} />
-                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-solar">À REVOIR</span>
+                                        <RotateCcw
+                                            size={34}
+                                            className="text-solar"
+                                            strokeWidth={2.5}
+                                        />
+                                        <span className="font-mono text-[0.62rem] font-bold tracking-wider text-solar">
+                                            À REVOIR
+                                        </span>
                                     </div>
                                 </div>
                                 {/* Card content */}
@@ -648,11 +677,13 @@ const TinderView = ({
                     {/* ── Right — Instructions + CTA ──────────────────────── */}
                     <div className="flex flex-1 flex-col justify-center px-12">
                         <h2 className="mb-2 font-display text-[1.5rem] font-extrabold leading-tight text-white-soft">
-                            Évaluez les films<br />
+                            Évaluez les films
+                            <br />
                             <span className="text-aurora">en un geste</span>
                         </h2>
                         <p className="mb-8 text-[0.82rem] text-mist/70">
-                            Chaque décision est enregistrée instantanément. Vous pouvez toujours annuler le dernier vote.
+                            Chaque décision est enregistrée instantanément. Vous pouvez toujours
+                            annuler le dernier vote.
                         </p>
 
                         {/* Steps */}
@@ -663,9 +694,14 @@ const TinderView = ({
                                 </div>
                                 <div>
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
-                                        Droite ou <kbd className="rounded border border-aurora/30 bg-aurora/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-aurora">✓</kbd>
+                                        Droite ou{" "}
+                                        <kbd className="rounded border border-aurora/30 bg-aurora/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-aurora">
+                                            ✓
+                                        </kbd>
                                     </p>
-                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Valider le film</p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">
+                                        Valider le film
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
@@ -674,9 +710,14 @@ const TinderView = ({
                                 </div>
                                 <div>
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
-                                        Gauche ou <kbd className="rounded border border-coral/30 bg-coral/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-coral">✗</kbd>
+                                        Gauche ou{" "}
+                                        <kbd className="rounded border border-coral/30 bg-coral/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-coral">
+                                            ✗
+                                        </kbd>
                                     </p>
-                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Refuser — avec message optionnel</p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">
+                                        Refuser — avec message optionnel
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
@@ -685,9 +726,14 @@ const TinderView = ({
                                 </div>
                                 <div>
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
-                                        Haut ou touche <kbd className="rounded border border-solar/30 bg-solar/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-solar">R</kbd>
+                                        Haut ou touche{" "}
+                                        <kbd className="rounded border border-solar/30 bg-solar/10 px-1.5 py-0.5 font-mono text-[0.65rem] text-solar">
+                                            R
+                                        </kbd>
                                     </p>
-                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Mettre en révision (à revoir)</p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">
+                                        Mettre en révision (à revoir)
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
@@ -698,7 +744,9 @@ const TinderView = ({
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
                                         Bouton Détails
                                     </p>
-                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">Fiche complète du film</p>
+                                    <p className="mt-0.5 text-[0.75rem] text-mist/60">
+                                        Fiche complète du film
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -707,7 +755,12 @@ const TinderView = ({
                         <div className="mb-8 flex items-start gap-3 rounded-xl border border-solar/20 bg-solar/[0.06] px-4 py-3">
                             <span className="mt-px text-[0.9rem]">⚠️</span>
                             <p className="text-[0.75rem] leading-relaxed text-solar/80">
-                                Chaque décision est <span className="font-bold text-solar">sauvegardée instantanément</span> — pas de confirmation. Utilisez le bouton <strong>Annuler</strong> pour revenir en arrière.
+                                Chaque décision est{" "}
+                                <span className="font-bold text-solar">
+                                    sauvegardée instantanément
+                                </span>{" "}
+                                — pas de confirmation. Utilisez le bouton <strong>Annuler</strong>{" "}
+                                pour revenir en arrière.
                             </p>
                         </div>
 
@@ -721,7 +774,10 @@ const TinderView = ({
                         >
                             <Zap size={16} />
                             Commencer
-                            <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                            <ChevronRight
+                                size={16}
+                                className="transition-transform group-hover:translate-x-0.5"
+                            />
                         </button>
                     </div>
                 </div>

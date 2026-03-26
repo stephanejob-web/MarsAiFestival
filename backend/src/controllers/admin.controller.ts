@@ -411,6 +411,9 @@ export const resetAllVotesHandler = async (_req: Request, res: Response): Promis
         const affected = await resetAllVotes();
         res.json({ success: true, message: `${affected} vote(s) réinitialisé(s).`, affected });
     } catch (err) {
-        res.status(500).json({ success: false, error: err instanceof Error ? err.message : String(err) });
+        res.status(500).json({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };

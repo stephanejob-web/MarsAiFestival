@@ -70,9 +70,7 @@ export const deleteVote = async (juryId: number, filmId: number): Promise<boolea
 
 // ── Reset tous les votes (dev / tests) — admin seulement ─────────────────────
 export const resetAllVotes = async (): Promise<number> => {
-    const [result] = await pool.execute<ResultSetHeader>(
-        `DELETE FROM jury_film_commentary`,
-    );
+    const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM jury_film_commentary`);
     return result.affectedRows;
 };
 

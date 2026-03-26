@@ -1,13 +1,5 @@
 import React from "react";
-import {
-    Smartphone,
-    Zap,
-    MessageCircle,
-    Film,
-    CheckCircle,
-    Info,
-    Download,
-} from "lucide-react";
+import { Smartphone, Zap, MessageCircle, Film, CheckCircle, Info, Download } from "lucide-react";
 
 const FEATURES = [
     {
@@ -144,11 +136,15 @@ const MobileAppView = (): React.JSX.Element => {
                     <div className="flex gap-3">
                         <div className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/8 bg-surface px-4 py-3 opacity-50">
                             <Download size={14} className="text-mist" />
-                            <span className="text-[0.78rem] font-semibold text-mist">App Store</span>
+                            <span className="text-[0.78rem] font-semibold text-mist">
+                                App Store
+                            </span>
                         </div>
                         <div className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/8 bg-surface px-4 py-3 opacity-50">
                             <Download size={14} className="text-mist" />
-                            <span className="text-[0.78rem] font-semibold text-mist">Google Play</span>
+                            <span className="text-[0.78rem] font-semibold text-mist">
+                                Google Play
+                            </span>
                         </div>
                     </div>
                     <p className="text-center text-[0.68rem] text-mist/40">
