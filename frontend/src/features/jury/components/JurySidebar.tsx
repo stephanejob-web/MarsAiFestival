@@ -5,6 +5,7 @@ import {
     CheckCircle,
     ChevronDown,
     ChevronUp,
+    LayoutList,
     LogOut,
     MessageCircle,
     Mic,
@@ -12,12 +13,14 @@ import {
     Send,
     Settings,
     ShieldCheck,
+    Smartphone,
     Zap,
 } from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
+import type { VoteMode } from "../hooks/useVoteMode";
 import ProfileModal from "./ProfileModal";
 import { VocalJoinButton } from "./VocalPanel";
 
@@ -31,6 +34,8 @@ interface JurySidebarProps {
     totalFilms: number;
     isChatOpen: boolean;
     onChatToggle: () => void;
+    voteMode: VoteMode;
+    onVoteModeChange: (mode: VoteMode) => void;
 }
 
 interface NavItemProps {
@@ -93,6 +98,8 @@ const JurySidebar = ({
     totalFilms,
     isChatOpen,
     onChatToggle,
+    voteMode,
+    onVoteModeChange,
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
@@ -158,6 +165,53 @@ const JurySidebar = ({
                         isActive={activeView === "eval"}
                         onClick={() => onViewChange("eval")}
                     />
+
+                    {/* Vote mode toggle — visible only when Films assignés is active */}
+                    {activeView === "eval" && (
+                        <div className="relative mx-1 mb-1 mt-0.5 flex p-0.5 rounded-lg bg-black/25 border border-white/6">
+                            {/* Sliding pill */}
+                            <div
+                                className="absolute inset-0.5 rounded-md transition-all duration-200 ease-out pointer-events-none"
+                                style={{
+                                    left: voteMode === "normal" ? "2px" : "calc(50% + 1px)",
+                                    right: voteMode === "normal" ? "calc(50% + 1px)" : "2px",
+                                    background:
+                                        voteMode === "normal"
+                                            ? "rgba(255,255,255,0.06)"
+                                            : "rgba(78,255,206,0.88)",
+                                    boxShadow:
+                                        voteMode === "rapide"
+                                            ? "0 0 8px rgba(78,255,206,0.3)"
+                                            : "none",
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => onVoteModeChange("normal")}
+                                className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
+                                    voteMode === "normal"
+                                        ? "text-white-soft"
+                                        : "text-mist hover:text-white/60"
+                                }`}
+                            >
+                                <LayoutList size={11} />
+                                Normal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onVoteModeChange("rapide")}
+                                className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
+                                    voteMode === "rapide"
+                                        ? "text-deep-sky"
+                                        : "text-mist hover:text-white/60"
+                                }`}
+                            >
+                                <Zap size={11} />
+                                Rapide
+                            </button>
+                        </div>
+                    )}
+
                     <NavItem
                         icon={<CheckCircle size={14} />}
                         label="Évalués"
@@ -174,14 +228,6 @@ const JurySidebar = ({
                         isActive={activeView === "discuter"}
                         onClick={() => onViewChange("discuter")}
                     />
-                    <NavItem
-                        icon={<Zap size={14} />}
-                        label="Vote rapide"
-                        count={pendingCount}
-                        countVariant="pending"
-                        isActive={activeView === "tinder"}
-                        onClick={() => onViewChange("tinder")}
-                    />
 
                     <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Sélection
@@ -196,7 +242,24 @@ const JurySidebar = ({
                         disabled
                     />
 
-                    <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
+                    {/* App mobile promo tab */}
+                    <button
+                        type="button"
+                        onClick={() => onViewChange("mobile")}
+                        className={`mt-2 flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
+                            activeView === "mobile"
+                                ? "border-aurora/40 bg-aurora/10 text-aurora"
+                                : "border-aurora/20 bg-aurora/5 text-aurora/70 hover:border-aurora/35 hover:bg-aurora/8 hover:text-aurora"
+                        }`}
+                    >
+                        <Smartphone size={14} className="flex-shrink-0" />
+                        <span className="flex-1 text-left">Application mobile</span>
+                        <span className="rounded-full bg-aurora/15 px-1.5 py-0.5 font-mono text-[0.6rem] text-aurora">
+                            NEW
+                        </span>
+                    </button>
+
+                    <div className="mt-2 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Compte
                     </div>
                     {(user?.role === "admin" || user?.role === "moderateur") && (

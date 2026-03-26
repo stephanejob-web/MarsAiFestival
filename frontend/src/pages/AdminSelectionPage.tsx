@@ -10,6 +10,7 @@ import {
     ChevronRight,
     LayoutList,
     ListChecks,
+    Trash2,
 } from "lucide-react";
 import StatCard from "../features/admin/components/StatCard";
 import useAdminSelection, {
@@ -1060,6 +1061,12 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
     const [mode, setMode] = useState<Mode>("analyse");
     const [expandedId, setExpandedId] = useState<number | null>(null);
+    const [resetConfirm, setResetConfirm] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetFeedback, setResetFeedback] = useState<{
+        type: "success" | "error";
+        message: string;
+    } | null>(null);
 
     const handleModeChange = (m: Mode): void => {
         setMode(m);
@@ -1512,6 +1519,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
                     >
                         <RefreshCw size={12} /> Rafraîchir
                     </button>
+                    <button
+                        type="button"
+                        onClick={(): void => setResetConfirm(true)}
+                        className="flex items-center gap-1.5 rounded-md border border-coral/20 bg-coral/[0.06] px-2.5 py-1 text-[0.7rem] text-coral transition-all hover:border-coral/40 hover:bg-coral/[0.12]"
+                        title="Réinitialiser tous les votes (dev/test)"
+                    >
+                        <Trash2 size={12} /> Reset votes
+                    </button>
                     <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
                         <ShieldCheck size={13} className="mr-1" /> Admin
                     </span>
@@ -1720,6 +1735,97 @@ const AdminSelectionPage = (): React.JSX.Element => {
             </div>
 
             <FilmInsightDrawer film={expandedFilm} onClose={() => setExpandedId(null)} />
+
+            {/* ── Reset votes confirmation modal ────────────────────────────── */}
+            {resetConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-sm rounded-2xl border border-coral/25 bg-[#1a1a2e] p-6 shadow-2xl">
+                        <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-coral/[0.12] text-coral">
+                                <Trash2 size={18} />
+                            </div>
+                            <div>
+                                <h3 className="font-display text-[0.92rem] font-extrabold text-white-soft">
+                                    Réinitialiser les votes
+                                </h3>
+                                <p className="text-[0.72rem] text-mist">Action irréversible</p>
+                            </div>
+                        </div>
+
+                        <p className="mb-5 text-[0.8rem] text-white-soft/80">
+                            Tous les votes des jurés seront supprimés de la base de données. Cette
+                            action est réservée aux tests et au développement.
+                        </p>
+
+                        {resetFeedback && (
+                            <div
+                                className={`mb-4 flex items-center gap-2 rounded-xl border px-3 py-2.5 text-[0.78rem] ${
+                                    resetFeedback.type === "success"
+                                        ? "border-aurora/25 bg-aurora/[0.06] text-aurora"
+                                        : "border-coral/25 bg-coral/[0.06] text-coral"
+                                }`}
+                            >
+                                {resetFeedback.type === "success" ? (
+                                    <Check size={13} />
+                                ) : (
+                                    <X size={13} />
+                                )}
+                                {resetFeedback.message}
+                            </div>
+                        )}
+
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={(): void => {
+                                    setResetConfirm(false);
+                                    setResetFeedback(null);
+                                }}
+                                disabled={resetLoading}
+                                className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-[0.78rem] text-mist transition-all hover:bg-white/[0.08] disabled:opacity-40"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                type="button"
+                                disabled={resetLoading || resetFeedback?.type === "success"}
+                                onClick={(): void => {
+                                    setResetLoading(true);
+                                    setResetFeedback(null);
+                                    apiFetch<{ success: boolean; message: string }>(
+                                        "/api/admin/votes/reset",
+                                        {
+                                            method: "DELETE",
+                                            headers: { Authorization: `Bearer ${getToken()}` },
+                                        },
+                                    )
+                                        .then((data) => {
+                                            setResetFeedback({
+                                                type: "success",
+                                                message: data.message,
+                                            });
+                                            reload();
+                                            setTimeout(() => {
+                                                setResetConfirm(false);
+                                                setResetFeedback(null);
+                                            }, 1500);
+                                        })
+                                        .catch(() => {
+                                            setResetFeedback({
+                                                type: "error",
+                                                message: "Erreur lors de la réinitialisation.",
+                                            });
+                                        })
+                                        .finally(() => setResetLoading(false));
+                                }}
+                                className="flex-1 rounded-lg border border-coral/30 bg-coral/[0.1] px-4 py-2 text-[0.78rem] font-bold text-coral transition-all hover:bg-coral/[0.2] disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                {resetLoading ? "Suppression…" : "Confirmer"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

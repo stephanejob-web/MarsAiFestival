@@ -68,6 +68,12 @@ export const deleteVote = async (juryId: number, filmId: number): Promise<boolea
     return result.affectedRows > 0;
 };
 
+// ── Reset tous les votes (dev / tests) — admin seulement ─────────────────────
+export const resetAllVotes = async (): Promise<number> => {
+    const [result] = await pool.execute<ResultSetHeader>(`DELETE FROM jury_film_commentary`);
+    return result.affectedRows;
+};
+
 // ── Stats globales (pour la vue Sélection admin) ──────────────────────────────
 export const getVotesSummary = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(

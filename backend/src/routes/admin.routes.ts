@@ -18,6 +18,7 @@ import {
     updatePermissions,
     startAdminVocal,
     stopAdminVocal,
+    resetAllVotesHandler,
 } from "../controllers/admin.controller";
 import { getCalendarHandler, updateCalendarHandler } from "../controllers/calendar.controller";
 import {
@@ -100,6 +101,9 @@ router.delete("/users/:id", requireAdmin, removeUser);
 // ── Vocal admin ───────────────────────────────────────────────────────────────
 router.post("/vocal/start", requireAdmin, startAdminVocal);
 router.post("/vocal/stop", requireAdmin, stopAdminVocal);
+
+// ── Dev / tests — reset votes ─────────────────────────────────────────────────
+router.delete("/votes/reset", requireAdmin, resetAllVotesHandler);
 
 // ── Calendrier ────────────────────────────────────────────────────────────────
 router.get(

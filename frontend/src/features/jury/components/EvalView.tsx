@@ -2,15 +2,26 @@ import React from "react";
 import { Clapperboard } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
+import type { VoteMode } from "../hooks/useVoteMode";
+import type { Decision } from "../types";
 import FilmDetail from "./FilmDetail";
 import FilmList from "./FilmList";
 import NotationPanel from "./NotationPanel";
+import TinderView from "./TinderView";
 
 interface EvalViewProps {
     panel: UseJuryPanelReturn;
+    onVoteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
+    showToast: (message: string) => void;
+    voteMode: VoteMode;
 }
 
-const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
+const EvalView = ({
+    panel,
+    onVoteDirect,
+    showToast,
+    voteMode,
+}: EvalViewProps): React.JSX.Element => {
     const handlePublish = (): void => {
         panel.handleCommentPublish();
     };
@@ -31,6 +42,10 @@ const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
                 </div>
             </div>
         );
+    }
+
+    if (voteMode === "rapide") {
+        return <TinderView films={panel.films} onVoteDirect={onVoteDirect} showToast={showToast} />;
     }
 
     return (
