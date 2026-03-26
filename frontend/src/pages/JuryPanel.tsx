@@ -10,11 +10,12 @@ import JurySidebar from "../features/jury/components/JurySidebar";
 import JuryToast from "../features/jury/components/JuryToast";
 import JuryTopbar from "../features/jury/components/JuryTopbar";
 import ListesView from "../features/jury/components/ListesView";
-import TinderView from "../features/jury/components/TinderView";
+import MobileAppView from "../features/jury/components/MobileAppView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
+import useVoteMode from "../features/jury/hooks/useVoteMode";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
 import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
@@ -23,6 +24,7 @@ import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
+    const { mode: voteMode, setMode: setVoteMode } = useVoteMode();
     const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
 
     if (!user) return <Navigate to="/jury" replace />;
@@ -41,6 +43,8 @@ const JuryPanel = (): React.JSX.Element => {
                 totalFilms={panel.films.length}
                 isChatOpen={panel.isChatOpen}
                 onChatToggle={() => panel.setIsChatOpen(!panel.isChatOpen)}
+                voteMode={voteMode}
+                onVoteModeChange={setVoteMode}
             />
             <div className="flex flex-1 flex-col overflow-hidden">
                 <JuryTopbar
@@ -49,17 +53,18 @@ const JuryPanel = (): React.JSX.Element => {
                         // Navigation handled inside JuryTopbar
                     }}
                 />
-                {panel.activeView === "eval" && <EvalView panel={panel} />}
+                {(panel.activeView === "eval" || panel.activeView === "tinder") && (
+                    <EvalView
+                        panel={panel}
+                        onVoteDirect={panel.voteDirect}
+                        showToast={panel.showToast}
+                        voteMode={voteMode}
+                    />
+                )}
                 {panel.activeView === "listes" && <ListesView />}
                 {panel.activeView === "discuter" && <DiscuterView panel={panel} />}
                 {panel.activeView === "delib" && <DelibView />}
-                {panel.activeView === "tinder" && (
-                    <TinderView
-                        films={panel.films}
-                        onVoteDirect={panel.voteDirect}
-                        showToast={panel.showToast}
-                    />
-                )}
+                {panel.activeView === "mobile" && <MobileAppView />}
             </div>
             <ModalARevoir
                 isOpen={panel.activeModal === "arevoir"}
