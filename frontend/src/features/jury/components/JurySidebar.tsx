@@ -13,6 +13,7 @@ import {
     Send,
     Settings,
     ShieldCheck,
+    Smartphone,
     Zap,
 } from "lucide-react";
 
@@ -241,7 +242,24 @@ const JurySidebar = ({
                         disabled
                     />
 
-                    <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
+                    {/* App mobile promo tab */}
+                    <button
+                        type="button"
+                        onClick={() => onViewChange("mobile")}
+                        className={`mt-2 flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
+                            activeView === "mobile"
+                                ? "border-aurora/40 bg-aurora/10 text-aurora"
+                                : "border-aurora/20 bg-aurora/5 text-aurora/70 hover:border-aurora/35 hover:bg-aurora/8 hover:text-aurora"
+                        }`}
+                    >
+                        <Smartphone size={14} className="flex-shrink-0" />
+                        <span className="flex-1 text-left">Application mobile</span>
+                        <span className="rounded-full bg-aurora/15 px-1.5 py-0.5 font-mono text-[0.6rem] text-aurora">
+                            NEW
+                        </span>
+                    </button>
+
+                    <div className="mt-2 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                         Compte
                     </div>
                     {(user?.role === "admin" || user?.role === "moderateur") && (

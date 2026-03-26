@@ -14,6 +14,7 @@ import {
     Zap,
     ArrowRight,
     ArrowLeft,
+    ArrowUp,
     RotateCcw,
     Send,
 } from "lucide-react";
@@ -585,11 +586,11 @@ const TinderView = ({
                                 </div>
                                 <span className="font-mono text-[0.58rem] font-bold text-aurora">VALIDER</span>
                             </div>
-                            <div className="demo-hint-up absolute top-[-62px] flex flex-col items-center gap-1 opacity-0">
-                                <span className="font-mono text-[0.58rem] font-bold text-solar">À REVOIR</span>
+                            <div className="demo-hint-up absolute top-[-68px] flex flex-col items-center gap-1 opacity-0">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full border border-solar/40 bg-solar/12">
-                                    <ArrowRight size={18} className="text-solar rotate-[-90deg]" />
+                                    <ArrowUp size={18} className="text-solar" />
                                 </div>
+                                <span className="font-mono text-[0.58rem] font-bold text-solar">À REVOIR</span>
                             </div>
 
                             {/* The demo card */}
@@ -680,7 +681,7 @@ const TinderView = ({
                             </div>
                             <div className="flex items-start gap-4">
                                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-solar/30 bg-solar/10">
-                                    <ArrowRight size={16} className="text-solar rotate-[-90deg]" />
+                                    <ArrowUp size={16} className="text-solar" />
                                 </div>
                                 <div>
                                     <p className="text-[0.85rem] font-semibold text-white-soft">
