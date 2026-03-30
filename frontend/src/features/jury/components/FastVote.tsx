@@ -517,6 +517,9 @@ const FastVote = ({
                 case "ArrowLeft":
                     openPanel("refuse");
                     break;
+                case "ArrowUp":
+                openPanel("aRevoir");
+                break;
                 case "r":
                 case "R":
                     openPanel("aRevoir");
