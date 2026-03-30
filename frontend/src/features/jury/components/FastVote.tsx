@@ -412,7 +412,7 @@ const FastVote = ({
         const isUpwardSwipe = absY > absX && dy < -SWIPE_Y_THRESHOLD;
 
         if (isUpwardSwipe) {
-            flyAndVote("aRevoir", 0, -window.innerHeight * 1.5);
+            openPanel("aRevoir", 0, -window.innerHeight * 1.5);
         } else if (absX > SWIPE_THRESHOLD) {
             if (dx > 0) {
                 flyAndVote("valide", window.innerWidth * 1.5, 0);
@@ -518,8 +518,8 @@ const FastVote = ({
                     openPanel("refuse");
                     break;
                 case "ArrowUp":
-                openPanel("aRevoir");
-                break;
+                    openPanel("aRevoir");
+                    break;
                 case "r":
                 case "R":
                     openPanel("aRevoir");
