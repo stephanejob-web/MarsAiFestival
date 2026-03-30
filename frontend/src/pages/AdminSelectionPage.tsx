@@ -10,6 +10,7 @@ import {
     ChevronRight,
     LayoutList,
     ListChecks,
+    ListFilter,
 } from "lucide-react";
 import StatCard from "../features/admin/components/StatCard";
 import useAdminSelection, {
@@ -206,9 +207,10 @@ const JuryVoteDots = ({ film }: JuryVoteDotsProps): React.JSX.Element => {
 
 interface VoteBarProps {
     film: AdminFilmVoteSummary;
+    hideRefuse?: boolean;
 }
 
-const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
+const VoteBar = ({ film, hideRefuse = false }: VoteBarProps): React.JSX.Element => {
     const total = film.votes_valide + film.votes_arevoir + film.votes_refuse;
     if (total === 0) {
         return <span className="text-[0.72rem] text-mist opacity-50">Aucun vote</span>;
@@ -232,10 +234,12 @@ const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
                     <X size={9} className="rotate-180" />
                     {film.votes_arevoir}
                 </span>
-                <span className="flex items-center gap-0.5 text-coral">
-                    <X size={9} />
-                    {film.votes_refuse}
-                </span>
+                {!hideRefuse && (
+                    <span className="flex items-center gap-0.5 text-coral">
+                        <X size={9} />
+                        {film.votes_refuse}
+                    </span>
+                )}
             </div>
         </div>
     );
@@ -244,9 +248,14 @@ const VoteBar = ({ film }: VoteBarProps): React.JSX.Element => {
 interface AdminDecisionProps {
     film: AdminFilmVoteSummary;
     onUpdate: (filmId: number, statut: string) => Promise<void>;
+    hideSelect?: boolean;
 }
 
-const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Element => {
+const AdminDecision = ({
+    film,
+    onUpdate,
+    hideSelect = false,
+}: AdminDecisionProps): React.JSX.Element => {
     const isTop50 = film.statut === "selectionne" || film.statut === "finaliste";
     const isFinaliste = film.statut === "finaliste";
 
@@ -260,55 +269,63 @@ const AdminDecision = ({ film, onUpdate }: AdminDecisionProps): React.JSX.Elemen
 
     return (
         <div className="flex flex-col gap-1.5">
-            <button
-                type="button"
-                onClick={handleToggleTop50}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-display text-[0.72rem] font-extrabold transition-all ${
-                    isTop50
-                        ? "bg-aurora text-deep-sky shadow-[0_2px_12px_rgba(78,255,206,0.35)] hover:opacity-90"
-                        : "border border-white/[0.12] bg-white/[0.04] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
-                }`}
-            >
-                {isTop50 ? (
-                    <>
-                        <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 12 12"
-                            fill="none"
-                            className="shrink-0"
-                        >
-                            <path
-                                d="M2 6l3 3 5-5"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                        Sélectionné
-                    </>
-                ) : (
-                    <>
-                        <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 12 12"
-                            fill="none"
-                            className="shrink-0"
-                        >
-                            <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.4" />
-                            <path
-                                d="M6 4v4M4 6h4"
-                                stroke="currentColor"
-                                strokeWidth="1.4"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                        Sélectionner
-                    </>
-                )}
-            </button>
+            {!hideSelect && (
+                <button
+                    type="button"
+                    onClick={handleToggleTop50}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-display text-[0.72rem] font-extrabold transition-all ${
+                        isTop50
+                            ? "bg-aurora text-deep-sky shadow-[0_2px_12px_rgba(78,255,206,0.35)] hover:opacity-90"
+                            : "border border-white/12 bg-white/4 text-mist hover:border-aurora/30 hover:bg-aurora/6 hover:text-aurora"
+                    }`}
+                >
+                    {isTop50 ? (
+                        <>
+                            <svg
+                                width="11"
+                                height="11"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                                className="shrink-0"
+                            >
+                                <path
+                                    d="M2 6l3 3 5-5"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                            Sélectionné
+                        </>
+                    ) : (
+                        <>
+                            <svg
+                                width="11"
+                                height="11"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                                className="shrink-0"
+                            >
+                                <circle
+                                    cx="6"
+                                    cy="6"
+                                    r="4.5"
+                                    stroke="currentColor"
+                                    strokeWidth="1.4"
+                                />
+                                <path
+                                    d="M6 4v4M4 6h4"
+                                    stroke="currentColor"
+                                    strokeWidth="1.4"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                            Sélectionner
+                        </>
+                    )}
+                </button>
+            )}
             {isTop50 && (
                 <button
                     type="button"
@@ -1038,7 +1055,7 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type Mode = "analyse" | "top50" | "top5";
+type Mode = "analyse" | "preselection" | "top50" | "top5";
 
 const AdminSelectionPage = (): React.JSX.Element => {
     const {
@@ -1074,6 +1091,207 @@ const AdminSelectionPage = (): React.JSX.Element => {
 
     const handleRowClick = (filmId: number): void => {
         setExpandedId((prev) => (prev === filmId ? null : filmId));
+    };
+
+    // ── Pre-selection view ─────────────────────────────────────────────────────
+    const renderPreSelection = (): React.JSX.Element => {
+        const preSelectionFilms = allFilms.filter(
+            (f) => f.votes_valide > 0 && f.votes_refuse === 0,
+        );
+
+        return (
+            <div className="overflow-hidden rounded-xl border border-white/[0.06]">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                #
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Film
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Répartition votes
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Consensus
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Jurés
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Cmts
+                            </th>
+                            <th className="px-4 py-3 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-mist">
+                                Sélectionner
+                            </th>
+                            <th className="w-8 px-2 py-3" />
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {preSelectionFilms.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={8}
+                                    className="px-4 py-12 text-center text-[0.82rem] text-mist"
+                                >
+                                    Aucun film ne correspond aux critères de pré-sélection.
+                                </td>
+                            </tr>
+                        ) : (
+                            preSelectionFilms.map((film, index) => {
+                                const consensus = getConsensus(film);
+                                const badge = CONSENSUS_CONFIG[consensus];
+                                const isSelected =
+                                    film.statut === "selectionne" || film.statut === "finaliste";
+                                return (
+                                    <React.Fragment key={film.film_id}>
+                                        <tr
+                                            onClick={(): void => handleRowClick(film.film_id)}
+                                            className="group/row cursor-pointer border-b border-white/[0.04] transition-colors hover:bg-white/[0.04]"
+                                            title="Cliquez pour voir les détails"
+                                        >
+                                            {/* # */}
+                                            <td className="px-4 py-3 font-mono text-[0.7rem] text-mist">
+                                                {index + 1}
+                                            </td>
+
+                                            {/* Film */}
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="font-mono text-[0.65rem] font-black text-mist opacity-40">
+                                                        {String(film.film_id).padStart(3, "0")}
+                                                    </span>
+                                                    <div className="text-[0.82rem] font-semibold text-white-soft">
+                                                        {film.original_title}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-0.5 font-mono text-[0.62rem] text-mist">
+                                                    {film.dossier_num}
+                                                </div>
+                                            </td>
+
+                                            {/* Répartition votes */}
+                                            <td className="px-4 py-3">
+                                                <VoteBar film={film} hideRefuse />
+                                            </td>
+
+                                            {/* Consensus */}
+                                            <td className="px-4 py-3">
+                                                <span
+                                                    className={`inline-block rounded-full px-2.5 py-1 text-[0.7rem] font-semibold ${badge.cls}`}
+                                                >
+                                                    {badge.label}
+                                                </span>
+                                            </td>
+
+                                            {/* Jurés */}
+                                            <td className="px-4 py-3">
+                                                <JuryVoteDots film={film} />
+                                            </td>
+
+                                            {/* Commentaires */}
+                                            <td className="px-4 py-3 font-mono text-[0.75rem]">
+                                                {film.total_comments > 0 ? (
+                                                    <span className="text-lavande">
+                                                        {film.total_comments}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-mist opacity-40">—</span>
+                                                )}
+                                                {film.total_tickets > 0 && (
+                                                    <span className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-solar/10 px-1.5 py-0.5 text-[0.62rem] text-solar">
+                                                        <Flag size={9} />
+                                                        {film.total_tickets}
+                                                    </span>
+                                                )}
+                                            </td>
+
+                                            {/* Sélectionner */}
+                                            <td
+                                                className="px-4 py-3"
+                                                onClick={(e: React.MouseEvent): void =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={(): void => {
+                                                        void updateStatut(
+                                                            film.film_id,
+                                                            isSelected ? "soumis" : "selectionne",
+                                                        );
+                                                    }}
+                                                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-display text-[0.72rem] font-extrabold transition-all ${
+                                                        isSelected
+                                                            ? "bg-aurora text-deep-sky shadow-[0_2px_12px_rgba(78,255,206,0.35)] hover:opacity-90"
+                                                            : "border border-white/[0.12] bg-white/[0.04] text-mist hover:border-aurora/30 hover:bg-aurora/[0.06] hover:text-aurora"
+                                                    }`}
+                                                >
+                                                    {isSelected ? (
+                                                        <>
+                                                            <svg
+                                                                width="11"
+                                                                height="11"
+                                                                viewBox="0 0 12 12"
+                                                                fill="none"
+                                                                className="shrink-0"
+                                                            >
+                                                                <path
+                                                                    d="M2 6l3 3 5-5"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                />
+                                                            </svg>
+                                                            Sélectionné
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg
+                                                                width="11"
+                                                                height="11"
+                                                                viewBox="0 0 12 12"
+                                                                fill="none"
+                                                                className="shrink-0"
+                                                            >
+                                                                <circle
+                                                                    cx="6"
+                                                                    cy="6"
+                                                                    r="4.5"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="1.4"
+                                                                />
+                                                                <path
+                                                                    d="M6 4v4M4 6h4"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="1.4"
+                                                                    strokeLinecap="round"
+                                                                />
+                                                            </svg>
+                                                            Sélectionner
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </td>
+
+                                            {/* Chevron */}
+                                            <td className="w-8 px-2 py-3 text-right">
+                                                <ChevronRight
+                                                    size={14}
+                                                    className="text-mist opacity-25 transition-all group-hover/row:opacity-80 group-hover/row:text-aurora"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </React.Fragment>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        );
     };
 
     // ── Top 50 special view ────────────────────────────────────────────────────
@@ -1462,7 +1680,11 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                                 e.stopPropagation()
                                             }
                                         >
-                                            <AdminDecision film={film} onUpdate={updateStatut} />
+                                            <AdminDecision
+                                                film={film}
+                                                onUpdate={updateStatut}
+                                                hideSelect
+                                            />
                                         </td>
 
                                         {/* Chevron */}
@@ -1585,8 +1807,8 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             />
                         </div>
 
-                        {/* Mode selector — 3 phases clairement séparées */}
-                        <div className="mb-6 grid grid-cols-3 gap-2">
+                        {/* Mode selector — 4 phases clairement séparées */}
+                        <div className="mb-6 grid grid-cols-4 gap-2">
                             {(
                                 [
                                     {
@@ -1594,6 +1816,14 @@ const AdminSelectionPage = (): React.JSX.Element => {
                                         icon: <LayoutList size={15} />,
                                         label: "Analyse des votes",
                                         sub: `${allFilms.length} films · filtres jury`,
+                                        active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
+                                        iconBg: "bg-aurora/[0.12] text-aurora",
+                                    },
+                                    {
+                                        key: "preselection" as Mode,
+                                        icon: <ListFilter size={15} />,
+                                        label: "Pré-sélection",
+                                        sub: `${allFilms.filter((f) => f.votes_valide > 0 && f.votes_refuse === 0).length} films éligibles`,
                                         active: "border-aurora/30 bg-aurora/[0.08] text-aurora",
                                         iconBg: "bg-aurora/[0.12] text-aurora",
                                     },
@@ -1707,7 +1937,9 @@ const AdminSelectionPage = (): React.JSX.Element => {
                             ? renderTop50()
                             : mode === "top5"
                               ? renderTop5()
-                              : renderDefaultTable()}
+                              : mode === "preselection"
+                                ? renderPreSelection()
+                                : renderDefaultTable()}
 
                         {/* Row expand hint */}
                         {mode === "analyse" && filtered.length > 0 && (
