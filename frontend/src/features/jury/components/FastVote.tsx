@@ -254,6 +254,12 @@ const FastVote = ({
         });
     }, []);
 
+    const closePanel = useCallback((): void => {
+        setPanelType(null);
+        setPanelMessage("");
+        setPanelTag(null);
+    }, []);
+
     const confirmPanel = useCallback(
         (withMessage: boolean): void => {
             if (!panelType || isFlying || !currentFilm) return;
@@ -261,12 +267,10 @@ const FastVote = ({
             const msg = withMessage && panelMessage.trim() ? panelMessage.trim() : undefined;
             const toX = decision === "refuse" ? -window.innerWidth * 1.5 : 0;
             const toY = decision === "aRevoir" ? -window.innerHeight * 1.5 : 0;
-            setPanelType(null);
-            setPanelMessage("");
-            setPanelTag(null);
+            closePanel();
             flyAndVote(decision, toX, toY, msg);
         },
-        [panelType, isFlying, currentFilm, panelMessage, flyAndVote],
+        [panelType, isFlying, currentFilm, panelMessage, flyAndVote, closePanel],
     );
 
     const handleVoteButton = useCallback(
@@ -485,7 +489,7 @@ const FastVote = ({
                 switch (e.key) {
                     case "Escape":
                         e.preventDefault();
-                        confirmPanel(false);
+                        closePanel();
                         break;
                     case "Enter":
                         if (!e.shiftKey && tag !== "TEXTAREA") {
@@ -545,6 +549,7 @@ const FastVote = ({
         handleUndo,
         panelType,
         confirmPanel,
+        closePanel,
         selectTag,
         tags,
     ]);
@@ -1406,7 +1411,7 @@ const FastVote = ({
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
-                        onClick={() => confirmPanel(false)}
+                        onClick={closePanel}
                     />
                     {/* Sheet */}
                     <div
