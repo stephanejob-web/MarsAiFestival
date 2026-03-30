@@ -54,12 +54,7 @@ const JuryPanel = (): React.JSX.Element => {
                     }}
                 />
                 {(panel.activeView === "eval" || panel.activeView === "tinder") && (
-                    <EvalView
-                        panel={panel}
-                        onVoteDirect={panel.voteDirect}
-                        showToast={panel.showToast}
-                        voteMode={voteMode}
-                    />
+                    <EvalView panel={panel} voteMode={voteMode} />
                 )}
                 {panel.activeView === "listes" && <ListesView />}
                 {panel.activeView === "discuter" && <DiscuterView panel={panel} />}

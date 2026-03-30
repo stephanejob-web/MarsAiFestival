@@ -20,13 +20,12 @@ import {
 } from "lucide-react";
 
 import type { Decision, JuryFilm } from "../types";
+import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useVoteTags from "../hooks/useVoteTags";
 import type { VoteTag } from "../hooks/useVoteTags";
 
-interface TinderViewProps {
-    films: JuryFilm[];
-    onVoteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
-    showToast: (message: string) => void;
+interface FastVoteProps {
+    panel: UseJuryPanelReturn;
     skipIntro?: boolean;
     onIntroComplete?: () => void;
 }
@@ -93,14 +92,16 @@ const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
     round: i % 2 === 0,
 }));
 
-const TinderView = ({
-    films,
-    onVoteDirect,
-    showToast,
+const FastVote = ({
+    panel,
     skipIntro = false,
     onIntroComplete,
-}: TinderViewProps): React.JSX.Element => {
-    const [pendingFilms] = useState<JuryFilm[]>(() => films.filter((f) => f.myDecision === null));
+}: FastVoteProps): React.JSX.Element => {
+    const { films, voteDirect: onVoteDirect, showToast } = panel;
+
+    const [pendingFilms] = useState<JuryFilm[]>(() =>
+        films.filter((f: JuryFilm) => f.myDecision === null),
+    );
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
 
@@ -1497,4 +1498,4 @@ const TinderView = ({
     );
 };
 
-export default TinderView;
+export default FastVote;
