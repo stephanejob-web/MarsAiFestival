@@ -35,6 +35,10 @@ const VIEW_META: Record<ActiveView, ViewMeta> = {
         title: "Vote rapide",
         subtitle: "Swipe pour voter sur les films un par un",
     },
+    mobile: {
+        title: "Application mobile",
+        subtitle: "Votez depuis votre téléphone — rapide, fluide, intuitif",
+    },
 };
 
 const JuryTopbar = ({ activeView, onDisconnect }: JuryTopbarProps): React.JSX.Element => {

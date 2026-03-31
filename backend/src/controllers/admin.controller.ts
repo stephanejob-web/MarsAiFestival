@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { listVideosFromS3, getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
 import { getFilms } from "../repositories/film.repository";
+import { resetAllVotes } from "../repositories/vote.repository";
 import {
     generateInviteToken,
     verifyInviteToken,
@@ -401,5 +402,18 @@ export const verifyInvite = (_req: Request, res: Response): void => {
         res.json({ success: true, email: payload.email, role: payload.role });
     } catch {
         res.status(401).json({ success: false, message: "Token invalide ou expiré." });
+    }
+};
+
+// ── DELETE /api/admin/votes/reset — Remet tous les votes à NULL (tests/dev) ───
+export const resetAllVotesHandler = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const affected = await resetAllVotes();
+        res.json({ success: true, message: `${affected} vote(s) réinitialisé(s).`, affected });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+        });
     }
 };

@@ -1,0 +1,56 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.vps
+    ports:
+      - "8001:5173"
+    environment:
+      - VITE_API_URL=
+      - VITE_LIVEKIT_URL=wss://marai-1fs2judn.livekit.cloud
+      - BACKEND_URL=http://backend:5500
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend.vps
+    expose:
+      - "5500"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=marsai
+      - DB_USER=root
+      - DB_PASSWORD=marsai_dev_2026
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: marsai_dev_2026
+      MYSQL_DATABASE: marsai
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:

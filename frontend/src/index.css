@@ -80,7 +80,8 @@
 }
 
 @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0px);
     }
     50% {
@@ -98,7 +99,8 @@
 }
 
 @keyframes scroll-indicator {
-    0%, 100% {
+    0%,
+    100% {
         opacity: 1;
         transform: translateY(0);
     }
@@ -224,6 +226,97 @@ h1 {
     will-change: transform;
 }
 
+/* ── FastVote — demo card swing animation (3 phases: right, left, up) ── */
+@keyframes demo-card-swing {
+    /* Phase 1 — swing RIGHT */
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    9% {
+        transform: translate(70px, 0) rotate(9deg);
+    }
+    20%,
+    33% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    /* Phase 2 — swing LEFT */
+    43% {
+        transform: translate(-70px, 0) rotate(-9deg);
+    }
+    54%,
+    67% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    /* Phase 3 — swing UP */
+    77% {
+        transform: translate(0, -72px) rotate(0deg);
+    }
+    88%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+@keyframes demo-hint-right {
+    0%,
+    4% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    19% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes demo-hint-left {
+    0%,
+    37% {
+        opacity: 0;
+    }
+    43% {
+        opacity: 1;
+    }
+    53% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes demo-hint-up {
+    0%,
+    71% {
+        opacity: 0;
+    }
+    77% {
+        opacity: 1;
+    }
+    87% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.demo-card-swing {
+    animation: demo-card-swing 5.4s ease-in-out infinite;
+    will-change: transform;
+}
+.demo-hint-right {
+    animation: demo-hint-right 5.4s ease-in-out infinite;
+}
+.demo-hint-left {
+    animation: demo-hint-left 5.4s ease-in-out infinite;
+}
+.demo-hint-up {
+    animation: demo-hint-up 5.4s ease-in-out infinite;
+}
+
 /* ── Timeline line draw ────────────────────────────────────────── */
 .timeline-draw {
     position: absolute;
@@ -231,11 +324,7 @@ h1 {
     top: 0;
     width: 1px;
     height: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(78, 255, 206, 0.25),
-        rgba(255, 255, 255, 0.04)
-    );
+    background: linear-gradient(to bottom, rgba(78, 255, 206, 0.25), rgba(255, 255, 255, 0.04));
     transition: height 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s;
 }
 .timeline-draw[data-visible="true"] {

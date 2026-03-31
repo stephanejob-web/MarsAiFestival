@@ -2,15 +2,18 @@ import React from "react";
 import { Clapperboard } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
+import type { VoteMode } from "../hooks/useVoteMode";
 import FilmDetail from "./FilmDetail";
 import FilmList from "./FilmList";
 import NotationPanel from "./NotationPanel";
+import FastVote from "./FastVote";
 
 interface EvalViewProps {
     panel: UseJuryPanelReturn;
+    voteMode: VoteMode;
 }
 
-const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
+const EvalView = ({ panel, voteMode }: EvalViewProps): React.JSX.Element => {
     const handlePublish = (): void => {
         panel.handleCommentPublish();
     };
@@ -31,6 +34,17 @@ const EvalView = ({ panel }: EvalViewProps): React.JSX.Element => {
                 </div>
             </div>
         );
+    }
+
+    if (voteMode === "rapide") {
+        if (panel.isLoadingFilms) {
+            return (
+                <div className="flex flex-1 items-center justify-center">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+                </div>
+            );
+        }
+        return <FastVote panel={panel} />;
     }
 
     return (
