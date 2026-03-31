@@ -20,13 +20,12 @@ import {
 } from "lucide-react";
 
 import type { Decision, JuryFilm } from "../types";
+import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useVoteTags from "../hooks/useVoteTags";
 import type { VoteTag } from "../hooks/useVoteTags";
 
-interface TinderViewProps {
-    films: JuryFilm[];
-    onVoteDirect: (filmId: number, decision: Exclude<Decision, null>, message?: string) => void;
-    showToast: (message: string) => void;
+interface FastVoteProps {
+    panel: UseJuryPanelReturn;
     skipIntro?: boolean;
     onIntroComplete?: () => void;
 }
@@ -93,14 +92,16 @@ const CONFETTI = Array.from({ length: 30 }, (_, i) => ({
     round: i % 2 === 0,
 }));
 
-const TinderView = ({
-    films,
-    onVoteDirect,
-    showToast,
+const FastVote = ({
+    panel,
     skipIntro = false,
     onIntroComplete,
-}: TinderViewProps): React.JSX.Element => {
-    const [pendingFilms] = useState<JuryFilm[]>(() => films.filter((f) => f.myDecision === null));
+}: FastVoteProps): React.JSX.Element => {
+    const { films, voteDirect: onVoteDirect, showToast } = panel;
+
+    const [pendingFilms] = useState<JuryFilm[]>(() =>
+        films.filter((f: JuryFilm) => f.myDecision === null),
+    );
     const [currentIndex, setCurrentIndex] = useState(0);
     const [history, setHistory] = useState<number[]>([]);
 
@@ -253,6 +254,12 @@ const TinderView = ({
         });
     }, []);
 
+    const closePanel = useCallback((): void => {
+        setPanelType(null);
+        setPanelMessage("");
+        setPanelTag(null);
+    }, []);
+
     const confirmPanel = useCallback(
         (withMessage: boolean): void => {
             if (!panelType || isFlying || !currentFilm) return;
@@ -260,12 +267,10 @@ const TinderView = ({
             const msg = withMessage && panelMessage.trim() ? panelMessage.trim() : undefined;
             const toX = decision === "refuse" ? -window.innerWidth * 1.5 : 0;
             const toY = decision === "aRevoir" ? -window.innerHeight * 1.5 : 0;
-            setPanelType(null);
-            setPanelMessage("");
-            setPanelTag(null);
+            closePanel();
             flyAndVote(decision, toX, toY, msg);
         },
-        [panelType, isFlying, currentFilm, panelMessage, flyAndVote],
+        [panelType, isFlying, currentFilm, panelMessage, flyAndVote, closePanel],
     );
 
     const handleVoteButton = useCallback(
@@ -407,7 +412,7 @@ const TinderView = ({
         const isUpwardSwipe = absY > absX && dy < -SWIPE_Y_THRESHOLD;
 
         if (isUpwardSwipe) {
-            flyAndVote("aRevoir", 0, -window.innerHeight * 1.5);
+            openPanel("aRevoir", 0, -window.innerHeight * 1.5);
         } else if (absX > SWIPE_THRESHOLD) {
             if (dx > 0) {
                 flyAndVote("valide", window.innerWidth * 1.5, 0);
@@ -484,7 +489,7 @@ const TinderView = ({
                 switch (e.key) {
                     case "Escape":
                         e.preventDefault();
-                        confirmPanel(false);
+                        closePanel();
                         break;
                     case "Enter":
                         if (!e.shiftKey && tag !== "TEXTAREA") {
@@ -511,6 +516,9 @@ const TinderView = ({
                     break;
                 case "ArrowLeft":
                     openPanel("refuse");
+                    break;
+                case "ArrowUp":
+                    openPanel("aRevoir");
                     break;
                 case "r":
                 case "R":
@@ -544,6 +552,7 @@ const TinderView = ({
         handleUndo,
         panelType,
         confirmPanel,
+        closePanel,
         selectTag,
         tags,
     ]);
@@ -1405,7 +1414,7 @@ const TinderView = ({
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
-                        onClick={() => confirmPanel(false)}
+                        onClick={closePanel}
                     />
                     {/* Sheet */}
                     <div
@@ -1497,4 +1506,4 @@ const TinderView = ({
     );
 };
 
-export default TinderView;
+export default FastVote;
