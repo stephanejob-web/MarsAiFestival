@@ -5,6 +5,8 @@ import {
     createTag,
     updateTag,
     deleteTag,
+    setdefault,
+    VoteTagType,
 } from "../repositories/voteTag.repository";
 
 // ── GET /api/vote-tags — Liste des étiquettes actives (jury) ──────────────────
@@ -29,20 +31,34 @@ export const listAllTags = async (_req: Request, res: Response): Promise<void> =
 
 // ── POST /api/vote-tags — Créer une étiquette (admin) ────────────────────────
 export const addTag = async (req: Request, res: Response): Promise<void> => {
-    const { key, label, icon, color, sortOrder, messageTemplate } = req.body as {
+    const { key, label, icon, color, type, sortOrder, isDefault, messageTemplate } = req.body as {
         key?: string;
         label?: string;
         icon?: string;
         color?: string;
+        type?: VoteTagType;
         sortOrder?: number;
+        isDefault?: boolean;
         messageTemplate?: string;
     };
-    if (!key || !label || !icon || !color) {
-        res.status(400).json({ success: false, message: "key, label, icon et color sont requis." });
+    if (!key || !label || !icon || !color || !type) {
+        res.status(400).json({
+            success: false,
+            message: "key, label, icon, color et type sont requis.",
+        });
         return;
     }
     try {
-        const id = await createTag(key, label, icon, color, sortOrder ?? 0, messageTemplate);
+        const id = await createTag(
+            key,
+            label,
+            icon,
+            color,
+            type,
+            sortOrder ?? 0,
+            isDefault ?? false,
+            messageTemplate,
+        );
         res.status(201).json({ success: true, data: { id } });
     } catch (err) {
         const msg = err instanceof Error ? err.message : "Erreur serveur";
@@ -53,20 +69,36 @@ export const addTag = async (req: Request, res: Response): Promise<void> => {
 // ── PATCH /api/vote-tags/:id — Modifier une étiquette (admin) ─────────────────
 export const editTag = async (req: Request, res: Response): Promise<void> => {
     const id = Number(req.params.id);
-    const { label, icon, color, isActive, sortOrder, messageTemplate } = req.body as {
-        label?: string;
-        icon?: string;
-        color?: string;
-        isActive?: boolean;
-        sortOrder?: number;
-        messageTemplate?: string;
-    };
-    if (!label || !icon || !color) {
-        res.status(400).json({ success: false, message: "label, icon et color sont requis." });
+    const { label, icon, color, type, isActive, isDefault, sortOrder, messageTemplate } =
+        req.body as {
+            label?: string;
+            icon?: string;
+            color?: string;
+            type?: VoteTagType;
+            isActive?: boolean;
+            isDefault?: boolean;
+            sortOrder?: number;
+            messageTemplate?: string;
+        };
+    if (!label || !icon || !color || !type) {
+        res.status(400).json({
+            success: false,
+            message: "label, icon, color et type sont requis.",
+        });
         return;
     }
     try {
-        await updateTag(id, label, icon, color, isActive ?? true, sortOrder ?? 0, messageTemplate);
+        await updateTag(
+            id,
+            label,
+            icon,
+            color,
+            type,
+            isActive ?? true,
+            isDefault ?? false,
+            sortOrder ?? 0,
+            messageTemplate,
+        );
         res.json({ success: true });
     } catch {
         res.status(500).json({ success: false, message: "Erreur serveur" });
@@ -78,6 +110,17 @@ export const removeTag = async (req: Request, res: Response): Promise<void> => {
     const id = Number(req.params.id);
     try {
         await deleteTag(id);
+        res.json({ success: true });
+    } catch {
+        res.status(500).json({ success: false, message: "Erreur serveur" });
+    }
+};
+
+// ── PATCH /api/vote-tags/:id/default — Définir l'étiquette par défaut (admin) ─
+export const changeTagDefault = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    try {
+        await setdefault(id);
         res.json({ success: true });
     } catch {
         res.status(500).json({ success: false, message: "Erreur serveur" });
