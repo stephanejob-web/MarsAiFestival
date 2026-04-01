@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import type { ReasonTag } from "../types";
 import useVoteTags from "../hooks/useVoteTags";
@@ -25,7 +25,19 @@ const ModalARevoir = ({
     onConfirm,
 }: ModalAReVoirProps): React.JSX.Element | null => {
     const [showError, setShowError] = useState<boolean>(false);
-    const tags = useVoteTags();
+    const allTags = useVoteTags();
+    const tags = allTags.filter((t) => t.type === "a_revoir");
+
+    useEffect((): void => {
+        if (!isOpen) return;
+        const defaultTag = tags.find((t) => t.is_default);
+        if (defaultTag && !selectedReason && !message.trim()) {
+            onReasonSelect(defaultTag.key);
+            if (defaultTag.message_template) {
+                onMessageChange(defaultTag.message_template);
+            }
+        }
+    }, [isOpen, tags, selectedReason, message, onReasonSelect, onMessageChange]);
 
     if (!isOpen) return null;
 
