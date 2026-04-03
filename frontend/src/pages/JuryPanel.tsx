@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,6 +13,7 @@ import ListesView from "../features/jury/components/ListesView";
 import MobileAppView from "../features/jury/components/MobileAppView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
 import ModalRefuse from "../features/jury/components/ModalRefuse";
+import ModernView from "../features/jury/components/ModernView";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
 import useVoteMode from "../features/jury/hooks/useVoteMode";
@@ -21,11 +22,22 @@ import BanModal from "../features/admin/components/BanModal";
 import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
 import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 
+type EvalVariant = "classic" | "modern";
+
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
     const { mode: voteMode, setMode: setVoteMode } = useVoteMode();
     const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
+
+    const [evalVariant, setEvalVariantState] = useState<EvalVariant>(
+        () => (localStorage.getItem("jury_eval_variant") as EvalVariant | null) ?? "classic",
+    );
+
+    const handleEvalVariantChange = (v: EvalVariant): void => {
+        localStorage.setItem("jury_eval_variant", v);
+        setEvalVariantState(v);
+    };
 
     if (!user) return <Navigate to="/jury" replace />;
 
@@ -47,15 +59,25 @@ const JuryPanel = (): React.JSX.Element => {
                 onVoteModeChange={setVoteMode}
             />
             <div className="flex flex-1 flex-col overflow-hidden">
-                <JuryTopbar
-                    activeView={panel.activeView}
-                    onDisconnect={() => {
-                        // Navigation handled inside JuryTopbar
-                    }}
-                />
-                {(panel.activeView === "eval" || panel.activeView === "tinder") && (
-                    <EvalView panel={panel} voteMode={voteMode} />
+                {!(
+                    evalVariant === "modern" &&
+                    (panel.activeView === "eval" || panel.activeView === "tinder")
+                ) && (
+                    <JuryTopbar
+                        activeView={panel.activeView}
+                        evalVariant={evalVariant}
+                        onEvalVariantChange={handleEvalVariantChange}
+                        onDisconnect={() => {
+                            // Navigation handled inside JuryTopbar
+                        }}
+                    />
                 )}
+                {(panel.activeView === "eval" || panel.activeView === "tinder") &&
+                    (evalVariant === "modern" ? (
+                        <ModernView panel={panel} onEvalVariantChange={handleEvalVariantChange} />
+                    ) : (
+                        <EvalView panel={panel} voteMode={voteMode} />
+                    ))}
                 {panel.activeView === "listes" && <ListesView />}
                 {panel.activeView === "discuter" && <DiscuterView panel={panel} />}
                 {panel.activeView === "delib" && <DelibView />}
