@@ -1,4 +1,3 @@
-import React from "react";
 import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug } from "lucide-react";
 import type { AdminNavCategory } from "./types";
 

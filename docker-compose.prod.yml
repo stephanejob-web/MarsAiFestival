@@ -45,8 +45,9 @@ services:
     restart: unless-stopped
     ports:
       - "3307:3306"
+    env_file:
+      - .env.vps
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: marsai
     volumes:
       - mysql-data:/var/lib/mysql

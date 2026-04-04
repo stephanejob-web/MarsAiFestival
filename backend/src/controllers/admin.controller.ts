@@ -135,7 +135,6 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
             const existing = await getModeratorPermissions(id);
             if (!existing) {
                 await updateModeratorPermissions(id, {
-                    can_manage_users: false,
                     can_access_admin: false,
                     can_disable_accounts: false,
                     can_ban_users: false,

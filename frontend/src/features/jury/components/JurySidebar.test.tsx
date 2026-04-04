@@ -46,6 +46,8 @@ const defaultProps = {
     totalFilms: 5,
     isChatOpen: false,
     onChatToggle: vi.fn(),
+    voteMode: "normal" as const,
+    onVoteModeChange: vi.fn(),
 };
 
 const renderSidebar = (overrides = {}): void => {

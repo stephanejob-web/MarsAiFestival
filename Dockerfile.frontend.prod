@@ -14,7 +14,7 @@ COPY frontend/tsconfig.json ./
 COPY frontend/tsconfig.app.json ./
 COPY frontend/tsconfig.node.json ./
 
-RUN npm run build
+RUN npx vite build
 
 # ── Stage 2 : Serve avec nginx ────────────────────────────────────────────────
 FROM nginx:alpine
