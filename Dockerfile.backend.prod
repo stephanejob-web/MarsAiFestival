@@ -10,6 +10,7 @@ COPY backend/src ./src
 COPY backend/tsconfig.json ./
 
 RUN npx tsc || true
+COPY backend/src/openapi.yaml ./dist/openapi.yaml
 
 # ── Stage 2 : Production ──────────────────────────────────────────────────────
 FROM node:20-alpine
