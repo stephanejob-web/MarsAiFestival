@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Camera, ImageIcon, KeyRound, X } from "lucide-react";
 import useJuryUser from "../hooks/useJuryUser";
 
-const API = import.meta.env.VITE_API_URL as string;
+const API = (import.meta.env.VITE_API_URL as string) || "";
 
 interface ProfileModalProps {
     onClose: () => void;
