@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend.prod
+      args:
+        - VITE_GOOGLE_CLIENT_ID=772416103398-0cif2a7lj8j6agcp49g2ab14fh7so8ep.apps.googleusercontent.com
     container_name: marsai-frontend
     restart: unless-stopped
     depends_on:
