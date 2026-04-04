@@ -14,6 +14,7 @@ frontend/dist/
 .env.*.local
 backend/.env
 frontend/.env
+.env.vps
 
 ## ── Logs ─────────────────────────────────────────────────────────
 logs/

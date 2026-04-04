@@ -1,0 +1,70 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.prod
+    container_name: marsai-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.marsai.rule=Host(`marsai.lightchurch.fr`)"
+      - "traefik.http.routers.marsai.entrypoints=websecure"
+      - "traefik.http.routers.marsai.tls.certresolver=letsencrypt"
+      - "traefik.http.services.marsai.loadbalancer.server.port=80"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend.prod
+    container_name: marsai-backend
+    restart: unless-stopped
+    env_file:
+      - .env.vps
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=marsai
+      - DB_USER=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - backend-uploads:/app/uploads
+    networks:
+      - marsai-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: marsai-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: marsai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - marsai-network
+
+volumes:
+  mysql-data:
+  backend-uploads:
+
+networks:
+  marsai-network:
+    driver: bridge
+  traefik-network:
+    external: true
