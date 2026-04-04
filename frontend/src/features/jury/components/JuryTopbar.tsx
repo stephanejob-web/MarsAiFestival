@@ -4,9 +4,13 @@ import { ArrowLeft, LogOut } from "lucide-react";
 
 import type { ActiveView } from "../types";
 
+type EvalVariant = "classic" | "modern";
+
 interface JuryTopbarProps {
     activeView: ActiveView;
     onDisconnect: () => void;
+    evalVariant?: EvalVariant;
+    onEvalVariantChange?: (v: EvalVariant) => void;
 }
 
 interface ViewMeta {
@@ -41,9 +45,18 @@ const VIEW_META: Record<ActiveView, ViewMeta> = {
     },
 };
 
-const JuryTopbar = ({ activeView, onDisconnect }: JuryTopbarProps): React.JSX.Element => {
+const JuryTopbar = ({
+    activeView,
+    onDisconnect,
+    evalVariant,
+    onEvalVariantChange,
+}: JuryTopbarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const meta = VIEW_META[activeView];
+    const showVariantToggle =
+        (activeView === "eval" || activeView === "tinder") &&
+        evalVariant !== undefined &&
+        onEvalVariantChange !== undefined;
 
     const handleDisconnect = (): void => {
         onDisconnect();
@@ -59,6 +72,32 @@ const JuryTopbar = ({ activeView, onDisconnect }: JuryTopbarProps): React.JSX.El
                 <span className="rounded-full border border-aurora/25 bg-aurora/10 px-3 py-1 text-[0.7rem] font-bold tracking-[0.04em] text-aurora">
                     Phase 1 · Top 50 · 12/12/26
                 </span>
+                {showVariantToggle && (
+                    <div className="flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5">
+                        <button
+                            type="button"
+                            onClick={() => onEvalVariantChange("classic")}
+                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                                evalVariant === "classic"
+                                    ? "bg-white/15 text-white-soft shadow-sm"
+                                    : "text-mist hover:text-white-soft"
+                            }`}
+                        >
+                            EvalView
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onEvalVariantChange("modern")}
+                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                                evalVariant === "modern"
+                                    ? "bg-white/15 text-white-soft shadow-sm"
+                                    : "text-mist hover:text-white-soft"
+                            }`}
+                        >
+                            ModernView
+                        </button>
+                    </div>
+                )}
                 <button
                     type="button"
                     onClick={() => navigate("/")}

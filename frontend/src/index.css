@@ -226,37 +226,81 @@ h1 {
     will-change: transform;
 }
 
-/* ── TinderView — demo card swing animation (3 phases: right, left, up) ── */
+/* ── FastVote — demo card swing animation (3 phases: right, left, up) ── */
 @keyframes demo-card-swing {
     /* Phase 1 — swing RIGHT */
-    0%        { transform: translate(0,     0)    rotate(0deg);   }
-    9%        { transform: translate(70px,  0)    rotate(9deg);   }
-    20%,33%   { transform: translate(0,     0)    rotate(0deg);   }
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    9% {
+        transform: translate(70px, 0) rotate(9deg);
+    }
+    20%,
+    33% {
+        transform: translate(0, 0) rotate(0deg);
+    }
     /* Phase 2 — swing LEFT */
-    43%       { transform: translate(-70px, 0)    rotate(-9deg);  }
-    54%,67%   { transform: translate(0,     0)    rotate(0deg);   }
+    43% {
+        transform: translate(-70px, 0) rotate(-9deg);
+    }
+    54%,
+    67% {
+        transform: translate(0, 0) rotate(0deg);
+    }
     /* Phase 3 — swing UP */
-    77%       { transform: translate(0,    -72px) rotate(0deg);   }
-    88%,100%  { transform: translate(0,     0)    rotate(0deg);   }
+    77% {
+        transform: translate(0, -72px) rotate(0deg);
+    }
+    88%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
 }
 
 @keyframes demo-hint-right {
-    0%,4%  { opacity: 0; }
-    10%    { opacity: 1; }
-    19%    { opacity: 0; }
-    100%   { opacity: 0; }
+    0%,
+    4% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    19% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 @keyframes demo-hint-left {
-    0%,37%  { opacity: 0; }
-    43%     { opacity: 1; }
-    53%     { opacity: 0; }
-    100%    { opacity: 0; }
+    0%,
+    37% {
+        opacity: 0;
+    }
+    43% {
+        opacity: 1;
+    }
+    53% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 @keyframes demo-hint-up {
-    0%,71%  { opacity: 0; }
-    77%     { opacity: 1; }
-    87%     { opacity: 0; }
-    100%    { opacity: 0; }
+    0%,
+    71% {
+        opacity: 0;
+    }
+    77% {
+        opacity: 1;
+    }
+    87% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .demo-card-swing {
