@@ -13,7 +13,7 @@ import { Track } from "livekit-client";
 import type { Participant, TrackPublication } from "livekit-client";
 import { Camera, Maximize2, Mic, MicOff, Minimize2, Monitor, PhoneOff, Video } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL as string;
+const API = (import.meta.env.VITE_API_URL as string) || "";
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL as string;
 
 // ── Tuile participant mini (mode réduit) ──────────────────────────────────────
