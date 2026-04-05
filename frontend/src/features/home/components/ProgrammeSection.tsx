@@ -127,7 +127,7 @@ const ProgrammeSection = (): React.JSX.Element => {
 
                 {/* Onglets jours — cachés si 0 ou 1 jour */}
                 {DAYS.length > 1 && (
-                    <div className="flex gap-2 justify-center mb-10">
+                    <div className="flex flex-wrap gap-2 justify-center mb-10">
                         {DAYS.map((d, i) => (
                             <button
                                 key={i}
