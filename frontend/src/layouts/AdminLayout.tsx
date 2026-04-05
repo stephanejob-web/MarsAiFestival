@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ArrowLeft, Menu } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,14 +11,8 @@ import SessionExpiredModal from "../features/admin/components/SessionExpiredModa
 
 const AdminLayout = (): React.JSX.Element => {
     const navigate = useNavigate();
-    const location = useLocation();
     const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
-    // Fermer le sidebar au changement de route (mobile)
-    useEffect(() => {
-        setSidebarOpen(false);
-    }, [location.pathname]);
 
     // Bloquer le scroll quand le sidebar mobile est ouvert
     useEffect(() => {

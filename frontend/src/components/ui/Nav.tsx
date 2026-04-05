@@ -4,6 +4,44 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { usePhase } from "../../features/home/hooks/usePhase";
 
+const LangSwitcher = ({
+    currentLang,
+    onToggle,
+    ariaLabel,
+    compact = false,
+}: {
+    currentLang: "fr" | "en";
+    onToggle: () => void;
+    ariaLabel: string;
+    compact?: boolean;
+}): React.JSX.Element => (
+    <button
+        onClick={onToggle}
+        className={`flex items-center gap-0 font-mono text-xs border border-white/20 hover:border-aurora/50 rounded-md overflow-hidden transition-colors ${compact ? "shrink-0" : ""}`}
+        aria-label={ariaLabel}
+    >
+        <span
+            className={`px-2 py-1.5 transition-colors ${
+                currentLang === "fr"
+                    ? "bg-aurora text-deep-sky font-bold"
+                    : "text-white/40 hover:text-white/70"
+            }`}
+        >
+            FR
+        </span>
+        <span className="w-px h-4 bg-white/15" />
+        <span
+            className={`px-2 py-1.5 transition-colors ${
+                currentLang === "en"
+                    ? "bg-aurora text-deep-sky font-bold"
+                    : "text-white/40 hover:text-white/70"
+            }`}
+        >
+            EN
+        </span>
+    </button>
+);
+
 const Nav = (): React.JSX.Element => {
     const [scrolled, setScrolled] = useState<boolean>(false);
     const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -29,11 +67,6 @@ const Nav = (): React.JSX.Element => {
         window.addEventListener("scroll", onScroll, { passive: true });
         return (): void => window.removeEventListener("scroll", onScroll);
     }, []);
-
-    // Fermer le menu mobile au changement de route
-    useEffect((): void => {
-        setMobileOpen(false);
-    }, [location.pathname]);
 
     // Bloquer le scroll body quand le menu mobile est ouvert
     useEffect((): (() => void) => {
@@ -65,34 +98,6 @@ const Nav = (): React.JSX.Element => {
         const next = currentLang === "fr" ? "en" : "fr";
         i18n.changeLanguage(next);
     };
-
-    const LangSwitcher = ({ compact = false }: { compact?: boolean }): React.JSX.Element => (
-        <button
-            onClick={toggleLang}
-            className={`flex items-center gap-0 font-mono text-xs border border-white/20 hover:border-aurora/50 rounded-md overflow-hidden transition-colors ${compact ? "shrink-0" : ""}`}
-            aria-label={`Switch language to ${t("nav.langSwitch")}`}
-        >
-            <span
-                className={`px-2 py-1.5 transition-colors ${
-                    currentLang === "fr"
-                        ? "bg-aurora text-deep-sky font-bold"
-                        : "text-white/40 hover:text-white/70"
-                }`}
-            >
-                FR
-            </span>
-            <span className="w-px h-4 bg-white/15" />
-            <span
-                className={`px-2 py-1.5 transition-colors ${
-                    currentLang === "en"
-                        ? "bg-aurora text-deep-sky font-bold"
-                        : "text-white/40 hover:text-white/70"
-                }`}
-            >
-                EN
-            </span>
-        </button>
-    );
 
     return (
         <>
@@ -135,7 +140,11 @@ const Nav = (): React.JSX.Element => {
 
                     {/* Actions — desktop uniquement */}
                     <div className="hidden md:flex items-center gap-2 shrink-0">
-                        <LangSwitcher />
+                        <LangSwitcher
+                            currentLang={currentLang}
+                            onToggle={toggleLang}
+                            ariaLabel={`Switch language to ${t("nav.langSwitch")}`}
+                        />
 
                         {ctaEnabled ? (
                             <Link
@@ -168,7 +177,12 @@ const Nav = (): React.JSX.Element => {
 
                     {/* Mobile : langue + hamburger */}
                     <div className="flex md:hidden items-center gap-2 shrink-0">
-                        <LangSwitcher compact />
+                        <LangSwitcher
+                            currentLang={currentLang}
+                            onToggle={toggleLang}
+                            ariaLabel={`Switch language to ${t("nav.langSwitch")}`}
+                            compact
+                        />
                         <button
                             onClick={(): void => setMobileOpen((v) => !v)}
                             className="w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-lg border border-white/15 hover:border-aurora/40 transition-colors"

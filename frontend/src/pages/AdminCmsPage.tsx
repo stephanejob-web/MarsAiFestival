@@ -215,7 +215,9 @@ const AdminCmsPage = (): React.JSX.Element => {
                     CMS
                 </span>
                 <div className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
-                <span className="hidden sm:block text-[0.75rem] text-mist truncate">Gestion du contenu public</span>
+                <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                    Gestion du contenu public
+                </span>
 
                 <div className="ml-auto flex items-center gap-2">
                     {/* Live indicator */}

@@ -76,10 +76,13 @@ const AdminPage = (): React.JSX.Element => {
                             }
                         >
                             {isInVocal ? <MicOff size={14} /> : <Mic size={14} />}
-                            <span className="hidden sm:inline">{isInVocal ? "Quitter le vocal" : "Lancer un vocal"}</span>
+                            <span className="hidden sm:inline">
+                                {isInVocal ? "Quitter le vocal" : "Lancer un vocal"}
+                            </span>
                         </button>
                         <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2 py-1 font-mono text-[0.7rem] text-mist">
-                            <ShieldCheck size={13} /> <span className="hidden sm:inline">Admin</span>
+                            <ShieldCheck size={13} />{" "}
+                            <span className="hidden sm:inline">Admin</span>
                         </span>
                     </div>
                 </div>
@@ -143,9 +146,11 @@ const AdminPage = (): React.JSX.Element => {
                                 <button
                                     type="button"
                                     onClick={() => setIsInviteOpen(true)}
+                                    aria-label="Inviter un membre"
                                     className="flex items-center gap-2 rounded-[9px] bg-aurora px-4 py-2 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
                                 >
-                                    ✉ Inviter
+                                    ✉ <span className="hidden sm:inline">Inviter un membre</span>
+                                    <span className="sm:hidden">Inviter</span>
                                 </button>
                             </div>
 
