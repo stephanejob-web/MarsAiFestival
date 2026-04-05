@@ -186,7 +186,7 @@ const HeroSection = (): React.JSX.Element => {
             />
 
             {/* Contenu principal centré */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-24 pb-72">
+            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 w-full max-w-7xl mx-auto pt-16 pb-40 sm:pt-24 sm:pb-72">
                 {/* Co-création label */}
                 <p
                     className="font-mono text-xs text-mist/60 mb-6 tracking-wider"
@@ -210,7 +210,7 @@ const HeroSection = (): React.JSX.Element => {
                 {/* Titre massif — clip-path reveal par mot */}
                 <h1
                     className="font-display font-black leading-none tracking-tighter my-6 lg:my-8"
-                    style={{ fontSize: "clamp(5rem, 15vw, 14rem)" }}
+                    style={{ fontSize: "clamp(4rem, 15vw, 14rem)" }}
                 >
                     <span
                         className="inline-block text-white-soft"
