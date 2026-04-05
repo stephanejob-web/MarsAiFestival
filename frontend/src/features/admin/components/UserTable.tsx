@@ -214,7 +214,8 @@ const UserTable = ({
 
     return (
         <div className="overflow-hidden rounded-[14px] border border-white/[0.05] bg-surface-2">
-            <table className="w-full border-collapse">
+        <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] border-collapse">
                 <thead>
                     <tr>
                         <th className="border-b border-white/[0.05] bg-white/[0.02] px-4 py-2.5 text-left text-[0.62rem] font-bold uppercase tracking-[0.1em] text-mist">
@@ -608,6 +609,7 @@ const UserTable = ({
                     )}
                 </tbody>
             </table>
+        </div>
         </div>
     );
 };
