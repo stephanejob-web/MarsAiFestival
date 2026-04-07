@@ -31,10 +31,6 @@ const VIEW_META: Record<ActiveView, ViewMeta> = {
         title: "À discuter",
         subtitle: "Films en révision collective",
     },
-    delib: {
-        title: "Délibération",
-        subtitle: "Vote final du jury",
-    },
     tinder: {
         title: "Vote rapide",
         subtitle: "Swipe pour voter sur les films un par un",
@@ -42,6 +38,10 @@ const VIEW_META: Record<ActiveView, ViewMeta> = {
     mobile: {
         title: "Application mobile",
         subtitle: "Votez depuis votre téléphone — rapide, fluide, intuitif",
+    },
+    screening: {
+        title: "Projection en cours",
+        subtitle: "L'administrateur projette un film au jury",
     },
 };
 
