@@ -615,7 +615,7 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                     {activeTab === "votes" && film && (
                         <>
                             {/* Big numbers row */}
-                            <div className="mb-6 grid grid-cols-4 gap-3">
+                            <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {voteRows.map(({ label, count, cardCls, iconCls, icon }) => (
                                     <div
                                         key={label}
@@ -1714,13 +1714,13 @@ const AdminSelectionPage = (): React.JSX.Element => {
     return (
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Topbar */}
-            <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+            <div className="flex min-h-[50px] items-center gap-2 border-b border-white/[0.06] bg-surface px-3 md:px-5 flex-wrap py-2">
+                <span className="font-display text-[0.88rem] font-extrabold text-white-soft shrink-0">
                     Sélection &amp; Votes
                 </span>
-                <div className="h-[18px] w-px bg-white/[0.08]" />
-                <span className="text-[0.75rem] text-mist">
-                    Votes, commentaires, signalements du jury — synthèse complète
+                <div className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
+                <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                    Votes, commentaires, signalements du jury
                 </span>
                 <div className="ml-auto flex items-center gap-3">
                     {lastUpdated && (
@@ -1756,7 +1756,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6">
                 {error && (
                     <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
                         {error}
@@ -1783,7 +1783,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         </div>
 
                         {/* Stats */}
-                        <div className="mb-6 grid grid-cols-6 gap-3">
+                        <div className="mb-6 grid grid-cols-3 md:grid-cols-6 gap-3">
                             <StatCard
                                 label="Unanimes"
                                 value={stats.unanime}
@@ -1823,7 +1823,7 @@ const AdminSelectionPage = (): React.JSX.Element => {
                         </div>
 
                         {/* Mode selector — 4 phases clairement séparées */}
-                        <div className="mb-6 grid grid-cols-4 gap-2">
+                        <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-2">
                             {(
                                 [
                                     {

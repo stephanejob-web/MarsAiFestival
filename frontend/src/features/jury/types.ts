@@ -8,7 +8,7 @@ export type UserRole = "jury" | "admin";
 
 export type FeedbackType = "error" | "success";
 
-export type ActiveView = "eval" | "listes" | "discuter" | "delib" | "tinder" | "mobile";
+export type ActiveView = "eval" | "listes" | "discuter" | "tinder" | "mobile" | "screening";
 
 export type ModalType = "arevoir" | "refuse" | null;
 

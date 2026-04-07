@@ -1194,3 +1194,32 @@ button:disabled {
         padding-top: 80px;
     }
 }
+
+@media (max-width: 480px) {
+    .verification-right {
+        padding: 64px 20px 40px;
+    }
+
+    .verification-otp-digit {
+        width: 42px;
+        height: 46px;
+        font-size: 1.15rem;
+        border-radius: 8px;
+    }
+
+    .verification-otp-wrap {
+        gap: 6px;
+    }
+
+    .verification-title {
+        font-size: 1.45rem;
+    }
+
+    .verification-steps {
+        margin-bottom: 32px;
+    }
+
+    .verification-step-label {
+        display: none;
+    }
+}

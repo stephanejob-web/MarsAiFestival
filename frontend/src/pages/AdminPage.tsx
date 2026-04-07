@@ -57,35 +57,38 @@ const AdminPage = (): React.JSX.Element => {
         <>
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Topbar */}
-                <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                    <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+                <div className="flex min-h-[50px] items-center gap-2 border-b border-white/[0.06] bg-surface px-3 md:px-5 flex-wrap py-2">
+                    <span className="font-display text-[0.88rem] font-extrabold text-white-soft shrink-0">
                         Gestion des utilisateurs
                     </span>
-                    <div className="h-[18px] w-px bg-white/[0.08]" />
-                    <span className="text-[0.75rem] text-mist">
-                        Jurys et modérateurs — accès par login/mot de passe ou Gmail
+                    <span className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
+                    <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                        Jurys et modérateurs
                     </span>
-                    <div className="ml-auto flex items-center gap-3">
+                    <div className="ml-auto flex items-center gap-2 shrink-0">
                         <button
                             type="button"
                             onClick={isInVocal ? leaveVocal : joinVocal}
                             className={
                                 isInVocal
-                                    ? "flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/10 px-3.5 py-1.5 font-display text-[0.78rem] font-extrabold text-coral transition-all hover:bg-coral/20"
-                                    : "flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.07] px-3.5 py-1.5 font-display text-[0.78rem] font-extrabold text-aurora transition-all hover:bg-aurora/[0.14] hover:shadow-[0_0_12px_rgba(78,255,206,0.2)]"
+                                    ? "flex items-center gap-1.5 rounded-[8px] border border-coral/40 bg-coral/10 px-2.5 py-1.5 font-display text-[0.78rem] font-extrabold text-coral transition-all hover:bg-coral/20"
+                                    : "flex items-center gap-1.5 rounded-[8px] border border-aurora/30 bg-aurora/[0.07] px-2.5 py-1.5 font-display text-[0.78rem] font-extrabold text-aurora transition-all hover:bg-aurora/[0.14]"
                             }
                         >
                             {isInVocal ? <MicOff size={14} /> : <Mic size={14} />}
-                            {isInVocal ? "Quitter le vocal" : "Lancer un vocal"}
+                            <span className="hidden sm:inline">
+                                {isInVocal ? "Quitter le vocal" : "Lancer un vocal"}
+                            </span>
                         </button>
-                        <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2.5 py-1 font-mono text-[0.7rem] text-mist">
-                            <ShieldCheck size={13} className="mr-1.5" /> Admin
+                        <span className="flex items-center gap-1 rounded-md border border-solar/20 bg-solar/[0.07] px-2 py-1 font-mono text-[0.7rem] text-mist">
+                            <ShieldCheck size={13} />{" "}
+                            <span className="hidden sm:inline">Admin</span>
                         </span>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-3 md:p-6">
                     {error && (
                         <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
                             {error}
@@ -99,7 +102,7 @@ const AdminPage = (): React.JSX.Element => {
                     ) : (
                         <>
                             {/* Stats */}
-                            <div className="stats-row mb-6 grid grid-cols-4 gap-3">
+                            <div className="stats-row mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <StatCard
                                     label="Jurys"
                                     value={juryCount}
@@ -130,12 +133,12 @@ const AdminPage = (): React.JSX.Element => {
                             <ParticipationChart users={users} />
 
                             {/* Section head */}
-                            <div className="mb-3 flex items-center justify-between">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                                 <div>
                                     <h2 className="font-display text-[0.95rem] font-extrabold text-white-soft">
                                         Comptes jury &amp; modérateurs
                                     </h2>
-                                    <p className="mt-0.5 text-[0.72rem] text-mist">
+                                    <p className="mt-0.5 text-[0.72rem] text-mist hidden sm:block">
                                         L'administrateur est le seul habilité à créer et gérer les
                                         accès.
                                     </p>
@@ -143,9 +146,11 @@ const AdminPage = (): React.JSX.Element => {
                                 <button
                                     type="button"
                                     onClick={() => setIsInviteOpen(true)}
-                                    className="flex items-center gap-2 rounded-[9px] bg-aurora px-[18px] py-2.5 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
+                                    aria-label="Inviter un membre"
+                                    className="flex items-center gap-2 rounded-[9px] bg-aurora px-4 py-2 font-display text-[0.82rem] font-extrabold tracking-[0.01em] text-deep-sky transition-all hover:-translate-y-px hover:shadow-[0_4px_20px_rgba(78,255,206,0.35)]"
                                 >
-                                    ✉ Inviter un membre
+                                    ✉ <span className="hidden sm:inline">Inviter un membre</span>
+                                    <span className="sm:hidden">Inviter</span>
                                 </button>
                             </div>
 
