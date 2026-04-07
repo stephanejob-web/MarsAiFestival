@@ -37,7 +37,7 @@ const JuryPanel = (): React.JSX.Element => {
         if (!screening && panel.activeView === "screening") {
             panel.setActiveView("eval");
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [screening]);
 
     const [evalVariant, setEvalVariantState] = useState<EvalVariant>(

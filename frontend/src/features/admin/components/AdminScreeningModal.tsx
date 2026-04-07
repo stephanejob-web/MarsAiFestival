@@ -32,10 +32,15 @@ const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
 // ── Config visuelle des décisions ────────────────────────────────────────────
 const DECISION_CFG = {
-    valide:        { label: "Validé",      color: "#4effce", glow: "rgba(78,255,206,0.7)",  badge: "✓" },
-    arevoir:       { label: "À revoir",    color: "#f5e642", glow: "rgba(245,230,66,0.7)",  badge: "↻" },
-    refuse:        { label: "Refusé",      color: "#ff6b6b", glow: "rgba(255,107,107,0.7)", badge: "✕" },
-    in_discussion: { label: "Discussion",  color: "#c084fc", glow: "rgba(192,132,252,0.7)", badge: "◎" },
+    valide: { label: "Validé", color: "#4effce", glow: "rgba(78,255,206,0.7)", badge: "✓" },
+    arevoir: { label: "À revoir", color: "#f5e642", glow: "rgba(245,230,66,0.7)", badge: "↻" },
+    refuse: { label: "Refusé", color: "#ff6b6b", glow: "rgba(255,107,107,0.7)", badge: "✕" },
+    in_discussion: {
+        label: "Discussion",
+        color: "#c084fc",
+        glow: "rgba(192,132,252,0.7)",
+        badge: "◎",
+    },
 } as const;
 
 type DecisionKey = keyof typeof DECISION_CFG;
@@ -84,7 +89,8 @@ const LiveVotePanel = ({
         firstName: j.first_name,
         lastName: j.last_name,
         profilPicture: j.profil_picture,
-        decision: (poll?.details.find((d) => d.juryId === j.id)?.decision ?? null) as DecisionKey | null,
+        decision: (poll?.details.find((d) => d.juryId === j.id)?.decision ??
+            null) as DecisionKey | null,
     }));
 
     return (
@@ -108,16 +114,18 @@ const LiveVotePanel = ({
                     {merged.map((j) => {
                         const cfg = j.decision ? DECISION_CFG[j.decision] : null;
                         const isFlash = flashIds.has(j.id);
-                        const initials = `${j.firstName[0] ?? ""}${j.lastName[0] ?? ""}`.toUpperCase();
+                        const initials =
+                            `${j.firstName[0] ?? ""}${j.lastName[0] ?? ""}`.toUpperCase();
                         return (
                             <div key={j.id} className="flex flex-col items-center gap-1">
                                 {/* Avatar + anneau */}
                                 <div
                                     className="relative"
                                     style={{
-                                        filter: isFlash && cfg
-                                            ? `drop-shadow(0 0 10px ${cfg.glow})`
-                                            : "none",
+                                        filter:
+                                            isFlash && cfg
+                                                ? `drop-shadow(0 0 10px ${cfg.glow})`
+                                                : "none",
                                         transition: "filter 0.5s ease",
                                     }}
                                 >
@@ -128,11 +136,12 @@ const LiveVotePanel = ({
                                                 ? `2px solid ${cfg.color}`
                                                 : "2px solid rgba(255,255,255,0.08)",
                                             outlineOffset: "2px",
-                                            boxShadow: isFlash && cfg
-                                                ? `0 0 18px ${cfg.glow}, 0 0 36px ${cfg.glow}40`
-                                                : cfg
-                                                ? `0 0 6px ${cfg.glow}50`
-                                                : "none",
+                                            boxShadow:
+                                                isFlash && cfg
+                                                    ? `0 0 18px ${cfg.glow}, 0 0 36px ${cfg.glow}40`
+                                                    : cfg
+                                                      ? `0 0 6px ${cfg.glow}50`
+                                                      : "none",
                                             transition: "all 0.5s ease",
                                         }}
                                     >
@@ -169,7 +178,10 @@ const LiveVotePanel = ({
                                         {j.firstName}
                                     </span>
                                     {cfg ? (
-                                        <span className="text-[0.5rem] font-bold" style={{ color: cfg.color }}>
+                                        <span
+                                            className="text-[0.5rem] font-bold"
+                                            style={{ color: cfg.color }}
+                                        >
                                             {cfg.label}
                                         </span>
                                     ) : (
@@ -184,39 +196,42 @@ const LiveVotePanel = ({
 
             {/* Barres de tally */}
             <div className="border-t border-white/[0.04] px-4 py-3 space-y-[7px]">
-                {(Object.entries(DECISION_CFG) as [DecisionKey, (typeof DECISION_CFG)[DecisionKey]][]).map(
-                    ([key, cfg]) => {
-                        const count = tally[key] ?? 0;
-                        const pct = totalJury > 0 ? (count / totalJury) * 100 : 0;
-                        return (
-                            <div key={key} className="flex items-center gap-2">
-                                <span
-                                    className="w-[54px] shrink-0 truncate text-[0.55rem] font-semibold"
-                                    style={{ color: cfg.color }}
-                                >
-                                    {cfg.label}
-                                </span>
-                                <div className="relative h-[4px] flex-1 overflow-hidden rounded-full bg-white/[0.05]">
-                                    <div
-                                        className="absolute inset-y-0 left-0 rounded-full"
-                                        style={{
-                                            width: `${pct}%`,
-                                            background: cfg.color,
-                                            boxShadow: pct > 0 ? `0 0 6px ${cfg.glow}` : "none",
-                                            transition: "width 0.7s cubic-bezier(0.34,1.56,0.64,1)",
-                                        }}
-                                    />
-                                </div>
-                                <span
-                                    className="w-3.5 shrink-0 text-right font-mono text-[0.58rem] font-bold tabular-nums"
-                                    style={{ color: count > 0 ? cfg.color : "rgba(255,255,255,0.15)" }}
-                                >
-                                    {count}
-                                </span>
+                {(
+                    Object.entries(DECISION_CFG) as [
+                        DecisionKey,
+                        (typeof DECISION_CFG)[DecisionKey],
+                    ][]
+                ).map(([key, cfg]) => {
+                    const count = tally[key] ?? 0;
+                    const pct = totalJury > 0 ? (count / totalJury) * 100 : 0;
+                    return (
+                        <div key={key} className="flex items-center gap-2">
+                            <span
+                                className="w-[54px] shrink-0 truncate text-[0.55rem] font-semibold"
+                                style={{ color: cfg.color }}
+                            >
+                                {cfg.label}
+                            </span>
+                            <div className="relative h-[4px] flex-1 overflow-hidden rounded-full bg-white/[0.05]">
+                                <div
+                                    className="absolute inset-y-0 left-0 rounded-full"
+                                    style={{
+                                        width: `${pct}%`,
+                                        background: cfg.color,
+                                        boxShadow: pct > 0 ? `0 0 6px ${cfg.glow}` : "none",
+                                        transition: "width 0.7s cubic-bezier(0.34,1.56,0.64,1)",
+                                    }}
+                                />
                             </div>
-                        );
-                    },
-                )}
+                            <span
+                                className="w-3.5 shrink-0 text-right font-mono text-[0.58rem] font-bold tabular-nums"
+                                style={{ color: count > 0 ? cfg.color : "rgba(255,255,255,0.15)" }}
+                            >
+                                {count}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -249,8 +264,15 @@ const WebcamTile = ({ participant }: { participant: Participant }): React.JSX.El
     const profilPicture = meta?.profilPicture ?? null;
     const isAdmin = meta?.isAdmin ?? false;
     const displayName = name ?? participant.identity;
-    const initials = displayName.split(" ").map((p: string) => p[0]).join("").slice(0, 2).toUpperCase();
-    const cameraPub = participant.getTrackPublication(Track.Source.Camera) as TrackPublication | undefined;
+    const initials = displayName
+        .split(" ")
+        .map((p: string) => p[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    const cameraPub = participant.getTrackPublication(Track.Source.Camera) as
+        | TrackPublication
+        | undefined;
 
     return (
         <div
@@ -269,15 +291,22 @@ const WebcamTile = ({ participant }: { participant: Participant }): React.JSX.El
             ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0a0f1a] to-[#111827]">
                     {profilPicture ? (
-                        <img src={profilPicture} alt={initials}
+                        <img
+                            src={profilPicture}
+                            alt={initials}
                             className="h-14 w-14 rounded-full object-cover ring-2 ring-white/10"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = "none";
+                            }}
+                        />
                     ) : (
-                        <div className={`flex h-14 w-14 items-center justify-center rounded-full font-extrabold text-[0.9rem] ${
-                            isAdmin
-                                ? "bg-gradient-to-br from-coral to-lavande text-white"
-                                : "bg-gradient-to-br from-aurora to-lavande text-deep-sky"
-                        }`}>
+                        <div
+                            className={`flex h-14 w-14 items-center justify-center rounded-full font-extrabold text-[0.9rem] ${
+                                isAdmin
+                                    ? "bg-gradient-to-br from-coral to-lavande text-white"
+                                    : "bg-gradient-to-br from-aurora to-lavande text-deep-sky"
+                            }`}
+                        >
                             {initials}
                         </div>
                     )}
@@ -286,14 +315,19 @@ const WebcamTile = ({ participant }: { participant: Participant }): React.JSX.El
 
             {/* Bandeau bas */}
             <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between bg-gradient-to-t from-black/85 to-transparent px-2.5 pb-2 pt-6">
-                <span className="truncate text-[0.65rem] font-semibold text-white/90">{displayName}</span>
+                <span className="truncate text-[0.65rem] font-semibold text-white/90">
+                    {displayName}
+                </span>
                 <div className="flex items-center gap-1">
                     {isMuted && <MicOff size={10} className="text-coral" />}
                     {isSpeaking && !isMuted && (
                         <span className="flex items-end gap-[2px]">
                             {[0, 1, 2].map((i) => (
-                                <span key={i} className="w-[2px] rounded-full bg-aurora animate-pulse"
-                                    style={{ height: 6 + i * 3, animationDelay: `${i * 0.15}s` }} />
+                                <span
+                                    key={i}
+                                    className="w-[2px] rounded-full bg-aurora animate-pulse"
+                                    style={{ height: 6 + i * 3, animationDelay: `${i * 0.15}s` }}
+                                />
                             ))}
                         </span>
                     )}
@@ -302,10 +336,14 @@ const WebcamTile = ({ participant }: { participant: Participant }): React.JSX.El
 
             {/* Badge */}
             {(isSpeaking || isAdmin) && (
-                <div className={`absolute left-2 top-2 rounded-full px-1.5 py-0.5 backdrop-blur-sm ${
-                    isAdmin ? "bg-coral/25" : "bg-aurora/20"
-                }`}>
-                    <span className={`text-[0.5rem] font-bold ${isAdmin ? "text-coral" : "text-aurora"}`}>
+                <div
+                    className={`absolute left-2 top-2 rounded-full px-1.5 py-0.5 backdrop-blur-sm ${
+                        isAdmin ? "bg-coral/25" : "bg-aurora/20"
+                    }`}
+                >
+                    <span
+                        className={`text-[0.5rem] font-bold ${isAdmin ? "text-coral" : "text-aurora"}`}
+                    >
                         {isAdmin ? "Admin" : "Parle"}
                     </span>
                 </div>
@@ -342,15 +380,22 @@ const WebcamPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =>
                 {participants.length === 0 ? (
                     <div className="flex h-full items-center justify-center">
                         <span className="text-center text-[0.7rem] leading-relaxed text-mist/30">
-                            En attente<br />des jurés…
+                            En attente
+                            <br />
+                            des jurés…
                         </span>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-2">
-                        {participants.map((p) => <WebcamTile key={p.identity} participant={p} />)}
+                        {participants.map((p) => (
+                            <WebcamTile key={p.identity} participant={p} />
+                        ))}
                         {screenTracks.length > 0 && (
                             <div className="relative col-span-2 overflow-hidden rounded-2xl border border-aurora/30">
-                                <VideoTrack trackRef={screenTracks[0]} className="aspect-video w-full object-contain bg-black" />
+                                <VideoTrack
+                                    trackRef={screenTracks[0]}
+                                    className="aspect-video w-full object-contain bg-black"
+                                />
                                 <div className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[0.55rem] text-aurora">
                                     Écran partagé
                                 </div>
@@ -362,25 +407,36 @@ const WebcamPanel = ({ onLeave }: { onLeave: () => void }): React.JSX.Element =>
 
             {/* Contrôles */}
             <div className="flex shrink-0 items-center justify-center gap-2 border-t border-white/[0.06] px-4 py-3">
-                <button type="button"
+                <button
+                    type="button"
                     onClick={() => void localParticipant.setMicrophoneEnabled(isMuted)}
                     className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
-                        isMuted ? "bg-coral/20 text-coral hover:bg-coral/30" : "bg-aurora/15 text-aurora hover:bg-aurora/25"
+                        isMuted
+                            ? "bg-coral/20 text-coral hover:bg-coral/30"
+                            : "bg-aurora/15 text-aurora hover:bg-aurora/25"
                     }`}
-                    title={isMuted ? "Activer le micro" : "Couper le micro"}>
+                    title={isMuted ? "Activer le micro" : "Couper le micro"}
+                >
                     {isMuted ? <MicOff size={14} /> : <Mic size={14} />}
                 </button>
-                <button type="button"
+                <button
+                    type="button"
                     onClick={() => void localParticipant.setCameraEnabled(!isCameraOn)}
                     className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
-                        isCameraOn ? "bg-aurora/15 text-aurora hover:bg-aurora/25" : "bg-white/[0.05] text-mist hover:bg-white/10"
+                        isCameraOn
+                            ? "bg-aurora/15 text-aurora hover:bg-aurora/25"
+                            : "bg-white/[0.05] text-mist hover:bg-white/10"
                     }`}
-                    title={isCameraOn ? "Éteindre la caméra" : "Activer la caméra"}>
+                    title={isCameraOn ? "Éteindre la caméra" : "Activer la caméra"}
+                >
                     {isCameraOn ? <Video size={14} /> : <VideoOff size={14} />}
                 </button>
-                <button type="button" onClick={onLeave}
+                <button
+                    type="button"
+                    onClick={onLeave}
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-coral/80 text-white transition-opacity hover:opacity-85"
-                    title="Quitter la session vidéo">
+                    title="Quitter la session vidéo"
+                >
                     <PhoneOff size={13} />
                 </button>
             </div>
@@ -461,8 +517,13 @@ const AdminScreeningModal = ({
             style={{ background: "rgba(2,4,8,0.97)", backdropFilter: "blur(8px)" }}
         >
             {/* Glow ambiant */}
-            <div className="pointer-events-none absolute inset-0"
-                style={{ background: "radial-gradient(ellipse 60% 40% at 40% 50%, rgba(78,255,206,0.05) 0%, rgba(192,132,252,0.03) 60%, transparent 80%)" }} />
+            <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                    background:
+                        "radial-gradient(ellipse 60% 40% at 40% 50%, rgba(78,255,206,0.05) 0%, rgba(192,132,252,0.03) 60%, transparent 80%)",
+                }}
+            />
 
             {/* ── Topbar ─────────────────────────────────────────────────────── */}
             <div className="flex shrink-0 items-center gap-4 border-b border-white/[0.06] bg-black/50 px-6 py-3.5 backdrop-blur-sm">
@@ -505,11 +566,15 @@ const AdminScreeningModal = ({
 
             {/* ── Corps ──────────────────────────────────────────────────────── */}
             <div className="flex min-h-0 flex-1">
-
                 {/* ── Player vidéo (centre) ───────────────────────────────── */}
                 <div className="flex flex-1 items-center justify-center bg-black p-6">
-                    <div className="relative w-full max-w-5xl overflow-hidden rounded-2xl"
-                        style={{ boxShadow: "0 0 0 1px rgba(78,255,206,0.12), 0 0 60px rgba(78,255,206,0.08), 0 32px 80px rgba(0,0,0,0.9)" }}>
+                    <div
+                        className="relative w-full max-w-5xl overflow-hidden rounded-2xl"
+                        style={{
+                            boxShadow:
+                                "0 0 0 1px rgba(78,255,206,0.12), 0 0 60px rgba(78,255,206,0.08), 0 32px 80px rgba(0,0,0,0.9)",
+                        }}
+                    >
                         {videoUrl ? (
                             <>
                                 <video
@@ -521,20 +586,28 @@ const AdminScreeningModal = ({
                                     preload="auto"
                                     onCanPlay={() => setIsVideoReady(true)}
                                     onSeeked={handleSeek}
-                                    onPlay={(e) => onPlay((e.target as HTMLVideoElement).currentTime)}
-                                    onPause={(e) => onPause((e.target as HTMLVideoElement).currentTime)}
+                                    onPlay={(e) =>
+                                        onPlay((e.target as HTMLVideoElement).currentTime)
+                                    }
+                                    onPause={(e) =>
+                                        onPause((e.target as HTMLVideoElement).currentTime)
+                                    }
                                     className="aspect-video w-full bg-black"
                                 />
                                 {!isVideoReady && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
                                         <div className="h-12 w-12 animate-spin rounded-full border-2 border-aurora/30 border-t-aurora" />
-                                        <span className="text-[0.82rem] text-mist/60">Chargement de la vidéo…</span>
+                                        <span className="text-[0.82rem] text-mist/60">
+                                            Chargement de la vidéo…
+                                        </span>
                                     </div>
                                 )}
                             </>
                         ) : (
                             <div className="flex aspect-video w-full items-center justify-center bg-[#080d18]">
-                                <p className="text-[0.9rem] text-mist/30">Aucune vidéo disponible</p>
+                                <p className="text-[0.9rem] text-mist/30">
+                                    Aucune vidéo disponible
+                                </p>
                             </div>
                         )}
                     </div>
@@ -571,7 +644,10 @@ const AdminScreeningModal = ({
                                 <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
                                     <div className="grid grid-cols-2 gap-2 w-full opacity-30">
                                         {[...Array(4)].map((_, i) => (
-                                            <div key={i} className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-white/[0.06] bg-[#0d1117]">
+                                            <div
+                                                key={i}
+                                                className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-white/[0.06] bg-[#0d1117]"
+                                            >
                                                 <Camera size={20} className="text-mist/20" />
                                             </div>
                                         ))}
@@ -598,7 +674,6 @@ const AdminScreeningModal = ({
                     {/* Zone votes live */}
                     <LiveVotePanel filmId={filmId} juryMembers={juryMembers} />
                 </div>
-
             </div>
         </div>
     );

@@ -62,12 +62,18 @@ const MsgBubble = ({ msg, isSelf }: { msg: Msg; isSelf: boolean }): React.JSX.El
         <div className={`flex gap-2 ${isSelf ? "flex-row-reverse" : "flex-row"}`}>
             <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.55rem] font-extrabold text-deep-sky">
                 {msg.profilPicture ? (
-                    <img src={msg.profilPicture} alt="" className="h-full w-full rounded-full object-cover" />
+                    <img
+                        src={msg.profilPicture}
+                        alt=""
+                        className="h-full w-full rounded-full object-cover"
+                    />
                 ) : (
                     msg.initials
                 )}
             </div>
-            <div className={`flex max-w-[78%] flex-col gap-0.5 ${isSelf ? "items-end" : "items-start"}`}>
+            <div
+                className={`flex max-w-[78%] flex-col gap-0.5 ${isSelf ? "items-end" : "items-start"}`}
+            >
                 <div className="flex items-center gap-1.5">
                     <span className="text-[0.62rem] font-semibold text-mist/70">{msg.name}</span>
                     <span className="text-[0.58rem] text-mist/30">{time}</span>
@@ -169,7 +175,11 @@ const DelibView = ({ filmId = null, filmTitle }: DelibViewProps): React.JSX.Elem
                                 <div key={u.socketId} className="flex items-center gap-2">
                                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.5rem] font-extrabold text-deep-sky overflow-hidden">
                                         {u.profilPicture ? (
-                                            <img src={u.profilPicture} alt="" className="h-full w-full object-cover" />
+                                            <img
+                                                src={u.profilPicture}
+                                                alt=""
+                                                className="h-full w-full object-cover"
+                                            />
                                         ) : (
                                             u.initials
                                         )}
@@ -238,22 +248,38 @@ const DelibView = ({ filmId = null, filmTitle }: DelibViewProps): React.JSX.Elem
                                     <div className="flex flex-col gap-2">
                                         {poll.details.map((d) => {
                                             const color =
-                                                d.decision === "valide" ? "#4effce"
-                                                : d.decision === "arevoir" ? "#f5e642"
-                                                : d.decision === "refuse" ? "#ff6b6b"
-                                                : "#c084fc";
+                                                d.decision === "valide"
+                                                    ? "#4effce"
+                                                    : d.decision === "arevoir"
+                                                      ? "#f5e642"
+                                                      : d.decision === "refuse"
+                                                        ? "#ff6b6b"
+                                                        : "#c084fc";
                                             const label =
-                                                d.decision === "valide" ? "Valide"
-                                                : d.decision === "arevoir" ? "À revoir"
-                                                : d.decision === "refuse" ? "Refusé"
-                                                : "Discussion";
-                                            const initials = `${d.firstName[0]}${d.lastName[0]}`.toUpperCase();
+                                                d.decision === "valide"
+                                                    ? "Valide"
+                                                    : d.decision === "arevoir"
+                                                      ? "À revoir"
+                                                      : d.decision === "refuse"
+                                                        ? "Refusé"
+                                                        : "Discussion";
+                                            const initials =
+                                                `${d.firstName[0]}${d.lastName[0]}`.toUpperCase();
                                             return (
-                                                <div key={d.juryId} className="flex items-center gap-2">
+                                                <div
+                                                    key={d.juryId}
+                                                    className="flex items-center gap-2"
+                                                >
                                                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-lavande text-[0.5rem] font-extrabold text-deep-sky overflow-hidden">
                                                         {d.profilPicture ? (
-                                                            <img src={d.profilPicture} alt="" className="h-full w-full object-cover" />
-                                                        ) : initials}
+                                                            <img
+                                                                src={d.profilPicture}
+                                                                alt=""
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            initials
+                                                        )}
                                                     </div>
                                                     <span className="flex-1 truncate text-[0.68rem] text-mist/70">
                                                         {d.firstName} {d.lastName}
@@ -274,7 +300,9 @@ const DelibView = ({ filmId = null, filmTitle }: DelibViewProps): React.JSX.Elem
                     ) : (
                         <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
                             <p className="text-[0.72rem] text-mist/40">
-                                Sélectionnez un film<br />pour voir les votes
+                                Sélectionnez un film
+                                <br />
+                                pour voir les votes
                             </p>
                         </div>
                     )}
@@ -302,7 +330,9 @@ const DelibView = ({ filmId = null, filmTitle }: DelibViewProps): React.JSX.Elem
                         </div>
                     ) : messages.length === 0 ? (
                         <div className="flex h-full items-center justify-center">
-                            <p className="text-[0.78rem] text-mist/30">Soyez le premier à commenter…</p>
+                            <p className="text-[0.78rem] text-mist/30">
+                                Soyez le premier à commenter…
+                            </p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-3">
@@ -330,7 +360,9 @@ const DelibView = ({ filmId = null, filmTitle }: DelibViewProps): React.JSX.Elem
                                     handleSend();
                                 }
                             }}
-                            placeholder={filmId ? "Partagez votre analyse…" : "Sélectionnez un film"}
+                            placeholder={
+                                filmId ? "Partagez votre analyse…" : "Sélectionnez un film"
+                            }
                             disabled={!filmId || !isConnected}
                             className="flex-1 bg-transparent text-[0.82rem] text-white-soft outline-none placeholder:text-mist/40 disabled:cursor-not-allowed disabled:opacity-50"
                         />

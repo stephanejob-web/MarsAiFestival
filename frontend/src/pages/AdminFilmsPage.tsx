@@ -442,9 +442,12 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     <Radio size={14} className="animate-pulse text-coral" />
                                 </span>
                                 <div className="flex-1">
-                                    <span className="text-[0.82rem] font-bold text-coral">Projection en cours</span>
+                                    <span className="text-[0.82rem] font-bold text-coral">
+                                        Projection en cours
+                                    </span>
                                     <span className="ml-2 text-[0.75rem] text-mist">
-                                        {films.find((f) => f.id === screeningFilmId)?.original_title ?? `Film #${screeningFilmId}`}
+                                        {films.find((f) => f.id === screeningFilmId)
+                                            ?.original_title ?? `Film #${screeningFilmId}`}
                                     </span>
                                 </div>
                                 <button
@@ -461,7 +464,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                         {screeningFilmId !== null && screeningModalOpen && (
                             <AdminScreeningModal
                                 filmId={screeningFilmId}
-                                filmTitle={films.find((f) => f.id === screeningFilmId)?.original_title ?? `Film #${screeningFilmId}`}
+                                filmTitle={
+                                    films.find((f) => f.id === screeningFilmId)?.original_title ??
+                                    `Film #${screeningFilmId}`
+                                }
                                 filmCountry={films.find((f) => f.id === screeningFilmId)?.country}
                                 startedAt={screeningStartedAt}
                                 videoUrl={screeningVideoUrl}
@@ -756,29 +762,37 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                     </span>
                                                     <div className="flex items-center gap-2">
                                                         {/* Bouton Projeter */}
-                                                        {film.video_url && (
-                                                            screeningFilmId === film.id ? (
+                                                        {film.video_url &&
+                                                            (screeningFilmId === film.id ? (
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => void handleStopScreening()}
+                                                                    onClick={() =>
+                                                                        void handleStopScreening()
+                                                                    }
                                                                     disabled={screeningLoading}
                                                                     className="flex items-center gap-1 rounded-lg border border-coral/40 bg-coral/15 px-2.5 py-1 text-[0.68rem] font-bold text-coral transition-all hover:bg-coral/25 disabled:opacity-50"
                                                                 >
-                                                                    <Radio size={10} className="animate-pulse" />
+                                                                    <Radio
+                                                                        size={10}
+                                                                        className="animate-pulse"
+                                                                    />
                                                                     En direct
                                                                 </button>
                                                             ) : (
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => void handleStartScreening(film.id)}
+                                                                    onClick={() =>
+                                                                        void handleStartScreening(
+                                                                            film.id,
+                                                                        )
+                                                                    }
                                                                     disabled={screeningLoading}
                                                                     className="flex items-center gap-1 rounded-lg border border-lavande/30 bg-lavande/[0.08] px-2.5 py-1 text-[0.68rem] font-semibold text-lavande transition-all hover:border-lavande/50 hover:bg-lavande/15 disabled:opacity-50"
                                                                 >
                                                                     <Radio size={10} />
                                                                     Projeter
                                                                 </button>
-                                                            )
-                                                        )}
+                                                            ))}
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
                                                             style={{
