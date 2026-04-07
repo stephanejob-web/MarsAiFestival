@@ -761,7 +761,9 @@ CREATE TABLE `vote_tags` (
   `label` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `icon` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   `color` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('refuser','valide','a_revoir','a_discuter') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'refuser',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `sort_order` int NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `message_template` text COLLATE utf8mb4_unicode_ci,
@@ -776,7 +778,7 @@ CREATE TABLE `vote_tags` (
 
 LOCK TABLES `vote_tags` WRITE;
 /*!40000 ALTER TABLE `vote_tags` DISABLE KEYS */;
-INSERT INTO `vote_tags` VALUES (1,'rights','Droits musicaux','🎵','aurora',1,0,'2026-03-20 12:16:02','Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux qui nécessite votre attention avant toute diffusion.\n\nCordialement,\nLe jury marsAI Festival 2026'),(2,'quality','Qualité','📋','solar',1,1,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été visionné par le jury. La qualité technique ou artistique ne correspond pas encore aux critères du festival. Nous vous encourageons à retravailler certains aspects.\n\nCordialement,\nLe jury marsAI Festival 2026'),(3,'content','Contenu','⚠️','coral',1,2,'2026-03-20 12:16:02','Bonjour,\n\nLe contenu de votre film soulève des réserves de la part du jury. Certains éléments ne sont pas conformes à la charte éditoriale du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(4,'tech','YouTube','📺','lavande',1,3,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été identifié comme déjà disponible sur des plateformes publiques (YouTube, etc.), ce qui ne correspond pas aux critères de première diffusion du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(5,'other','Autre','❓','mist',1,4,'2026-03-20 12:16:02','Bonjour,\n\nAprès évaluation, le jury a décidé de ne pas retenir votre film pour cette édition du festival marsAI 2026.\n\nCordialement,\nLe jury marsAI Festival 2026');
+INSERT INTO `vote_tags` (`id`, `key`, `label`, `icon`, `color`, `type`, `is_active`, `is_default`, `sort_order`, `created_at`, `message_template`) VALUES (1,'rights','Droits musicaux','🎵','aurora','refuser',1,0,0,'2026-03-20 12:16:02','Bonjour,\n\nAprès visionnage de votre film, le jury souhaite vous signaler un problème de droits musicaux qui nécessite votre attention avant toute diffusion.\n\nCordialement,\nLe jury marsAI Festival 2026'),(2,'quality','Qualité','📋','solar','refuser',1,0,1,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été visionné par le jury. La qualité technique ou artistique ne correspond pas encore aux critères du festival. Nous vous encourageons à retravailler certains aspects.\n\nCordialement,\nLe jury marsAI Festival 2026'),(3,'content','Contenu','⚠️','coral','refuser',1,0,2,'2026-03-20 12:16:02','Bonjour,\n\nLe contenu de votre film soulève des réserves de la part du jury. Certains éléments ne sont pas conformes à la charte éditoriale du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(4,'tech','YouTube','📺','lavande','refuser',1,0,3,'2026-03-20 12:16:02','Bonjour,\n\nVotre film a été identifié comme déjà disponible sur des plateformes publiques (YouTube, etc.), ce qui ne correspond pas aux critères de première diffusion du festival.\n\nCordialement,\nLe jury marsAI Festival 2026'),(5,'other','Autre','❓','mist','refuser',1,0,4,'2026-03-20 12:16:02','Bonjour,\n\nAprès évaluation, le jury a décidé de ne pas retenir votre film pour cette édition du festival marsAI 2026.\n\nCordialement,\nLe jury marsAI Festival 2026');
 /*!40000 ALTER TABLE `vote_tags` ENABLE KEYS */;
 UNLOCK TABLES;
 

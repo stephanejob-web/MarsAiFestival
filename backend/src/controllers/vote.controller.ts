@@ -47,6 +47,31 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
         await upsertVote(juryId, Number(filmId), decision as Decision, message);
         const vote = await getVote(juryId, Number(filmId));
 
+        // ── Broadcast poll:update en temps réel ───────────────────────────────
+        try {
+            const io = req.app.locals.io as import("socket.io").Server;
+            const allVotes = await getVotesByFilm(Number(filmId));
+            const tally = { valide: 0, arevoir: 0, refuse: 0, in_discussion: 0 };
+            for (const v of allVotes) {
+                const d = v.decision as keyof typeof tally;
+                if (d in tally) tally[d]++;
+            }
+            io.emit("poll:update", {
+                filmId: Number(filmId),
+                tally,
+                total: allVotes.length,
+                details: allVotes.map((v) => ({
+                    juryId: v.jury_id as number,
+                    firstName: v.first_name as string,
+                    lastName: v.last_name as string,
+                    profilPicture: (v.profil_picture as string | null) ?? null,
+                    decision: v.decision as string,
+                })),
+            });
+        } catch {
+            // Ne pas bloquer la réponse si le broadcast échoue
+        }
+
         // ── Email au réalisateur pour "arevoir" et "refuse" ───────────────────
         if (DECISIONS_WITH_EMAIL.includes(decision as Decision) && message?.trim()) {
             const film = await getFilmById(Number(filmId));

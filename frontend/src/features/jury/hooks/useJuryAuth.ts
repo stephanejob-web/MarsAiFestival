@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import type { ActiveTab, FeedbackMessage, LoginFormState, RegisterFormState } from "../types";
 
-const API = import.meta.env.VITE_API_URL as string;
+const API = (import.meta.env.VITE_API_URL as string) || "";
 
 const INITIAL_LOGIN_FORM: LoginFormState = { email: "", password: "" };
 const INITIAL_REGISTER_FORM: RegisterFormState = {

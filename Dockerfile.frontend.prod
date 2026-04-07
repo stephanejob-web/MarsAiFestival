@@ -1,0 +1,31 @@
+# ── Stage 1 : Build Vite ──────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
+ARG VITE_LIVEKIT_URL
+ENV VITE_LIVEKIT_URL=$VITE_LIVEKIT_URL
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+COPY frontend/vite.config.ts ./
+COPY frontend/tsconfig.json ./
+COPY frontend/tsconfig.app.json ./
+COPY frontend/tsconfig.node.json ./
+
+RUN npx vite build
+
+# ── Stage 2 : Serve avec nginx ────────────────────────────────────────────────
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx/nginx.prod.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80

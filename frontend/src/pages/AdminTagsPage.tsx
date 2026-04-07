@@ -3,14 +3,18 @@ import { apiFetch } from "../services/api";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
+type VoteTagType = "refuser" | "valide" | "a_revoir" | "a_discuter";
+
 interface VoteTag {
     id: number;
     key: string;
     label: string;
     icon: string;
     color: string;
+    type: VoteTagType;
     message_template: string | null;
     is_active: boolean;
+    is_default: boolean;
     sort_order: number;
 }
 
@@ -24,12 +28,21 @@ const COLOR_PREVIEW: Record<string, string> = {
     mist: "bg-mist",
 };
 
+const TYPE_OPTIONS: { value: VoteTagType; label: string }[] = [
+    { value: "refuser", label: "Refuser" },
+    { value: "a_revoir", label: "À revoir" },
+    { value: "valide", label: "Validé" },
+    { value: "a_discuter", label: "À discuter" },
+];
+
 const EMPTY_FORM = {
     key: "",
     label: "",
     icon: "",
     color: "aurora",
+    type: "refuser" as VoteTagType,
     sort_order: 0,
+    is_default: false,
     message_template: "",
 };
 
@@ -63,7 +76,7 @@ const AdminTagsPage = (): React.JSX.Element => {
     }, [load]);
 
     const handleSubmit = async (): Promise<void> => {
-        if (!form.key || !form.label || !form.icon || !form.color) {
+        if (!form.key || !form.label || !form.icon || !form.color || !form.type) {
             setError("Tous les champs sont requis.");
             return;
         }
@@ -79,7 +92,9 @@ const AdminTagsPage = (): React.JSX.Element => {
                         label: form.label,
                         icon: form.icon,
                         color: form.color,
+                        type: form.type,
                         isActive: true,
+                        isDefault: form.is_default,
                         sortOrder: form.sort_order,
                         messageTemplate: form.message_template || null,
                     }),
@@ -92,7 +107,12 @@ const AdminTagsPage = (): React.JSX.Element => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        ...form,
+                        key: form.key,
+                        label: form.label,
+                        icon: form.icon,
+                        color: form.color,
+                        type: form.type,
+                        isDefault: form.is_default,
                         sortOrder: form.sort_order,
                         messageTemplate: form.message_template || null,
                     }),
@@ -119,10 +139,24 @@ const AdminTagsPage = (): React.JSX.Element => {
                     label: tag.label,
                     icon: tag.icon,
                     color: tag.color,
+                    type: tag.type,
                     isActive: !tag.is_active,
+                    isDefault: tag.is_default,
                     sortOrder: tag.sort_order,
                     messageTemplate: tag.message_template ?? null,
                 }),
+            });
+            await load();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur");
+        }
+    };
+
+    const handleSetDefault = async (tag: VoteTag): Promise<void> => {
+        try {
+            await apiFetch(`/api/vote-tags/${tag.id}/default`, {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${getToken()}` },
             });
             await load();
         } catch (err) {
@@ -149,7 +183,9 @@ const AdminTagsPage = (): React.JSX.Element => {
             label: tag.label,
             icon: tag.icon,
             color: tag.color,
+            type: tag.type,
             sort_order: tag.sort_order,
+            is_default: tag.is_default,
             message_template: tag.message_template ?? "",
         });
         setEditingId(tag.id);
@@ -159,13 +195,13 @@ const AdminTagsPage = (): React.JSX.Element => {
     return (
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Topbar */}
-            <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+            <div className="flex min-h-[50px] items-center gap-2 border-b border-white/[0.06] bg-surface px-3 md:px-5 flex-wrap py-2">
+                <span className="font-display text-[0.88rem] font-extrabold text-white-soft shrink-0">
                     Étiquettes de décision
                 </span>
-                <div className="h-[18px] w-px bg-white/[0.08]" />
-                <span className="text-[0.75rem] text-mist">
-                    Tags affichés dans les popups « À revoir » et « Refuser » du jury
+                <div className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
+                <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                    Tags jury — popups À revoir / Refuser
                 </span>
                 <div className="ml-auto">
                     <button
@@ -182,7 +218,7 @@ const AdminTagsPage = (): React.JSX.Element => {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6">
                 {error && (
                     <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
                         {error}
@@ -244,6 +280,27 @@ const AdminTagsPage = (): React.JSX.Element => {
                             </div>
                             <div>
                                 <label className="mb-1.5 block text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
+                                    Type
+                                </label>
+                                <select
+                                    value={form.type}
+                                    onChange={(e) =>
+                                        setForm((f) => ({
+                                            ...f,
+                                            type: e.target.value as VoteTagType,
+                                        }))
+                                    }
+                                    className="w-full rounded-[8px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.82rem] text-white-soft outline-none focus:border-aurora/40"
+                                >
+                                    {TYPE_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
                                     Couleur
                                 </label>
                                 <div className="flex gap-2">
@@ -274,6 +331,23 @@ const AdminTagsPage = (): React.JSX.Element => {
                                     className="w-full rounded-[8px] border border-white/[0.09] bg-white/[0.04] px-3 py-2 text-[0.82rem] text-white-soft outline-none focus:border-aurora/40"
                                 />
                             </div>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2">
+                            <input
+                                id="is_default"
+                                type="checkbox"
+                                checked={form.is_default}
+                                onChange={(e) =>
+                                    setForm((f) => ({ ...f, is_default: e.target.checked }))
+                                }
+                                className="h-4 w-4 rounded accent-aurora"
+                            />
+                            <label htmlFor="is_default" className="text-[0.78rem] text-mist">
+                                Message par défaut{" "}
+                                <span className="opacity-60">
+                                    (pré-sélectionné à l&apos;ouverture de la modale)
+                                </span>
+                            </label>
                         </div>
                         <div className="mt-4">
                             <label className="mb-1.5 block text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
@@ -332,7 +406,7 @@ const AdminTagsPage = (): React.JSX.Element => {
                                         Clé
                                     </th>
                                     <th className="px-4 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
-                                        Label
+                                        Type
                                     </th>
                                     <th className="px-4 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
                                         Couleur
@@ -342,6 +416,9 @@ const AdminTagsPage = (): React.JSX.Element => {
                                     </th>
                                     <th className="px-4 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
                                         Statut
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-mist">
+                                        Défaut
                                     </th>
                                     <th className="px-4 py-3" />
                                 </tr>
@@ -364,8 +441,10 @@ const AdminTagsPage = (): React.JSX.Element => {
                                         <td className="px-4 py-3 font-mono text-[0.78rem] text-mist">
                                             {tag.key}
                                         </td>
-                                        <td className="px-4 py-3 text-[0.82rem] text-white-soft">
-                                            {tag.label}
+                                        <td className="px-4 py-3">
+                                            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[0.7rem] text-mist">
+                                                {tag.type}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className="flex items-center gap-1.5 text-[0.78rem] text-mist">
@@ -389,6 +468,19 @@ const AdminTagsPage = (): React.JSX.Element => {
                                                 }`}
                                             >
                                                 {tag.is_active ? "Actif" : "Inactif"}
+                                            </button>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => void handleSetDefault(tag)}
+                                                className={`rounded-full px-2.5 py-0.5 text-[0.7rem] font-semibold transition-all ${
+                                                    tag.is_default
+                                                        ? "border border-solar/30 bg-solar/10 text-solar"
+                                                        : "border border-white/10 bg-white/[0.04] text-mist hover:border-solar/20 hover:text-solar"
+                                                }`}
+                                            >
+                                                {tag.is_default ? "Défaut" : "—"}
                                             </button>
                                         </td>
                                         <td className="px-4 py-3">

@@ -14,6 +14,13 @@ export interface AdminNavCategory {
     items: AdminNavItem[];
 }
 
+export interface AdminUsersStatsData {
+    adminCount: number;
+    moderatorCount: number;
+    deactivatedCount: number;
+    totalCreatedCount: number;
+}
+
 export interface ModeratorPermissions {
     can_access_admin: boolean;
     can_disable_accounts: boolean;

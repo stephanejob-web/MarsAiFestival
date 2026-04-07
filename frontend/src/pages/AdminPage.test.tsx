@@ -13,6 +13,12 @@ describe("AdminPage", () => {
             isLoading: false,
             error: null,
             toggleStatus: vi.fn(),
+            changeRole: vi.fn(),
+            banUser: vi.fn(),
+            unbanUser: vi.fn(),
+            sendMessage: vi.fn(),
+            updatePermissions: vi.fn(),
+            reload: vi.fn(),
         });
     });
 
@@ -40,6 +46,12 @@ describe("AdminPage", () => {
             isLoading: true,
             error: null,
             toggleStatus: vi.fn(),
+            changeRole: vi.fn(),
+            banUser: vi.fn(),
+            unbanUser: vi.fn(),
+            sendMessage: vi.fn(),
+            updatePermissions: vi.fn(),
+            reload: vi.fn(),
         });
         render(
             <MemoryRouter>

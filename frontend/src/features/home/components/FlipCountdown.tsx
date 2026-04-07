@@ -398,8 +398,8 @@ const FlipCountdown = ({ days, hours, minutes, seconds, label }: Props): React.J
                 {label}
             </p>
             <div
-                className="flex items-center gap-3"
-                style={{ fontSize: "clamp(2.4rem, 5.2vw, 4rem)" }}
+                className="flex flex-wrap items-center justify-center gap-2 sm:gap-3"
+                style={{ fontSize: "clamp(1.6rem, 4.5vw, 4rem)" }}
             >
                 {units.map((u, i) => (
                     <React.Fragment key={u.label}>

@@ -3,16 +3,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend.vps
-    ports:
-      - "8001:5173"
     environment:
       - VITE_API_URL=
       - VITE_LIVEKIT_URL=wss://marai-1fs2judn.livekit.cloud
       - BACKEND_URL=http://backend:5500
+      - VITE_NO_SSL=true
     depends_on:
       backend:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.marsai.rule=Host(`marsai.lightchurch.fr`)"
+      - "traefik.http.routers.marsai.entrypoints=websecure"
+      - "traefik.http.routers.marsai.tls.certresolver=letsencrypt"
+      - "traefik.http.services.marsai.loadbalancer.server.port=5173"
 
   backend:
     build:
@@ -32,11 +40,18 @@ services:
       mysql:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.marsai-api.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.marsai-api.entrypoints=websecure"
+      - "traefik.http.routers.marsai-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.marsai-api.loadbalancer.server.port=5500"
 
   mysql:
     image: mysql:8.0
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: marsai_dev_2026
       MYSQL_DATABASE: marsai
@@ -49,6 +64,14 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - marsai-network
+
+networks:
+  marsai-network:
+    driver: bridge
+  traefik-network:
+    external: true
 
 volumes:
   mysql_data:

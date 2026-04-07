@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 
+export type VoteTagType = "refuser" | "valide" | "a_revoir" | "a_discuter";
+
 export interface VoteTag {
     id: number;
     key: string;
     label: string;
     icon: string;
     color: string;
+    type: VoteTagType;
     message_template: string | null;
     is_active: boolean;
+    is_default: boolean;
     sort_order: number;
 }
 
@@ -18,8 +22,10 @@ const FALLBACK_TAGS: VoteTag[] = [
         label: "Droits musicaux",
         icon: "🎵",
         color: "aurora",
+        type: "refuser",
         message_template: null,
         is_active: true,
+        is_default: false,
         sort_order: 0,
     },
     {
@@ -28,8 +34,10 @@ const FALLBACK_TAGS: VoteTag[] = [
         label: "Qualité",
         icon: "📋",
         color: "solar",
+        type: "refuser",
         message_template: null,
         is_active: true,
+        is_default: false,
         sort_order: 1,
     },
     {
@@ -38,8 +46,10 @@ const FALLBACK_TAGS: VoteTag[] = [
         label: "Contenu",
         icon: "⚠️",
         color: "coral",
+        type: "refuser",
         message_template: null,
         is_active: true,
+        is_default: false,
         sort_order: 2,
     },
     {
@@ -48,8 +58,10 @@ const FALLBACK_TAGS: VoteTag[] = [
         label: "YouTube",
         icon: "📺",
         color: "lavande",
+        type: "refuser",
         message_template: null,
         is_active: true,
+        is_default: false,
         sort_order: 3,
     },
     {
@@ -58,8 +70,10 @@ const FALLBACK_TAGS: VoteTag[] = [
         label: "Autre",
         icon: "❓",
         color: "mist",
+        type: "refuser",
         message_template: null,
         is_active: true,
+        is_default: false,
         sort_order: 4,
     },
 ];

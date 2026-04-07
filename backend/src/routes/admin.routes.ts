@@ -3,6 +3,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { requireAdmin, requirePermissionOrAdmin } from "../middlewares/auth.middleware";
+import { getAdminVocalToken } from "../controllers/vocal.controller";
 import {
     listAdminFilms,
     listS3Videos,
@@ -19,6 +20,11 @@ import {
     startAdminVocal,
     stopAdminVocal,
     resetAllVotesHandler,
+    startScreening,
+    stopScreening,
+    getScreeningState,
+    seekScreening,
+    playbackScreening,
 } from "../controllers/admin.controller";
 import { getCalendarHandler, updateCalendarHandler } from "../controllers/calendar.controller";
 import {
@@ -99,8 +105,16 @@ router.put("/users/:id/permissions", requireAdmin, updatePermissions);
 router.delete("/users/:id", requireAdmin, removeUser);
 
 // ── Vocal admin ───────────────────────────────────────────────────────────────
+router.get("/vocal/token", requireAdmin, getAdminVocalToken);
 router.post("/vocal/start", requireAdmin, startAdminVocal);
 router.post("/vocal/stop", requireAdmin, stopAdminVocal);
+
+// ── Screening (projection live vers les jurés) ────────────────────────────────
+router.post("/screening/start", requireAdmin, startScreening);
+router.post("/screening/stop", requireAdmin, stopScreening);
+router.get("/screening/state", requireAdmin, getScreeningState);
+router.post("/screening/seek", requireAdmin, seekScreening);
+router.post("/screening/playback", requireAdmin, playbackScreening);
 
 // ── Dev / tests — reset votes ─────────────────────────────────────────────────
 router.delete("/votes/reset", requireAdmin, resetAllVotesHandler);
