@@ -25,7 +25,6 @@ interface FilmCardProps {
 }
 
 const getPosterArt = (idx: number): React.JSX.Element => {
-    const g = `pa${idx}`;
     const arts: React.JSX.Element[] = [];
     return arts[idx % arts.length];
 };
