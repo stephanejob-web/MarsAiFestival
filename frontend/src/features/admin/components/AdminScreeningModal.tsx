@@ -68,7 +68,7 @@ const LiveVotePanel = ({
         }
         prevDetailsRef.current = poll.details;
         if (newFlash.length === 0) return;
-        setFlashIds((f) => new Set([...f, ...newFlash]));
+        queueMicrotask(() => setFlashIds((f) => new Set([...f, ...newFlash])));
         const t = setTimeout(() => {
             setFlashIds((f) => {
                 const next = new Set(f);
@@ -239,8 +239,9 @@ const LiveVotePanel = ({
 
 // ── Chrono ────────────────────────────────────────────────────────────────────
 const useElapsed = (startedAt: number): string => {
-    const [elapsed, setElapsed] = useState(Date.now() - startedAt);
+    const [elapsed, setElapsed] = useState(0);
     useEffect(() => {
+        queueMicrotask(() => setElapsed(Date.now() - startedAt));
         const id = setInterval(() => setElapsed(Date.now() - startedAt), 1000);
         return () => clearInterval(id);
     }, [startedAt]);

@@ -30,7 +30,7 @@ const useLivePoll = (filmId: number | null): PollData | null => {
     // Charger les votes initiaux via HTTP
     useEffect(() => {
         if (!filmId) {
-            setPoll(null);
+            queueMicrotask(() => setPoll(null));
             return;
         }
         const token = localStorage.getItem("jury_token");
