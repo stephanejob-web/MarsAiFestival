@@ -4,10 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
 const backendTarget = process.env.BACKEND_URL ?? 'http://localhost:5500'
+const useHttps = process.env.VITE_NO_SSL !== 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [tailwindcss(), react(), basicSsl()],
+  plugins: [tailwindcss(), react(), ...(useHttps ? [basicSsl()] : [])],
   server: {
     host: true,
     proxy: {
