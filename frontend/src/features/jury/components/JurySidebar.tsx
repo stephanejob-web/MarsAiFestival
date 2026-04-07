@@ -11,7 +11,6 @@ import {
     LogOut,
     MessageCircle,
     Mic,
-    Scale,
     Send,
     Settings,
     ShieldCheck,
@@ -23,6 +22,7 @@ import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
 import type { VoteMode } from "../hooks/useVoteMode";
+import type { ScreeningPayload } from "../hooks/useScreening";
 import ProfileModal from "./ProfileModal";
 import { VocalJoinButton } from "./VocalPanel";
 
@@ -38,6 +38,7 @@ interface JurySidebarProps {
     onChatToggle: () => void;
     voteMode: VoteMode;
     onVoteModeChange: (mode: VoteMode) => void;
+    screening: ScreeningPayload | null;
 }
 
 interface NavItemProps {
@@ -102,6 +103,7 @@ const JurySidebar = ({
     onChatToggle,
     voteMode,
     onVoteModeChange,
+    screening,
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
@@ -239,18 +241,33 @@ const JurySidebar = ({
                             onClick={() => onViewChange("discuter")}
                         />
 
+                        {/* ── Onglet En direct — visible uniquement pendant une projection ── */}
+                        {screening && (
+                            <button
+                                type="button"
+                                onClick={() => onViewChange("screening")}
+                                className={`mt-2 flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
+                                    activeView === "screening"
+                                        ? "border-coral/50 bg-coral/15 text-coral shadow-[0_0_16px_rgba(255,107,107,0.2)]"
+                                        : "border-coral/30 bg-coral/[0.07] text-coral/80 hover:border-coral/50 hover:bg-coral/12 hover:text-coral"
+                                }`}
+                            >
+                                <span className="relative flex-shrink-0">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-coral opacity-50" />
+                                    <span className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full bg-coral">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                    </span>
+                                </span>
+                                <span className="flex-1 text-left">En direct</span>
+                                <span className="max-w-[80px] truncate rounded-full bg-coral/20 px-1.5 py-0.5 font-mono text-[0.58rem] text-coral">
+                                    {screening.title}
+                                </span>
+                            </button>
+                        )}
+
                         <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
                             Sélection
                         </div>
-                        <NavItem
-                            icon={<Scale size={14} />}
-                            label="Délibération"
-                            count={0}
-                            countVariant="neutral"
-                            isActive={activeView === "delib"}
-                            onClick={() => onViewChange("delib")}
-                            disabled
-                        />
 
                         {/* App mobile promo tab */}
                         <button
