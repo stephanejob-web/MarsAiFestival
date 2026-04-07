@@ -11,6 +11,7 @@ export default defineConfig({
   plugins: [tailwindcss(), react(), ...(useHttps ? [basicSsl()] : [])],
   server: {
     host: true,
+    allowedHosts: ['marsai.lightchurch.fr'],
     proxy: {
       '/api': {
         target: backendTarget,
