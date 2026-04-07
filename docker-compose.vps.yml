@@ -20,6 +20,9 @@ services:
       - "traefik.http.routers.marsai.entrypoints=websecure"
       - "traefik.http.routers.marsai.tls.certresolver=letsencrypt"
       - "traefik.http.services.marsai.loadbalancer.server.port=5173"
+      - "traefik.http.services.marsai.loadbalancer.server.scheme=https"
+      - "traefik.http.serversTransports.marsai-transport.insecureSkipVerify=true"
+      - "traefik.http.services.marsai.loadbalancer.serverstransport=marsai-transport"
 
   backend:
     build:
