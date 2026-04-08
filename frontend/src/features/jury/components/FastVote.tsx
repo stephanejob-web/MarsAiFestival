@@ -969,6 +969,7 @@ const FastVote = ({
                         {nextFilm.videoUrl ? (
                             <video
                                 src={nextFilm.videoUrl}
+                                poster={nextFilm.posterImg ?? undefined}
                                 className="h-full w-full object-contain opacity-40"
                                 preload="metadata"
                                 muted
@@ -1005,6 +1006,7 @@ const FastVote = ({
                             <video
                                 ref={videoRef}
                                 src={currentFilm.videoUrl}
+                                poster={currentFilm.posterImg ?? undefined}
                                 className="h-full w-full object-contain"
                                 preload="auto"
                                 autoPlay
