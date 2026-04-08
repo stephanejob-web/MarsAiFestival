@@ -67,6 +67,7 @@ export interface ScreeningState {
     title: string;
     country: string;
     videoUrl: string | null;
+    posterImg?: string | null;
     startedAt: number;
     seekTime?: number;
     seekedAt?: number;
