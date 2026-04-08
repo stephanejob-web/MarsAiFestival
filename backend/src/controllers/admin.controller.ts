@@ -430,6 +430,7 @@ export const startScreening = async (req: Request, res: Response): Promise<void>
             title: film.original_title as string,
             country: (film.country as string) ?? "",
             videoUrl,
+            posterImg: (film.poster_img as string | null) ?? null,
             startedAt: Date.now(),
         };
 

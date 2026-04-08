@@ -86,6 +86,7 @@ const FilmDrawer = ({
                             src={film.video_url}
                             controls
                             preload="metadata"
+                            poster={film.poster_img ?? undefined}
                             className="block max-h-[190px] w-full object-cover"
                         />
                     </div>
