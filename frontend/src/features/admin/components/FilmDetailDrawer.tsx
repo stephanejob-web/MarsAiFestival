@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Check } from "lucide-react";
 import { apiFetch } from "../../../services/api";
+import { API_BASE_URL } from "../../../constants/api";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
@@ -128,6 +129,8 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
     const [emailMessage, setEmailMessage] = useState("");
     const [sending, setSending] = useState(false);
     const [emailStatus, setEmailStatus] = useState<"idle" | "ok" | "error">("idle");
+    const [posterUploading, setPosterUploading] = useState(false);
+    const posterInputRef = React.useRef<HTMLInputElement>(null);
 
     const sendEmail = (): void => {
         if (!filmId || !emailSubject.trim() || !emailMessage.trim()) return;
@@ -162,6 +165,27 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
             })
             .catch(() => undefined);
     }, [filmId]);
+
+    const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const file = e.target.files?.[0];
+        if (!file || !filmId) return;
+        setPosterUploading(true);
+        const fd = new FormData();
+        fd.append("poster", file);
+        fetch(`${API_BASE_URL}/api/films/${filmId}/poster`, {
+            method: "PATCH",
+            headers: { Authorization: `Bearer ${getToken()}` },
+            body: fd,
+        })
+            .then((r) => r.json())
+            .then((res: { success: boolean; poster_img?: string }) => {
+                if (res.success && res.poster_img) {
+                    setFilm((prev) => prev ? { ...prev, poster_img: res.poster_img! } : prev);
+                }
+            })
+            .catch(() => undefined)
+            .finally(() => setPosterUploading(false));
+    };
 
     const isOpen = filmId !== null;
     // loading = drawer open but film not yet fetched (or fetching a new film)
@@ -236,6 +260,43 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
 
                     {!loading && film && (
                         <div className="space-y-4">
+                            {/* ── Affiche ── */}
+                            <div className="mb-4">
+                                <input
+                                    ref={posterInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                    onChange={handlePosterUpload}
+                                />
+                                {film.poster_img ? (
+                                    <div className="group relative">
+                                        <img
+                                            src={film.poster_img}
+                                            alt={`Affiche — ${film.original_title}`}
+                                            className="w-full rounded-xl object-cover max-h-64"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => posterInputRef.current?.click()}
+                                            disabled={posterUploading}
+                                            className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/0 text-transparent transition-all group-hover:bg-black/50 group-hover:text-white text-xs font-semibold"
+                                        >
+                                            {posterUploading ? "Upload…" : "Changer l'affiche"}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => posterInputRef.current?.click()}
+                                        disabled={posterUploading}
+                                        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/[0.1] bg-white/[0.02] py-6 text-[0.75rem] text-mist transition-colors hover:border-aurora/40 hover:text-aurora disabled:opacity-50"
+                                    >
+                                        {posterUploading ? "Upload en cours…" : "🖼️ Uploader une affiche"}
+                                    </button>
+                                )}
+                            </div>
+
                             {/* ── Film ── */}
                             <Section title="Film">
                                 <Row label="Titre original" value={film.original_title} />
