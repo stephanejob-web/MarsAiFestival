@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
 import {
     createTicket,
     getAllTickets,
@@ -130,16 +130,12 @@ export const emailRealisator = async (req: Request, res: Response): Promise<void
             return;
         }
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-        });
-
-        await transporter.sendMail({
-            from: `"marsAI Festival" <${process.env.EMAIL_USER}>`,
-            to: ticket.realisator_email as string,
+        const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
+        await brevo.transactionalEmails.sendTransacEmail({
+            sender: { name: "marsAI Festival", email: process.env.BREVO_SENDER_EMAIL ?? "" },
+            to: [{ email: ticket.realisator_email as string }],
             subject: subject.trim(),
-            html: `<div style="font-family:sans-serif;max-width:520px;margin:auto">${body.trim().replace(/\n/g, "<br/>")}</div>`,
+            htmlContent: `<div style="font-family:sans-serif;max-width:520px;margin:auto">${body.trim().replace(/\n/g, "<br/>")}</div>`,
         });
 
         res.json({ success: true, message: "Email envoyé au réalisateur." });

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
 import {
     upsertVote,
     deleteVote,
@@ -77,16 +77,13 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
             const film = await getFilmById(Number(filmId));
             if (film?.realisator_email) {
                 const label = DECISION_LABELS[decision as Decision];
-                const transporter = nodemailer.createTransport({
-                    service: "gmail",
-                    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-                });
-                await transporter
-                    .sendMail({
-                        from: `"marsAI Festival 2026" <${process.env.EMAIL_USER}>`,
-                        to: film.realisator_email as string,
+                const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
+                await brevo.transactionalEmails
+                    .sendTransacEmail({
+                        sender: { name: "marsAI Festival 2026", email: process.env.BREVO_SENDER_EMAIL ?? "" },
+                        to: [{ email: film.realisator_email as string }],
                         subject: `[marsAI 2026] ${label} — ${film.original_title as string} (${film.dossier_num as string})`,
-                        html: `
+                        htmlContent: `
                         <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
                             <h2 style="color:#4a0080">marsAI Festival 2026</h2>
                             <p>Bonjour,</p>
@@ -99,7 +96,7 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
                             <p style="color:#888;font-size:12px">Ce message a été envoyé par le jury marsAI Festival 2026.</p>
                         </div>`,
                     })
-                    .catch((err) => {
+                    .catch((err: unknown) => {
                         // eslint-disable-next-line no-console
                         console.error("⚠️ Échec envoi email réalisateur :", err);
                     });
