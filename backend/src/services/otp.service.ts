@@ -1,5 +1,7 @@
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
+
+const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 
 interface OtpEntry {
     code: string;
@@ -16,20 +18,12 @@ export function generateAndStoreOtp(email: string): string {
 }
 
 export async function sendOtpEmail(email: string, code: string): Promise<void> {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
+    await client.transactionalEmails.sendTransacEmail({
+        sender: { name: "marsAI Festival", email: process.env.BREVO_SENDER_EMAIL ?? "" },
+        to: [{ email }],
         subject: "MarsAI Festival — Code de vérification",
-        text: `Votre code de vérification est : ${code}\n\nIl expire dans 5 minutes.`,
-        html: `
+        textContent: `Votre code de vérification est : ${code}\n\nIl expire dans 5 minutes.`,
+        htmlContent: `
             <div style="font-family:sans-serif;max-width:480px;margin:auto">
                 <h2 style="color:#4effce">MarsAI Festival</h2>
                 <p>Votre code de vérification :</p>

@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
 import "dotenv/config";
+
+const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
 const INVITE_URL =
@@ -30,23 +32,15 @@ export async function sendInviteEmail(
     role: "jury" | "admin",
     token: string,
 ): Promise<void> {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
     const inviteUrl = `${INVITE_URL}?token=${token}`;
     const roleLabel = role === "admin" ? "Administrateur" : "Membre du jury";
 
-    await transporter.sendMail({
-        from: `"marsAI Festival" <${process.env.EMAIL_USER}>`,
-        to: email,
+    await client.transactionalEmails.sendTransacEmail({
+        sender: { name: "marsAI Festival", email: process.env.BREVO_SENDER_EMAIL ?? "" },
+        to: [{ email }],
         subject: "marsAI 2026 — Votre invitation",
-        text: `Vous avez été invité(e) à rejoindre le jury marsAI 2026 en tant que ${roleLabel}.\n\nCliquez sur ce lien pour créer votre compte (valable 48h) :\n${inviteUrl}`,
-        html: `
+        textContent: `Vous avez été invité(e) à rejoindre le jury marsAI 2026 en tant que ${roleLabel}.\n\nCliquez sur ce lien pour créer votre compte (valable 48h) :\n${inviteUrl}`,
+        htmlContent: `
             <div style="font-family:sans-serif;max-width:520px;margin:auto;background:#0f111a;color:#e2e8f0;padding:32px;border-radius:16px;">
                 <h2 style="color:#4effce;margin:0 0 8px">mars<span style="color:#a78bfa">AI</span> Festival 2026</h2>
                 <p style="color:#94a3b8;margin:0 0 24px;font-size:0.85rem">Panneau d'administration</p>
