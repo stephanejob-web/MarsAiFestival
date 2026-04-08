@@ -29,6 +29,7 @@ services:
     expose:
       - "5500"
     env_file:
+      - ./.env.vps
       - ./backend/.env
     environment:
       - DB_HOST=mysql
