@@ -10,6 +10,7 @@ export interface FilmInsert {
     tags: string | null;
     original_synopsis: string | null;
     english_synopsis: string | null;
+    poster_img: string | null;
     video_url: string | null;
     subtitle_fr_url: string | null;
     subtitle_en_url: string | null;
@@ -29,12 +30,13 @@ export const insertFilm = async (data: FilmInsert): Promise<number> => {
             realisator_id, dossier_num,
             original_title, english_title, language, tags,
             original_synopsis, english_synopsis,
+            poster_img,
             video_url, subtitle_fr_url, subtitle_en_url,
             creative_workflow, tech_stack,
             duration,
             ia_class, ia_image, ia_son, ia_scenario, ia_post,
             statut
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'to_review')`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'to_review')`,
         [
             data.realisator_id,
             data.dossier_num,
@@ -44,6 +46,7 @@ export const insertFilm = async (data: FilmInsert): Promise<number> => {
             data.tags ?? null,
             data.original_synopsis ?? null,
             data.english_synopsis ?? null,
+            data.poster_img ?? null,
             data.video_url ?? null,
             data.subtitle_fr_url ?? null,
             data.subtitle_en_url ?? null,
@@ -101,6 +104,14 @@ export const getUnassignedFilms = async (): Promise<RowDataPacket[]> => {
          WHERE f.id NOT IN (SELECT DISTINCT film_id FROM jury_film_assignment)`,
     );
     return rows;
+};
+
+export const updatePosterImg = async (id: number, posterUrl: string): Promise<boolean> => {
+    const [result] = await pool.execute<ResultSetHeader>(
+        `UPDATE film SET poster_img = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        [posterUrl, id],
+    );
+    return result.affectedRows > 0;
 };
 
 export const deleteFilm = async (id: number): Promise<boolean> => {

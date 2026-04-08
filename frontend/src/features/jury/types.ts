@@ -97,6 +97,7 @@ export interface JuryFilm {
     iaPost: string;
     note: string;
     videoUrl: string | null;
+    posterImg: string | null;
     myDecision: Decision;
     comments: JuryComment[];
     opinions: JuryOpinion[];

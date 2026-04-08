@@ -13,6 +13,7 @@ import {
     getFilms,
     getFilmById,
     updateFilmStatut,
+    updatePosterImg,
     deleteFilm,
 } from "../repositories/film.repository";
 import { getVotesSummary } from "../repositories/vote.repository";
@@ -42,12 +43,14 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
         name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
 
     try {
-        for (const field of ["video", "subtitleFR", "subtitleEN"]) {
+        for (const field of ["poster", "video", "subtitleFR", "subtitleEN"]) {
             const fileArr = files?.[field];
             if (fileArr && fileArr.length > 0) {
                 const file = fileArr[0];
                 const filename = `${dossierNum}/${field}-${sanitizeName(file.originalname)}`;
-                urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype);
+                // Poster images are public (displayed on the site); other files remain private
+                const isPublic = field === "poster";
+                urls[field] = await uploadFileToS3(file.buffer, filename, file.mimetype, isPublic);
             }
         }
     } catch (err) {
@@ -129,6 +132,7 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
             tags: body.tags || null,
             original_synopsis: body.synopsis || null,
             english_synopsis: body.synopsisEn || null,
+            poster_img: urls["poster"] ?? null,
             video_url: urls["video"] ?? null,
             subtitle_fr_url: urls["subtitleFR"] ?? null,
             subtitle_en_url: urls["subtitleEN"] ?? null,
@@ -372,6 +376,46 @@ export const getVideoUrl = async (req: Request, res: Response): Promise<void> =>
         res.status(500).json({
             success: false,
             message: "Erreur lors de la génération de l'URL vidéo.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── PATCH /api/films/:id/poster — Uploader / remplacer l'affiche ──────────────
+export const uploadPoster = async (req: Request, res: Response): Promise<void> => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+        res.status(400).json({ success: false, message: "ID invalide." });
+        return;
+    }
+
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const file = files?.["poster"]?.[0] ?? (req.file as Express.Multer.File | undefined);
+    if (!file) {
+        res.status(400).json({ success: false, message: "Aucune image fournie." });
+        return;
+    }
+
+    try {
+        const film = await getFilmById(id);
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+
+        const sanitize = (name: string): string =>
+            name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
+
+        const dossierNum = film.dossier_num as string;
+        const filename = `${dossierNum}/poster-${sanitize(file.originalname)}`;
+        const url = await uploadFileToS3(file.buffer, filename, file.mimetype, true);
+
+        await updatePosterImg(id, url);
+        res.json({ success: true, poster_img: url });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'upload de l'affiche.",
             error: err instanceof Error ? err.message : String(err),
         });
     }

@@ -25,7 +25,7 @@ export const getDiscussionFilms = async (): Promise<RowDataPacket[]> => {
     const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT
             f.id AS film_id, f.dossier_num, f.original_title, f.english_title,
-            f.language, f.tags, f.duration, f.ia_class, f.video_url,
+            f.language, f.tags, f.duration, f.ia_class, f.video_url, f.poster_img,
             f.ia_image, f.ia_son, f.ia_scenario, f.ia_post,
             f.creative_workflow, f.tech_stack,
             f.subtitle_fr_url, f.subtitle_en_url,

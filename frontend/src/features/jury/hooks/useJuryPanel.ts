@@ -39,6 +39,7 @@ interface ApiFilmRow {
     duration: number | null;
     ia_class: "full" | "hybrid" | null;
     video_url: string | null;
+    poster_img: string | null;
     ia_image: number;
     ia_son: number;
     ia_scenario: number;
@@ -92,6 +93,7 @@ const mapApiFilm = (row: ApiFilmRow): JuryFilm => ({
     iaPost: row.ia_post ? "Oui" : "Non",
     note: row.creative_workflow ?? "",
     videoUrl: row.video_url ?? null,
+    posterImg: row.poster_img ?? null,
     myDecision: null,
     comments: [],
     opinions: [],
@@ -316,6 +318,7 @@ const useJuryPanel = (): UseJuryPanelReturn => {
                 iaPost: "",
                 note: "",
                 videoUrl: null,
+                posterImg: null,
                 myDecision: null,
                 comments: [],
                 opinions: [],

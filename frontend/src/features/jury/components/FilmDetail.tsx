@@ -166,6 +166,7 @@ const FilmDetail = ({ film }: FilmDetailProps): React.JSX.Element => {
                             key={film.videoUrl}
                             src={film.videoUrl}
                             controls
+                            poster={film.posterImg ?? undefined}
                             className="aspect-video w-full bg-black"
                             preload="metadata"
                         />

@@ -42,6 +42,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
         country: f.realisator_country ?? "—",
         year: String(f.film_year ?? 2026),
         videoUrl: f.video_url ?? null,
+        posterImg: f.poster_img ?? null,
         myDecision: "discuter" as const,
         // champs requis par JuryFilm mais non utilisés dans DiscuterView
         duration: f.duration
@@ -246,6 +247,7 @@ const DiscuterView = ({ panel }: DiscuterViewProps): React.JSX.Element => {
                                         key={selectedFilm.videoUrl}
                                         src={selectedFilm.videoUrl}
                                         controls
+                                        poster={selectedFilm.posterImg ?? undefined}
                                         className="aspect-video w-full bg-black"
                                         preload="metadata"
                                     />

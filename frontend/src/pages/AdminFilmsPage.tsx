@@ -12,9 +12,10 @@ const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
 interface PresignedVideoProps {
     filmId: number;
+    posterImg?: string | null;
 }
 
-const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
+const PresignedVideo = ({ filmId, posterImg }: PresignedVideoProps): React.JSX.Element => {
     const [src, setSrc] = useState<string | null>(null);
     const [error, setError] = useState(false);
 
@@ -47,6 +48,7 @@ const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
             controls
             autoPlay
             preload="auto"
+            poster={posterImg ?? undefined}
             className="aspect-video w-full object-cover"
         />
     );
@@ -469,6 +471,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     `Film #${screeningFilmId}`
                                 }
                                 filmCountry={films.find((f) => f.id === screeningFilmId)?.country}
+                                filmPosterImg={
+                                    films.find((f) => f.id === screeningFilmId)?.poster_img
+                                }
                                 startedAt={screeningStartedAt}
                                 videoUrl={screeningVideoUrl}
                                 juryMembers={juryMembers}
@@ -590,7 +595,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
                                                 <div className="bg-black">
-                                                    <PresignedVideo filmId={film.id} />
+                                                    <PresignedVideo
+                                                        filmId={film.id}
+                                                        posterImg={film.poster_img}
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div
@@ -601,6 +609,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                             : `${accent}11`,
                                                     }}
                                                 >
+                                                    {film.poster_img && (
+                                                        <img
+                                                            src={film.poster_img}
+                                                            alt=""
+                                                            className="absolute inset-0 h-full w-full object-cover"
+                                                        />
+                                                    )}
                                                     {/* Selected badge */}
                                                     {isSelected && (
                                                         <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">

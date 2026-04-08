@@ -157,7 +157,13 @@ const VideoModal = ({
                         </div>
                     )}
                     {!loading && signedUrl && (
-                        <video src={signedUrl} controls autoPlay className="w-full h-full" />
+                        <video
+                            src={signedUrl}
+                            controls
+                            autoPlay
+                            poster={award.poster_img ?? undefined}
+                            className="w-full h-full"
+                        />
                     )}
                     {!loading && !signedUrl && (
                         <div className="w-full h-full flex items-center justify-center text-mist/40 text-sm">

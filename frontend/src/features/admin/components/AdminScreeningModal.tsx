@@ -450,6 +450,7 @@ export interface AdminScreeningModalProps {
     filmId: number;
     filmTitle: string;
     filmCountry?: string;
+    filmPosterImg?: string | null;
     startedAt: number;
     videoUrl: string | null;
     juryMembers: AdminJuryMember[];
@@ -465,6 +466,7 @@ const AdminScreeningModal = ({
     filmId,
     filmTitle,
     filmCountry,
+    filmPosterImg,
     startedAt,
     videoUrl,
     juryMembers,
@@ -585,6 +587,7 @@ const AdminScreeningModal = ({
                                     controls
                                     playsInline
                                     preload="auto"
+                                    poster={filmPosterImg ?? undefined}
                                     onCanPlay={() => setIsVideoReady(true)}
                                     onSeeked={handleSeek}
                                     onPlay={(e) =>
