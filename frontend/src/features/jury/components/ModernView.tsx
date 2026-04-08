@@ -81,6 +81,7 @@ const FilmThumbnail = ({ film, isActive, onClick }: FilmThumbnailProps): React.J
                     preload="metadata"
                     muted
                     playsInline
+                    poster={film.posterImg ?? undefined}
                     className={`w-full h-full object-cover transition-opacity ${
                         isVideoReady
                             ? isActive
