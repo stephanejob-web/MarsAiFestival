@@ -8,6 +8,7 @@ export interface DiscussionFilm {
     original_title: string;
     dossier_num: string;
     video_url: string | null;
+    poster_img: string | null;
     duration: number | null;
     ia_class: "full" | "hybrid" | null;
     ia_image: number;
