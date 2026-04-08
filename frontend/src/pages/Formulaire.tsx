@@ -79,10 +79,12 @@ const Formulaire = (): React.JSX.Element => {
                             formData={form.formData}
                             errors={form.errors}
                             videoFile={form.videoFile}
+                            posterFile={form.posterFile}
                             uploadProgress={form.uploadProgress}
                             onChange={form.updateField}
                             onVideoSelect={(file) => form.setVideoFile(file)}
                             onVideoReset={form.resetVideo}
+                            onPosterSelect={form.setPosterFile}
                             setUploadProgress={form.setUploadProgress}
                             setVideoDuration={form.setVideoDuration}
                             setVideoValid={form.setVideoValid}

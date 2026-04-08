@@ -562,6 +562,7 @@ const FilmInsightDrawer = ({ film, onClose }: FilmInsightDrawerProps): React.JSX
                                 key={videoUrl}
                                 src={videoUrl}
                                 controls
+                                poster={film?.poster_img ?? undefined}
                                 className="aspect-video w-full"
                             />
                         ) : (
