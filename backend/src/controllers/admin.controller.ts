@@ -517,14 +517,15 @@ export const sendBulkEmail = async (req: Request, res: Response): Promise<void> 
     };
 
     if (!emails?.length || !subject?.trim() || !message?.trim()) {
-        res.status(400).json({ success: false, message: "emails, subject et message sont requis." });
+        res.status(400).json({
+            success: false,
+            message: "emails, subject et message sont requis.",
+        });
         return;
     }
 
     const results = await Promise.allSettled(
-        emails.map((email) =>
-            sendRealisateurEmail(email, "", "", subject.trim(), message.trim()),
-        ),
+        emails.map((email) => sendRealisateurEmail(email, "", "", subject.trim(), message.trim())),
     );
 
     const failed = results.filter((r) => r.status === "rejected").length;

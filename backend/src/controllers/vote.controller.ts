@@ -80,7 +80,10 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
                 const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
                 await brevo.transactionalEmails
                     .sendTransacEmail({
-                        sender: { name: "marsAI Festival 2026", email: process.env.BREVO_SENDER_EMAIL ?? "" },
+                        sender: {
+                            name: "marsAI Festival 2026",
+                            email: process.env.BREVO_SENDER_EMAIL ?? "",
+                        },
                         to: [{ email: film.realisator_email as string }],
                         subject: `[marsAI 2026] ${label} — ${film.original_title as string} (${film.dossier_num as string})`,
                         htmlContent: `

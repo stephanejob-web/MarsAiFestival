@@ -52,7 +52,8 @@ const AdminEmailingPage = (): React.JSX.Element => {
                 <div>
                     <h1 className="text-lg font-semibold text-white">Emailing réalisateurs</h1>
                     <p className="text-xs text-mist mt-0.5">
-                        {realisators.length} réalisateur{realisators.length !== 1 ? "s" : ""} inscrit
+                        {realisators.length} réalisateur{realisators.length !== 1 ? "s" : ""}{" "}
+                        inscrit
                         {realisators.length !== 1 ? "s" : ""}
                     </p>
                 </div>
@@ -68,7 +69,10 @@ const AdminEmailingPage = (): React.JSX.Element => {
                 <div className="bg-aurora/10 border border-aurora/30 rounded-lg px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-sm">
                         <CheckCircle size={16} className="text-aurora" />
-                        <span className="text-aurora font-medium">{sendResult.sent} email{sendResult.sent !== 1 ? "s" : ""} envoyé{sendResult.sent !== 1 ? "s" : ""}</span>
+                        <span className="text-aurora font-medium">
+                            {sendResult.sent} email{sendResult.sent !== 1 ? "s" : ""} envoyé
+                            {sendResult.sent !== 1 ? "s" : ""}
+                        </span>
                         {sendResult.failed > 0 && (
                             <span className="text-red-400 flex items-center gap-1">
                                 <XCircle size={14} />
@@ -101,7 +105,10 @@ const AdminEmailingPage = (): React.JSX.Element => {
                             )}
                         </button>
                         <div className="relative flex-1">
-                            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-mist" />
+                            <Search
+                                size={13}
+                                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-mist"
+                            />
                             <input
                                 type="text"
                                 placeholder="Rechercher..."
@@ -120,7 +127,9 @@ const AdminEmailingPage = (): React.JSX.Element => {
                         {isLoading ? (
                             <div className="py-12 text-center text-mist text-sm">Chargement...</div>
                         ) : filtered.length === 0 ? (
-                            <div className="py-12 text-center text-mist text-sm">Aucun résultat</div>
+                            <div className="py-12 text-center text-mist text-sm">
+                                Aucun résultat
+                            </div>
                         ) : (
                             filtered.map((r) => (
                                 <button
