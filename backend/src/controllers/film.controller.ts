@@ -156,6 +156,23 @@ export const submitFilm = async (req: Request, res: Response): Promise<void> => 
         return;
     }
 
+    // ── Étape 4 : Email de confirmation au réalisateur (non bloquant) ──────────
+    const realisatorName = `${body.prenom ?? ""} ${body.nom ?? ""}`.trim();
+    const realisatorEmail = body.email ?? "";
+    const filmTitle = body.titre ?? dossierNum;
+    if (realisatorEmail) {
+        sendRealisateurEmail(
+            realisatorEmail,
+            realisatorName,
+            filmTitle,
+            "Confirmation de réception de votre film",
+            `Nous avons bien reçu votre dépôt pour le film "${filmTitle}".\n\nVotre numéro de dossier est : ${dossierNum}\n\nNous examinerons votre film dans les meilleurs délais et vous recontacterons prochainement.\n\nMerci de votre participation au marsAI Festival 2026 !`,
+        ).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.error("⚠️ Échec envoi email confirmation réalisateur :", err);
+        });
+    }
+
     res.status(201).json({
         success: true,
         dossierNum,

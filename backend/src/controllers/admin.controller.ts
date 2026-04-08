@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { listVideosFromS3, getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
 import { getFilms, getFilmById } from "../repositories/film.repository";
 import { resetAllVotes } from "../repositories/vote.repository";
+import { getAllRealisators } from "../repositories/realisator.repository";
+import { sendRealisateurEmail } from "../services/realisator-email.service";
 import type { ScreeningState } from "../index";
 import {
     generateInviteToken,
@@ -490,6 +492,46 @@ export const seekScreening = (req: Request, res: Response): void => {
     const io = req.app.locals.io as import("socket.io").Server;
     io.emit("screening:seek", { currentTime, seekedAt });
     res.json({ success: true });
+};
+
+// ── GET /api/admin/realisators — Liste des réalisateurs avec email ────────────
+export const listRealisators = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await getAllRealisators();
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la récupération des réalisateurs.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/emailing — Envoi d'email groupé aux réalisateurs ──────────
+export const sendBulkEmail = async (req: Request, res: Response): Promise<void> => {
+    const { emails, subject, message } = req.body as {
+        emails?: string[];
+        subject?: string;
+        message?: string;
+    };
+
+    if (!emails?.length || !subject?.trim() || !message?.trim()) {
+        res.status(400).json({
+            success: false,
+            message: "emails, subject et message sont requis.",
+        });
+        return;
+    }
+
+    const results = await Promise.allSettled(
+        emails.map((email) => sendRealisateurEmail(email, "", "", subject.trim(), message.trim())),
+    );
+
+    const failed = results.filter((r) => r.status === "rejected").length;
+    const sent = results.length - failed;
+
+    res.json({ success: true, sent, failed });
 };
 
 // ── DELETE /api/admin/votes/reset — Remet tous les votes à NULL (tests/dev) ───

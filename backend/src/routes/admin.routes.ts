@@ -25,6 +25,8 @@ import {
     getScreeningState,
     seekScreening,
     playbackScreening,
+    listRealisators,
+    sendBulkEmail,
 } from "../controllers/admin.controller";
 import { getCalendarHandler, updateCalendarHandler } from "../controllers/calendar.controller";
 import {
@@ -79,6 +81,10 @@ const router = Router();
 // ── Films ─────────────────────────────────────────────────────────────────────
 router.get("/films", requireAdmin, listAdminFilms);
 router.get("/videos", requireAdmin, listS3Videos);
+
+// ── Emailing réalisateurs ─────────────────────────────────────────────────────
+router.get("/realisators", requireAdmin, listRealisators);
+router.post("/emailing", requireAdmin, sendBulkEmail);
 
 // ── Invitations ───────────────────────────────────────────────────────────────
 router.post("/invite", requireAdmin, sendInvite);
