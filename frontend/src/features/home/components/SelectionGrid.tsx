@@ -104,7 +104,13 @@ const VideoModal = ({ film, onClose }: { film: Film; onClose: () => void }): Rea
                         </div>
                     )}
                     {!loadingUrl && signedUrl && (
-                        <video src={signedUrl} controls autoPlay className="w-full h-full" />
+                        <video
+                            src={signedUrl}
+                            controls
+                            autoPlay
+                            poster={film.poster_img ?? undefined}
+                            className="w-full h-full"
+                        />
                     )}
                     {!loadingUrl && !signedUrl && (
                         <div className="w-full h-full flex items-center justify-center text-mist/50 text-sm">
