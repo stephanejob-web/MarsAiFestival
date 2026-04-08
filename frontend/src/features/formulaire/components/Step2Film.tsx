@@ -396,7 +396,9 @@ const Step2Film = ({
                             <div className="text-sm font-semibold text-aurora mb-1">
                                 Glisser une image ou cliquer pour parcourir
                             </div>
-                            <div className="text-xs text-mist">JPG, PNG, WebP — format affiche (2:3 recommandé)</div>
+                            <div className="text-xs text-mist">
+                                JPG, PNG, WebP — format affiche (2:3 recommandé)
+                            </div>
                         </div>
                     </>
                 )}

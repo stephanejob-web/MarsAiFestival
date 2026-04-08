@@ -180,7 +180,7 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
             .then((r) => r.json())
             .then((res: { success: boolean; poster_img?: string }) => {
                 if (res.success && res.poster_img) {
-                    setFilm((prev) => prev ? { ...prev, poster_img: res.poster_img! } : prev);
+                    setFilm((prev) => (prev ? { ...prev, poster_img: res.poster_img! } : prev));
                 }
             })
             .catch(() => undefined)
@@ -292,7 +292,9 @@ const FilmDetailDrawer = ({ filmId, onClose }: FilmDetailDrawerProps): React.JSX
                                         disabled={posterUploading}
                                         className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/[0.1] bg-white/[0.02] py-6 text-[0.75rem] text-mist transition-colors hover:border-aurora/40 hover:text-aurora disabled:opacity-50"
                                     >
-                                        {posterUploading ? "Upload en cours…" : "🖼️ Uploader une affiche"}
+                                        {posterUploading
+                                            ? "Upload en cours…"
+                                            : "🖼️ Uploader une affiche"}
                                     </button>
                                 )}
                             </div>

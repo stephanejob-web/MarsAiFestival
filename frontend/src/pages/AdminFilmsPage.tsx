@@ -471,7 +471,9 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                     `Film #${screeningFilmId}`
                                 }
                                 filmCountry={films.find((f) => f.id === screeningFilmId)?.country}
-                                filmPosterImg={films.find((f) => f.id === screeningFilmId)?.poster_img}
+                                filmPosterImg={
+                                    films.find((f) => f.id === screeningFilmId)?.poster_img
+                                }
                                 startedAt={screeningStartedAt}
                                 videoUrl={screeningVideoUrl}
                                 juryMembers={juryMembers}
@@ -593,7 +595,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
                                                 <div className="bg-black">
-                                                    <PresignedVideo filmId={film.id} posterImg={film.poster_img} />
+                                                    <PresignedVideo
+                                                        filmId={film.id}
+                                                        posterImg={film.poster_img}
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div
