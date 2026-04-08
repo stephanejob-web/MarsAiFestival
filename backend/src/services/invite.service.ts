@@ -5,8 +5,7 @@ import "dotenv/config";
 const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "change-this-secret";
-const INVITE_URL =
-    process.env.INVITE_URL ?? "https://stephanejob-web.github.io/mars-AI/views/login-jury.html";
+const INVITE_URL = process.env.INVITE_URL ?? "https://marsai.lightchurch.fr/jury";
 const INVITE_EXPIRY = "48h";
 
 export interface InvitePayload {
