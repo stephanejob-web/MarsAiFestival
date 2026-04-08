@@ -8,7 +8,7 @@ services:
       - VITE_LIVEKIT_URL=wss://marai-1fs2judn.livekit.cloud
       - BACKEND_URL=http://backend:5500
       - VITE_NO_SSL=true
-      - VITE_GOOGLE_CLIENT_ID=772416103398-0cif2a7lj8j6agcp49g2ab14fh7so8ep.apps.googleusercontent.com
+      - VITE_GOOGLE_CLIENT_ID=772416103398-dld2t8lk6amda0ohsansm31udg3oc9ia.apps.googleusercontent.com
     depends_on:
       backend:
         condition: service_started
