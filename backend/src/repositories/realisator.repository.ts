@@ -23,6 +23,29 @@ export interface RealisatorInsert {
     newsletter: boolean;
 }
 
+export interface RealisatorWithFilm {
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    country: string | null;
+    newsletter: boolean;
+    film_title: string;
+    dossier_num: string;
+    submitted_at: string;
+}
+
+export const getAllRealisators = async (): Promise<RealisatorWithFilm[]> => {
+    const [rows] = await pool.execute<import("mysql2").RowDataPacket[]>(
+        `SELECT r.id, r.email, r.first_name, r.last_name, r.country, r.newsletter,
+                f.original_title AS film_title, f.dossier_num, f.created_at AS submitted_at
+         FROM realisator r
+         JOIN film f ON f.realisator_id = r.id
+         ORDER BY f.created_at DESC`,
+    );
+    return rows as RealisatorWithFilm[];
+};
+
 export const insertRealisator = async (data: RealisatorInsert): Promise<number> => {
     const [result] = await pool.execute<ResultSetHeader>(
         `INSERT INTO realisator (
