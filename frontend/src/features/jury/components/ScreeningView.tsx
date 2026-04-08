@@ -634,6 +634,7 @@ const ScreeningView = ({ screening }: Props): React.JSX.Element => {
                                     controls
                                     playsInline
                                     preload="auto"
+                                    poster={screening.posterImg ?? undefined}
                                     onCanPlay={() => setIsReady(true)}
                                     className="aspect-video w-full bg-black"
                                 />
