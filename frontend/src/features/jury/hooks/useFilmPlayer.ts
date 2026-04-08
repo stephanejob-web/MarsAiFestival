@@ -18,7 +18,10 @@ interface UseFilmPlayerReturn {
     handleEnded: () => void;
 }
 
-const useFilmPlayer = ({ filmId, startMuted = true }: UseFilmPlayerOptions = {}): UseFilmPlayerReturn => {
+const useFilmPlayer = ({
+    filmId,
+    startMuted = true,
+}: UseFilmPlayerOptions = {}): UseFilmPlayerReturn => {
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(startMuted);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -28,7 +31,10 @@ const useFilmPlayer = ({ filmId, startMuted = true }: UseFilmPlayerOptions = {})
         const video = videoRef.current;
         if (!video) return;
         video.currentTime = 0;
-        void video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        void video
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch(() => setIsPlaying(false));
     }, [filmId]);
 
     const togglePlay = useCallback((): void => {
@@ -56,7 +62,17 @@ const useFilmPlayer = ({ filmId, startMuted = true }: UseFilmPlayerOptions = {})
     const handlePause = useCallback((): void => setIsPlaying(false), []);
     const handleEnded = useCallback((): void => setIsPlaying(false), []);
 
-    return { videoRef, isPlaying, isMuted, togglePlay, toggleMute, handleFullscreen, handlePlay, handlePause, handleEnded };
+    return {
+        videoRef,
+        isPlaying,
+        isMuted,
+        togglePlay,
+        toggleMute,
+        handleFullscreen,
+        handlePlay,
+        handlePause,
+        handleEnded,
+    };
 };
 
 export default useFilmPlayer;
