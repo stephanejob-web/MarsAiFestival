@@ -17,10 +17,7 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
         return;
     }
 
-    await pool.execute(
-        "UPDATE jury SET push_token = ? WHERE id = ?",
-        [token, juryId],
-    );
+    await pool.execute("UPDATE jury SET push_token = ? WHERE id = ?", [token, juryId]);
 
     res.json({ success: true });
 };
