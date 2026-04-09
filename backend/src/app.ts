@@ -43,6 +43,7 @@ import programmeRouter from "./routes/programme.routes";
 import juryShowcaseRouter from "./routes/jury_showcase.routes";
 import cmsPublicRouter from "./routes/cms_public.routes";
 import publicRouter from "./routes/phase_public.routes";
+import pushRouter from "./routes/push.routes";
 
 app.use("/", homeRouter);
 app.use("/api/films", filmRouter);
@@ -61,5 +62,6 @@ app.use("/api/programme", programmeRouter);
 app.use("/api/jury-showcase", juryShowcaseRouter);
 app.use("/api/cms", cmsPublicRouter);
 app.use("/api/public", publicRouter);
+app.use("/api/push", pushRouter);
 
 export default app;
