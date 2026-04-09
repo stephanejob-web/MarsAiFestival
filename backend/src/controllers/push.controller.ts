@@ -7,6 +7,11 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
     const juryId = req.juryUser?.id;
     const { token } = req.body as { token?: string };
 
+    if (!juryId) {
+        res.status(401).json({ success: false, message: "Non authentifié." });
+        return;
+    }
+
     if (!token || typeof token !== "string") {
         res.status(400).json({ success: false, message: "Token manquant." });
         return;
