@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, Clapperboard, LayoutList, LogOut, Zap } from "lucide-react";
 
 import type { ActiveView } from "../types";
 
@@ -73,38 +73,41 @@ const JuryTopbar = ({
                     Phase 1 · Top 50 · 12/12/26
                 </span>
                 {showVariantToggle && (
-                    <div className="flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5">
+                    <div className="flex items-center gap-1 rounded-xl border border-white/8 bg-white/[0.04] p-1">
                         <button
                             type="button"
                             onClick={() => onEvalVariantChange("classic")}
-                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold transition-all duration-200 ${
                                 evalVariant === "classic"
-                                    ? "bg-white/15 text-white-soft shadow-sm"
-                                    : "text-mist hover:text-white-soft"
+                                    ? "bg-white/15 text-white shadow-[0_1px_8px_rgba(0,0,0,0.3)]"
+                                    : "text-mist/60 hover:text-mist"
                             }`}
                         >
+                            <LayoutList size={12} />
                             Liste
                         </button>
                         <button
                             type="button"
                             onClick={() => onEvalVariantChange("modern")}
-                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold transition-all duration-200 ${
                                 evalVariant === "modern"
-                                    ? "bg-white/15 text-white-soft shadow-sm"
-                                    : "text-mist hover:text-white-soft"
+                                    ? "bg-aurora/20 text-aurora shadow-[0_1px_12px_rgba(100,220,200,0.25)]"
+                                    : "text-mist/60 hover:text-aurora/70"
                             }`}
                         >
+                            <Clapperboard size={12} />
                             Cinéma
                         </button>
                         <button
                             type="button"
                             onClick={() => onEvalVariantChange("rapide")}
-                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold transition-all duration-200 ${
                                 evalVariant === "rapide"
-                                    ? "bg-aurora/20 text-aurora shadow-sm"
-                                    : "text-mist hover:text-white-soft"
+                                    ? "bg-amber-400/15 text-amber-300 shadow-[0_1px_12px_rgba(251,191,36,0.2)]"
+                                    : "text-mist/60 hover:text-amber-400/70"
                             }`}
                         >
+                            <Zap size={12} />
                             Rapide
                         </button>
                     </div>

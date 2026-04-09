@@ -5,13 +5,16 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
+    Clapperboard,
     Clock,
+    LayoutList,
     Maximize2,
     Minimize2,
     Send,
     Settings,
     User,
     X,
+    Zap,
 } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
@@ -246,22 +249,25 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center rounded-lg border border-white/10 bg-black/30 backdrop-blur-sm p-0.5">
+                    <div className="flex items-center gap-1 rounded-xl border border-white/8 bg-black/30 backdrop-blur-sm p-1">
                         <button
                             type="button"
                             onClick={() => onEvalVariantChange("classic")}
-                            className="rounded-md px-3 py-1 text-[0.72rem] font-semibold text-slate-400 hover:text-white transition-all"
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200"
                         >
+                            <LayoutList size={12} />
                             Liste
                         </button>
-                        <div className="rounded-md px-3 py-1 text-[0.72rem] font-semibold bg-white/15 text-white shadow-sm">
+                        <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold bg-aurora/20 text-aurora shadow-[0_1px_12px_rgba(100,220,200,0.25)]">
+                            <Clapperboard size={12} />
                             Cinéma
                         </div>
                         <button
                             type="button"
                             onClick={() => onEvalVariantChange("rapide")}
-                            className="rounded-md px-3 py-1 text-[0.72rem] font-semibold text-slate-400 hover:text-white transition-all"
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold text-slate-400 hover:text-amber-400/70 transition-all duration-200"
                         >
+                            <Zap size={12} />
                             Rapide
                         </button>
                     </div>
