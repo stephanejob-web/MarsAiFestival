@@ -1,4 +1,4 @@
-import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug, Mail } from "lucide-react";
+import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug, Mail, Bell } from "lucide-react";
 import type { AdminNavCategory } from "./types";
 
 export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
@@ -15,7 +15,10 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
     },
     {
         category: "Communication",
-        items: [{ label: "Emailing", to: "/admin/emailing", icon: <Mail size={15} /> }],
+        items: [
+            { label: "Emailing", to: "/admin/emailing", icon: <Mail size={15} /> },
+            { label: "Notifications push", to: "/admin/notifications", icon: <Bell size={15} /> },
+        ],
     },
     {
         category: "Configuration",
