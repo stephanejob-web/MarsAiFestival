@@ -90,7 +90,7 @@ const FilmThumbnail = ({ film, isActive, onClick }: FilmThumbnailProps): React.J
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type EvalVariant = "classic" | "modern";
+type EvalVariant = "classic" | "modern" | "rapide";
 
 interface ModernViewProps {
     panel: UseJuryPanelReturn;
@@ -252,11 +252,18 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
                             onClick={() => onEvalVariantChange("classic")}
                             className="rounded-md px-3 py-1 text-[0.72rem] font-semibold text-slate-400 hover:text-white transition-all"
                         >
-                            EvalView
+                            Liste
                         </button>
                         <div className="rounded-md px-3 py-1 text-[0.72rem] font-semibold bg-white/15 text-white shadow-sm">
-                            ModernView
+                            Cinéma
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => onEvalVariantChange("rapide")}
+                            className="rounded-md px-3 py-1 text-[0.72rem] font-semibold text-slate-400 hover:text-white transition-all"
+                        >
+                            Rapide
+                        </button>
                     </div>
                     <button
                         type="button"
