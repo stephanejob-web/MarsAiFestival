@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2";
 
 // ── POST /api/push/token — Enregistre le push token du juré connecté ──────────
 export const savePushToken = async (req: Request, res: Response): Promise<void> => {
-    const juryId = (req as any).user?.id;
+    const juryId = req.juryUser?.id;
     const { token } = req.body as { token?: string };
 
     if (!token || typeof token !== "string") {
