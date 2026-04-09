@@ -39,7 +39,7 @@ const JuryPanel = (): React.JSX.Element => {
     }, [screening]);
 
     const [evalVariant, setEvalVariantState] = useState<EvalVariant>(
-        () => (localStorage.getItem("jury_eval_variant") as EvalVariant | null) ?? "classic",
+        () => (localStorage.getItem("jury_eval_variant") as EvalVariant | null) ?? "modern",
     );
 
     const handleEvalVariantChange = (v: EvalVariant): void => {
