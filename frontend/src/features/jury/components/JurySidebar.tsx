@@ -236,7 +236,9 @@ const JurySidebar = ({
                             >
                                 <Smartphone size={13} />
                                 <span>Application mobile</span>
-                                <span className="ml-auto rounded-full bg-white/8 px-1.5 py-px font-mono text-[0.55rem] text-mist/60">NEW</span>
+                                <span className="ml-auto rounded-full bg-white/8 px-1.5 py-px font-mono text-[0.55rem] text-mist/60">
+                                    NEW
+                                </span>
                             </button>
                         </div>
                     </nav>
