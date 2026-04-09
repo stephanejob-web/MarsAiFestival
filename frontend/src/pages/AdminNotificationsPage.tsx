@@ -236,7 +236,9 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                         </p>
                         <div className="flex items-center gap-1.5 text-[0.7rem] text-mist/60">
                             <Smartphone size={11} />
-                            <span>{withToken.length} token{withToken.length > 1 ? "s" : ""}</span>
+                            <span>
+                                {withToken.length} token{withToken.length > 1 ? "s" : ""}
+                            </span>
                         </div>
                     </div>
 
@@ -275,7 +277,10 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                         className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left transition-all hover:bg-white/[0.04]"
                                     >
                                         {selected.has(m.id) ? (
-                                            <CheckSquare size={14} className="shrink-0 text-aurora" />
+                                            <CheckSquare
+                                                size={14}
+                                                className="shrink-0 text-aurora"
+                                            />
                                         ) : (
                                             <Square size={14} className="shrink-0 text-mist/40" />
                                         )}
@@ -287,13 +292,17 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                             />
                                         ) : (
                                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aurora/15 text-[0.55rem] font-bold text-aurora">
-                                                {m.first_name[0]}{m.last_name[0]}
+                                                {m.first_name[0]}
+                                                {m.last_name[0]}
                                             </div>
                                         )}
                                         <span className="text-[0.8rem] text-white-soft">
                                             {m.first_name} {m.last_name}
                                         </span>
-                                        <Smartphone size={10} className="ml-auto text-aurora/50 shrink-0" />
+                                        <Smartphone
+                                            size={10}
+                                            className="ml-auto text-aurora/50 shrink-0"
+                                        />
                                     </button>
                                 ))}
 
@@ -308,7 +317,10 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                                 key={m.id}
                                                 className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 opacity-40"
                                             >
-                                                <Square size={14} className="shrink-0 text-mist/40" />
+                                                <Square
+                                                    size={14}
+                                                    className="shrink-0 text-mist/40"
+                                                />
                                                 {m.profil_picture ? (
                                                     <img
                                                         src={m.profil_picture}
@@ -317,7 +329,8 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                                     />
                                                 ) : (
                                                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[0.55rem] font-bold text-mist">
-                                                        {m.first_name[0]}{m.last_name[0]}
+                                                        {m.first_name[0]}
+                                                        {m.last_name[0]}
                                                     </div>
                                                 )}
                                                 <span className="text-[0.8rem] text-mist">
