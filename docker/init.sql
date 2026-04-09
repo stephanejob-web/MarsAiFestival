@@ -409,6 +409,7 @@ CREATE TABLE `jury` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `session_token` varchar(36) DEFAULT NULL,
   `permissions` json DEFAULT NULL,
+  `push_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_jury_email` (`email`),
   UNIQUE KEY `uq_jury_google_id` (`google_id`)
