@@ -1,155 +1,167 @@
 import React from "react";
-import { Smartphone, Zap, MessageCircle, Film, CheckCircle, Info, Download } from "lucide-react";
+import { CheckCircle, Film, MessageCircle, Zap } from "lucide-react";
+import appVideo from "../../../assets/app_mobile.mov";
 
 const FEATURES = [
     {
-        icon: <Zap size={16} className="text-aurora" />,
+        icon: <Zap size={15} className="text-aurora" />,
         title: "Vote style Tinder",
         desc: "Swipez les films pour voter en quelques secondes, où que vous soyez.",
+        color: "aurora",
     },
     {
-        icon: <Film size={16} className="text-lavande" />,
+        icon: <Film size={15} className="text-lavande" />,
         title: "Vidéos intégrées",
-        desc: "Visionnez les films directement dans l'application avec lecture automatique.",
+        desc: "Visionnez les films directement dans l'app avec lecture automatique.",
+        color: "lavande",
     },
     {
-        icon: <MessageCircle size={16} className="text-aurora" />,
+        icon: <MessageCircle size={15} className="text-aurora" />,
         title: "Chat jury en temps réel",
         desc: "Communiquez avec les autres jurés instantanément depuis votre mobile.",
+        color: "aurora",
     },
     {
-        icon: <CheckCircle size={16} className="text-[#ffd166]" />,
+        icon: <CheckCircle size={15} className="text-[#ffd166]" />,
         title: "Suivi de progression",
-        desc: "Visualisez vos films évalués, refusés, validés et à revoir en un coup d'œil.",
-    },
-    {
-        icon: <Info size={16} className="text-lavande" />,
-        title: "Détail complet des films",
-        desc: "Accédez aux informations IA, workflow créatif, sous-titres et métadonnées.",
+        desc: "Films évalués, refusés, validés et à revoir en un coup d'œil.",
+        color: "amber",
     },
 ];
 
-const STEPS = [
-    { num: "1", text: "Téléchargez Expo Go sur l'App Store ou Google Play" },
-    { num: "2", text: "Scannez le QR code ci-dessous avec votre appareil photo" },
-    { num: "3", text: "Connectez-vous avec vos identifiants jury habituels" },
-];
+// ── iPhone Mockup ─────────────────────────────────────────────────────────────
+
+const IPhoneMockup = (): React.JSX.Element => (
+    <div className="relative flex-shrink-0" style={{ width: 240 }}>
+        {/* Glow ambiance */}
+        <div className="pointer-events-none absolute inset-0 -z-10 scale-110 rounded-[52px] bg-aurora/10 blur-3xl" />
+
+        {/* Chassis */}
+        <div
+            className="relative rounded-[44px] bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] p-[3px]"
+            style={{
+                boxShadow:
+                    "0 0 0 1px rgba(255,255,255,0.08), 0 30px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12)",
+            }}
+        >
+            {/* Screen area */}
+            <div
+                className="relative overflow-hidden rounded-[42px] bg-black"
+                style={{ aspectRatio: "9/19.5" }}
+            >
+                {/* Vidéo */}
+                <video
+                    src={appVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 h-full w-full object-cover"
+                />
+
+                {/* Dynamic Island */}
+                <div className="absolute left-1/2 top-3 z-20 h-[28px] w-[90px] -translate-x-1/2 rounded-full bg-black" />
+
+                {/* Reflet écran */}
+                <div className="pointer-events-none absolute inset-0 z-10 rounded-[42px] bg-gradient-to-br from-white/[0.04] via-transparent to-transparent" />
+            </div>
+
+            {/* Bouton power droit */}
+            <div className="absolute -right-[5px] top-[100px] h-[60px] w-[4px] rounded-r-full bg-[#333]" />
+
+            {/* Boutons volume gauche */}
+            <div className="absolute -left-[5px] top-[80px] h-[36px] w-[4px] rounded-l-full bg-[#333]" />
+            <div className="absolute -left-[5px] top-[125px] h-[60px] w-[4px] rounded-l-full bg-[#333]" />
+
+            {/* Bouton silent gauche */}
+            <div className="absolute -left-[5px] top-[50px] h-[24px] w-[4px] rounded-l-full bg-[#333]" />
+        </div>
+    </div>
+);
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 const MobileAppView = (): React.JSX.Element => {
     return (
-        <div className="flex h-full flex-col overflow-y-auto bg-background">
-            {/* Hero */}
-            <div className="relative overflow-hidden border-b border-white/6 bg-gradient-to-br from-aurora/8 via-transparent to-lavande/8 px-10 py-14">
-                <div className="relative z-10 flex items-center gap-8">
-                    {/* App icon */}
-                    <div className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center rounded-[22px] border border-aurora/30 bg-gradient-to-br from-aurora/15 to-lavande/15 shadow-lg shadow-aurora/10">
-                        <Smartphone size={40} className="text-aurora" />
-                    </div>
+        <div className="relative flex h-full flex-col overflow-y-auto bg-background">
+            {/* Blobs déco */}
+            <div className="pointer-events-none absolute left-1/4 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-aurora/5 blur-[120px]" />
+            <div className="pointer-events-none absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-lavande/5 blur-[100px]" />
 
-                    <div>
-                        <div className="mb-1 flex items-center gap-2">
-                            <span className="rounded-full bg-aurora/12 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest text-aurora">
-                                Nouveau
-                            </span>
-                        </div>
-                        <h1 className="text-[1.9rem] font-extrabold leading-tight text-white-soft">
-                            mars<span className="text-aurora">AI</span>
-                            <span className="ml-2 text-[1.4rem] font-light text-mist">Mobile</span>
-                        </h1>
-                        <p className="mt-1.5 text-[0.9rem] text-mist">
-                            Votez pour vos films depuis votre téléphone — rapide, fluide, intuitif.
-                        </p>
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-16 px-10 py-16 lg:flex-row lg:items-center lg:justify-center">
+                {/* ── Mockup ── */}
+                <div className="flex flex-col items-center gap-6">
+                    <IPhoneMockup />
+
+                    {/* Badge store */}
+                    <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/4 px-4 py-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-aurora animate-pulse" />
+                        <span className="font-mono text-[0.65rem] text-aurora/80 uppercase tracking-widest">
+                            Expo Go · iOS &amp; Android
+                        </span>
                     </div>
                 </div>
 
-                {/* Deco blobs */}
-                <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-aurora/5 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-8 right-32 h-48 w-48 rounded-full bg-lavande/6 blur-2xl" />
-            </div>
+                {/* ── Contenu droit ── */}
+                <div className="max-w-md">
+                    {/* Badge */}
+                    <span className="inline-block rounded-full border border-aurora/25 bg-aurora/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-aurora">
+                        Application mobile
+                    </span>
 
-            <div className="grid flex-1 grid-cols-1 gap-8 px-10 py-10 xl:grid-cols-2">
-                {/* Features */}
-                <div>
-                    <h2 className="mb-5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-60">
-                        Fonctionnalités
-                    </h2>
-                    <div className="flex flex-col gap-3">
+                    {/* Titre */}
+                    <h1 className="mt-4 text-[2.4rem] font-black leading-none tracking-tight text-white-soft">
+                        mars<span className="text-aurora">AI</span>
+                        <span className="block text-[1.6rem] font-light text-mist/70">
+                            dans votre poche
+                        </span>
+                    </h1>
+
+                    <p className="mt-4 text-[0.9rem] leading-relaxed text-mist">
+                        Votez, discutez et suivez vos films depuis votre téléphone. Conçue pour le
+                        jury — aussi fluide qu'intuitive.
+                    </p>
+
+                    {/* Features */}
+                    <div className="mt-8 flex flex-col gap-3">
                         {FEATURES.map((f) => (
                             <div
                                 key={f.title}
-                                className="flex items-start gap-3.5 rounded-xl border border-white/5 bg-surface px-4 py-3.5"
+                                className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3 backdrop-blur-sm"
                             >
                                 <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-white/5">
                                     {f.icon}
                                 </div>
                                 <div>
-                                    <div className="text-[0.84rem] font-semibold text-white-soft">
+                                    <div className="text-[0.83rem] font-semibold text-white-soft">
                                         {f.title}
                                     </div>
-                                    <div className="mt-0.5 text-[0.75rem] leading-relaxed text-mist">
+                                    <div className="mt-0.5 text-[0.73rem] leading-relaxed text-mist">
                                         {f.desc}
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-
-                {/* Install steps + QR */}
-                <div className="flex flex-col gap-6">
-                    <div>
-                        <h2 className="mb-5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-60">
-                            Comment installer
-                        </h2>
-                        <div className="flex flex-col gap-3">
-                            {STEPS.map((s) => (
-                                <div key={s.num} className="flex items-center gap-4">
-                                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-aurora/30 bg-aurora/10 font-mono text-[0.8rem] font-bold text-aurora">
-                                        {s.num}
-                                    </div>
-                                    <p className="text-[0.82rem] text-mist">{s.text}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* QR placeholder */}
-                    <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/6 bg-surface p-8">
-                        <div className="flex h-[160px] w-[160px] items-center justify-center rounded-xl border-2 border-dashed border-aurora/25 bg-aurora/5">
-                            <div className="text-center">
-                                <Smartphone size={32} className="mx-auto mb-2 text-aurora/40" />
-                                <p className="text-[0.65rem] text-mist/50">QR code disponible</p>
-                                <p className="text-[0.65rem] text-mist/50">après déploiement</p>
-                            </div>
+                    <div className="mt-8 flex items-center gap-5 rounded-2xl border border-white/6 bg-white/[0.03] px-5 py-4">
+                        <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-xl border border-dashed border-aurora/30 bg-aurora/5">
+                            <span className="font-mono text-[0.55rem] text-aurora/50 text-center leading-snug">
+                                QR
+                                <br />
+                                code
+                            </span>
                         </div>
-                        <div className="text-center">
-                            <p className="text-[0.8rem] font-semibold text-white-soft">
-                                Scan to download
+                        <div>
+                            <p className="text-[0.82rem] font-semibold text-white-soft">
+                                Scanner pour accéder
                             </p>
-                            <p className="mt-0.5 text-[0.7rem] text-mist">
-                                Compatible iOS et Android via Expo Go
+                            <p className="mt-0.5 text-[0.72rem] text-mist">
+                                Ouvrez Expo Go et scannez ce code depuis votre appareil photo
                             </p>
                         </div>
                     </div>
-
-                    {/* Store buttons */}
-                    <div className="flex gap-3">
-                        <div className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/8 bg-surface px-4 py-3 opacity-50">
-                            <Download size={14} className="text-mist" />
-                            <span className="text-[0.78rem] font-semibold text-mist">
-                                App Store
-                            </span>
-                        </div>
-                        <div className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/8 bg-surface px-4 py-3 opacity-50">
-                            <Download size={14} className="text-mist" />
-                            <span className="text-[0.78rem] font-semibold text-mist">
-                                Google Play
-                            </span>
-                        </div>
-                    </div>
-                    <p className="text-center text-[0.68rem] text-mist/40">
-                        Publication sur les stores prévue prochainement
-                    </p>
                 </div>
             </div>
         </div>
