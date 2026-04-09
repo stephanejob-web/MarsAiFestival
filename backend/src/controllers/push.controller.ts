@@ -5,7 +5,11 @@ import { RowDataPacket } from "mysql2";
 // ── POST /api/push/token — Enregistre le push token du juré connecté ──────────
 export const savePushToken = async (req: Request, res: Response): Promise<void> => {
     const juryId = req.juryUser?.id;
-    const { token } = req.body as { token?: string };
+    const { token, deviceName, deviceOs } = req.body as {
+        token?: string;
+        deviceName?: string;
+        deviceOs?: string;
+    };
 
     if (!juryId) {
         res.status(401).json({ success: false, message: "Non authentifié." });
@@ -22,9 +26,22 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
         return;
     }
 
-    await pool.execute("UPDATE jury SET push_token = ? WHERE id = ?", [token, juryId]);
+    await pool.execute(
+        "UPDATE jury SET push_token = ?, device_name = ?, device_os = ? WHERE id = ?",
+        [token, deviceName ?? null, deviceOs ?? null, juryId],
+    );
 
     res.json({ success: true });
+};
+
+// ── GET /api/push/devices — Liste tous les jurés avec leur token/device ────────
+export const getDevices = async (_req: Request, res: Response): Promise<void> => {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT id, first_name, last_name, email, push_token, device_name, device_os
+         FROM jury
+         ORDER BY push_token IS NOT NULL DESC, last_name ASC`,
+    );
+    res.json({ success: true, data: rows });
 };
 
 // ── POST /api/push/send — Envoie une notification (admin / Postman) ───────────

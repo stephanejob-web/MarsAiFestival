@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     Bell,
     Send,
@@ -9,6 +9,9 @@ import {
     XCircle,
     Smartphone,
     Loader2,
+    Monitor,
+    Copy,
+    Check,
 } from "lucide-react";
 import { apiFetch } from "../services/api";
 
@@ -17,8 +20,9 @@ interface JuryMember {
     first_name: string;
     last_name: string;
     email: string;
-    profil_picture: string | null;
     push_token: string | null;
+    device_name: string | null;
+    device_os: string | null;
 }
 
 interface SendResult {
@@ -30,6 +34,33 @@ interface SendResult {
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
+function TokenCell({ token }: { token: string }) {
+    const [copied, setCopied] = useState(false);
+    const short = token.replace("ExponentPushToken[", "…[").slice(0, 28) + "…]";
+
+    const copy = async () => {
+        await navigator.clipboard.writeText(token);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={copy}
+            title={token}
+            className="flex items-center gap-1.5 font-mono text-[0.65rem] text-aurora/70 hover:text-aurora transition-colors"
+        >
+            <span>{short}</span>
+            {copied ? (
+                <Check size={11} className="text-aurora shrink-0" />
+            ) : (
+                <Copy size={11} className="shrink-0 opacity-50" />
+            )}
+        </button>
+    );
+}
+
 const AdminNotificationsPage = (): React.JSX.Element => {
     const [members, setMembers] = useState<JuryMember[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -39,31 +70,30 @@ const AdminNotificationsPage = (): React.JSX.Element => {
     const [isSending, setIsSending] = useState(false);
     const [result, setResult] = useState<SendResult | null>(null);
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const data = await apiFetch<{ success: boolean; data: JuryMember[] }>(
-                    "/api/admin/users",
-                    { headers: { Authorization: `Bearer ${getToken()}` } },
-                );
-                if (data.success) setMembers(data.data);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        void load();
+    const fetchMembers = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await apiFetch<{ success: boolean; data: JuryMember[] }>(
+                "/api/push/devices",
+                { headers: { Authorization: `Bearer ${getToken()}` } },
+            );
+            if (data.success) setMembers(data.data);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        void fetchMembers();
+    }, [fetchMembers]);
 
     const withToken = members.filter((m) => m.push_token);
     const withoutToken = members.filter((m) => !m.push_token);
     const allSelected = withToken.length > 0 && withToken.every((m) => selected.has(m.id));
 
     const toggleAll = () => {
-        if (allSelected) {
-            setSelected(new Set());
-        } else {
-            setSelected(new Set(withToken.map((m) => m.id)));
-        }
+        if (allSelected) setSelected(new Set());
+        else setSelected(new Set(withToken.map((m) => m.id)));
     };
 
     const toggleOne = (id: number) => {
@@ -104,7 +134,7 @@ const AdminNotificationsPage = (): React.JSX.Element => {
     const canSend = title.trim() && body.trim() && !isSending;
 
     return (
-        <div className="p-6 space-y-6 max-w-3xl">
+        <div className="p-6 space-y-6 max-w-5xl">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Bell size={20} className="text-aurora" />
@@ -116,8 +146,125 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                 </div>
             </div>
 
+            {/* ── Tableau des devices ── */}
+            <div className="rounded-xl border border-white/[0.06] bg-surface overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
+                    <div className="flex items-center gap-2">
+                        <Monitor size={14} className="text-aurora" />
+                        <p className="text-xs font-semibold uppercase tracking-widest text-mist/60">
+                            Appareils enregistrés
+                        </p>
+                    </div>
+                    <span className="rounded-full bg-aurora/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-aurora">
+                        {withToken.length} / {members.length}
+                    </span>
+                </div>
+
+                {isLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                        <Loader2 size={18} className="animate-spin text-aurora/50" />
+                    </div>
+                ) : members.length === 0 ? (
+                    <p className="px-5 py-8 text-center text-sm text-mist/40">Aucun juré trouvé.</p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-white/[0.04]">
+                                    <th className="px-4 py-2.5 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
+                                        Juré
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
+                                        Appareil
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
+                                        Système
+                                    </th>
+                                    <th className="px-4 py-2.5 text-left text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
+                                        Token
+                                    </th>
+                                    <th className="px-4 py-2.5 text-center text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
+                                        Statut
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {members.map((m) => (
+                                    <tr
+                                        key={m.id}
+                                        className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+                                    >
+                                        <td className="px-4 py-3">
+                                            <div>
+                                                <p className="text-[0.82rem] font-medium text-white-soft">
+                                                    {m.first_name} {m.last_name}
+                                                </p>
+                                                <p className="text-[0.7rem] text-mist/50">
+                                                    {m.email}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {m.device_name ? (
+                                                <div className="flex items-center gap-1.5">
+                                                    <Smartphone
+                                                        size={12}
+                                                        className="text-mist/50 shrink-0"
+                                                    />
+                                                    <span className="text-[0.78rem] text-white-soft">
+                                                        {m.device_name}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[0.72rem] text-mist/30 italic">
+                                                    —
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {m.device_os ? (
+                                                <span className="inline-flex items-center rounded-md bg-white/[0.05] px-2 py-0.5 text-[0.7rem] text-mist">
+                                                    {m.device_os}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[0.72rem] text-mist/30 italic">
+                                                    —
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {m.push_token ? (
+                                                <TokenCell token={m.push_token} />
+                                            ) : (
+                                                <span className="text-[0.72rem] text-mist/30 italic">
+                                                    Non enregistré
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            {m.push_token ? (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-aurora/10 px-2 py-0.5 text-[0.65rem] font-semibold text-aurora">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-aurora" />
+                                                    Actif
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 text-[0.65rem] text-mist/40">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-mist/30" />
+                                                    Inactif
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Composer + Destinataires ── */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {/* ── Composer ── */}
+                {/* Composer */}
                 <div className="space-y-4">
                     <div className="rounded-xl border border-white/[0.06] bg-surface p-5 space-y-4">
                         <p className="text-xs font-semibold uppercase tracking-widest text-mist/60">
@@ -175,7 +322,7 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                 <textarea
                                     value={body}
                                     onChange={(e) => setBody(e.target.value)}
-                                    placeholder="ex : 3 nouveaux films vous ont été assignés. Connectez-vous pour les évaluer."
+                                    placeholder="ex : 3 nouveaux films vous ont été assignés."
                                     maxLength={200}
                                     rows={3}
                                     className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none placeholder:text-mist/40 focus:border-aurora/50 focus:ring-1 focus:ring-aurora/20 transition-all"
@@ -186,7 +333,6 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                             </div>
                         </div>
 
-                        {/* Résultat */}
                         {result && (
                             <div
                                 className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm ${
@@ -228,7 +374,7 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                     </div>
                 </div>
 
-                {/* ── Destinataires ── */}
+                {/* Destinataires */}
                 <div className="rounded-xl border border-white/[0.06] bg-surface p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold uppercase tracking-widest text-mist/60">
@@ -248,7 +394,6 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                         </div>
                     ) : (
                         <>
-                            {/* Sélectionner tous */}
                             {withToken.length > 0 && (
                                 <button
                                     type="button"
@@ -284,21 +429,17 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                         ) : (
                                             <Square size={14} className="shrink-0 text-mist/40" />
                                         )}
-                                        {m.profil_picture ? (
-                                            <img
-                                                src={m.profil_picture}
-                                                alt=""
-                                                className="h-6 w-6 shrink-0 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aurora/15 text-[0.55rem] font-bold text-aurora">
-                                                {m.first_name[0]}
-                                                {m.last_name[0]}
-                                            </div>
-                                        )}
-                                        <span className="text-[0.8rem] text-white-soft">
-                                            {m.first_name} {m.last_name}
-                                        </span>
+                                        <div className="flex min-w-0 flex-1 flex-col">
+                                            <span className="text-[0.8rem] text-white-soft truncate">
+                                                {m.first_name} {m.last_name}
+                                            </span>
+                                            {m.device_name && (
+                                                <span className="text-[0.65rem] text-mist/40 truncate">
+                                                    {m.device_name}
+                                                    {m.device_os ? ` · ${m.device_os}` : ""}
+                                                </span>
+                                            )}
+                                        </div>
                                         <Smartphone
                                             size={10}
                                             className="ml-auto text-aurora/50 shrink-0"
@@ -306,7 +447,6 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                     </button>
                                 ))}
 
-                                {/* Jurés sans token */}
                                 {withoutToken.length > 0 && (
                                     <>
                                         <p className="px-2.5 pt-3 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-mist/40">
@@ -321,18 +461,6 @@ const AdminNotificationsPage = (): React.JSX.Element => {
                                                     size={14}
                                                     className="shrink-0 text-mist/40"
                                                 />
-                                                {m.profil_picture ? (
-                                                    <img
-                                                        src={m.profil_picture}
-                                                        alt=""
-                                                        className="h-6 w-6 shrink-0 rounded-full object-cover grayscale"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[0.55rem] font-bold text-mist">
-                                                        {m.first_name[0]}
-                                                        {m.last_name[0]}
-                                                    </div>
-                                                )}
                                                 <span className="text-[0.8rem] text-mist">
                                                     {m.first_name} {m.last_name}
                                                 </span>
