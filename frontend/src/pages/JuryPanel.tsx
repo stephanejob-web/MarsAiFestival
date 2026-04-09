@@ -16,19 +16,17 @@ import ModernView from "../features/jury/components/ModernView";
 import ScreeningView from "../features/jury/components/ScreeningView";
 import useJuryPanel from "../features/jury/hooks/useJuryPanel";
 import useJuryUser from "../features/jury/hooks/useJuryUser";
-import useVoteMode from "../features/jury/hooks/useVoteMode";
 import useScreening from "../features/jury/hooks/useScreening";
 import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
 import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
 import AdminMessageToast from "../features/admin/components/AdminMessageToast";
 
-type EvalVariant = "classic" | "modern";
+type EvalVariant = "classic" | "modern" | "rapide";
 
 const JuryPanel = (): React.JSX.Element => {
     const user = useJuryUser();
     const panel = useJuryPanel();
-    const { mode: voteMode, setMode: setVoteMode } = useVoteMode();
     const { isBanned, isSessionExpired, adminMessage, clearAdminMessage } = useBanProtection();
     const screening = useScreening();
 
@@ -65,8 +63,6 @@ const JuryPanel = (): React.JSX.Element => {
                 totalFilms={panel.films.length}
                 isChatOpen={panel.isChatOpen}
                 onChatToggle={() => panel.setIsChatOpen(!panel.isChatOpen)}
-                voteMode={voteMode}
-                onVoteModeChange={setVoteMode}
                 screening={screening}
             />
             <div className="flex flex-1 flex-col overflow-hidden">
@@ -86,8 +82,10 @@ const JuryPanel = (): React.JSX.Element => {
                 {(panel.activeView === "eval" || panel.activeView === "tinder") &&
                     (evalVariant === "modern" ? (
                         <ModernView panel={panel} onEvalVariantChange={handleEvalVariantChange} />
+                    ) : evalVariant === "rapide" ? (
+                        <EvalView panel={panel} voteMode="rapide" />
                     ) : (
-                        <EvalView panel={panel} voteMode={voteMode} />
+                        <EvalView panel={panel} voteMode="normal" />
                     ))}
                 {panel.activeView === "listes" && <ListesView />}
                 {panel.activeView === "discuter" && <DiscuterView panel={panel} />}

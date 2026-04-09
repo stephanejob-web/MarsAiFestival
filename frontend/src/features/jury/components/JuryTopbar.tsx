@@ -4,7 +4,7 @@ import { ArrowLeft, LogOut } from "lucide-react";
 
 import type { ActiveView } from "../types";
 
-type EvalVariant = "classic" | "modern";
+type EvalVariant = "classic" | "modern" | "rapide";
 
 interface JuryTopbarProps {
     activeView: ActiveView;
@@ -83,7 +83,7 @@ const JuryTopbar = ({
                                     : "text-mist hover:text-white-soft"
                             }`}
                         >
-                            EvalView
+                            Liste
                         </button>
                         <button
                             type="button"
@@ -94,7 +94,18 @@ const JuryTopbar = ({
                                     : "text-mist hover:text-white-soft"
                             }`}
                         >
-                            ModernView
+                            Cinéma
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onEvalVariantChange("rapide")}
+                            className={`rounded-md px-3 py-1 text-[0.72rem] font-semibold transition-all ${
+                                evalVariant === "rapide"
+                                    ? "bg-aurora/20 text-aurora shadow-sm"
+                                    : "text-mist hover:text-white-soft"
+                            }`}
+                        >
+                            Rapide
                         </button>
                     </div>
                 )}
