@@ -38,6 +38,8 @@ services:
       - DB_NAME=marsai
       - DB_USER=root
       - DB_PASSWORD=marsai_dev_2026
+    volumes:
+      - backend_uploads:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -79,3 +81,4 @@ volumes:
   mysql_data:
   caddy_data:
   caddy_config:
+  backend_uploads:
