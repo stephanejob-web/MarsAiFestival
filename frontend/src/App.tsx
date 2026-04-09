@@ -15,6 +15,7 @@ import ProtectedJuryRoute from "./components/ui/ProtectedJuryRoute";
 import AdminCmsPage from "./pages/AdminCmsPage";
 import AdminDocsPage from "./pages/AdminDocsPage";
 import AdminEmailingPage from "./pages/AdminEmailingPage";
+import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import NotFound from "./pages/NotFound";
 
 const App = (): React.JSX.Element => {
@@ -34,6 +35,7 @@ const App = (): React.JSX.Element => {
                         <Route path="/admin/cms" element={<AdminCmsPage />} />
                         <Route path="docs" element={<AdminDocsPage />} />
                         <Route path="emailing" element={<AdminEmailingPage />} />
+                        <Route path="notifications" element={<AdminNotificationsPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />
