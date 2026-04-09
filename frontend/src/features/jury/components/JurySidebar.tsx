@@ -7,22 +7,19 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
-    LayoutList,
     LogOut,
     MessageCircle,
     Mic,
-    Scale,
     Send,
     Settings,
     ShieldCheck,
     Smartphone,
-    Zap,
 } from "lucide-react";
 
 import useJuryChat from "../hooks/useJuryChat";
 import useJuryUser from "../hooks/useJuryUser";
 import type { ActiveView } from "../types";
-import type { VoteMode } from "../hooks/useVoteMode";
+import type { ScreeningPayload } from "../hooks/useScreening";
 import ProfileModal from "./ProfileModal";
 import { VocalJoinButton } from "./VocalPanel";
 
@@ -36,8 +33,7 @@ interface JurySidebarProps {
     totalFilms: number;
     isChatOpen: boolean;
     onChatToggle: () => void;
-    voteMode: VoteMode;
-    onVoteModeChange: (mode: VoteMode) => void;
+    screening: ScreeningPayload | null;
 }
 
 interface NavItemProps {
@@ -100,8 +96,7 @@ const JurySidebar = ({
     totalFilms,
     isChatOpen,
     onChatToggle,
-    voteMode,
-    onVoteModeChange,
+    screening,
 }: JurySidebarProps): React.JSX.Element => {
     const navigate = useNavigate();
     const chat = useJuryChat(isChatOpen);
@@ -164,71 +159,21 @@ const JurySidebar = ({
 
                     {/* Navigation */}
                     <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-3.5">
-                        <div className="px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
-                            Évaluation
-                        </div>
                         <NavItem
                             icon={<Clapperboard size={14} />}
-                            label="Films assignés"
+                            label="Évaluer"
                             count={pendingCount}
                             countVariant="pending"
-                            isActive={activeView === "eval"}
+                            isActive={activeView === "eval" || activeView === "tinder"}
                             onClick={() => onViewChange("eval")}
                         />
-
-                        {/* Vote mode toggle — visible only when Films assignés is active */}
-                        {activeView === "eval" && (
-                            <div className="relative mx-1 mb-1 mt-0.5 flex p-0.5 rounded-lg bg-black/25 border border-white/6">
-                                {/* Sliding pill */}
-                                <div
-                                    className="absolute inset-0.5 rounded-md transition-all duration-200 ease-out pointer-events-none"
-                                    style={{
-                                        left: voteMode === "normal" ? "2px" : "calc(50% + 1px)",
-                                        right: voteMode === "normal" ? "calc(50% + 1px)" : "2px",
-                                        background:
-                                            voteMode === "normal"
-                                                ? "rgba(255,255,255,0.06)"
-                                                : "rgba(78,255,206,0.88)",
-                                        boxShadow:
-                                            voteMode === "rapide"
-                                                ? "0 0 8px rgba(78,255,206,0.3)"
-                                                : "none",
-                                    }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => onVoteModeChange("normal")}
-                                    className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
-                                        voteMode === "normal"
-                                            ? "text-white-soft"
-                                            : "text-mist hover:text-white/60"
-                                    }`}
-                                >
-                                    <LayoutList size={11} />
-                                    Normal
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => onVoteModeChange("rapide")}
-                                    className={`relative z-10 flex w-1/2 items-center justify-center gap-1.5 rounded-md py-1.5 text-[0.72rem] font-semibold transition-colors duration-200 ${
-                                        voteMode === "rapide"
-                                            ? "text-deep-sky"
-                                            : "text-mist hover:text-white/60"
-                                    }`}
-                                >
-                                    <Zap size={11} />
-                                    Rapide
-                                </button>
-                            </div>
-                        )}
-
                         <NavItem
                             icon={<CheckCircle size={14} />}
-                            label="Évalués"
+                            label="Mes listes"
                             count={evaluatedCount}
                             countVariant="selected"
-                            isActive={false}
-                            onClick={() => onViewChange("eval")}
+                            isActive={activeView === "listes"}
+                            onClick={() => onViewChange("listes")}
                         />
                         <NavItem
                             icon={<MessageCircle size={14} />}
@@ -239,57 +184,63 @@ const JurySidebar = ({
                             onClick={() => onViewChange("discuter")}
                         />
 
-                        <div className="mt-1 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
-                            Sélection
-                        </div>
-                        <NavItem
-                            icon={<Scale size={14} />}
-                            label="Délibération"
-                            count={0}
-                            countVariant="neutral"
-                            isActive={activeView === "delib"}
-                            onClick={() => onViewChange("delib")}
-                            disabled
-                        />
-
-                        {/* App mobile promo tab */}
-                        <button
-                            type="button"
-                            onClick={() => onViewChange("mobile")}
-                            className={`mt-2 flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
-                                activeView === "mobile"
-                                    ? "border-aurora/40 bg-aurora/10 text-aurora"
-                                    : "border-aurora/20 bg-aurora/5 text-aurora/70 hover:border-aurora/35 hover:bg-aurora/8 hover:text-aurora"
-                            }`}
-                        >
-                            <Smartphone size={14} className="flex-shrink-0" />
-                            <span className="flex-1 text-left">Application mobile</span>
-                            <span className="rounded-full bg-aurora/15 px-1.5 py-0.5 font-mono text-[0.6rem] text-aurora">
-                                NEW
-                            </span>
-                        </button>
-
-                        <div className="mt-2 px-2 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-mist opacity-55">
-                            Compte
-                        </div>
-                        {(user?.role === "admin" || user?.role === "moderateur") && (
+                        {/* En direct — uniquement pendant une projection */}
+                        {screening && (
                             <button
                                 type="button"
-                                onClick={() => navigate("/admin")}
-                                className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-lavande transition-all hover:bg-white/4"
+                                onClick={() => onViewChange("screening")}
+                                className={`mt-2 flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-[0.8rem] font-semibold transition-all ${
+                                    activeView === "screening"
+                                        ? "border-coral/50 bg-coral/15 text-coral shadow-[0_0_16px_rgba(255,107,107,0.2)]"
+                                        : "border-coral/30 bg-coral/[0.07] text-coral/80 hover:border-coral/50 hover:bg-coral/12 hover:text-coral"
+                                }`}
                             >
-                                <ShieldCheck size={14} />
-                                <span>Panel admin</span>
+                                <span className="relative flex-shrink-0">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-coral opacity-50" />
+                                    <span className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full bg-coral">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                    </span>
+                                </span>
+                                <span className="flex-1 text-left">En direct</span>
+                                <span className="max-w-[80px] truncate rounded-full bg-coral/20 px-1.5 py-0.5 font-mono text-[0.58rem] text-coral">
+                                    {screening.title}
+                                </span>
                             </button>
                         )}
-                        <button
-                            type="button"
-                            onClick={() => navigate("/jury")}
-                            className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-coral transition-all hover:bg-white/4"
-                        >
-                            <LogOut size={14} />
-                            <span>Se déconnecter</span>
-                        </button>
+
+                        {/* Compte */}
+                        <div className="mt-3 border-t border-white/5 pt-3">
+                            {(user?.role === "admin" || user?.role === "moderateur") && (
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/admin")}
+                                    className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-lavande transition-all hover:bg-white/4"
+                                >
+                                    <ShieldCheck size={14} />
+                                    <span>Panel admin</span>
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => navigate("/jury")}
+                                className="flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.84rem] text-coral transition-all hover:bg-white/4"
+                            >
+                                <LogOut size={14} />
+                                <span>Se déconnecter</span>
+                            </button>
+                            {/* App mobile — lien discret */}
+                            <button
+                                type="button"
+                                onClick={() => onViewChange("mobile")}
+                                className="mt-1 flex w-full cursor-pointer items-center gap-[9px] rounded-lg px-2.5 py-2 text-[0.78rem] text-mist/50 transition-all hover:text-mist"
+                            >
+                                <Smartphone size={13} />
+                                <span>Application mobile</span>
+                                <span className="ml-auto rounded-full bg-white/8 px-1.5 py-px font-mono text-[0.55rem] text-mist/60">
+                                    NEW
+                                </span>
+                            </button>
+                        </div>
                     </nav>
 
                     {/* Vocal */}

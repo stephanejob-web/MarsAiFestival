@@ -14,6 +14,13 @@ export interface AdminNavCategory {
     items: AdminNavItem[];
 }
 
+export interface AdminUsersStatsData {
+    adminCount: number;
+    moderatorCount: number;
+    deactivatedCount: number;
+    totalCreatedCount: number;
+}
+
 export interface ModeratorPermissions {
     can_access_admin: boolean;
     can_disable_accounts: boolean;
@@ -82,6 +89,7 @@ export interface AdminFilmVoteSummary {
     dossier_num: string;
     statut: string;
     video_url: string | null;
+    poster_img: string | null;
     realisator_email: string | null;
     realisator_first_name: string | null;
     realisator_last_name: string | null;

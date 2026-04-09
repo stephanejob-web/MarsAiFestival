@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Film, Search, Check, Star, X } from "lucide-react";
+import { Film, Search, Check, Star, X, Radio } from "lucide-react";
 import useAdminFilms from "../features/admin/hooks/useAdminFilms";
 import { apiFetch } from "../services/api";
 import FilmDetailDrawer from "../features/admin/components/FilmDetailDrawer";
 import AssignDistributionModal from "../features/admin/components/AssignDistributionModal";
+import AdminScreeningModal from "../features/admin/components/AdminScreeningModal";
+
+const API = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 const getToken = (): string => localStorage.getItem("jury_token") ?? "";
 
 interface PresignedVideoProps {
     filmId: number;
+    posterImg?: string | null;
 }
 
-const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
+const PresignedVideo = ({ filmId, posterImg }: PresignedVideoProps): React.JSX.Element => {
     const [src, setSrc] = useState<string | null>(null);
     const [error, setError] = useState(false);
 
@@ -44,6 +48,7 @@ const PresignedVideo = ({ filmId }: PresignedVideoProps): React.JSX.Element => {
             controls
             autoPlay
             preload="auto"
+            poster={posterImg ?? undefined}
             className="aspect-video w-full object-cover"
         />
     );
@@ -98,6 +103,92 @@ const AdminFilmsPage = (): React.JSX.Element => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [activatedVideos, setActivatedVideos] = useState<Set<number>>(new Set());
 
+    // ── Screening state ───────────────────────────────────────────────────────
+    const [screeningFilmId, setScreeningFilmId] = useState<number | null>(null);
+    const [screeningVideoUrl, setScreeningVideoUrl] = useState<string | null>(null);
+    const [screeningLoading, setScreeningLoading] = useState(false);
+    const [screeningModalOpen, setScreeningModalOpen] = useState(false);
+    const [screeningStartedAt, setScreeningStartedAt] = useState<number>(Date.now());
+
+    useEffect(() => {
+        apiFetch<{ success: boolean; data: { filmId: number; videoUrl?: string } | null }>(
+            "/api/admin/screening/state",
+            { headers: { Authorization: `Bearer ${getToken()}` } },
+        )
+            .then((res) => {
+                if (res.success && res.data) {
+                    setScreeningFilmId(res.data.filmId);
+                    if (res.data.videoUrl) setScreeningVideoUrl(res.data.videoUrl);
+                }
+            })
+            .catch(() => null);
+    }, []);
+
+    const handleStartScreening = async (filmId: number): Promise<void> => {
+        setScreeningLoading(true);
+        try {
+            const res = await fetch(`${API}/api/admin/screening/start`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                },
+                body: JSON.stringify({ filmId }),
+            });
+            const data = (await res.json()) as { success: boolean; data?: { videoUrl?: string } };
+            if (data.success) {
+                setScreeningFilmId(filmId);
+                if (data.data?.videoUrl) setScreeningVideoUrl(data.data.videoUrl);
+                setScreeningStartedAt(Date.now());
+                setScreeningModalOpen(true);
+            }
+        } finally {
+            setScreeningLoading(false);
+        }
+    };
+
+    const handleStopScreening = async (): Promise<void> => {
+        setScreeningLoading(true);
+        try {
+            const res = await fetch(`${API}/api/admin/screening/stop`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            const data = (await res.json()) as { success: boolean };
+            if (data.success) {
+                setScreeningFilmId(null);
+                setScreeningVideoUrl(null);
+                setScreeningModalOpen(false);
+            }
+        } finally {
+            setScreeningLoading(false);
+        }
+    };
+
+    const handleAdminSeek = (currentTime: number): void => {
+        void fetch(`${API}/api/admin/screening/seek`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ currentTime }),
+        });
+    };
+
+    const handleAdminPlay = (currentTime: number): void => {
+        void fetch(`${API}/api/admin/screening/playback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ action: "play", currentTime }),
+        });
+    };
+
+    const handleAdminPause = (currentTime: number): void => {
+        void fetch(`${API}/api/admin/screening/playback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ action: "pause", currentTime }),
+        });
+    };
+
     const PAGE_SIZE = 8;
 
     const activateVideo = (filmId: number): void => {
@@ -134,14 +225,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
     return (
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Topbar */}
-            <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+            <div className="flex min-h-[50px] items-center gap-2 border-b border-white/[0.06] bg-surface px-3 md:px-5 flex-wrap py-2">
+                <span className="font-display text-[0.88rem] font-extrabold text-white-soft shrink-0">
                     Assignation des films
                 </span>
-                <div className="h-[18px] w-px bg-white/[0.08]" />
-                <span className="text-[0.75rem] text-mist">
-                    {films.length} films · {activeJuryCount} jurés actifs · {assignments.length}{" "}
-                    assignations
+                <div className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
+                <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                    {films.length} films · {activeJuryCount} jurés · {assignments.length} assign.
                 </span>
                 <div className="ml-auto flex items-center gap-2">
                     {/* Auto-distribute — compact topbar button */}
@@ -221,7 +311,7 @@ const AdminFilmsPage = (): React.JSX.Element => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6">
                 {error && (
                     <div className="mb-5 rounded-xl border border-coral/20 bg-coral/10 px-4 py-3 text-[0.82rem] text-coral">
                         {error}
@@ -347,6 +437,56 @@ const AdminFilmsPage = (): React.JSX.Element => {
                             </div>
                         )}
 
+                        {/* Screening active badge */}
+                        {screeningFilmId !== null && (
+                            <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-coral/40 bg-coral/[0.06] px-4 py-3">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-coral/20">
+                                    <Radio size={14} className="animate-pulse text-coral" />
+                                </span>
+                                <div className="flex-1">
+                                    <span className="text-[0.82rem] font-bold text-coral">
+                                        Projection en cours
+                                    </span>
+                                    <span className="ml-2 text-[0.75rem] text-mist">
+                                        {films.find((f) => f.id === screeningFilmId)
+                                            ?.original_title ?? `Film #${screeningFilmId}`}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setScreeningModalOpen(true)}
+                                    className="flex items-center gap-1.5 rounded-lg border border-coral/40 bg-coral/15 px-3 py-1.5 text-[0.73rem] font-bold text-coral transition-all hover:bg-coral/25"
+                                >
+                                    Ouvrir la salle
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Screening modal */}
+                        {screeningFilmId !== null && screeningModalOpen && (
+                            <AdminScreeningModal
+                                filmId={screeningFilmId}
+                                filmTitle={
+                                    films.find((f) => f.id === screeningFilmId)?.original_title ??
+                                    `Film #${screeningFilmId}`
+                                }
+                                filmCountry={films.find((f) => f.id === screeningFilmId)?.country}
+                                filmPosterImg={
+                                    films.find((f) => f.id === screeningFilmId)?.poster_img
+                                }
+                                startedAt={screeningStartedAt}
+                                videoUrl={screeningVideoUrl}
+                                juryMembers={juryMembers}
+                                onClose={() => setScreeningModalOpen(false)}
+                                onStop={() => {
+                                    void handleStopScreening();
+                                }}
+                                onSeek={handleAdminSeek}
+                                onPlay={handleAdminPlay}
+                                onPause={handleAdminPause}
+                            />
+                        )}
+
                         {/* Search */}
                         <div className="relative mb-3.5">
                             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 opacity-40">
@@ -455,7 +595,10 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                             {/* Video */}
                                             {film.video_url && activatedVideos.has(film.id) ? (
                                                 <div className="bg-black">
-                                                    <PresignedVideo filmId={film.id} />
+                                                    <PresignedVideo
+                                                        filmId={film.id}
+                                                        posterImg={film.poster_img}
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div
@@ -466,6 +609,13 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                             : `${accent}11`,
                                                     }}
                                                 >
+                                                    {film.poster_img && (
+                                                        <img
+                                                            src={film.poster_img}
+                                                            alt=""
+                                                            className="absolute inset-0 h-full w-full object-cover"
+                                                        />
+                                                    )}
                                                     {/* Selected badge */}
                                                     {isSelected && (
                                                         <div className="absolute left-2 top-2 z-10 flex items-center gap-1 rounded-full border border-aurora/40 bg-aurora/15 px-2.5 py-1 backdrop-blur-sm">
@@ -626,6 +776,38 @@ const AdminFilmsPage = (): React.JSX.Element => {
                                                         )}
                                                     </span>
                                                     <div className="flex items-center gap-2">
+                                                        {/* Bouton Projeter */}
+                                                        {film.video_url &&
+                                                            (screeningFilmId === film.id ? (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        void handleStopScreening()
+                                                                    }
+                                                                    disabled={screeningLoading}
+                                                                    className="flex items-center gap-1 rounded-lg border border-coral/40 bg-coral/15 px-2.5 py-1 text-[0.68rem] font-bold text-coral transition-all hover:bg-coral/25 disabled:opacity-50"
+                                                                >
+                                                                    <Radio
+                                                                        size={10}
+                                                                        className="animate-pulse"
+                                                                    />
+                                                                    En direct
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        void handleStartScreening(
+                                                                            film.id,
+                                                                        )
+                                                                    }
+                                                                    disabled={screeningLoading}
+                                                                    className="flex items-center gap-1 rounded-lg border border-lavande/30 bg-lavande/[0.08] px-2.5 py-1 text-[0.68rem] font-semibold text-lavande transition-all hover:border-lavande/50 hover:bg-lavande/15 disabled:opacity-50"
+                                                                >
+                                                                    <Radio size={10} />
+                                                                    Projeter
+                                                                </button>
+                                                            ))}
                                                         <span
                                                             className="rounded-full border px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide"
                                                             style={{

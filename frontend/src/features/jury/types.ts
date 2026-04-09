@@ -8,7 +8,7 @@ export type UserRole = "jury" | "admin";
 
 export type FeedbackType = "error" | "success";
 
-export type ActiveView = "eval" | "listes" | "discuter" | "delib" | "tinder" | "mobile";
+export type ActiveView = "eval" | "listes" | "discuter" | "tinder" | "mobile" | "screening";
 
 export type ModalType = "arevoir" | "refuse" | null;
 
@@ -97,6 +97,7 @@ export interface JuryFilm {
     iaPost: string;
     note: string;
     videoUrl: string | null;
+    posterImg: string | null;
     myDecision: Decision;
     comments: JuryComment[];
     opinions: JuryOpinion[];

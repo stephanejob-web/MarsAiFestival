@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
 import {
     upsertVote,
     deleteVote,
@@ -47,21 +47,46 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
         await upsertVote(juryId, Number(filmId), decision as Decision, message);
         const vote = await getVote(juryId, Number(filmId));
 
+        // ── Broadcast poll:update en temps réel ───────────────────────────────
+        try {
+            const io = req.app.locals.io as import("socket.io").Server;
+            const allVotes = await getVotesByFilm(Number(filmId));
+            const tally = { valide: 0, arevoir: 0, refuse: 0, in_discussion: 0 };
+            for (const v of allVotes) {
+                const d = v.decision as keyof typeof tally;
+                if (d in tally) tally[d]++;
+            }
+            io.emit("poll:update", {
+                filmId: Number(filmId),
+                tally,
+                total: allVotes.length,
+                details: allVotes.map((v) => ({
+                    juryId: v.jury_id as number,
+                    firstName: v.first_name as string,
+                    lastName: v.last_name as string,
+                    profilPicture: (v.profil_picture as string | null) ?? null,
+                    decision: v.decision as string,
+                })),
+            });
+        } catch {
+            // Ne pas bloquer la réponse si le broadcast échoue
+        }
+
         // ── Email au réalisateur pour "arevoir" et "refuse" ───────────────────
         if (DECISIONS_WITH_EMAIL.includes(decision as Decision) && message?.trim()) {
             const film = await getFilmById(Number(filmId));
             if (film?.realisator_email) {
                 const label = DECISION_LABELS[decision as Decision];
-                const transporter = nodemailer.createTransport({
-                    service: "gmail",
-                    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-                });
-                await transporter
-                    .sendMail({
-                        from: `"marsAI Festival 2026" <${process.env.EMAIL_USER}>`,
-                        to: film.realisator_email as string,
+                const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
+                await brevo.transactionalEmails
+                    .sendTransacEmail({
+                        sender: {
+                            name: "marsAI Festival 2026",
+                            email: process.env.BREVO_SENDER_EMAIL ?? "",
+                        },
+                        to: [{ email: film.realisator_email as string }],
                         subject: `[marsAI 2026] ${label} — ${film.original_title as string} (${film.dossier_num as string})`,
-                        html: `
+                        htmlContent: `
                         <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
                             <h2 style="color:#4a0080">marsAI Festival 2026</h2>
                             <p>Bonjour,</p>
@@ -74,7 +99,7 @@ export const submitVote = async (req: Request, res: Response): Promise<void> => 
                             <p style="color:#888;font-size:12px">Ce message a été envoyé par le jury marsAI Festival 2026.</p>
                         </div>`,
                     })
-                    .catch((err) => {
+                    .catch((err: unknown) => {
                         // eslint-disable-next-line no-console
                         console.error("⚠️ Échec envoi email réalisateur :", err);
                     });

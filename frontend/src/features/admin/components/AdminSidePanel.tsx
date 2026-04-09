@@ -24,7 +24,7 @@ const getTokenPayload = (): { id: number; role: string } | null => {
     }
 };
 
-const AdminSidePanel = (): React.JSX.Element => {
+const AdminSidePanel = ({ onClose }: { onClose?: () => void }): React.JSX.Element => {
     const navigate = useNavigate();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isVocalJoined, setIsVocalJoined] = useState(false);
@@ -121,6 +121,7 @@ const AdminSidePanel = (): React.JSX.Element => {
                                                 href={item.to}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
+                                                onClick={onClose}
                                                 className="mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] text-mist transition-all hover:bg-white/[0.04] hover:text-white-soft"
                                             >
                                                 <span className="w-[17px] shrink-0 text-center">
@@ -136,6 +137,7 @@ const AdminSidePanel = (): React.JSX.Element => {
                                             <NavLink
                                                 to={item.to}
                                                 end={item.to === "/admin"}
+                                                onClick={onClose}
                                                 className={({ isActive }): string =>
                                                     `mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.82rem] transition-all ${
                                                         isActive

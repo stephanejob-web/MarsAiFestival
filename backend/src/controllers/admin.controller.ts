@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { listVideosFromS3, getPresignedVideoUrl, extractS3Key } from "../services/s3.service";
-import { getFilms } from "../repositories/film.repository";
+import { getFilms, getFilmById } from "../repositories/film.repository";
 import { resetAllVotes } from "../repositories/vote.repository";
+import { getAllRealisators } from "../repositories/realisator.repository";
+import { sendRealisateurEmail } from "../services/realisator-email.service";
+import type { ScreeningState } from "../index";
 import {
     generateInviteToken,
     verifyInviteToken,
@@ -135,7 +138,6 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
             const existing = await getModeratorPermissions(id);
             if (!existing) {
                 await updateModeratorPermissions(id, {
-                    can_manage_users: false,
                     can_access_admin: false,
                     can_disable_accounts: false,
                     can_ban_users: false,
@@ -403,6 +405,133 @@ export const verifyInvite = (_req: Request, res: Response): void => {
     } catch {
         res.status(401).json({ success: false, message: "Token invalide ou expiré." });
     }
+};
+
+// ── POST /api/admin/screening/start — Projeter un film à tous les jurés ───────
+export const startScreening = async (req: Request, res: Response): Promise<void> => {
+    const { filmId } = req.body as { filmId?: number };
+    if (!filmId) {
+        res.status(400).json({ success: false, message: "filmId est requis." });
+        return;
+    }
+    try {
+        const film = await getFilmById(Number(filmId));
+        if (!film) {
+            res.status(404).json({ success: false, message: "Film introuvable." });
+            return;
+        }
+
+        let videoUrl: string | null = (film.video_url as string | null) ?? null;
+        if (videoUrl) {
+            const key = extractS3Key(videoUrl);
+            if (key) videoUrl = await getPresignedVideoUrl(key);
+        }
+
+        const state: ScreeningState = {
+            filmId: Number(filmId),
+            title: film.original_title as string,
+            country: (film.country as string) ?? "",
+            videoUrl,
+            posterImg: (film.poster_img as string | null) ?? null,
+            startedAt: Date.now(),
+        };
+
+        const io = req.app.locals.io as import("socket.io").Server;
+        const screeningRef = req.app.locals.screeningRef as { current: ScreeningState | null };
+        screeningRef.current = state;
+        io.emit("screening:start", state);
+
+        res.json({ success: true, data: state });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors du lancement du screening.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/screening/stop — Arrêter la projection ────────────────────
+export const stopScreening = (req: Request, res: Response): void => {
+    const io = req.app.locals.io as import("socket.io").Server;
+    const screeningRef = req.app.locals.screeningRef as { current: ScreeningState | null };
+    screeningRef.current = null;
+    io.emit("screening:stop");
+    res.json({ success: true });
+};
+
+// ── GET /api/admin/screening/state — État actuel de la projection ─────────────
+export const getScreeningState = (req: Request, res: Response): void => {
+    const screeningRef = req.app.locals.screeningRef as { current: ScreeningState | null };
+    res.json({ success: true, data: screeningRef.current });
+};
+
+// ── POST /api/admin/screening/playback — Synchroniser play/pause ──────────────
+export const playbackScreening = (req: Request, res: Response): void => {
+    const { action, currentTime } = req.body as { action: "play" | "pause"; currentTime: number };
+    const screeningRef = req.app.locals.screeningRef as { current: ScreeningState | null };
+    if (!screeningRef.current) {
+        res.status(400).json({ success: false, message: "Aucune projection en cours" });
+        return;
+    }
+    const io = req.app.locals.io as import("socket.io").Server;
+    io.emit("screening:playback", { action, currentTime, emittedAt: Date.now() });
+    res.json({ success: true });
+};
+
+// ── POST /api/admin/screening/seek — Synchroniser la position de lecture ───────
+export const seekScreening = (req: Request, res: Response): void => {
+    const { currentTime } = req.body as { currentTime: number };
+    const screeningRef = req.app.locals.screeningRef as { current: ScreeningState | null };
+    if (!screeningRef.current) {
+        res.status(400).json({ success: false, message: "Aucune projection en cours" });
+        return;
+    }
+    const seekedAt = Date.now();
+    screeningRef.current = { ...screeningRef.current, seekTime: currentTime, seekedAt };
+    const io = req.app.locals.io as import("socket.io").Server;
+    io.emit("screening:seek", { currentTime, seekedAt });
+    res.json({ success: true });
+};
+
+// ── GET /api/admin/realisators — Liste des réalisateurs avec email ────────────
+export const listRealisators = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const data = await getAllRealisators();
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "Erreur lors de la récupération des réalisateurs.",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
+};
+
+// ── POST /api/admin/emailing — Envoi d'email groupé aux réalisateurs ──────────
+export const sendBulkEmail = async (req: Request, res: Response): Promise<void> => {
+    const { emails, subject, message } = req.body as {
+        emails?: string[];
+        subject?: string;
+        message?: string;
+    };
+
+    if (!emails?.length || !subject?.trim() || !message?.trim()) {
+        res.status(400).json({
+            success: false,
+            message: "emails, subject et message sont requis.",
+        });
+        return;
+    }
+
+    const results = await Promise.allSettled(
+        emails.map((email) => sendRealisateurEmail(email, "", "", subject.trim(), message.trim())),
+    );
+
+    const failed = results.filter((r) => r.status === "rejected").length;
+    const sent = results.length - failed;
+
+    res.json({ success: true, sent, failed });
 };
 
 // ── DELETE /api/admin/votes/reset — Remet tous les votes à NULL (tests/dev) ───

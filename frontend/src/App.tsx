@@ -14,6 +14,8 @@ import ProtectedAdminRoute from "./components/ui/ProtectedAdminRoute";
 import ProtectedJuryRoute from "./components/ui/ProtectedJuryRoute";
 import AdminCmsPage from "./pages/AdminCmsPage";
 import AdminDocsPage from "./pages/AdminDocsPage";
+import AdminEmailingPage from "./pages/AdminEmailingPage";
+import NotFound from "./pages/NotFound";
 
 const App = (): React.JSX.Element => {
     return (
@@ -31,12 +33,14 @@ const App = (): React.JSX.Element => {
                         <Route path="tags" element={<AdminTagsPage />} />
                         <Route path="/admin/cms" element={<AdminCmsPage />} />
                         <Route path="docs" element={<AdminDocsPage />} />
+                        <Route path="emailing" element={<AdminEmailingPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />
                 <Route element={<ProtectedJuryRoute />}>
                     <Route path="jury/panel" element={<JuryPanel />} />
                 </Route>
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );

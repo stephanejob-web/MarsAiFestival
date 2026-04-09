@@ -1,5 +1,27 @@
 import type { Decision, JuryFilm } from "../features/jury/types";
 
+const DEFAULT_REALISATOR = {
+    gender: null,
+    firstName: "",
+    lastName: "",
+    birthDate: null,
+    email: "",
+    profession: null,
+    phone: null,
+    mobilePhone: null,
+    street: null,
+    postalCode: null,
+    city: null,
+    country: null,
+    youtube: null,
+    instagram: null,
+    linkedin: null,
+    facebook: null,
+    xtwitter: null,
+    howDidYouKnowUs: null,
+    newsletter: false,
+};
+
 export const INITIAL_FILMS: JuryFilm[] = [
     {
         id: 1,
@@ -19,8 +41,24 @@ export const INITIAL_FILMS: JuryFilm[] = [
         videoUrl: null,
         myDecision: "valide",
         comments: [
-            "Tres belle utilisation de l IA.",
-            "Rythme solide et proposition visuelle forte.",
+            {
+                id: 1,
+                juryId: 1,
+                name: "Marie Lefebvre",
+                initials: "ML",
+                profilPicture: null,
+                text: "Tres belle utilisation de l IA.",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+            },
+            {
+                id: 2,
+                juryId: 1,
+                name: "Marie Lefebvre",
+                initials: "ML",
+                profilPicture: null,
+                text: "Rythme solide et proposition visuelle forte.",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+            },
         ],
         opinions: [
             {
@@ -76,6 +114,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
                 avatarVariant: 4,
             },
         ],
+        realisator: DEFAULT_REALISATOR,
     },
     {
         id: 2,
@@ -94,7 +133,17 @@ export const INITIAL_FILMS: JuryFilm[] = [
         note: "Exploration poetique de l enfance dans un monde synthetique. Les emotions numériques rencontrent la nostalgie organique.",
         videoUrl: null,
         myDecision: "aRevoir",
-        comments: ["Tres fort esthetiquement mais fin a clarifier."],
+        comments: [
+            {
+                id: 3,
+                juryId: 1,
+                name: "Marie Lefebvre",
+                initials: "ML",
+                profilPicture: null,
+                text: "Tres fort esthetiquement mais fin a clarifier.",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+            },
+        ],
         opinions: [
             {
                 initials: "TR",
@@ -149,6 +198,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
                 avatarVariant: 4,
             },
         ],
+        realisator: DEFAULT_REALISATOR,
     },
     {
         id: 3,
@@ -221,6 +271,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
                 avatarVariant: 4,
             },
         ],
+        realisator: DEFAULT_REALISATOR,
     },
     {
         id: 4,
@@ -239,7 +290,17 @@ export const INITIAL_FILMS: JuryFilm[] = [
         note: "Experience sonore immersive sur les frontieres culturelles. Le son comme frontiere et comme pont.",
         videoUrl: null,
         myDecision: "refuse",
-        comments: ["Ne correspond pas assez aux criteres image IA."],
+        comments: [
+            {
+                id: 4,
+                juryId: 1,
+                name: "Marie Lefebvre",
+                initials: "ML",
+                profilPicture: null,
+                text: "Ne correspond pas assez aux criteres image IA.",
+                updatedAt: "2026-01-01T00:00:00.000Z",
+            },
+        ],
         opinions: [
             {
                 initials: "TR",
@@ -293,6 +354,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
                 avatarVariant: 4,
             },
         ],
+        realisator: DEFAULT_REALISATOR,
     },
     {
         id: 5,
@@ -365,6 +427,7 @@ export const INITIAL_FILMS: JuryFilm[] = [
                 avatarVariant: 4,
             },
         ],
+        realisator: DEFAULT_REALISATOR,
     },
 ];
 
@@ -372,10 +435,12 @@ export const DECISION_LABEL: Record<Exclude<Decision, null>, string> = {
     valide: "Valide",
     aRevoir: "A revoir",
     refuse: "Refuse",
+    discuter: "A discuter",
 };
 
 export const DECISION_CHIP_CLASS: Record<Exclude<Decision, null>, string> = {
     valide: "bg-aurora/12 text-aurora",
     aRevoir: "bg-solar/12 text-solar",
     refuse: "bg-coral/12 text-coral",
+    discuter: "bg-lavande/12 text-lavande",
 };

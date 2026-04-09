@@ -3,16 +3,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend.vps
-    ports:
-      - "8001:5173"
     environment:
       - VITE_API_URL=
       - VITE_LIVEKIT_URL=wss://marai-1fs2judn.livekit.cloud
       - BACKEND_URL=http://backend:5500
+      - VITE_NO_SSL=true
+      - VITE_GOOGLE_CLIENT_ID=772416103398-dld2t8lk6amda0ohsansm31udg3oc9ia.apps.googleusercontent.com
     depends_on:
       backend:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.marsai.rule=Host(`marsai.lightchurch.fr`)"
+      - "traefik.http.routers.marsai.entrypoints=websecure"
+      - "traefik.http.routers.marsai.tls.certresolver=letsencrypt"
+      - "traefik.http.services.marsai.loadbalancer.server.port=5173"
 
   backend:
     build:
@@ -21,6 +30,7 @@ services:
     expose:
       - "5500"
     env_file:
+      - ./.env.vps
       - ./backend/.env
     environment:
       - DB_HOST=mysql
@@ -28,15 +38,24 @@ services:
       - DB_NAME=marsai
       - DB_USER=root
       - DB_PASSWORD=marsai_dev_2026
+    volumes:
+      - backend_uploads:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.marsai-api.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.marsai-api.entrypoints=websecure"
+      - "traefik.http.routers.marsai-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.marsai-api.loadbalancer.server.port=5500"
 
   mysql:
     image: mysql:8.0
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: marsai_dev_2026
       MYSQL_DATABASE: marsai
@@ -49,8 +68,17 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - marsai-network
+
+networks:
+  marsai-network:
+    driver: bridge
+  traefik-network:
+    external: true
 
 volumes:
   mysql_data:
   caddy_data:
   caddy_config:
+  backend_uploads:

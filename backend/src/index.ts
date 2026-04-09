@@ -61,11 +61,27 @@ interface VocalUser {
 }
 const vocalUsers = new Map<string, VocalUser>();
 
+// ── Screening state (film projeté en direct par l'admin) ───────────────────────
+export interface ScreeningState {
+    filmId: number;
+    title: string;
+    country: string;
+    videoUrl: string | null;
+    posterImg?: string | null;
+    startedAt: number;
+    seekTime?: number;
+    seekedAt?: number;
+}
+const screeningRef: { current: ScreeningState | null } = { current: null };
+
 // Expose vocalUsers pour les routes HTTP admin
 app.locals.vocalUsers = vocalUsers;
 
 // Expose juryToSockets pour les controllers HTTP (ban)
 app.locals.juryToSockets = juryToSockets;
+
+// Expose screeningRef pour les controllers HTTP admin
+app.locals.screeningRef = screeningRef;
 
 const broadcastOnline = (filmId: number): void => {
     const users = Array.from(onlineByFilm.get(filmId)?.values() ?? []);

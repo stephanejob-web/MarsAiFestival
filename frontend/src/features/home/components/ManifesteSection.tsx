@@ -77,7 +77,7 @@ const ManifesteSection = (): React.JSX.Element => {
                 </div>
 
                 {/* Timeline */}
-                <div className="relative pl-10">
+                <div className="relative pl-12 sm:pl-10">
                     {/* Ligne qui se dessine au scroll */}
                     <div ref={lineRef} className="timeline-draw" data-visible="false" />
 
@@ -161,7 +161,7 @@ const ManifesteSection = (): React.JSX.Element => {
 
                 {/* Tools */}
                 <Reveal variant="up" delay={100}>
-                    <div className="mt-14 pl-10">
+                    <div className="mt-14 pl-12 sm:pl-10">
                         <p className="font-mono text-[10px] text-aurora/30 uppercase tracking-[0.2em] mb-4">
                             Créez avec
                         </p>

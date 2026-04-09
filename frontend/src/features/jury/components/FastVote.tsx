@@ -411,7 +411,7 @@ const FastVote = ({
         const isUpwardSwipe = absY > absX && dy < -SWIPE_Y_THRESHOLD;
 
         if (isUpwardSwipe) {
-            openPanel("aRevoir", 0, -window.innerHeight * 1.5);
+            openPanel("aRevoir");
         } else if (absX > SWIPE_THRESHOLD) {
             if (dx > 0) {
                 flyAndVote("valide", window.innerWidth * 1.5, 0);
@@ -945,6 +945,7 @@ const FastVote = ({
                         {nextFilm.videoUrl ? (
                             <video
                                 src={nextFilm.videoUrl}
+                                poster={nextFilm.posterImg ?? undefined}
                                 className="h-full w-full object-contain opacity-40"
                                 preload="metadata"
                                 muted
@@ -981,6 +982,7 @@ const FastVote = ({
                             <video
                                 ref={videoRef}
                                 src={currentFilm.videoUrl}
+                                poster={currentFilm.posterImg ?? undefined}
                                 className="h-full w-full object-contain"
                                 preload="auto"
                                 autoPlay

@@ -365,7 +365,7 @@ const SectionOverview = (): React.JSX.Element => (
             Vue d&apos;ensemble — marsAI Festival
         </SectionTitle>
 
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
                 {
                     label: "Films",
@@ -1193,13 +1193,13 @@ const AdminDocsPage = (): React.JSX.Element => {
     return (
         <div className="flex flex-1 flex-col overflow-hidden">
             {/* Topbar */}
-            <div className="flex h-[50px] min-h-[50px] items-center gap-3 border-b border-white/[0.06] bg-surface px-5">
-                <span className="font-display text-[0.88rem] font-extrabold text-white-soft">
+            <div className="flex min-h-[50px] items-center gap-2 border-b border-white/[0.06] bg-surface px-3 md:px-5 flex-wrap py-2">
+                <span className="font-display text-[0.88rem] font-extrabold text-white-soft shrink-0">
                     Documentation
                 </span>
-                <div className="h-[18px] w-px bg-white/[0.08]" />
-                <span className="text-[0.75rem] text-mist">
-                    Référence technique & fonctionnelle — marsAI Festival
+                <div className="hidden sm:block h-[18px] w-px bg-white/[0.08]" />
+                <span className="hidden sm:block text-[0.75rem] text-mist truncate">
+                    Référence technique &amp; fonctionnelle
                 </span>
                 <div className="ml-auto">
                     <span className="rounded-full border border-aurora/20 bg-aurora/10 px-3 py-1 text-[0.68rem] font-semibold text-aurora">

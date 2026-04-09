@@ -20,10 +20,12 @@ interface Step2FilmProps {
     formData: FormDepotData;
     errors: FormDepotErrors;
     videoFile: File | null;
+    posterFile: File | null;
     uploadProgress: number;
     onChange: (field: keyof FormDepotData, value: string | boolean) => void;
     onVideoSelect: (file: File) => void;
     onVideoReset: () => void;
+    onPosterSelect: (file: File | null) => void;
     setUploadProgress: (progress: number) => void;
     setVideoDuration: (duration: number | null) => void;
     setVideoValid: (valid: boolean) => void;
@@ -35,10 +37,12 @@ const Step2Film = ({
     formData,
     errors,
     videoFile,
+    posterFile,
     uploadProgress,
     onChange,
     onVideoSelect,
     onVideoReset,
+    onPosterSelect,
     setUploadProgress,
     setVideoDuration,
     setVideoValid,
@@ -55,6 +59,8 @@ const Step2Film = ({
     const [durationStatus, setDurationStatus] = useState<DurationStatus | null>(null);
     const [showValidationHint, setShowValidationHint] = useState(false);
     const uploadIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const posterInputRef = useRef<HTMLInputElement>(null);
+    const [posterPreview, setPosterPreview] = useState<string | null>(null);
 
     const checkDuration = useCallback(
         (file: File): void => {
@@ -111,6 +117,27 @@ const Step2Film = ({
             if (uploadIntervalRef.current) clearInterval(uploadIntervalRef.current);
         };
     }, []);
+
+    useEffect(() => {
+        if (!posterFile) {
+            queueMicrotask(() => setPosterPreview(null));
+            return;
+        }
+        const url = URL.createObjectURL(posterFile);
+        queueMicrotask(() => setPosterPreview(url));
+        return () => URL.revokeObjectURL(url);
+    }, [posterFile]);
+
+    const handlePosterInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const file = e.target.files?.[0];
+        if (file) onPosterSelect(file);
+    };
+
+    const handlePosterDrop = (e: React.DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) onPosterSelect(file);
+    };
 
     const handleReset = (): void => {
         if (uploadIntervalRef.current) clearInterval(uploadIntervalRef.current);
@@ -297,6 +324,86 @@ const Step2Film = ({
                     {renderError("synopsisEn")}
                 </div>
             </div>
+
+            {/* Affiche du film */}
+            <hr className="border-white/6 my-6" />
+            <div className="text-[0.68rem] font-bold uppercase tracking-widest text-mist mb-4 mt-1">
+                Affiche du film{" "}
+                <span className="text-coral text-[0.65rem] normal-case font-normal">
+                    — obligatoire
+                </span>
+            </div>
+
+            <div
+                className={`rounded-2xl border-2 border-dashed transition-all ${
+                    errors.poster
+                        ? "border-coral/50 bg-coral/5"
+                        : "border-aurora/[0.28] hover:border-aurora/55 hover:bg-aurora/4"
+                } ${posterPreview ? "p-0 overflow-hidden" : "p-6 flex flex-col items-center gap-3 cursor-pointer"}`}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handlePosterDrop}
+                onClick={() => !posterPreview && posterInputRef.current?.click()}
+                role={posterPreview ? undefined : "button"}
+                tabIndex={posterPreview ? undefined : 0}
+                onKeyDown={(e) => {
+                    if (!posterPreview && e.key === "Enter") posterInputRef.current?.click();
+                }}
+            >
+                <input
+                    ref={posterInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handlePosterInputChange}
+                />
+
+                {posterPreview ? (
+                    <div className="relative group">
+                        <img
+                            src={posterPreview}
+                            alt="Aperçu affiche"
+                            className="w-full max-h-72 object-contain rounded-2xl"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    posterInputRef.current?.click();
+                                }}
+                                className="bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm font-semibold hover:bg-white/20 transition-colors"
+                            >
+                                Changer
+                            </button>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onPosterSelect(null);
+                                }}
+                                className="bg-coral/20 border border-coral/40 rounded-xl px-4 py-2 text-sm font-semibold text-coral hover:bg-coral/30 transition-colors"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="w-14 h-14 rounded-full bg-aurora/8 border border-aurora/20 flex items-center justify-center text-2xl">
+                            🖼️
+                        </div>
+                        <div className="text-center">
+                            <div className="text-sm font-semibold text-aurora mb-1">
+                                Glisser une image ou cliquer pour parcourir
+                            </div>
+                            <div className="text-xs text-mist">
+                                JPG, PNG, WebP — format affiche (2:3 recommandé)
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+            {renderError("poster")}
 
             {/* Fichier vidéo */}
             <hr className="border-white/6 my-6" />

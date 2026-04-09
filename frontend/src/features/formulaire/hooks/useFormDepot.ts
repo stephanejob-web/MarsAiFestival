@@ -12,6 +12,8 @@ interface UseFormDepotReturn {
     videoDuration: number | null;
     videoValid: boolean;
     uploadProgress: number;
+    posterFile: File | null;
+    setPosterFile: (file: File | null) => void;
     subtitleFR: File | null;
     subtitleEN: File | null;
     rgpdChecked: boolean[];
@@ -99,6 +101,7 @@ const useFormDepot = (): UseFormDepotReturn => {
     const [videoDuration, setVideoDuration] = useState<number | null>(null);
     const [videoValid, setVideoValid] = useState<boolean>(false);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [posterFile, setPosterFile] = useState<File | null>(null);
     const [subtitleFR, setSubtitleFR] = useState<File | null>(null);
     const [subtitleEN, setSubtitleEN] = useState<File | null>(null);
     const [rgpdChecked, setRgpdChecked] = useState<boolean[]>([false, false, false]);
@@ -251,6 +254,7 @@ const useFormDepot = (): UseFormDepotReturn => {
                 if (!formData.langue) newErrors.langue = "Sélectionnez la langue du film";
                 if (!formData.synopsis.trim()) newErrors.synopsis = "Champ requis";
                 if (!formData.synopsisEn.trim()) newErrors.synopsisEn = "English synopsis required";
+                if (!posterFile) newErrors.poster = "L'affiche du film est requise";
                 if (!videoFile) newErrors.video = "Fichier vidéo requis";
                 else if (!videoValid)
                     newErrors.video = "La vidéo dépasse la durée maximale autorisée (2 min 30 s)";
@@ -266,7 +270,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             setErrors(newErrors);
             return Object.keys(newErrors).length === 0;
         },
-        [formData, videoFile, videoValid, validateAge],
+        [formData, posterFile, videoFile, videoValid, validateAge],
     );
 
     const goToStep = useCallback(
@@ -357,6 +361,7 @@ const useFormDepot = (): UseFormDepotReturn => {
                 data.append(key, String(value));
             });
             if (videoDuration !== null) data.append("duration", String(Math.round(videoDuration)));
+            if (posterFile) data.append("poster", posterFile);
             if (videoFile) data.append("video", videoFile);
             if (subtitleFR) data.append("subtitleFR", subtitleFR);
             if (subtitleEN) data.append("subtitleEN", subtitleEN);
@@ -370,7 +375,7 @@ const useFormDepot = (): UseFormDepotReturn => {
             if (result.youtubeWarning) setYoutubeWarning(result.youtubeWarning);
             setSubmissionState("success");
         },
-        [formData, videoDuration, videoFile, subtitleFR, subtitleEN],
+        [formData, videoDuration, posterFile, videoFile, subtitleFR, subtitleEN],
     );
 
     return {
@@ -389,6 +394,8 @@ const useFormDepot = (): UseFormDepotReturn => {
         videoDuration,
         videoValid,
         uploadProgress,
+        posterFile,
+        setPosterFile,
         subtitleFR,
         subtitleEN,
         rgpdChecked,

@@ -9,6 +9,7 @@ import {
     deleteFilmById,
     emailRealisateur,
     getVideoUrl,
+    uploadPoster,
 } from "../controllers/film.controller";
 import { requireAdmin } from "../middlewares/auth.middleware";
 
@@ -24,10 +25,17 @@ router.get("/:id", showFilm);
 router.patch("/:id", requireAdmin, patchFilm);
 router.post("/:id/email", requireAdmin, emailRealisateur);
 router.get("/:id/video-url", requireAdmin, getVideoUrl);
+router.patch(
+    "/:id/poster",
+    requireAdmin,
+    upload.fields([{ name: "poster", maxCount: 1 }]),
+    uploadPoster,
+);
 router.delete("/:id", requireAdmin, deleteFilmById);
 router.post(
     "/",
     upload.fields([
+        { name: "poster", maxCount: 1 },
         { name: "video", maxCount: 1 },
         { name: "subtitleFR", maxCount: 1 },
         { name: "subtitleEN", maxCount: 1 },
