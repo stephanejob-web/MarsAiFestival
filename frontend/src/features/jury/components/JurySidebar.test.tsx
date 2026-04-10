@@ -46,8 +46,6 @@ const defaultProps = {
     totalFilms: 5,
     isChatOpen: false,
     onChatToggle: vi.fn(),
-    voteMode: "normal" as const,
-    onVoteModeChange: vi.fn(),
     screening: null,
 };
 
@@ -84,17 +82,17 @@ describe("JurySidebar", () => {
         expect(screen.getByText(/2 \/ 5 films évalués/i)).toBeDefined();
     });
 
-    it("appelle onViewChange avec eval quand on clique sur Films assignes", async () => {
+    it("appelle onViewChange avec eval quand on clique sur Evaluer", async () => {
         const onViewChange = vi.fn();
         const user = userEvent.setup();
         renderSidebar({ onViewChange });
-        await user.click(screen.getByRole("button", { name: /films assignés/i }));
+        await user.click(screen.getByRole("button", { name: /évaluer/i }));
         expect(onViewChange).toHaveBeenCalledWith("eval");
     });
 
     it("met en evidence l onglet actif avec la classe aurora", () => {
         renderSidebar({ activeView: "eval" });
-        const btn = screen.getByRole("button", { name: /films assignés/i });
+        const btn = screen.getByRole("button", { name: /évaluer/i });
         expect(btn.className).toContain("aurora");
     });
 

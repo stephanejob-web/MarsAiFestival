@@ -23,6 +23,7 @@ services:
       - VITE_API_URL=
       - VITE_LIVEKIT_URL=wss://marai-1fs2judn.livekit.cloud
       - BACKEND_URL=http://backend:5500
+      - VITE_GOOGLE_CLIENT_ID=772416103398-dld2t8lk6amda0ohsansm31udg3oc9ia.apps.googleusercontent.com
     depends_on:
       backend:
         condition: service_started

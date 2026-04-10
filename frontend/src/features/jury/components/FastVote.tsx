@@ -23,6 +23,7 @@ import type { Decision, JuryFilm } from "../types";
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useVoteTags from "../hooks/useVoteTags";
 import type { VoteTag } from "../hooks/useVoteTags";
+import useFilmPlayer from "../hooks/useFilmPlayer";
 
 interface FastVoteProps {
     panel: UseJuryPanelReturn;
@@ -126,10 +127,18 @@ const FastVote = ({
     const leftHintRef = useRef<HTMLDivElement>(null);
     const upHintRef = useRef<HTMLDivElement>(null);
 
-    // Video state
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
-    const videoRef = useRef<HTMLVideoElement>(null);
+    // Video player
+    const {
+        videoRef,
+        isPlaying,
+        isMuted,
+        togglePlay,
+        toggleMute,
+        handleFullscreen,
+        handlePlay,
+        handlePause,
+        handleEnded,
+    } = useFilmPlayer({ filmId: pendingFilms[currentIndex]?.id });
 
     // UI state
     const [showIntro, setShowIntro] = useState(!skipIntro);
@@ -158,16 +167,6 @@ const FastVote = ({
     const afterNextFilm = pendingFilms[currentIndex + 2];
 
     // Autoplay on film change
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-        video.currentTime = 0;
-        void video
-            .play()
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
-    }, [currentIndex]);
-
     // Cleanup RAF and timeouts on unmount
     useEffect(() => {
         return () => {
@@ -454,29 +453,6 @@ const FastVote = ({
     };
     const onTouchEnd = (): void => {
         onDragEnd();
-    };
-
-    const togglePlay = useCallback((): void => {
-        const video = videoRef.current;
-        if (!video) return;
-        if (isPlaying) {
-            video.pause();
-            setIsPlaying(false);
-        } else {
-            void video.play();
-            setIsPlaying(true);
-        }
-    }, [isPlaying]);
-
-    const toggleMute = (): void => {
-        const video = videoRef.current;
-        if (!video) return;
-        video.muted = !video.muted;
-        setIsMuted(video.muted);
-    };
-
-    const handleFullscreen = (): void => {
-        if (videoRef.current) void videoRef.current.requestFullscreen();
     };
 
     // Keyboard shortcuts
@@ -1011,9 +987,9 @@ const FastVote = ({
                                 preload="auto"
                                 autoPlay
                                 muted
-                                onPlay={() => setIsPlaying(true)}
-                                onPause={() => setIsPlaying(false)}
-                                onEnded={() => setIsPlaying(false)}
+                                onPlay={handlePlay}
+                                onPause={handlePause}
+                                onEnded={handleEnded}
                             />
                             {/* Click to play/pause (only when not dragging) */}
                             {!isDragging && (

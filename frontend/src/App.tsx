@@ -15,6 +15,7 @@ import ProtectedJuryRoute from "./components/ui/ProtectedJuryRoute";
 import AdminCmsPage from "./pages/AdminCmsPage";
 import AdminDocsPage from "./pages/AdminDocsPage";
 import AdminEmailingPage from "./pages/AdminEmailingPage";
+import NotFound from "./pages/NotFound";
 
 const App = (): React.JSX.Element => {
     return (
@@ -39,6 +40,7 @@ const App = (): React.JSX.Element => {
                 <Route element={<ProtectedJuryRoute />}>
                     <Route path="jury/panel" element={<JuryPanel />} />
                 </Route>
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );
