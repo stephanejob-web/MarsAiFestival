@@ -5,15 +5,6 @@ import path from "path";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 
-Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV ?? "development",
-    // N'envoie les erreurs qu'en production
-    enabled: process.env.NODE_ENV === "production",
-    // Capture les traces de performance (0.1 = 10% des requêtes)
-    tracesSampleRate: 0.1,
-});
-
 const app: Application = express();
 
 app.use(cors());
