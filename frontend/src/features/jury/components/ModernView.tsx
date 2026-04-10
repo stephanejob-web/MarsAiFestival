@@ -227,7 +227,8 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                         type="button"
                         onClick={() => setIsWatchingFilm(false)}
                         aria-label="Quitter le plein écran"
-                        className="absolute top-18 right-10
+                        className="absolute top-18 right-10 z-40 flex items-center gap-1 rounded bg-black/50 px-3 py-1 text-sm text-white"
+                    >
                         <Minimize2 size={13} />
                         Quitter
                     </button>
