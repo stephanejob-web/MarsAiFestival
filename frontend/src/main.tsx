@@ -13,6 +13,8 @@ Sentry.init({
     environment: import.meta.env.MODE,
     // Actif dès que le DSN est défini
     enabled: !!import.meta.env.VITE_SENTRY_DSN,
+    // Envoie les données utilisateur (IP, email...) pour mieux identifier qui est touché
+    sendDefaultPii: true,
     // Capture les traces de performance (0.1 = 10% des requêtes)
     tracesSampleRate: 0.1,
     // Capture les replays lors d'une erreur (enregistre les actions de l'utilisateur)
