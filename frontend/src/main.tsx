@@ -11,8 +11,8 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN as string,
     environment: import.meta.env.MODE,
-    // N'envoie les erreurs qu'en production
-    enabled: import.meta.env.PROD,
+    // Actif dès que le DSN est défini
+    enabled: !!import.meta.env.VITE_SENTRY_DSN,
     // Capture les traces de performance (0.1 = 10% des requêtes)
     tracesSampleRate: 0.1,
     // Capture les replays lors d'une erreur (enregistre les actions de l'utilisateur)
