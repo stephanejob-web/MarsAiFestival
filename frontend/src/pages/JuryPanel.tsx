@@ -65,23 +65,14 @@ const JuryPanel = (): React.JSX.Element => {
                 onChatToggle={() => panel.setIsChatOpen(!panel.isChatOpen)}
                 screening={screening}
             />
-            <div className="flex flex-1 flex-col overflow-hidden">
-                {!(
-                    evalVariant === "modern" &&
-                    (panel.activeView === "eval" || panel.activeView === "tinder")
-                ) && (
-                    <JuryTopbar
-                        activeView={panel.activeView}
-                        evalVariant={evalVariant}
-                        onEvalVariantChange={handleEvalVariantChange}
-                        onDisconnect={() => {
-                            // Navigation handled inside JuryTopbar
-                        }}
-                    />
-                )}
+            <div className="relative flex flex-1 flex-col overflow-hidden">
+                <JuryTopbar
+                    evalVariant={evalVariant}
+                    onEvalVariantChange={handleEvalVariantChange}
+                />
                 {(panel.activeView === "eval" || panel.activeView === "tinder") &&
                     (evalVariant === "modern" ? (
-                        <ModernView panel={panel} onEvalVariantChange={handleEvalVariantChange} />
+                        <ModernView panel={panel} />
                     ) : evalVariant === "rapide" ? (
                         <EvalView panel={panel} voteMode="rapide" />
                     ) : (
