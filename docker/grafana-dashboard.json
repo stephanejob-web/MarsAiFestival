@@ -1,14 +1,5 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_MYSQL",
-      "label": "MySQL — MarsAI",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "mysql",
-      "pluginName": "MySQL"
-    }
-  ],
+  "__inputs": [{ "name": "DS_MYSQL", "label": "MySQL — MarsAI", "type": "datasource", "pluginId": "mysql", "pluginName": "MySQL" }],
   "__requires": [
     { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
     { "type": "datasource", "id": "mysql", "name": "MySQL", "version": "1.0.0" },
@@ -22,583 +13,333 @@
   ],
   "annotations": { "list": [] },
   "editable": true,
-  "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
-  "panels": [
-
-    {
-      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
-      "id": 999,
-      "options": {
-        "code": { "language": "plaintext", "showLineNumbers": false, "showMiniMap": false },
-        "content": "<div style=\"display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:linear-gradient(135deg,rgba(78,255,206,0.08) 0%,rgba(167,139,250,0.08) 100%);border-radius:8px;border:1px solid rgba(78,255,206,0.2)\">\n  <div>\n    <div style=\"font-size:22px;font-weight:900;letter-spacing:-0.03em;color:#fff\">mars<span style=\"color:#4EFFCE\">AI</span> Festival <span style=\"color:#FFD93D\">2026</span></div>\n    <div style=\"font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px\">Tableau de bord — Administration & Suivi</div>\n  </div>\n  <div style=\"display:flex;gap:24px;font-size:11px;color:rgba(255,255,255,0.5)\">\n    <span>🎬 Festival de films IA</span>\n    <span>📊 Données en temps réel</span>\n    <span>🔄 Actualisation : 30s</span>\n  </div>\n</div>",
-        "mode": "html"
-      },
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 3 },
-      "id": 200,
-      "title": "📊  KPI — Chiffres clés",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#4EFFCE", "value": null }] },
-          "unit": "short",
-          "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 4 },
-      "id": 1,
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "🎬  Films déposés",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS \"Films\" FROM film", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#FF6B6B" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }] },
-          "unit": "short", "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 4 },
-      "id": 2,
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "🎥  Réalisateurs",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(DISTINCT realisator_id) AS \"Réalisateurs\" FROM film", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#FFD93D" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#FFD93D", "value": null }] },
-          "unit": "short", "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 4 },
-      "id": 3,
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "⚖️  Membres du jury",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS \"Jurés\" FROM jury WHERE role = 'jury' AND is_active = 1", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#34D399" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }] },
-          "unit": "short", "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 },
-      "id": 4,
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "✅  Films validés",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS \"Validés\" FROM film WHERE statut IN ('valide','selectionne','finaliste')", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#A78BFA" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#A78BFA", "value": null }] },
-          "unit": "short", "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 4 },
-      "id": 5,
-      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "💬  Messages discussion",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS \"Messages\" FROM discussion_message", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 3 }, { "color": "#FF6B6B", "value": 8 }] },
-          "unit": "short", "decimals": 0
-        }
-      },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 4 },
-      "id": 6,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "title": "🎫  Tickets ouverts",
-      "type": "stat",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS \"Tickets\" FROM ticket WHERE status = 'open'", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
-      "id": 201,
-      "title": "🎬  Analyse des films",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
-      },
-      "gridPos": { "h": 9, "w": 7, "x": 0, "y": 9 },
-      "id": 10,
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value", "percent"] },
-        "pieType": "donut",
-        "tooltip": { "mode": "multi", "sort": "desc" }
-      },
-      "title": "Statut des films",
-      "type": "piechart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT statut AS \"Statut\", COUNT(*) AS \"Nombre\" FROM film GROUP BY statut ORDER BY COUNT(*) DESC", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
-      },
-      "gridPos": { "h": 9, "w": 7, "x": 7, "y": 9 },
-      "id": 11,
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value", "percent"] },
-        "pieType": "pie",
-        "tooltip": { "mode": "multi", "sort": "desc" }
-      },
-      "title": "Full IA vs Hybride",
-      "type": "piechart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE ia_class WHEN 'full' THEN '🤖 Full IA' WHEN 'hybrid' THEN '🔀 Hybride' ELSE ia_class END AS \"Classe\", COUNT(*) AS \"Nombre\" FROM film GROUP BY ia_class", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
-          "custom": { "fillOpacity": 75, "lineWidth": 0 },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 9, "w": 10, "x": 14, "y": 9 },
-      "id": 12,
-      "options": {
-        "barRadius": 0.15,
-        "barWidth": 0.65,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "orientation": "horizontal",
-        "tooltip": { "mode": "single", "sort": "none" },
-        "xTickLabelSpacing": 100
-      },
-      "title": "Outils IA les plus utilisés",
-      "type": "barchart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT 'IA Image' AS Outil, SUM(ia_image) AS Total FROM film UNION ALL SELECT 'IA Son', SUM(ia_son) FROM film UNION ALL SELECT 'IA Scénario', SUM(ia_scenario) FROM film UNION ALL SELECT 'IA Post-prod', SUM(ia_post) FROM film ORDER BY Total DESC", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }, { "color": "#FFD93D", "value": 30 }, { "color": "#34D399", "value": 60 }] },
-          "unit": "percent",
-          "min": 0, "max": 100
-        }
-      },
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 18 },
-      "id": 13,
-      "options": {
-        "minVizHeight": 75, "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "title": "Taux de validation",
-      "type": "gauge",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(COUNT(CASE WHEN statut IN ('valide','selectionne','finaliste') THEN 1 END) * 100.0 / COUNT(*), 1) AS \"Taux\" FROM film", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }, { "color": "#FFD93D", "value": 10 }, { "color": "#34D399", "value": 20 }] },
-          "unit": "percent",
-          "min": 0, "max": 100
-        }
-      },
-      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 18 },
-      "id": 14,
-      "options": {
-        "minVizHeight": 75, "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "title": "Taux de finalistes",
-      "type": "gauge",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(COUNT(CASE WHEN statut = 'finaliste' THEN 1 END) * 100.0 / COUNT(*), 1) AS \"Taux\" FROM film", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 70, "lineWidth": 0 },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 18 },
-      "id": 15,
-      "options": {
-        "barRadius": 0.15,
-        "barWidth": 0.65,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "orientation": "horizontal",
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "Films par langue",
-      "type": "barchart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT language AS \"Langue\", COUNT(*) AS \"Films\" FROM film GROUP BY language ORDER BY COUNT(*) DESC LIMIT 10", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
-      "id": 202,
-      "title": "🌍  Géographie & Tendances",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 80, "lineWidth": 0 },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 9, "w": 10, "x": 0, "y": 25 },
-      "id": 20,
-      "options": {
-        "barRadius": 0.15,
-        "barWidth": 0.65,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "orientation": "horizontal",
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "Top 10 pays — Films déposés",
-      "type": "barchart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT r.country AS \"Pays\", COUNT(f.id) AS \"Films\" FROM film f JOIN realisator r ON r.id = f.realisator_id GROUP BY r.country ORDER BY COUNT(f.id) DESC LIMIT 10", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
-          "custom": { "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": true },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 9, "w": 14, "x": 10, "y": 25 },
-      "id": 21,
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "📈  Dépôts de films dans le temps",
-      "type": "timeseries",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS time, COUNT(*) AS \"Films déposés\" FROM film GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d') ORDER BY time", "format": "time_series", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "#A78BFA" },
-          "custom": { "fillOpacity": 12, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 4, "showPoints": "auto", "spanNulls": true },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 34 },
-      "id": 22,
-      "options": {
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "tooltip": { "mode": "multi", "sort": "none" }
-      },
-      "title": "💬  Activité des discussions dans le temps",
-      "type": "timeseries",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT DATE_FORMAT(sent_at, '%Y-%m-%d') AS time, COUNT(*) AS \"Messages\" FROM discussion_message GROUP BY DATE_FORMAT(sent_at, '%Y-%m-%d') ORDER BY time", "format": "time_series", "refId": "A" }]
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
-      "id": 203,
-      "title": "⚖️  Activité du jury",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "Films assignés" },
-            "properties": [
-              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
-              { "id": "custom.width", "value": 180 },
-              { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 5 }, { "color": "#FF6B6B", "value": 12 }] } }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Rôle" },
-            "properties": [
-              { "id": "custom.width", "value": 100 },
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "mappings", "value": [{ "options": { "admin": { "color": "#FF6B6B", "index": 0, "text": "👑 Admin" }, "jury": { "color": "#4EFFCE", "index": 1, "text": "⚖️ Jury" }, "moderateur": { "color": "#A78BFA", "index": 2, "text": "🛡️ Modo" } }, "type": "value" }] }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Actif" },
-            "properties": [
-              { "id": "custom.width", "value": 80 },
-              { "id": "mappings", "value": [{ "options": { "1": { "color": "#34D399", "index": 0, "text": "✅" }, "0": { "color": "#FF6B6B", "index": 1, "text": "❌" } }, "type": "value" }] }
-            ]
-          }
-        ]
-      },
-      "gridPos": { "h": 10, "w": 14, "x": 0, "y": 42 },
-      "id": 30,
-      "options": {
-        "cellHeight": "md",
-        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
-        "showHeader": true,
-        "sortBy": [{ "desc": true, "displayName": "Films assignés" }]
-      },
-      "title": "Tableau du jury — Films assignés",
-      "type": "table",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS \"Nom\", j.role AS \"Rôle\", j.is_active AS \"Actif\", j.email AS \"Email\", COUNT(DISTINCT a.film_id) AS \"Films assignés\", DATE_FORMAT(j.created_at, '%d/%m/%Y') AS \"Inscrit le\" FROM jury j LEFT JOIN jury_film_assignment a ON a.jury_id = j.id GROUP BY j.id ORDER BY COUNT(DISTINCT a.film_id) DESC", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 80, "lineWidth": 0 },
-          "unit": "short", "min": 0
-        }
-      },
-      "gridPos": { "h": 10, "w": 10, "x": 14, "y": 42 },
-      "id": 31,
-      "options": {
-        "barRadius": 0.15,
-        "barWidth": 0.6,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "orientation": "horizontal",
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "Messages par film (top discussions)",
-      "type": "barchart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT f.original_title AS \"Film\", COUNT(d.id) AS \"Messages\" FROM film f INNER JOIN discussion_message d ON d.film_id = f.id GROUP BY f.id ORDER BY COUNT(d.id) DESC LIMIT 10", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 },
-      "id": 204,
-      "title": "🎫  Tickets & Support",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
-      },
-      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 53 },
-      "id": 40,
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value", "percent"] },
-        "pieType": "donut",
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "Tickets par statut",
-      "type": "piechart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT status AS \"Statut\", COUNT(*) AS \"Nombre\" FROM ticket GROUP BY status", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
-      },
-      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 53 },
-      "id": 41,
-      "options": {
-        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value", "percent"] },
-        "pieType": "donut",
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "title": "Tickets par type",
-      "type": "piechart",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT type AS \"Type\", COUNT(*) AS \"Nombre\" FROM ticket GROUP BY type", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "Statut" },
-            "properties": [
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "custom.width", "value": 120 },
-              { "id": "mappings", "value": [{ "options": { "open": { "color": "#FF6B6B", "index": 0, "text": "🔴 Ouvert" }, "in_progress": { "color": "#FFD93D", "index": 1, "text": "🟡 En cours" }, "resolved": { "color": "#34D399", "index": 2, "text": "🟢 Résolu" }, "rejected": { "color": "#6B7280", "index": 3, "text": "⚫ Rejeté" } }, "type": "value" }] }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Type" },
-            "properties": [
-              { "id": "custom.width", "value": 110 },
-              { "id": "mappings", "value": [{ "options": { "content": { "index": 0, "text": "📝 Contenu" }, "technical": { "index": 1, "text": "⚙️ Technique" }, "rights": { "index": 2, "text": "⚖️ Droits" }, "other": { "index": 3, "text": "❓ Autre" } }, "type": "value" }] }
-            ]
-          }
-        ]
-      },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
-      "id": 42,
-      "options": {
-        "cellHeight": "sm",
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "desc": true, "displayName": "Créé le" }]
-      },
-      "title": "Derniers tickets — Vue détaillée",
-      "type": "table",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS \"Juré\", f.original_title AS \"Film\", t.type AS \"Type\", t.status AS \"Statut\", LEFT(t.description, 40) AS \"Description\", DATE_FORMAT(t.created_at, '%d/%m %H:%i') AS \"Créé le\" FROM ticket t JOIN jury j ON j.id = t.jury_id JOIN film f ON f.id = t.film_id ORDER BY t.created_at DESC LIMIT 15", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 },
-      "id": 205,
-      "title": "🏆  Top Films & Réalisateurs",
-      "type": "row"
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "Statut" },
-            "properties": [
-              { "id": "custom.width", "value": 120 },
-              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
-              { "id": "mappings", "value": [{ "options": { "finaliste": { "color": "#FFD93D", "index": 0, "text": "🏆 Finaliste" }, "selectionne": { "color": "#4EFFCE", "index": 1, "text": "⭐ Sélectionné" }, "valide": { "color": "#34D399", "index": 2, "text": "✅ Validé" }, "to_review": { "color": "#6B7280", "index": 3, "text": "🔍 À revoir" }, "refuse": { "color": "#FF6B6B", "index": 4, "text": "❌ Refusé" } }, "type": "value" }] }
-            ]
-          },
-          { "matcher": { "id": "byName", "options": "Classe IA" }, "properties": [{ "id": "custom.width", "value": 100 }, { "id": "mappings", "value": [{ "options": { "full": { "color": "#A78BFA", "index": 0, "text": "🤖 Full IA" }, "hybrid": { "color": "#F97316", "index": 1, "text": "🔀 Hybride" } }, "type": "value" }] }] },
-          { "matcher": { "id": "byName", "options": "Durée (min)" }, "properties": [{ "id": "custom.width", "value": 100 }] }
-        ]
-      },
-      "gridPos": { "h": 10, "w": 14, "x": 0, "y": 62 },
-      "id": 50,
-      "options": {
-        "cellHeight": "sm",
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "desc": false, "displayName": "Statut" }]
-      },
-      "title": "Catalogue films — Vue complète",
-      "type": "table",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT f.dossier_num AS \"N° Dossier\", f.original_title AS \"Titre\", CONCAT(r.first_name, ' ', r.last_name) AS \"Réalisateur\", r.country AS \"Pays\", f.language AS \"Langue\", f.ia_class AS \"Classe IA\", ROUND(f.duration / 60, 1) AS \"Durée (min)\", f.statut AS \"Statut\", DATE_FORMAT(f.created_at, '%d/%m/%Y') AS \"Déposé le\" FROM film f JOIN realisator r ON r.id = f.realisator_id ORDER BY f.created_at DESC", "format": "table", "refId": "A" }]
-    },
-
-    {
-      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
-        },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "Films" }, "properties": [{ "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }, { "id": "custom.width", "value": 120 }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#4EFFCE", "value": null }, { "color": "#FFD93D", "value": 2 }, { "color": "#FF6B6B", "value": 4 }] } }] },
-          { "matcher": { "id": "byName", "options": "Newsletter" }, "properties": [{ "id": "custom.width", "value": 90 }, { "id": "mappings", "value": [{ "options": { "1": { "color": "#34D399", "index": 0, "text": "✅ Oui" }, "0": { "color": "#6B7280", "index": 1, "text": "Non" } }, "type": "value" }] }] }
-        ]
-      },
-      "gridPos": { "h": 10, "w": 10, "x": 14, "y": 62 },
-      "id": 51,
-      "options": {
-        "cellHeight": "sm",
-        "footer": { "show": false },
-        "showHeader": true,
-        "sortBy": [{ "desc": true, "displayName": "Films" }]
-      },
-      "title": "Réalisateurs — Activité",
-      "type": "table",
-      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(r.first_name, ' ', r.last_name) AS \"Réalisateur\", r.country AS \"Pays\", r.newsletter AS \"Newsletter\", COUNT(f.id) AS \"Films\", DATE_FORMAT(MAX(f.created_at), '%d/%m/%Y') AS \"Dernier dépôt\" FROM realisator r JOIN film f ON f.realisator_id = r.id GROUP BY r.id ORDER BY COUNT(f.id) DESC", "format": "table", "refId": "A" }]
-    }
-
-  ],
   "refresh": "30s",
   "schemaVersion": 38,
   "tags": ["marsai", "festival", "2026"],
   "time": { "from": "now-90d", "to": "now" },
-  "timepicker": {},
   "timezone": "Europe/Paris",
-  "title": "🎬  MarsAI Festival 2026 — Dashboard",
-  "uid": "marsai-festival-v2",
-  "version": 2
+  "title": "🎬  MarsAI Festival 2026 — Dashboard Pro",
+  "uid": "marsai-festival-v3",
+  "version": 3,
+  "panels": [
+
+    {
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "id": 999, "type": "text", "title": "", "transparent": true,
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:linear-gradient(135deg,rgba(78,255,206,0.1) 0%,rgba(167,139,250,0.1) 50%,rgba(255,107,107,0.08) 100%);border-radius:12px;border:1px solid rgba(78,255,206,0.25);height:100%\">\n  <div style=\"display:flex;align-items:center;gap:20px\">\n    <div style=\"width:48px;height:48px;background:linear-gradient(135deg,#4EFFCE,#A78BFA);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px\">🎬</div>\n    <div>\n      <div style=\"font-size:26px;font-weight:900;letter-spacing:-0.03em;color:#fff;line-height:1\">mars<span style=\"color:#4EFFCE\">AI</span> Festival <span style=\"color:#FFD93D\">2026</span></div>\n      <div style=\"font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.12em;text-transform:uppercase;margin-top:4px\">Tableau de bord administrateur — Données en temps réel</div>\n    </div>\n  </div>\n  <div style=\"display:flex;gap:32px\">\n    <div style=\"text-align:center\"><div style=\"font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em\">Actualisation</div><div style=\"color:#4EFFCE;font-weight:700;font-size:14px\">30s</div></div>\n    <div style=\"text-align:center\"><div style=\"font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em\">Fuseau</div><div style=\"color:#FFD93D;font-weight:700;font-size:14px\">Paris</div></div>\n    <div style=\"text-align:center\"><div style=\"font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em\">Version</div><div style=\"color:#A78BFA;font-weight:700;font-size:14px\">v3.0</div></div>\n  </div>\n</div>"
+      }
+    },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 }, "id": 300, "title": "📊  KPI — Chiffres clés du festival", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 0, "y": 5 }, "id": 1, "type": "stat",
+      "title": "🎬 Films déposés", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#4EFFCE" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM film", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 3, "y": 5 }, "id": 2, "type": "stat",
+      "title": "🎥 Réalisateurs", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#FF6B6B" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(DISTINCT realisator_id) AS val FROM film", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 6, "y": 5 }, "id": 3, "type": "stat",
+      "title": "⚖️ Jurés actifs", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#FFD93D" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM jury WHERE role='jury' AND is_active=1", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 9, "y": 5 }, "id": 4, "type": "stat",
+      "title": "🏆 Finalistes", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#F97316" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM film WHERE statut='finaliste'", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 12, "y": 5 }, "id": 5, "type": "stat",
+      "title": "✅ Films validés", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#34D399" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM film WHERE statut IN ('valide','selectionne','finaliste')", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 15, "y": 5 }, "id": 6, "type": "stat",
+      "title": "💬 Messages", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#A78BFA" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT (SELECT COUNT(*) FROM discussion_message) + (SELECT COUNT(*) FROM global_chat_message) AS val", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 18, "y": 5 }, "id": 7, "type": "stat",
+      "title": "🎫 Tickets ouverts", "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 3 }, { "color": "#FF6B6B", "value": 8 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM ticket WHERE status='open'", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 3, "x": 21, "y": 5 }, "id": 8, "type": "stat",
+      "title": "🤝 Collaborateurs", "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#60A5FA" }, "unit": "short", "decimals": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(DISTINCT collaborator_id) AS val FROM collaborator_film", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 }, "id": 301, "title": "🔄  Pipeline des candidatures", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 10, "x": 0, "y": 10 }, "id": 10, "type": "barchart",
+      "title": "Entonnoir — Films par statut",
+      "options": { "barRadius": 0.15, "barWidth": 0.7, "groupWidth": 0.7, "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "orientation": "horizontal", "tooltip": { "mode": "single", "sort": "none" }, "xTickLabelSpacing": 100 },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE statut WHEN 'soumis' THEN '📥 Soumis' WHEN 'to_review' THEN '🔍 À examiner' WHEN 'in_discussion' THEN '💬 En discussion' WHEN 'asked_to_modify' THEN '✏️ Modif demandée' WHEN 'arevoir' THEN '🔄 À revoir' WHEN 'valide' THEN '✅ Validé' WHEN 'selectionne' THEN '⭐ Sélectionné' WHEN 'finaliste' THEN '🏆 Finaliste' WHEN 'refuse' THEN '❌ Refusé' ELSE statut END AS Statut, COUNT(*) AS Films FROM film GROUP BY statut ORDER BY FIELD(statut,'finaliste','selectionne','valide','arevoir','in_discussion','asked_to_modify','to_review','soumis','refuse')", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 7, "x": 10, "y": 10 }, "id": 11, "type": "gauge",
+      "title": "Taux de validation", "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdMarkers": true },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "percent", "min": 0, "max": 100, "decimals": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }, { "color": "#FFD93D", "value": 25 }, { "color": "#34D399", "value": 50 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(COUNT(CASE WHEN statut IN ('valide','selectionne','finaliste') THEN 1 END)*100.0/COUNT(*),1) AS val FROM film", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 7, "x": 17, "y": 10 }, "id": 12, "type": "gauge",
+      "title": "Taux de finalistes", "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdMarkers": true },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "percent", "min": 0, "max": 100, "decimals": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }, { "color": "#FFD93D", "value": 10 }, { "color": "#34D399", "value": 20 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(COUNT(CASE WHEN statut='finaliste' THEN 1 END)*100.0/COUNT(*),1) AS val FROM film", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 7, "x": 10, "y": 14 }, "id": 13, "type": "gauge",
+      "title": "Taux de refus", "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdMarkers": true },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "percent", "min": 0, "max": 100, "decimals": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 20 }, { "color": "#FF6B6B", "value": 40 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(COUNT(CASE WHEN statut='refuse' THEN 1 END)*100.0/COUNT(*),1) AS val FROM film", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 7, "x": 17, "y": 14 }, "id": 14, "type": "stat",
+      "title": "🎞️ Films sans vidéo uploadée", "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "auto" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "short", "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 5 }, { "color": "#FF6B6B", "value": 15 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT COUNT(*) AS val FROM film WHERE video_url IS NULL OR video_url=''", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }, "id": 302, "title": "🤖  Analyse Intelligence Artificielle", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 6, "x": 0, "y": 19 }, "id": 20, "type": "piechart",
+      "title": "Full IA vs Hybride",
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value","percent"] }, "pieType": "donut", "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE ia_class WHEN 'full' THEN '🤖 Full IA' ELSE '🔀 Hybride' END AS Classe, COUNT(*) AS Films FROM film GROUP BY ia_class", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 9, "x": 6, "y": 19 }, "id": 21, "type": "barchart",
+      "title": "Outils IA utilisés dans les films",
+      "options": { "barRadius": 0.15, "barWidth": 0.65, "groupWidth": 0.7, "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "orientation": "horizontal", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#4EFFCE" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT '🖼️ Image IA' AS Outil, SUM(ia_image) AS Films FROM film UNION ALL SELECT '🎵 Son IA', SUM(ia_son) FROM film UNION ALL SELECT '📝 Scénario IA', SUM(ia_scenario) FROM film UNION ALL SELECT '🎬 Post-prod IA', SUM(ia_post) FROM film ORDER BY Films DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 9, "x": 15, "y": 19 }, "id": 22, "type": "stat",
+      "title": "Durée moyenne des films", "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "textMode": "value_and_name", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#A78BFA" }, "unit": "short", "decimals": 1, "displayName": "minutes" } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(AVG(duration)/60.0,1) AS val FROM film WHERE duration IS NOT NULL AND duration>0", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 9, "x": 15, "y": 23 }, "id": 23, "type": "barchart",
+      "title": "Sous-titres disponibles",
+      "options": { "barRadius": 0.2, "barWidth": 0.5, "groupWidth": 0.6, "legend": { "showLegend": false }, "orientation": "auto", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT '🇫🇷 Sous-titres FR' AS Type, COUNT(*) AS Films FROM film WHERE subtitle_fr_url IS NOT NULL AND subtitle_fr_url!='' UNION ALL SELECT '🇬🇧 Sous-titres EN', COUNT(*) FROM film WHERE subtitle_en_url IS NOT NULL AND subtitle_en_url!='' UNION ALL SELECT '❌ Aucun sous-titre', COUNT(*) FROM film WHERE (subtitle_fr_url IS NULL OR subtitle_fr_url='') AND (subtitle_en_url IS NULL OR subtitle_en_url='')", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }, "id": 303, "title": "🌍  Géographie & Profil des réalisateurs", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 9, "w": 9, "x": 0, "y": 28 }, "id": 30, "type": "barchart",
+      "title": "Top 15 pays — Films déposés",
+      "options": { "barRadius": 0.15, "barWidth": 0.65, "groupWidth": 0.7, "legend": { "showLegend": false }, "orientation": "horizontal", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT r.country AS Pays, COUNT(f.id) AS Films FROM film f JOIN realisator r ON r.id=f.realisator_id GROUP BY r.country ORDER BY COUNT(f.id) DESC LIMIT 15", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 5, "w": 7, "x": 9, "y": 28 }, "id": 31, "type": "piechart",
+      "title": "Genre des réalisateurs",
+      "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value","percent"] }, "pieType": "pie", "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE WHEN LOWER(gender) IN ('m','male','homme','h') THEN '👨 Homme' WHEN LOWER(gender) IN ('f','female','femme') THEN '👩 Femme' ELSE '⚧ Autre/ND' END AS Genre, COUNT(*) AS Nombre FROM realisator GROUP BY Genre ORDER BY Nombre DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 5, "w": 8, "x": 16, "y": 28 }, "id": 32, "type": "gauge",
+      "title": "Taux abonnement newsletter",
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdMarkers": true },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "unit": "percent", "min": 0, "max": 100, "decimals": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "#FF6B6B", "value": null }, { "color": "#FFD93D", "value": 30 }, { "color": "#34D399", "value": 60 }] } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT ROUND(SUM(newsletter)*100.0/COUNT(*),1) AS val FROM realisator", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 7, "x": 9, "y": 33 }, "id": 33, "type": "barchart",
+      "title": "Présence sur les réseaux sociaux",
+      "options": { "barRadius": 0.2, "barWidth": 0.6, "groupWidth": 0.6, "legend": { "showLegend": false }, "orientation": "auto", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT '▶️ YouTube' AS Réseau, COUNT(*) AS Réalisateurs FROM realisator WHERE youtube IS NOT NULL AND youtube!='' UNION ALL SELECT '📸 Instagram', COUNT(*) FROM realisator WHERE instagram IS NOT NULL AND instagram!='' UNION ALL SELECT '💼 LinkedIn', COUNT(*) FROM realisator WHERE linkedin IS NOT NULL AND linkedin!='' UNION ALL SELECT '📘 Facebook', COUNT(*) FROM realisator WHERE facebook IS NOT NULL AND facebook!='' UNION ALL SELECT '🐦 X/Twitter', COUNT(*) FROM realisator WHERE xtwitter IS NOT NULL AND xtwitter!='' ORDER BY Réalisateurs DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 4, "w": 8, "x": 16, "y": 33 }, "id": 34, "type": "barchart",
+      "title": "Comment ont-ils découvert le festival ?",
+      "options": { "barRadius": 0.2, "barWidth": 0.6, "groupWidth": 0.6, "legend": { "showLegend": false }, "orientation": "horizontal", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#FFD93D" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT how_did_you_know_us AS Source, COUNT(*) AS Nombre FROM realisator WHERE how_did_you_know_us IS NOT NULL AND how_did_you_know_us!='' GROUP BY how_did_you_know_us ORDER BY COUNT(*) DESC LIMIT 8", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 }, "id": 304, "title": "📈  Activité dans le temps", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 }, "id": 40, "type": "timeseries",
+      "title": "📥 Dépôts de films par jour",
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#4EFFCE" }, "custom": { "fillOpacity": 18, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "spanNulls": true }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT DATE_FORMAT(created_at,'%Y-%m-%d') AS time, COUNT(*) AS `Films déposés` FROM film GROUP BY DATE_FORMAT(created_at,'%Y-%m-%d') ORDER BY time", "format": "time_series", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 }, "id": 41, "type": "timeseries",
+      "title": "💬 Activité des discussions & chat global",
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi" } },
+      "fieldConfig": { "defaults": { "custom": { "fillOpacity": 12, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 4, "showPoints": "auto", "spanNulls": true }, "unit": "short", "min": 0 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Discussions" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#A78BFA" } }] },
+          { "matcher": { "id": "byName", "options": "Chat global" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FFD93D" } }] }
+        ]
+      },
+      "targets": [
+        { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT DATE_FORMAT(sent_at,'%Y-%m-%d') AS time, COUNT(*) AS Discussions FROM discussion_message GROUP BY DATE_FORMAT(sent_at,'%Y-%m-%d') ORDER BY time", "format": "time_series", "refId": "A" },
+        { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT DATE_FORMAT(sent_at,'%Y-%m-%d') AS time, COUNT(*) AS `Chat global` FROM global_chat_message GROUP BY DATE_FORMAT(sent_at,'%Y-%m-%d') ORDER BY time", "format": "time_series", "refId": "B" }
+      ] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 46 }, "id": 305, "title": "⚖️  Jury — Activité & Assignations", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "gridPos": { "h": 10, "w": 13, "x": 0, "y": 47 }, "id": 50, "type": "table",
+      "title": "Tableau du jury — Activité complète",
+      "options": { "cellHeight": "md", "footer": { "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "Films assignés" }] },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Rôle" }, "properties": [{ "id": "custom.width", "value": 110 }, { "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "mappings", "value": [{ "options": { "admin": { "color": "#FF6B6B", "index": 0, "text": "👑 Admin" }, "jury": { "color": "#4EFFCE", "index": 1, "text": "⚖️ Jury" }, "moderateur": { "color": "#A78BFA", "index": 2, "text": "🛡️ Modo" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "Actif" }, "properties": [{ "id": "custom.width", "value": 70 }, { "id": "mappings", "value": [{ "options": { "1": { "color": "#34D399", "index": 0, "text": "✅" }, "0": { "color": "#FF6B6B", "index": 1, "text": "❌" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "Films assignés" }, "properties": [{ "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }, { "id": "custom.width", "value": 160 }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 5 }, { "color": "#FF6B6B", "value": 10 }] } }] },
+          { "matcher": { "id": "byName", "options": "Commentaires" }, "properties": [{ "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }, { "id": "custom.width", "value": 140 }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#34D399", "value": null }, { "color": "#FFD93D", "value": 3 }, { "color": "#4EFFCE", "value": 8 }] } }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(j.first_name,' ',j.last_name) AS Nom, j.role AS Rôle, j.is_active AS Actif, j.email AS Email, COUNT(DISTINCT a.film_id) AS `Films assignés`, COUNT(DISTINCT c.id) AS Commentaires, DATE_FORMAT(j.created_at,'%d/%m/%Y') AS `Inscrit le` FROM jury j LEFT JOIN jury_film_assignment a ON a.jury_id=j.id LEFT JOIN jury_film_comment c ON c.jury_id=j.id GROUP BY j.id ORDER BY COUNT(DISTINCT a.film_id) DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 10, "w": 11, "x": 13, "y": 47 }, "id": 51, "type": "barchart",
+      "title": "Décisions par juré (valide / à revoir / refusé / discussion)",
+      "options": { "barRadius": 0.1, "barWidth": 0.7, "groupWidth": 0.75, "stacking": "normal", "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "orientation": "horizontal", "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": {
+        "defaults": { "custom": { "fillOpacity": 85, "lineWidth": 0 }, "unit": "short", "min": 0 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Validé" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#34D399" } }] },
+          { "matcher": { "id": "byName", "options": "À revoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FFD93D" } }] },
+          { "matcher": { "id": "byName", "options": "Refusé" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF6B6B" } }] },
+          { "matcher": { "id": "byName", "options": "En discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#A78BFA" } }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(j.first_name,' ',j.last_name) AS Juré, COUNT(CASE WHEN jfc.decision='valide' THEN 1 END) AS Validé, COUNT(CASE WHEN jfc.decision='arevoir' THEN 1 END) AS `À revoir`, COUNT(CASE WHEN jfc.decision='refuse' THEN 1 END) AS Refusé, COUNT(CASE WHEN jfc.decision='in_discussion' THEN 1 END) AS `En discussion` FROM jury j LEFT JOIN jury_film_commentary jfc ON jfc.jury_id=j.id WHERE j.role='jury' GROUP BY j.id ORDER BY (COUNT(CASE WHEN jfc.decision='valide' THEN 1 END)+COUNT(CASE WHEN jfc.decision='arevoir' THEN 1 END)+COUNT(CASE WHEN jfc.decision='refuse' THEN 1 END)) DESC", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 57 }, "id": 306, "title": "🗳️  Délibération — Votes & Discussions", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 6, "x": 0, "y": 58 }, "id": 60, "type": "piechart",
+      "title": "Toutes les décisions jury",
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value","percent"] }, "pieType": "donut", "tooltip": { "mode": "multi" } },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "✅ Validé" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#34D399" } }] },
+          { "matcher": { "id": "byName", "options": "🔄 À revoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FFD93D" } }] },
+          { "matcher": { "id": "byName", "options": "❌ Refusé" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF6B6B" } }] },
+          { "matcher": { "id": "byName", "options": "💬 En discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#A78BFA" } }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE decision WHEN 'valide' THEN '✅ Validé' WHEN 'arevoir' THEN '🔄 À revoir' WHEN 'refuse' THEN '❌ Refusé' WHEN 'in_discussion' THEN '💬 En discussion' ELSE decision END AS Décision, COUNT(*) AS Nombre FROM jury_film_commentary WHERE decision IS NOT NULL GROUP BY decision ORDER BY Nombre DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 10, "x": 6, "y": 58 }, "id": 61, "type": "barchart",
+      "title": "Films les plus discutés",
+      "options": { "barRadius": 0.15, "barWidth": 0.65, "groupWidth": 0.7, "legend": { "showLegend": false }, "orientation": "horizontal", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#A78BFA" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT f.original_title AS Film, COUNT(d.id) AS Messages FROM film f INNER JOIN discussion_message d ON d.film_id=f.id GROUP BY f.id ORDER BY COUNT(d.id) DESC LIMIT 10", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 8, "x": 16, "y": 58 }, "id": 62, "type": "table",
+      "title": "Films en délibération active",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "Décisions" }] },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "custom.width", "value": 120 }, { "id": "mappings", "value": [{ "options": { "in_discussion": { "color": "#A78BFA", "index": 0, "text": "💬 Discussion" }, "valide": { "color": "#34D399", "index": 1, "text": "✅ Validé" }, "arevoir": { "color": "#FFD93D", "index": 2, "text": "🔄 À revoir" }, "finaliste": { "color": "#FFD93D", "index": 3, "text": "🏆 Finaliste" }, "selectionne": { "color": "#4EFFCE", "index": 4, "text": "⭐ Sélectionné" } }, "type": "value" }] }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT f.original_title AS Film, f.statut AS Statut, COUNT(DISTINCT jfc.jury_id) AS Décisions, COUNT(DISTINCT d.id) AS Messages FROM film f LEFT JOIN jury_film_commentary jfc ON jfc.film_id=f.id LEFT JOIN discussion_message d ON d.film_id=f.id GROUP BY f.id HAVING COUNT(DISTINCT jfc.jury_id)>0 OR COUNT(DISTINCT d.id)>0 ORDER BY COUNT(DISTINCT jfc.jury_id) DESC LIMIT 12", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 66 }, "id": 307, "title": "🎫  Tickets & Support", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 6, "x": 0, "y": 67 }, "id": 70, "type": "piechart",
+      "title": "Tickets par statut",
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value","percent"] }, "pieType": "donut", "tooltip": { "mode": "single" } },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "🔴 Ouvert" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF6B6B" } }] },
+          { "matcher": { "id": "byName", "options": "🟡 En cours" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FFD93D" } }] },
+          { "matcher": { "id": "byName", "options": "🟢 Résolu" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#34D399" } }] },
+          { "matcher": { "id": "byName", "options": "⚫ Rejeté" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#6B7280" } }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE status WHEN 'open' THEN '🔴 Ouvert' WHEN 'in_progress' THEN '🟡 En cours' WHEN 'resolved' THEN '🟢 Résolu' WHEN 'rejected' THEN '⚫ Rejeté' ELSE status END AS Statut, COUNT(*) AS Nombre FROM ticket GROUP BY status", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 6, "x": 6, "y": 67 }, "id": 71, "type": "piechart",
+      "title": "Tickets par type",
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "values": ["value","percent"] }, "pieType": "pie", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE type WHEN 'content' THEN '📝 Contenu' WHEN 'technical' THEN '⚙️ Technique' WHEN 'rights' THEN '⚖️ Droits' WHEN 'other' THEN '❓ Autre' ELSE type END AS Type, COUNT(*) AS Nombre FROM ticket GROUP BY type ORDER BY Nombre DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 67 }, "id": 72, "type": "table",
+      "title": "Tickets — Vue détaillée avec couleurs",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "Créé le" }] },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "custom.width", "value": 120 }, { "id": "mappings", "value": [{ "options": { "open": { "color": "#FF6B6B", "index": 0, "text": "🔴 Ouvert" }, "in_progress": { "color": "#FFD93D", "index": 1, "text": "🟡 En cours" }, "resolved": { "color": "#34D399", "index": 2, "text": "🟢 Résolu" }, "rejected": { "color": "#6B7280", "index": 3, "text": "⚫ Rejeté" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "Type" }, "properties": [{ "id": "custom.width", "value": 110 }, { "id": "mappings", "value": [{ "options": { "content": { "index": 0, "text": "📝 Contenu" }, "technical": { "index": 1, "text": "⚙️ Technique" }, "rights": { "index": 2, "text": "⚖️ Droits" }, "other": { "index": 3, "text": "❓ Autre" } }, "type": "value" }] }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(j.first_name,' ',j.last_name) AS Juré, f.original_title AS Film, t.type AS Type, t.status AS Statut, LEFT(t.description,45) AS Description, DATE_FORMAT(t.created_at,'%d/%m %H:%i') AS `Créé le` FROM ticket t JOIN jury j ON j.id=t.jury_id JOIN film f ON f.id=t.film_id ORDER BY t.created_at DESC LIMIT 20", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 75 }, "id": 308, "title": "🏆  Programme, Awards & Sponsors", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 7, "x": 0, "y": 76 }, "id": 80, "type": "barchart",
+      "title": "Événements du programme par type",
+      "options": { "barRadius": 0.2, "barWidth": 0.6, "groupWidth": 0.6, "legend": { "showLegend": false }, "orientation": "auto", "tooltip": { "mode": "single" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 0 }, "unit": "short", "min": 0 } },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CASE type WHEN 'opening' THEN '🎉 Ouverture' WHEN 'projection' THEN '🎬 Projection' WHEN 'masterclass' THEN '🎓 Masterclass' WHEN 'pause' THEN '☕ Pause' WHEN 'gala' THEN '✨ Gala' ELSE '📅 Autre' END AS Type, COUNT(*) AS Nombre FROM programme_event GROUP BY type ORDER BY Nombre DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 9, "x": 7, "y": 76 }, "id": 81, "type": "table",
+      "title": "🏅 Awards & Lauréats",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Award" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-text" } }] },
+          { "matcher": { "id": "byName", "options": "Dotation" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FFD93D" } }, { "id": "custom.cellOptions", "value": { "type": "color-text" } }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT a.name AS Award, a.cash_prize AS Dotation, COALESCE(CONCAT(r.first_name,' ',r.last_name),'— À déterminer') AS Lauréat, COALESCE(f.original_title,'—') AS Film FROM award a LEFT JOIN film f ON f.id=a.laureat LEFT JOIN realisator r ON r.id=f.realisator_id ORDER BY a.id", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 8, "w": 8, "x": 16, "y": 76 }, "id": 82, "type": "table",
+      "title": "💼 Sponsors",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Niveau" }, "properties": [{ "id": "custom.width", "value": 120 }, { "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "mappings", "value": [{ "options": { "main": { "color": "#FFD93D", "index": 0, "text": "⭐ Main" }, "premium": { "color": "#F97316", "index": 1, "text": "💎 Premium" }, "lead": { "color": "#4EFFCE", "index": 2, "text": "🥇 Lead" }, "partner": { "color": "#60A5FA", "index": 3, "text": "🤝 Partner" }, "supporter": { "color": "#A78BFA", "index": 4, "text": "💜 Supporter" } }, "type": "value" }] }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT name AS Sponsor, partnership_statut AS Niveau, COALESCE(sponsored_award,'—') AS `Prix sponsorisé` FROM sponsor ORDER BY FIELD(partnership_statut,'main','premium','lead','partner','supporter')", "format": "table", "refId": "A" }] },
+
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 84 }, "id": 309, "title": "📋  Catalogue complet — Films & Réalisateurs", "type": "row" },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 12, "w": 15, "x": 0, "y": 85 }, "id": 90, "type": "table",
+      "title": "Catalogue films — Tous les dépôts",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "Déposé le" }] },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.width", "value": 130 }, { "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "mappings", "value": [{ "options": { "finaliste": { "color": "#FFD93D", "index": 0, "text": "🏆 Finaliste" }, "selectionne": { "color": "#4EFFCE", "index": 1, "text": "⭐ Sélectionné" }, "valide": { "color": "#34D399", "index": 2, "text": "✅ Validé" }, "arevoir": { "color": "#60A5FA", "index": 3, "text": "🔄 À revoir" }, "in_discussion": { "color": "#A78BFA", "index": 4, "text": "💬 Discussion" }, "asked_to_modify": { "color": "#F97316", "index": 5, "text": "✏️ Modif" }, "to_review": { "color": "#6B7280", "index": 6, "text": "🔍 À examiner" }, "soumis": { "color": "#6B7280", "index": 7, "text": "📥 Soumis" }, "refuse": { "color": "#FF6B6B", "index": 8, "text": "❌ Refusé" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "IA" }, "properties": [{ "id": "custom.width", "value": 100 }, { "id": "mappings", "value": [{ "options": { "full": { "color": "#A78BFA", "index": 0, "text": "🤖 Full IA" }, "hybrid": { "color": "#F97316", "index": 1, "text": "🔀 Hybride" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "N° Dossier" }, "properties": [{ "id": "custom.width", "value": 100 }] },
+          { "matcher": { "id": "byName", "options": "Durée (min)" }, "properties": [{ "id": "custom.width", "value": 100 }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT f.dossier_num AS `N° Dossier`, f.original_title AS Titre, CONCAT(r.first_name,' ',r.last_name) AS Réalisateur, r.country AS Pays, f.language AS Langue, f.ia_class AS IA, ROUND(f.duration/60.0,1) AS `Durée (min)`, f.statut AS Statut, DATE_FORMAT(f.created_at,'%d/%m/%Y') AS `Déposé le` FROM film f JOIN realisator r ON r.id=f.realisator_id ORDER BY f.created_at DESC", "format": "table", "refId": "A" }] },
+
+    { "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "gridPos": { "h": 12, "w": 9, "x": 15, "y": 85 }, "id": 91, "type": "table",
+      "title": "Réalisateurs — Engagement & Profil",
+      "options": { "cellHeight": "sm", "footer": { "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "Films" }] },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" } }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Newsletter" }, "properties": [{ "id": "custom.width", "value": 90 }, { "id": "mappings", "value": [{ "options": { "1": { "color": "#34D399", "index": 0, "text": "✅" }, "0": { "color": "#6B7280", "index": 1, "text": "Non" } }, "type": "value" }] }] },
+          { "matcher": { "id": "byName", "options": "Films" }, "properties": [{ "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }, { "id": "custom.width", "value": 100 }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#4EFFCE", "value": null }, { "color": "#FFD93D", "value": 2 }, { "color": "#F97316", "value": 4 }] } }] },
+          { "matcher": { "id": "byName", "options": "Réseaux" }, "properties": [{ "id": "custom.width", "value": 80 }] }
+        ]
+      },
+      "targets": [{ "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" }, "rawSql": "SELECT CONCAT(r.first_name,' ',r.last_name) AS Réalisateur, r.country AS Pays, r.newsletter AS Newsletter, COUNT(f.id) AS Films, (CASE WHEN r.youtube IS NOT NULL AND r.youtube!='' THEN 1 ELSE 0 END + CASE WHEN r.instagram IS NOT NULL AND r.instagram!='' THEN 1 ELSE 0 END + CASE WHEN r.linkedin IS NOT NULL AND r.linkedin!='' THEN 1 ELSE 0 END + CASE WHEN r.facebook IS NOT NULL AND r.facebook!='' THEN 1 ELSE 0 END + CASE WHEN r.xtwitter IS NOT NULL AND r.xtwitter!='' THEN 1 ELSE 0 END) AS Réseaux, DATE_FORMAT(MAX(f.created_at),'%d/%m/%Y') AS `Dernier dépôt` FROM realisator r JOIN film f ON f.realisator_id=r.id GROUP BY r.id ORDER BY COUNT(f.id) DESC", "format": "table", "refId": "A" }] }
+
+  ]
 }
