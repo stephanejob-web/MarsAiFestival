@@ -1,8 +1,18 @@
+import * as Sentry from "@sentry/node";
 import express, { Application } from "express";
 import cors from "cors";
 import path from "path";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+
+Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV ?? "development",
+    // N'envoie les erreurs qu'en production
+    enabled: process.env.NODE_ENV === "production",
+    // Capture les traces de performance (0.1 = 10% des requêtes)
+    tracesSampleRate: 0.1,
+});
 
 const app: Application = express();
 
@@ -63,5 +73,8 @@ app.use("/api/jury-showcase", juryShowcaseRouter);
 app.use("/api/cms", cmsPublicRouter);
 app.use("/api/public", publicRouter);
 app.use("/api/push", pushRouter);
+
+// ── Sentry — gestionnaire d'erreurs (doit être après toutes les routes) ────────
+Sentry.setupExpressErrorHandler(app);
 
 export default app;
