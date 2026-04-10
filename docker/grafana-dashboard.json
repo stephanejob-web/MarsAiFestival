@@ -1,0 +1,548 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_MYSQL",
+      "label": "MySQL",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "mysql",
+      "pluginName": "MySQL"
+    }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "mysql", "name": "MySQL", "version": "1.0.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" },
+    { "type": "panel", "id": "piechart", "name": "Pie chart", "version": "" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "barchart", "name": "Bar chart", "version": "" },
+    { "type": "panel", "id": "table", "name": "Table", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Vue générale",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Films déposés",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(*) AS \"Films déposés\" FROM film",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#FF6B6B" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Réalisateurs",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(DISTINCT realisator_id) AS \"Réalisateurs\" FROM film",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#FFD93D" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Membres du jury",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(*) AS \"Jurés\" FROM jury WHERE role = 'jury' AND is_active = 1",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#A78BFA" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Tickets ouverts",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(*) AS \"Tickets\" FROM ticket WHERE status = 'open'",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#F97316" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Films validés",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(*) AS \"Validés\" FROM film WHERE statut IN ('valide','selectionne','finaliste')",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#34D399" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "title": "Messages de discussion",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT COUNT(*) AS \"Messages\" FROM discussion_message",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "title": "Analyse des films",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+      "id": 10,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
+        "pieType": "donut",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Films par statut",
+      "type": "piechart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT statut AS \"Statut\", COUNT(*) AS \"Nombre\" FROM film GROUP BY statut ORDER BY COUNT(*) DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+      "id": 11,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
+        "pieType": "pie",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Full IA vs Hybride",
+      "type": "piechart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT ia_class AS \"Classe IA\", COUNT(*) AS \"Nombre\" FROM film GROUP BY ia_class",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
+          "custom": { "fillOpacity": 80, "gradientMode": "none", "lineWidth": 1 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "id": 12,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "orientation": "horizontal",
+        "tooltip": { "mode": "single", "sort": "none" },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 200
+      },
+      "title": "Outils IA utilisés",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT 'IA Image' AS outil, SUM(ia_image) AS total FROM film UNION ALL SELECT 'IA Son', SUM(ia_son) FROM film UNION ALL SELECT 'IA Scénario', SUM(ia_scenario) FROM film UNION ALL SELECT 'IA Post-prod', SUM(ia_post) FROM film",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 102,
+      "title": "Candidatures dans le temps",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#4EFFCE" },
+          "custom": { "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "auto" },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 15 },
+      "id": 20,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Dépôts de films par jour",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS time, COUNT(*) AS \"Films déposés\" FROM film GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d') ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 70, "gradientMode": "none", "lineWidth": 1 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 15 },
+      "id": 21,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "orientation": "horizontal",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Films par pays",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT r.country AS \"Pays\", COUNT(f.id) AS \"Films\" FROM film f JOIN realisator r ON r.id = f.realisator_id GROUP BY r.country ORDER BY COUNT(f.id) DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 103,
+      "title": "Activité du jury",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }] }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Films assignés" }, "properties": [{ "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 10 }] } }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Films assignés" }]
+      },
+      "title": "Films assignés par juré",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS \"Juré\", j.email AS \"Email\", COUNT(a.film_id) AS \"Films assignés\" FROM jury j LEFT JOIN jury_film_assignment a ON a.jury_id = j.id WHERE j.role = 'jury' GROUP BY j.id ORDER BY COUNT(a.film_id) DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 80, "gradientMode": "none", "lineWidth": 1 },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "id": 31,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "horizontal",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Messages de discussion par film",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT f.original_title AS \"Film\", COUNT(d.id) AS \"Messages\" FROM film f LEFT JOIN discussion_message d ON d.film_id = f.id GROUP BY f.id HAVING COUNT(d.id) > 0 ORDER BY COUNT(d.id) DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "id": 104,
+      "title": "Tickets & Support",
+      "type": "row"
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 33 },
+      "id": 40,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
+        "pieType": "donut",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Tickets par statut",
+      "type": "piechart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT status AS \"Statut\", COUNT(*) AS \"Nombre\" FROM ticket GROUP BY status",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } } }
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 33 },
+      "id": 41,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
+        "pieType": "donut",
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "title": "Tickets par type",
+      "type": "piechart",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT type AS \"Type\", COUNT(*) AS \"Nombre\" FROM ticket GROUP BY type",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Statut" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "mappings", "value": [{ "options": { "open": { "color": "red", "index": 0, "text": "🔴 open" }, "in_progress": { "color": "yellow", "index": 1, "text": "🟡 en cours" }, "resolved": { "color": "green", "index": 2, "text": "🟢 résolu" }, "rejected": { "color": "blue", "index": 3, "text": "⚪ rejeté" } }, "type": "value" }] }] }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 33 },
+      "id": 42,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Créé le" }]
+      },
+      "title": "Derniers tickets",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_MYSQL}" },
+          "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS \"Juré\", f.original_title AS \"Film\", t.type AS \"Type\", t.status AS \"Statut\", DATE_FORMAT(t.created_at, '%d/%m/%Y') AS \"Créé le\" FROM ticket t JOIN jury j ON j.id = t.jury_id JOIN film f ON f.id = t.film_id ORDER BY t.created_at DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["marsai", "festival"],
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "Europe/Paris",
+  "title": "MarsAI Festival — Dashboard",
+  "uid": "marsai-festival-main",
+  "version": 1
+}
