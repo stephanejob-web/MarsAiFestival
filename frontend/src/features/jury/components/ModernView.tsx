@@ -5,21 +5,15 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronUp,
-    Clapperboard,
     Clock,
-    LayoutList,
     Maximize2,
     Minimize2,
     Send,
-    Settings,
-    User,
     X,
-    Zap,
 } from "lucide-react";
 
 import type { UseJuryPanelReturn } from "../hooks/useJuryPanel";
 import useFilmPlayer from "../hooks/useFilmPlayer";
-import useJuryUser from "../hooks/useJuryUser";
 import type { JuryFilm } from "../types";
 import { FilmCommentsBadge } from "./ModalMyComments";
 
@@ -93,15 +87,11 @@ const FilmThumbnail = ({ film, isActive, onClick }: FilmThumbnailProps): React.J
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type EvalVariant = "classic" | "modern" | "rapide";
-
 interface ModernViewProps {
     panel: UseJuryPanelReturn;
-    onEvalVariantChange: (v: EvalVariant) => void;
 }
 
-const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.Element => {
-    const user = useJuryUser();
+const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
     const carouselRef = useRef<HTMLDivElement>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
     const [isFooterOpen, setIsFooterOpen] = useState<boolean>(true);
@@ -122,6 +112,15 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
         const pending = panel.films.filter((f) => f.myDecision === null);
         return [...decided, ...pending];
     }, [panel.films]);
+
+    useEffect(() => {
+        if (!isWatchingFilm) return;
+        const handleKeyDown = (e: KeyboardEvent): void => {
+            if (e.key === "Escape") setIsWatchingFilm(false);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isWatchingFilm]);
 
     useEffect(() => {
         const container = carouselRef.current;
@@ -193,6 +192,7 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
                     src={activeFilm.videoUrl}
                     muted
                     autoPlay
+                    controls
                     loop
                     playsInline
                     preload="auto"
@@ -219,84 +219,15 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
             `}</style>
             <div className="absolute inset-0 bg-linear-to-b from-slate-900/70 via-slate-900/60 to-slate-900/90 z-1" />
 
-            {/* Header */}
-            <header className="relative z-10 flex items-center justify-between px-6 py-4 shrink-0">
-                <div className="flex items-center gap-3 cursor-pointer group">
-                    {user?.profilPicture ? (
-                        <img
-                            src={user.profilPicture}
-                            alt={user.fullName}
-                            className="w-10 h-10 rounded-full border border-slate-600 object-cover"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full border border-slate-600 bg-slate-700 flex items-center justify-center text-sm font-semibold text-slate-200">
-                            {user?.initials ?? "?"}
-                        </div>
-                    )}
-                    <div>
-                        <div className="flex items-center gap-1">
-                            <span className="font-medium text-sm text-slate-200">
-                                {user?.fullName ?? "Jury"}
-                            </span>
-                            <ChevronDown
-                                size={14}
-                                className="text-slate-400 group-hover:text-white transition-colors"
-                            />
-                        </div>
-                        <span className="text-xs text-slate-400">
-                            {user?.roleLabel ?? "Membre du Jury"}
-                        </span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 rounded-xl border border-white/8 bg-black/30 backdrop-blur-sm p-1">
-                        <button
-                            type="button"
-                            onClick={() => onEvalVariantChange("classic")}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200"
-                        >
-                            <LayoutList size={12} />
-                            Liste
-                        </button>
-                        <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold bg-aurora/20 text-aurora shadow-[0_1px_12px_rgba(100,220,200,0.25)]">
-                            <Clapperboard size={12} />
-                            Cinéma
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => onEvalVariantChange("rapide")}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[0.72rem] font-semibold text-slate-400 hover:text-amber-400/70 transition-all duration-200"
-                        >
-                            <Zap size={12} />
-                            Rapide
-                        </button>
-                    </div>
-                    <button
-                        type="button"
-                        aria-label="Compte utilisateur"
-                        className="p-2 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 transition-colors"
-                    >
-                        <User size={18} className="text-slate-300" />
-                    </button>
-                    <button
-                        type="button"
-                        aria-label="Paramètres"
-                        className="p-2 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 transition-colors"
-                    >
-                        <Settings size={18} className="text-slate-300" />
-                    </button>
-                </div>
-            </header>
-
             {/* Fullscreen film player */}
             {isWatchingFilm && (
-                <div className="absolute inset-0 z-30 bg-black flex items-center justify-center">
+                <div className="absolute inset-0 z-30 bg-black">
                     {/* Bouton fermer */}
                     <button
                         type="button"
                         onClick={() => setIsWatchingFilm(false)}
                         aria-label="Quitter le plein écran"
-                        className="absolute top-4 right-4 z-40 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 text-white/70 hover:text-white text-xs font-medium transition-all"
+                        className="absolute top-18 right-10 z-40 flex items-center gap-1 rounded bg-black/50 px-3 py-1 text-sm text-white"
                     >
                         <Minimize2 size={13} />
                         Quitter
@@ -308,7 +239,7 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
                         autoPlay
                         controls
                         preload="auto"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
                         onPlay={handlePlay}
                         onPause={handlePause}
                         onEnded={() => {
