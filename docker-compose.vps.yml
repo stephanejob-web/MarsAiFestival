@@ -60,7 +60,8 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=marsai_grafana_2026
-      - GF_SERVER_ROOT_URL=https://grafana.marsai.lightchurch.fr
+      - GF_SERVER_ROOT_URL=https://marsai.lightchurch.fr/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - grafana_data:/var/lib/grafana
     depends_on:
@@ -72,7 +73,7 @@ services:
       - traefik-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.marsai.lightchurch.fr`)"
+      - "traefik.http.routers.grafana.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/grafana`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
