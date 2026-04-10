@@ -9,7 +9,7 @@ services:
       - BACKEND_URL=http://backend:5500
       - VITE_NO_SSL=true
       - VITE_GOOGLE_CLIENT_ID=772416103398-dld2t8lk6amda0ohsansm31udg3oc9ia.apps.googleusercontent.com
-      - VITE_SENTRY_DSN=https://4e1253d1fe8ab2be06efe463385cdb6b@o4511194873004032.ingest.de.sentry.io/4511194876411984
+      - VITE_SENTRY_DSN=https://1cf10a6a88a99ea0607119187173586d@o4511194873004032.ingest.de.sentry.io/4511194883883088
     depends_on:
       backend:
         condition: service_started
