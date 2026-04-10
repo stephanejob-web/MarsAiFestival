@@ -28,7 +28,12 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
 
     await pool.execute(
         "UPDATE jury SET push_token = ?, device_name = ?, device_os = ? WHERE id = ?",
-        [token, deviceName ?? null, deviceOs ?? null, juryId],
+        [
+            token,
+            deviceName ? deviceName.slice(0, 100) : null,
+            deviceOs ? deviceOs.slice(0, 100) : null,
+            juryId,
+        ],
     );
 
     res.json({ success: true });
