@@ -124,6 +124,15 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
     }, [panel.films]);
 
     useEffect(() => {
+        if (!isWatchingFilm) return;
+        const handleKeyDown = (e: KeyboardEvent): void => {
+            if (e.key === "Escape") setIsWatchingFilm(false);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isWatchingFilm]);
+
+    useEffect(() => {
         const container = carouselRef.current;
         if (!container) return;
         const activeIndex = sortedFilms.findIndex((f) => f.id === panel.activeFilmId);
@@ -193,6 +202,7 @@ const ModernView = ({ panel, onEvalVariantChange }: ModernViewProps): React.JSX.
                     src={activeFilm.videoUrl}
                     muted
                     autoPlay
+                    controls
                     loop
                     playsInline
                     preload="auto"
