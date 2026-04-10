@@ -1,5 +1,5 @@
 import React from "react";
-import { Clapperboard, LayoutList, Settings, User, Zap } from "lucide-react";
+import { Clapperboard, LayoutList, Zap } from "lucide-react";
 
 type EvalVariant = "classic" | "modern" | "rapide";
 
