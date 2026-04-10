@@ -55,6 +55,28 @@ services:
       - "traefik.http.routers.marsai-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.marsai-api.loadbalancer.server.port=5500"
 
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=marsai_grafana_2026
+      - GF_SERVER_ROOT_URL=https://grafana.marsai.lightchurch.fr
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.marsai.lightchurch.fr`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
   mysql:
     image: mysql:8.0
     environment:
@@ -83,3 +105,4 @@ volumes:
   caddy_data:
   caddy_config:
   backend_uploads:
+  grafana_data:
