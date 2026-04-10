@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { MessageSquare, LogOut, ChevronDown, ChevronUp, Send, ExternalLink, Bug } from "lucide-react";
+import {
+    MessageSquare,
+    LogOut,
+    ChevronDown,
+    ChevronUp,
+    Send,
+    ExternalLink,
+    Bug,
+} from "lucide-react";
 import * as Sentry from "@sentry/react";
 import { ADMIN_NAV_LINKS, ADMIN_LABELS } from "../constants";
 import type { AdminNavCategory, AdminNavItem } from "../types";
@@ -325,7 +333,11 @@ const AdminSidePanel = ({ onClose }: { onClose?: () => void }): React.JSX.Elemen
                 <div className="border-t border-white/[0.05] px-3 pt-3 pb-1">
                     <button
                         type="button"
-                        onClick={() => Sentry.captureException(new Error("Test Sentry — déclenché depuis le panel admin"))}
+                        onClick={() =>
+                            Sentry.captureException(
+                                new Error("Test Sentry — déclenché depuis le panel admin"),
+                            )
+                        }
                         className="flex w-full items-center rounded-lg px-3 py-2 text-left text-[0.82rem] text-mist/60 transition-all hover:bg-white/[0.04] hover:text-mist"
                     >
                         <Bug size={14} className="mr-2" /> Tester Sentry
