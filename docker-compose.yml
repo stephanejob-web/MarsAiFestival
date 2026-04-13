@@ -86,7 +86,24 @@ services:
       timeout: 5s
       retries: 10
 
+  # ───────────────────────────────────────────
+  # Grafana — dashboard monitoring
+  # ───────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=marsai_grafana_2026
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      mysql:
+        condition: service_healthy
+
 volumes:
   mysql_data:
   backend_node_modules:
   frontend_node_modules:
+  grafana_data:
