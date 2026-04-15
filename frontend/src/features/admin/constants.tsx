@@ -1,4 +1,16 @@
-import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug, Mail, Bell, Server, BarChart2 } from "lucide-react";
+import {
+    Users,
+    Film,
+    Trophy,
+    Tag,
+    Globe,
+    BookOpen,
+    Plug,
+    Mail,
+    Bell,
+    Server,
+    BarChart2,
+} from "lucide-react";
 import type { AdminNavCategory } from "./types";
 
 export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
