@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
     LiveKitRoom,
     RoomAudioRenderer,
@@ -416,19 +417,22 @@ export const VocalJoinButton = ({
             </button>
             {error && <p className="px-2.5 text-[0.65rem] text-coral">{error}</p>}
 
-            {isJoined && token && (
-                <LiveKitRoom
-                    token={token}
-                    serverUrl={LIVEKIT_URL}
-                    connect={true}
-                    audio={true}
-                    video={true}
-                    onDisconnected={handleLeave}
-                >
-                    <RoomAudioRenderer />
-                    <FloatingPanel onLeave={handleLeave} />
-                </LiveKitRoom>
-            )}
+            {isJoined &&
+                token &&
+                createPortal(
+                    <LiveKitRoom
+                        token={token}
+                        serverUrl={LIVEKIT_URL}
+                        connect={true}
+                        audio={true}
+                        video={true}
+                        onDisconnected={handleLeave}
+                    >
+                        <RoomAudioRenderer />
+                        <FloatingPanel onLeave={handleLeave} />
+                    </LiveKitRoom>,
+                    document.body,
+                )}
         </>
     );
 };
