@@ -80,9 +80,7 @@ function ServiceCard({ icon, title, url, urlLabel, credentials, note }: ServiceC
                 </div>
             )}
 
-            {note && (
-                <p className="mt-3 text-[0.78rem] text-mist/50 italic">{note}</p>
-            )}
+            {note && <p className="mt-3 text-[0.78rem] text-mist/50 italic">{note}</p>}
         </div>
     );
 }
