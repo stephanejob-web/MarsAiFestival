@@ -5,8 +5,8 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
     {
         category: "Gestion",
         items: [
-            { label: "Utilisateurs", to: "/admin", icon: <Users size={15} />, count: 6 },
-            { label: "Assignation films", to: "/admin/films", icon: <Film size={15} />, count: 50 },
+            { label: "Utilisateurs", to: "/admin", icon: <Users size={15} /> },
+            { label: "Assignation films", to: "/admin/films", icon: <Film size={15} /> },
         ],
     },
     {
