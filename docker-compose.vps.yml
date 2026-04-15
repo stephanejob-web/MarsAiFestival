@@ -85,9 +85,7 @@ services:
       - "traefik.http.routers.minio-console.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/bucket`)"
       - "traefik.http.routers.minio-console.entrypoints=websecure"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.minio-console.middlewares=minio-strip"
       - "traefik.http.routers.minio-console.service=minio-console-svc"
-      - "traefik.http.middlewares.minio-strip.stripprefix.prefixes=/bucket"
       - "traefik.http.services.minio-console-svc.loadbalancer.server.port=9001"
 
   # Crée le bucket "marsai" au premier démarrage
