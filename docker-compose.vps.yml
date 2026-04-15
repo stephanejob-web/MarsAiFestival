@@ -44,6 +44,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - marsai-network
@@ -54,6 +56,58 @@ services:
       - "traefik.http.routers.marsai-api.entrypoints=websecure"
       - "traefik.http.routers.marsai-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.marsai-api.loadbalancer.server.port=5500"
+
+  # ───────────────────────────────────────────
+  # MinIO — stockage objet S3-compatible (remplace Scaleway)
+  # Console : https://minio-console.marsai.lightchurch.fr
+  # API S3  : https://minio.marsai.lightchurch.fr
+  # ───────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - marsai-network
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      # API S3 (port 9000)
+      - "traefik.http.routers.minio-api.rule=Host(`minio.marsai.lightchurch.fr`)"
+      - "traefik.http.routers.minio-api.entrypoints=websecure"
+      - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-api.service=minio-api-svc"
+      - "traefik.http.services.minio-api-svc.loadbalancer.server.port=9000"
+      # Console (port 9001)
+      - "traefik.http.routers.minio-console.rule=Host(`minio-console.marsai.lightchurch.fr`)"
+      - "traefik.http.routers.minio-console.entrypoints=websecure"
+      - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-console.service=minio-console-svc"
+      - "traefik.http.services.minio-console-svc.loadbalancer.server.port=9001"
+
+  # Crée le bucket "marsai" au premier démarrage
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - marsai-network
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/marsai &&
+      mc anonymous set download local/marsai
+      "
 
   grafana:
     image: grafana/grafana:latest
@@ -103,6 +157,7 @@ networks:
 
 volumes:
   mysql_data:
+  minio_data:
   caddy_data:
   caddy_config:
   backend_uploads:

@@ -54,16 +54,54 @@ services:
       - DB_NAME=marsai
       - DB_USER=root
       - DB_PASSWORD=marsai_dev_2026
-      - SCALEWAY_ACCESS_KEY=SCW3MFQBR803FXZS4N33
-      - SCALEWAY_SECRET_KEY=c64db8bf-f541-478d-aa6a-cbcb8c7be2ae
-      - SCALEWAY_ENDPOINT=https://s3.fr-par.scw.cloud
-      - SCALEWAY_BUCKET_NAME=tln
-      - SCALEWAY_REGION=fr-par
-      - SCALEWAY_FOLDER=grp1
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_PUBLIC_URL=http://localhost:9100
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=marsai
+      - MINIO_REGION=us-east-1
+      - MINIO_FOLDER=grp1
       - JWT_SECRET=mars-ai-dev-secret-2026
     depends_on:
       mysql:
         condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  # ───────────────────────────────────────────
+  # MinIO — stockage objet S3-compatible (remplace Scaleway)
+  # Console : http://localhost:9001  (admin / minioadmin)
+  # API S3  : http://localhost:9000
+  # ───────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Crée le bucket "marsai" au premier démarrage
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/marsai &&
+      mc anonymous set download local/marsai
+      "
 
   # ───────────────────────────────────────────
   # MySQL 8 — chargement automatique de marsai_backup.sql
@@ -104,6 +142,7 @@ services:
 
 volumes:
   mysql_data:
+  minio_data:
   backend_node_modules:
   frontend_node_modules:
   grafana_data:
