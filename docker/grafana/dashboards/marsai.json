@@ -1,235 +1,205 @@
 {
   "uid": "marsai-festival",
   "title": "MarsAI Festival — Vue d'ensemble",
-  "description": "Dashboard de suivi de la plateforme MarsAI Festival",
+  "description": "Dashboard professionnel de suivi de la plateforme MarsAI Festival",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": { "from": "now-90d", "to": "now" },
-  "timepicker": { "refresh_intervals": ["10s", "30s", "1m", "5m"] },
+  "timepicker": { "refresh_intervals": ["10s", "30s", "1m", "5m", "15m"] },
   "tags": ["marsai", "festival"],
   "style": "dark",
   "graphTooltip": 1,
   "panels": [
+
+    { "id": 1, "type": "row", "title": "🎬  Vue d'ensemble", "collapsed": false, "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 } },
+
     {
-      "id": 1,
-      "type": "row",
-      "title": "Indicateurs clés",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 }
+      "id": 2, "type": "stat", "title": "Films soumis",
+      "gridPos": { "x": 0, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-blue" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-blue", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM film", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 2,
-      "type": "stat",
-      "title": "Films soumis",
-      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 4 },
+      "id": 3, "type": "stat", "title": "Films validés",
+      "gridPos": { "x": 3, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-green" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM film WHERE statut = 'valide'", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 4, "type": "stat", "title": "Sélectionnés & Finalistes",
+      "gridPos": { "x": 6, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-yellow" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-yellow", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM film WHERE statut IN ('selectionne','finaliste')", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 5, "type": "stat", "title": "Films refusés",
+      "gridPos": { "x": 9, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-red" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-red", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM film WHERE statut = 'refuse'", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 6, "type": "stat", "title": "Réalisateurs inscrits",
+      "gridPos": { "x": 12, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-purple" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-purple", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM realisator", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 7, "type": "stat", "title": "Membres jury actifs",
+      "gridPos": { "x": 15, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-orange" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-orange", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM jury WHERE is_active = 1 AND is_banned = 0", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 8, "type": "stat", "title": "Évaluations jury",
+      "gridPos": { "x": 18, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-aqua" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-aqua", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM jury_film_commentary", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 9, "type": "stat", "title": "Pays représentés",
+      "gridPos": { "x": 21, "y": 1, "w": 3, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "textMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-blue" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-blue", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(DISTINCT r.country) AS value FROM realisator r INNER JOIN film f ON f.realisator_id = r.id", "format": "table", "refId": "A" }]
+    },
+
+    { "id": 10, "type": "row", "title": "📊  Progression du festival", "collapsed": false, "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 } },
+
+    {
+      "id": 11, "type": "gauge", "title": "Taux de validation",
+      "description": "% de films ayant reçu le statut 'validé'",
+      "gridPos": { "x": 0, "y": 6, "w": 8, "h": 7 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizWidth": 75,
+        "minVizHeight": 75,
+        "orientation": "auto"
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "blue" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+          "min": 0, "max": 100, "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 20 },
+            { "color": "green", "value": 50 }
+          ]},
+          "mappings": []
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM film",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT ROUND(SUM(CASE WHEN statut = 'valide' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 1) AS value FROM film", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 3,
-      "type": "stat",
-      "title": "Films validés",
-      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
+      "id": 12, "type": "gauge", "title": "Films évalués",
+      "description": "% de films ayant reçu au moins une évaluation jury",
+      "gridPos": { "x": 8, "y": 6, "w": 8, "h": 7 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizWidth": 75,
+        "minVizHeight": 75
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "green" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "min": 0, "max": 100, "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 25 },
+            { "color": "blue", "value": 60 }
+          ]}
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM film WHERE statut = 'valide'",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT ROUND((SELECT COUNT(DISTINCT film_id) FROM jury_film_commentary) * 100.0 / NULLIF((SELECT COUNT(*) FROM film), 0), 1) AS value", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 4,
-      "type": "stat",
-      "title": "Sélectionnés / Finalistes",
-      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 4 },
+      "id": 13, "type": "gauge", "title": "Films 100% IA",
+      "description": "% de films de classe 'full IA' vs hybrides",
+      "gridPos": { "x": 16, "y": 6, "w": 8, "h": 7 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizWidth": 75,
+        "minVizHeight": 75
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "gold" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "gold", "value": null }] }
+          "min": 0, "max": 100, "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "blue", "value": null },
+            { "color": "purple", "value": 40 },
+            { "color": "semi-dark-purple", "value": 70 }
+          ]}
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM film WHERE statut IN ('selectionne', 'finaliste')",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT ROUND(SUM(CASE WHEN ia_class = 'full' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 1) AS value FROM film", "format": "table", "refId": "A" }]
     },
+
+    { "id": 14, "type": "row", "title": "🎭  Répartition des films", "collapsed": false, "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 } },
+
     {
-      "id": 5,
-      "type": "stat",
-      "title": "Réalisateurs inscrits",
-      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 4 },
-      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "purple" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] }
-        }
-      },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM realisator",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "type": "stat",
-      "title": "Membres du jury",
-      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 4 },
-      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "orange" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] }
-        }
-      },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM jury WHERE role = 'jury' AND is_active = 1",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "type": "stat",
-      "title": "Évaluations jury",
-      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
-      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "textMode": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "teal" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "teal", "value": null }] }
-        }
-      },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM jury_film_commentary",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 8,
-      "type": "row",
-      "title": "Répartition des films",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 }
-    },
-    {
-      "id": 9,
-      "type": "piechart",
-      "title": "Films par statut",
-      "gridPos": { "x": 0, "y": 6, "w": 8, "h": 9 },
+      "id": 15, "type": "piechart", "title": "Statut des films",
+      "gridPos": { "x": 0, "y": 14, "w": 8, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "pieType": "donut",
-        "displayLabels": ["percent"],
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] },
+        "tooltip": { "mode": "single" }
       },
       "fieldConfig": {
         "defaults": {},
         "overrides": [
-          { "matcher": { "id": "byName", "options": "valide" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
-          { "matcher": { "id": "byName", "options": "refuse" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
-          { "matcher": { "id": "byName", "options": "to_review" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
-          { "matcher": { "id": "byName", "options": "arevoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
-          { "matcher": { "id": "byName", "options": "in_discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }] },
-          { "matcher": { "id": "byName", "options": "selectionne" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "gold" } }] },
-          { "matcher": { "id": "byName", "options": "finaliste" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }] }
+          { "matcher": { "id": "byName", "options": "to_review" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5794F2" } }, { "id": "displayName", "value": "À relire" }] },
+          { "matcher": { "id": "byName", "options": "valide" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#73BF69" } }, { "id": "displayName", "value": "Validé" }] },
+          { "matcher": { "id": "byName", "options": "arevoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF9830" } }, { "id": "displayName", "value": "À revoir" }] },
+          { "matcher": { "id": "byName", "options": "refuse" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#F2495C" } }, { "id": "displayName", "value": "Refusé" }] },
+          { "matcher": { "id": "byName", "options": "in_discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#B877D9" } }, { "id": "displayName", "value": "En discussion" }] },
+          { "matcher": { "id": "byName", "options": "selectionne" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FADE2A" } }, { "id": "displayName", "value": "Sélectionné" }] },
+          { "matcher": { "id": "byName", "options": "finaliste" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF780A" } }, { "id": "displayName", "value": "Finaliste" }] },
+          { "matcher": { "id": "byName", "options": "asked_to_modify" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#8AB8FF" } }, { "id": "displayName", "value": "Modification demandée" }] },
+          { "matcher": { "id": "byName", "options": "soumis" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#96D98D" } }, { "id": "displayName", "value": "Soumis" }] }
         ]
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT statut AS metric, COUNT(*) AS value FROM film GROUP BY statut ORDER BY value DESC",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT statut AS metric, COUNT(*) AS value FROM film GROUP BY statut ORDER BY value DESC", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 10,
-      "type": "piechart",
-      "title": "Classe IA",
-      "gridPos": { "x": 8, "y": 6, "w": 8, "h": 9 },
+      "id": 16, "type": "piechart", "title": "Classe IA",
+      "gridPos": { "x": 8, "y": 14, "w": 8, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "pieType": "donut",
@@ -239,98 +209,149 @@
       "fieldConfig": {
         "defaults": {},
         "overrides": [
-          { "matcher": { "id": "byName", "options": "full" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
-          { "matcher": { "id": "byName", "options": "hybrid" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }] }
+          { "matcher": { "id": "byName", "options": "full" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5794F2" } }, { "id": "displayName", "value": "100% IA" }] },
+          { "matcher": { "id": "byName", "options": "hybrid" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#B877D9" } }, { "id": "displayName", "value": "IA + Humain" }] }
         ]
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT ia_class AS metric, COUNT(*) AS value FROM film GROUP BY ia_class",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT ia_class AS metric, COUNT(*) AS value FROM film GROUP BY ia_class", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 11,
-      "type": "barchart",
-      "title": "Top 10 pays",
-      "gridPos": { "x": 16, "y": 6, "w": 8, "h": 9 },
+      "id": 17, "type": "barchart", "title": "Usage des outils IA",
+      "description": "Nombre de films utilisant chaque outil IA",
+      "gridPos": { "x": 16, "y": 14, "w": 8, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "orientation": "horizontal",
         "xTickLabelRotation": 0,
         "legend": { "displayMode": "hidden" },
-        "tooltip": { "mode": "single" }
+        "tooltip": { "mode": "single" },
+        "xField": "Outil"
       },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 80 }
+          "custom": { "fillOpacity": 90, "gradientMode": "hue", "lineWidth": 0 }
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT r.country AS country, COUNT(f.id) AS films FROM film f JOIN realisator r ON f.realisator_id = r.id GROUP BY r.country ORDER BY films DESC LIMIT 10",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT 'Génération image' AS Outil, SUM(ia_image) AS Films FROM film UNION ALL SELECT 'Génération son', SUM(ia_son) FROM film UNION ALL SELECT 'Écriture scénario', SUM(ia_scenario) FROM film UNION ALL SELECT 'Post-production', SUM(ia_post) FROM film ORDER BY Films DESC", "format": "table", "refId": "A" }]
     },
+
+    { "id": 18, "type": "row", "title": "🌍  Géographie & Langues", "collapsed": false, "gridPos": { "x": 0, "y": 24, "w": 24, "h": 1 } },
+
     {
-      "id": 12,
-      "type": "row",
-      "title": "Évolution dans le temps",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 1 }
-    },
-    {
-      "id": 13,
-      "type": "timeseries",
-      "title": "Soumissions de films par jour",
-      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "id": 19, "type": "barchart", "title": "Top 20 pays — Films soumis",
+      "gridPos": { "x": 0, "y": 25, "w": 16, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
-        "tooltip": { "mode": "multi", "sort": "none" },
+        "orientation": "horizontal",
+        "xTickLabelRotation": 0,
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "fillOpacity": 80,
+        "gradientMode": "opacity",
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" },
+        "xField": "Pays"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#5794F2" },
+          "custom": { "fillOpacity": 80, "gradientMode": "opacity" }
+        }
+      },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT r.country AS Pays, COUNT(f.id) AS Films FROM film f INNER JOIN realisator r ON f.realisator_id = r.id GROUP BY r.country ORDER BY Films DESC LIMIT 20", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 20, "type": "piechart", "title": "Langues des films",
+      "gridPos": { "x": 16, "y": 25, "w": 8, "h": 10 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": {
+        "pieType": "donut",
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT language AS metric, COUNT(*) AS value FROM film GROUP BY language ORDER BY value DESC LIMIT 10", "format": "table", "refId": "A" }]
+    },
+
+    { "id": 21, "type": "row", "title": "📈  Activité temporelle", "collapsed": false, "gridPos": { "x": 0, "y": 35, "w": 24, "h": 1 } },
+
+    {
+      "id": 22, "type": "timeseries", "title": "Soumissions de films par jour",
+      "gridPos": { "x": 0, "y": 36, "w": 12, "h": 8 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
         "legend": { "displayMode": "list", "placement": "bottom" }
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": { "mode": "fixed", "fixedColor": "#5794F2" },
           "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 15,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "spanNulls": false
+            "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity",
+            "showPoints": "auto", "spanNulls": false, "pointSize": 5
           },
           "unit": "short"
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT UNIX_TIMESTAMP(DATE(created_at)) * 1000 AS time_sec, COUNT(*) AS Films FROM film WHERE $__timeFilter(created_at) GROUP BY DATE(created_at) ORDER BY time_sec",
-          "format": "time_series",
-          "refId": "A",
-          "timeColumns": ["time_sec"]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT created_at AS time, COUNT(*) AS Films FROM film WHERE $__timeFilter(created_at) GROUP BY DATE(created_at) ORDER BY created_at", "format": "time_series", "refId": "A" }]
+    },
+
+    {
+      "id": 23, "type": "timeseries", "title": "Évaluations jury par jour",
+      "gridPos": { "x": 12, "y": 36, "w": 12, "h": 8 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#73BF69" },
+          "custom": {
+            "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity",
+            "showPoints": "auto", "spanNulls": false, "pointSize": 5
+          },
+          "unit": "short"
         }
+      },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT created_at AS time, COUNT(*) AS Évaluations FROM jury_film_commentary WHERE $__timeFilter(created_at) GROUP BY DATE(created_at) ORDER BY created_at", "format": "time_series", "refId": "A" }]
+    },
+
+    {
+      "id": 24, "type": "timeseries", "title": "Inscriptions réalisateurs & messages jury",
+      "gridPos": { "x": 0, "y": 44, "w": 24, "h": 8 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2, "fillOpacity": 10, "gradientMode": "opacity",
+            "showPoints": "auto", "spanNulls": false
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Réalisateurs" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#B877D9" } }] },
+          { "matcher": { "id": "byName", "options": "Messages" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF9830" } }] }
+        ]
+      },
+      "targets": [
+        { "rawQuery": true, "rawSql": "SELECT created_at AS time, COUNT(*) AS Réalisateurs FROM realisator WHERE $__timeFilter(created_at) GROUP BY DATE(created_at) ORDER BY created_at", "format": "time_series", "refId": "A" },
+        { "rawQuery": true, "rawSql": "SELECT sent_at AS time, COUNT(*) AS Messages FROM global_chat_message WHERE $__timeFilter(sent_at) GROUP BY DATE(sent_at) ORDER BY sent_at", "format": "time_series", "refId": "B" }
       ]
     },
+
+    { "id": 25, "type": "row", "title": "⚖️  Jury — Activité & Décisions", "collapsed": false, "gridPos": { "x": 0, "y": 52, "w": 24, "h": 1 } },
+
     {
-      "id": 14,
-      "type": "row",
-      "title": "Activité du jury",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 1 }
-    },
-    {
-      "id": 15,
-      "type": "bargauge",
-      "title": "Évaluations par juré",
-      "gridPos": { "x": 0, "y": 25, "w": 12, "h": 8 },
+      "id": 26, "type": "bargauge", "title": "Évaluations par juré",
+      "gridPos": { "x": 0, "y": 53, "w": 14, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "orientation": "horizontal",
@@ -339,132 +360,121 @@
         "reduceOptions": { "calcs": ["lastNotNull"] },
         "showUnfilled": true,
         "minVizWidth": 10,
-        "minVizHeight": 10
+        "minVizHeight": 10,
+        "namePlacement": "auto",
+        "text": {}
       },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "blue", "value": null },
-              { "color": "green", "value": 10 },
-              { "color": "gold", "value": 30 }
-            ]
-          },
-          "unit": "short"
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "#5794F2", "value": null },
+            { "color": "#73BF69", "value": 10 },
+            { "color": "#FADE2A", "value": 25 },
+            { "color": "#FF9830", "value": 50 }
+          ]},
+          "unit": "short", "min": 0
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS Juré, COUNT(jfc.id) AS Évaluations FROM jury j LEFT JOIN jury_film_commentary jfc ON j.id = jfc.jury_id WHERE j.role IN ('jury', 'moderateur') GROUP BY j.id ORDER BY Évaluations DESC",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS Juré, COUNT(jfc.id) AS Évaluations FROM jury j LEFT JOIN jury_film_commentary jfc ON j.id = jfc.jury_id WHERE j.is_active = 1 GROUP BY j.id, j.first_name, j.last_name ORDER BY Évaluations DESC", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 16,
-      "type": "piechart",
-      "title": "Décisions du jury",
-      "gridPos": { "x": 12, "y": 25, "w": 8, "h": 8 },
+      "id": 27, "type": "piechart", "title": "Décisions du jury",
+      "gridPos": { "x": 14, "y": 53, "w": 10, "h": 10 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "pieType": "donut",
-        "displayLabels": ["percent"],
+        "displayLabels": ["name", "percent"],
         "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
       },
       "fieldConfig": {
         "defaults": {},
         "overrides": [
-          { "matcher": { "id": "byName", "options": "valide" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
-          { "matcher": { "id": "byName", "options": "refuse" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] },
-          { "matcher": { "id": "byName", "options": "arevoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
-          { "matcher": { "id": "byName", "options": "in_discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }] }
+          { "matcher": { "id": "byName", "options": "valide" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#73BF69" } }, { "id": "displayName", "value": "Validé" }] },
+          { "matcher": { "id": "byName", "options": "refuse" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#F2495C" } }, { "id": "displayName", "value": "Refusé" }] },
+          { "matcher": { "id": "byName", "options": "arevoir" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF9830" } }, { "id": "displayName", "value": "À revoir" }] },
+          { "matcher": { "id": "byName", "options": "in_discussion" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#B877D9" } }, { "id": "displayName", "value": "En discussion" }] }
         ]
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT decision AS metric, COUNT(*) AS value FROM jury_film_commentary WHERE decision IS NOT NULL GROUP BY decision ORDER BY value DESC",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT decision AS metric, COUNT(*) AS value FROM jury_film_commentary WHERE decision IS NOT NULL GROUP BY decision ORDER BY value DESC", "format": "table", "refId": "A" }]
     },
+
+    { "id": 28, "type": "row", "title": "💬  Communication & Support", "collapsed": false, "gridPos": { "x": 0, "y": 63, "w": 24, "h": 1 } },
+
     {
-      "id": 17,
-      "type": "stat",
-      "title": "Messages chat global",
-      "gridPos": { "x": 20, "y": 25, "w": 4, "h": 4 },
+      "id": 29, "type": "stat", "title": "Messages chat global",
+      "gridPos": { "x": 0, "y": 64, "w": 4, "h": 4 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
-      },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-aqua" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-aqua", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM global_chat_message", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 30, "type": "stat", "title": "Messages discussions films",
+      "gridPos": { "x": 4, "y": 64, "w": 4, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-blue" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-blue", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM discussion_message", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 31, "type": "stat", "title": "Abonnés newsletter",
+      "gridPos": { "x": 8, "y": 64, "w": 4, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "semi-dark-green" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }] } } },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM realisator WHERE newsletter = 1", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 32, "type": "stat", "title": "Tickets ouverts",
+      "gridPos": { "x": 12, "y": 64, "w": 4, "h": 4 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "teal" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "teal", "value": null }] }
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 3 },
+            { "color": "red", "value": 8 }
+          ]}
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM global_chat_message",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT COUNT(*) AS value FROM ticket WHERE status = 'open'", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 18,
-      "type": "stat",
-      "title": "Messages discussions",
-      "gridPos": { "x": 20, "y": 29, "w": 4, "h": 4 },
-      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "reduceOptions": { "calcs": ["lastNotNull"] }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "fixed", "fixedColor": "blue" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
-        }
-      },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS value FROM discussion_message",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 19,
-      "type": "row",
-      "title": "Films — détail",
-      "collapsed": false,
-      "gridPos": { "x": 0, "y": 33, "w": 24, "h": 1 }
-    },
-    {
-      "id": 20,
-      "type": "barchart",
-      "title": "Films par langue",
-      "gridPos": { "x": 0, "y": 34, "w": 12, "h": 8 },
+      "id": 33, "type": "barchart", "title": "Messages chat par juré (top 10)",
+      "gridPos": { "x": 16, "y": 64, "w": 8, "h": 8 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
         "orientation": "horizontal",
-        "xTickLabelRotation": 0,
         "legend": { "displayMode": "hidden" },
-        "tooltip": { "mode": "single" }
+        "tooltip": { "mode": "single" },
+        "xField": "Juré"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#FF9830" },
+          "custom": { "fillOpacity": 80 }
+        }
+      },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT jury_name AS Juré, COUNT(*) AS Messages FROM global_chat_message GROUP BY jury_id, jury_name ORDER BY Messages DESC LIMIT 10", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 34, "type": "barchart", "title": "Tickets par type",
+      "gridPos": { "x": 0, "y": 68, "w": 8, "h": 6 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": {
+        "orientation": "horizontal",
+        "legend": { "displayMode": "hidden" },
+        "tooltip": { "mode": "single" },
+        "xField": "Type"
       },
       "fieldConfig": {
         "defaults": {
@@ -472,58 +482,87 @@
           "custom": { "fillOpacity": 80 }
         }
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT language AS Langue, COUNT(*) AS Films FROM film GROUP BY language ORDER BY Films DESC LIMIT 12",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT type AS Type, COUNT(*) AS Tickets FROM ticket GROUP BY type ORDER BY Tickets DESC", "format": "table", "refId": "A" }]
     },
+
     {
-      "id": 21,
-      "type": "table",
-      "title": "Derniers films soumis",
-      "gridPos": { "x": 12, "y": 34, "w": 12, "h": 8 },
+      "id": 35, "type": "piechart", "title": "Statut des tickets",
+      "gridPos": { "x": 8, "y": 68, "w": 8, "h": 6 },
       "datasource": { "type": "mysql", "uid": "marsai-mysql" },
       "options": {
-        "showHeader": true,
-        "sortBy": [{ "displayName": "Date", "desc": true }]
+        "pieType": "donut",
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value"] }
       },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "open" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#F2495C" } }, { "id": "displayName", "value": "Ouvert" }] },
+          { "matcher": { "id": "byName", "options": "in_progress" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#FF9830" } }, { "id": "displayName", "value": "En cours" }] },
+          { "matcher": { "id": "byName", "options": "resolved" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#73BF69" } }, { "id": "displayName", "value": "Résolu" }] },
+          { "matcher": { "id": "byName", "options": "rejected" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#8F8F8F" } }, { "id": "displayName", "value": "Rejeté" }] }
+        ]
+      },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT status AS metric, COUNT(*) AS value FROM ticket GROUP BY status", "format": "table", "refId": "A" }]
+    },
+
+    { "id": 36, "type": "row", "title": "📋  Tables détaillées", "collapsed": false, "gridPos": { "x": 0, "y": 74, "w": 24, "h": 1 } },
+
+    {
+      "id": 37, "type": "table", "title": "Derniers films soumis",
+      "gridPos": { "x": 0, "y": 75, "w": 14, "h": 10 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "showHeader": true, "footer": { "show": false } },
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" } } },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Statut" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+              { "id": "mappings", "value": [
+                { "type": "value", "options": { "valide":          { "text": "✅ Validé",    "color": "#73BF69" } } },
+                { "type": "value", "options": { "refuse":          { "text": "❌ Refusé",    "color": "#F2495C" } } },
+                { "type": "value", "options": { "to_review":       { "text": "🔵 À relire",  "color": "#5794F2" } } },
+                { "type": "value", "options": { "arevoir":         { "text": "🟠 À revoir",  "color": "#FF9830" } } },
+                { "type": "value", "options": { "in_discussion":   { "text": "🟣 Discussion","color": "#B877D9" } } },
+                { "type": "value", "options": { "selectionne":     { "text": "⭐ Sélectionné","color": "#FADE2A" } } },
+                { "type": "value", "options": { "finaliste":       { "text": "🏆 Finaliste", "color": "#FF780A" } } },
+                { "type": "value", "options": { "soumis":          { "text": "📨 Soumis",   "color": "#96D98D" } } }
+              ]}
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "IA" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "type": "color-background" } },
+              { "id": "mappings", "value": [
+                { "type": "value", "options": { "full":   { "text": "100% IA", "color": "#5794F2" } } },
+                { "type": "value", "options": { "hybrid": { "text": "Hybride", "color": "#B877D9" } } }
+              ]}
+            ]
+          },
+          { "matcher": { "id": "byName", "options": "Durée" }, "properties": [{ "id": "unit", "value": "s" }, { "id": "custom.width", "value": 70 }] },
+          { "matcher": { "id": "byName", "options": "Date" }, "properties": [{ "id": "custom.width", "value": 100 }] }
+        ]
+      },
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT f.original_title AS Titre, CONCAT(r.first_name, ' ', r.last_name) AS Réalisateur, r.country AS Pays, f.language AS Langue, f.ia_class AS IA, f.statut AS Statut, f.duration AS Durée, DATE_FORMAT(f.created_at, '%d/%m/%Y') AS Date FROM film f INNER JOIN realisator r ON f.realisator_id = r.id ORDER BY f.created_at DESC LIMIT 20", "format": "table", "refId": "A" }]
+    },
+
+    {
+      "id": 38, "type": "table", "title": "Activité jury — détail",
+      "gridPos": { "x": 14, "y": 75, "w": 10, "h": 10 },
+      "datasource": { "type": "mysql", "uid": "marsai-mysql" },
+      "options": { "showHeader": true, "footer": { "show": false } },
       "fieldConfig": {
         "defaults": { "custom": { "align": "auto" } },
         "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "statut" },
-            "properties": [
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  { "type": "value", "options": { "valide": { "text": "Validé", "color": "green" } } },
-                  { "type": "value", "options": { "refuse": { "text": "Refusé", "color": "red" } } },
-                  { "type": "value", "options": { "to_review": { "text": "À relire", "color": "blue" } } },
-                  { "type": "value", "options": { "arevoir": { "text": "À revoir", "color": "orange" } } },
-                  { "type": "value", "options": { "selectionne": { "text": "Sélectionné", "color": "gold" } } },
-                  { "type": "value", "options": { "finaliste": { "text": "Finaliste", "color": "yellow" } } }
-                ]
-              }
-            ]
-          }
+          { "matcher": { "id": "byName", "options": "Évaluations" }, "properties": [{ "id": "custom.displayMode", "value": "lcd-gauge" }, { "id": "min", "value": 0 }, { "id": "color", "value": { "mode": "thresholds" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 5 }, { "color": "gold", "value": 20 }] } }] },
+          { "matcher": { "id": "byName", "options": "Rôle" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background" } }, { "id": "mappings", "value": [{ "type": "value", "options": { "admin": { "color": "#F2495C", "text": "Admin" } } }, { "type": "value", "options": { "moderateur": { "color": "#FF9830", "text": "Modérateur" } } }, { "type": "value", "options": { "jury": { "color": "#5794F2", "text": "Jury" } } }] }] }
         ]
       },
-      "targets": [
-        {
-          "rawQuery": true,
-          "rawSql": "SELECT f.original_title AS Titre, CONCAT(r.first_name, ' ', r.last_name) AS Réalisateur, r.country AS Pays, f.statut AS statut, DATE_FORMAT(f.created_at, '%d/%m/%Y') AS Date FROM film f JOIN realisator r ON f.realisator_id = r.id ORDER BY f.created_at DESC LIMIT 10",
-          "format": "table",
-          "refId": "A"
-        }
-      ]
+      "targets": [{ "rawQuery": true, "rawSql": "SELECT CONCAT(j.first_name, ' ', j.last_name) AS Juré, j.role AS Rôle, COUNT(jfc.id) AS Évaluations, COUNT(dm.id) AS Messages, CASE WHEN j.is_active = 1 THEN '✅' ELSE '❌' END AS Actif FROM jury j LEFT JOIN jury_film_commentary jfc ON j.id = jfc.jury_id LEFT JOIN discussion_message dm ON j.id = dm.jury_id GROUP BY j.id, j.first_name, j.last_name, j.role, j.is_active ORDER BY Évaluations DESC", "format": "table", "refId": "A" }]
     }
+
   ]
 }
