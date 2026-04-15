@@ -1,6 +1,9 @@
 import React from "react";
 import { CheckCircle, Film, MessageCircle, Zap } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import appVideo from "../../../assets/app_mobile.mov";
+
+const APK_URL = "https://expo.dev/artifacts/eas/71rmfmvP39qxLV2Ts43oqi.apk";
 
 const FEATURES = [
     {
@@ -94,10 +97,10 @@ const MobileAppView = (): React.JSX.Element => {
                     <IPhoneMockup />
 
                     {/* Badge store */}
-                    <div className="flex items-center gap-2 rounded-full border border-white/8 bg-white/4 px-4 py-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-aurora animate-pulse" />
-                        <span className="font-mono text-[0.65rem] text-aurora/80 uppercase tracking-widest">
-                            Expo Go · iOS &amp; Android
+                    <div className="flex items-center gap-2 rounded-full border border-[#3ddc84]/30 bg-[#3ddc84]/8 px-4 py-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#3ddc84] animate-pulse" />
+                        <span className="font-mono text-[0.65rem] text-[#3ddc84]/90 uppercase tracking-widest">
+                            Android uniquement
                         </span>
                     </div>
                 </div>
@@ -144,21 +147,41 @@ const MobileAppView = (): React.JSX.Element => {
                         ))}
                     </div>
 
-                    {/* QR placeholder */}
-                    <div className="mt-8 flex items-center gap-5 rounded-2xl border border-white/6 bg-white/[0.03] px-5 py-4">
-                        <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-xl border border-dashed border-aurora/30 bg-aurora/5">
-                            <span className="font-mono text-[0.55rem] text-aurora/50 text-center leading-snug">
-                                QR
-                                <br />
-                                code
-                            </span>
+                    {/* QR code APK */}
+                    <div className="mt-8 rounded-2xl border border-white/6 bg-white/[0.03] px-5 py-4">
+                        <div className="flex items-center gap-5">
+                            {/* QR */}
+                            <div className="flex-shrink-0 rounded-xl border border-[#3ddc84]/20 bg-white p-2">
+                                <QRCodeSVG
+                                    value={APK_URL}
+                                    size={80}
+                                    bgColor="#ffffff"
+                                    fgColor="#0f0f14"
+                                    level="M"
+                                />
+                            </div>
+                            <div>
+                                <p className="text-[0.82rem] font-semibold text-white-soft">
+                                    Scanner pour télécharger l'APK
+                                </p>
+                                <p className="mt-1 text-[0.72rem] leading-relaxed text-mist">
+                                    Scannez ce code avec votre appareil photo Android pour télécharger et installer l'application.
+                                </p>
+                                <a
+                                    href={APK_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-2 inline-flex items-center gap-1.5 font-mono text-[0.65rem] text-[#3ddc84]/70 underline underline-offset-2 hover:text-[#3ddc84] transition-colors"
+                                >
+                                    Lien direct APK
+                                </a>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-[0.82rem] font-semibold text-white-soft">
-                                Scanner pour accéder
-                            </p>
-                            <p className="mt-0.5 text-[0.72rem] text-mist">
-                                Ouvrez Expo Go et scannez ce code depuis votre appareil photo
+                        {/* Avertissement iOS */}
+                        <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+                            <span className="text-amber-400 text-xs">⚠</span>
+                            <p className="text-[0.7rem] text-amber-400/80">
+                                Disponible uniquement sur <strong className="text-amber-400">Android</strong> pour l'instant. La version iOS est en cours de développement.
                             </p>
                         </div>
                     </div>
