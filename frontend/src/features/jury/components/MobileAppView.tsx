@@ -165,7 +165,8 @@ const MobileAppView = (): React.JSX.Element => {
                                     Scanner pour télécharger l'APK
                                 </p>
                                 <p className="mt-1 text-[0.72rem] leading-relaxed text-mist">
-                                    Scannez ce code avec votre appareil photo Android pour télécharger et installer l'application.
+                                    Scannez ce code avec votre appareil photo Android pour
+                                    télécharger et installer l'application.
                                 </p>
                                 <a
                                     href={APK_URL}
@@ -181,7 +182,9 @@ const MobileAppView = (): React.JSX.Element => {
                         <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
                             <span className="text-amber-400 text-xs">⚠</span>
                             <p className="text-[0.7rem] text-amber-400/80">
-                                Disponible uniquement sur <strong className="text-amber-400">Android</strong> pour l'instant. La version iOS est en cours de développement.
+                                Disponible uniquement sur{" "}
+                                <strong className="text-amber-400">Android</strong> pour l'instant.
+                                La version iOS est en cours de développement.
                             </p>
                         </div>
                     </div>
