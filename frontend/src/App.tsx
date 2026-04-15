@@ -16,6 +16,7 @@ import AdminCmsPage from "./pages/AdminCmsPage";
 import AdminDocsPage from "./pages/AdminDocsPage";
 import AdminEmailingPage from "./pages/AdminEmailingPage";
 import AdminNotificationsPage from "./pages/AdminNotificationsPage";
+import AdminServicesPage from "./pages/AdminServicesPage";
 import NotFound from "./pages/NotFound";
 
 const App = (): React.JSX.Element => {
@@ -36,6 +37,7 @@ const App = (): React.JSX.Element => {
                         <Route path="docs" element={<AdminDocsPage />} />
                         <Route path="emailing" element={<AdminEmailingPage />} />
                         <Route path="notifications" element={<AdminNotificationsPage />} />
+                        <Route path="services" element={<AdminServicesPage />} />
                     </Route>
                 </Route>
                 <Route path="formulaire" element={<Formulaire />} />

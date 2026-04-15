@@ -1,4 +1,4 @@
-import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug, Mail, Bell } from "lucide-react";
+import { Users, Film, Trophy, Tag, Globe, BookOpen, Plug, Mail, Bell, Server } from "lucide-react";
 import type { AdminNavCategory } from "./types";
 
 export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
@@ -34,6 +34,10 @@ export const ADMIN_NAV_LINKS: AdminNavCategory[] = [
                 requiresPermission: "can_access_admin",
             },
         ],
+    },
+    {
+        category: "Infrastructure",
+        items: [{ label: "Services & accès", to: "/admin/services", icon: <Server size={15} /> }],
     },
     {
         category: "Développement",
