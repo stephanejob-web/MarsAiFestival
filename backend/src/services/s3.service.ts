@@ -51,6 +51,7 @@ export async function deleteFileFromS3(key: string): Promise<void> {
 }
 
 // Le bucket est public (anonymous download) — URL directe sans signature
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getPresignedVideoUrl(key: string, _expiresIn = 3600): Promise<string> {
     return publicUrl(key);
 }
