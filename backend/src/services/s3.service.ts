@@ -50,7 +50,8 @@ export async function uploadFileToS3(
         }),
     );
 
-    const publicBase = process.env.MINIO_PUBLIC_URL ?? process.env.MINIO_ENDPOINT ?? "http://localhost:9000";
+    const publicBase =
+        process.env.MINIO_PUBLIC_URL ?? process.env.MINIO_ENDPOINT ?? "http://localhost:9000";
     return `${publicBase}/${BUCKET}/${key}`;
 }
 
@@ -113,7 +114,10 @@ export async function listVideosFromS3(): Promise<S3VideoItem[]> {
             const dossierMatch =
                 segments[segments.length - 2]?.match(/^(MAI-\d{4}-\d{5})$/i) ?? null;
 
-            const publicBase = process.env.MINIO_PUBLIC_URL ?? process.env.MINIO_ENDPOINT ?? "http://localhost:9000";
+            const publicBase =
+                process.env.MINIO_PUBLIC_URL ??
+                process.env.MINIO_ENDPOINT ??
+                "http://localhost:9000";
             videos.push({
                 key: obj.Key,
                 url: `${publicBase}/${BUCKET}/${obj.Key}`,
