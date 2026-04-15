@@ -26,27 +26,36 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
         return;
     }
 
-    await pool.execute(
-        "UPDATE jury SET push_token = ?, device_name = ?, device_os = ? WHERE id = ?",
-        [
-            token,
-            deviceName ? deviceName.slice(0, 100) : null,
-            deviceOs ? deviceOs.slice(0, 100) : null,
-            juryId,
-        ],
-    );
-
-    res.json({ success: true });
+    try {
+        await pool.execute(
+            "UPDATE jury SET push_token = ?, device_name = ?, device_os = ? WHERE id = ?",
+            [
+                token,
+                deviceName ? deviceName.slice(0, 100) : null,
+                deviceOs ? deviceOs.slice(0, 100) : null,
+                juryId,
+            ],
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("[push] savePushToken error:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur." });
+    }
 };
 
 // ── GET /api/push/devices — Liste tous les jurés avec leur token/device ────────
 export const getDevices = async (_req: Request, res: Response): Promise<void> => {
-    const [rows] = await pool.execute<RowDataPacket[]>(
-        `SELECT id, first_name, last_name, email, push_token, device_name, device_os
-         FROM jury
-         ORDER BY push_token IS NOT NULL DESC, last_name ASC`,
-    );
-    res.json({ success: true, data: rows });
+    try {
+        const [rows] = await pool.execute<RowDataPacket[]>(
+            `SELECT id, first_name, last_name, email, push_token, device_name, device_os
+             FROM jury
+             ORDER BY push_token IS NOT NULL DESC, last_name ASC`,
+        );
+        res.json({ success: true, data: rows });
+    } catch (err) {
+        console.error("[push] getDevices error:", err);
+        res.status(500).json({ success: false, message: "Erreur serveur." });
+    }
 };
 
 // ── POST /api/push/send — Envoie une notification (admin / Postman) ───────────

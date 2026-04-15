@@ -405,6 +405,8 @@ CREATE TABLE `jury` (
   `session_token` varchar(36) DEFAULT NULL,
   `permissions` json DEFAULT NULL,
   `push_token` varchar(255) DEFAULT NULL,
+  `device_name` varchar(100) DEFAULT NULL,
+  `device_os` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_jury_email` (`email`),
   UNIQUE KEY `uq_jury_google_id` (`google_id`)
