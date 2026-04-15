@@ -204,6 +204,120 @@ const SponsorsSection = (): React.JSX.Element => {
                 </h2>
             </div>
 
+            {/* ── Sponsor Infrastructure Principal ─────────────────────────── */}
+            <div className="max-w-3xl mx-auto mb-16 relative">
+                {/* Glow ambiance */}
+                <div className="pointer-events-none absolute -inset-8 rounded-3xl bg-aurora/5 blur-3xl" />
+
+                <a
+                    href="https://lightchurch.fr/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative block rounded-2xl overflow-hidden"
+                    style={{
+                        background:
+                            "linear-gradient(135deg, rgba(78,255,206,0.06) 0%, rgba(12,12,20,0.9) 50%, rgba(139,92,246,0.06) 100%)",
+                        border: "1px solid rgba(78,255,206,0.2)",
+                        boxShadow:
+                            "0 0 0 1px rgba(78,255,206,0.06), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    }}
+                >
+                    {/* Animated border top */}
+                    <div
+                        className="absolute top-0 left-0 right-0 h-px"
+                        style={{
+                            background:
+                                "linear-gradient(90deg, transparent, rgba(78,255,206,0.6), rgba(139,92,246,0.4), transparent)",
+                        }}
+                    />
+
+                    <div className="relative px-10 py-10 flex flex-col sm:flex-row items-center gap-8">
+                        {/* Icône / Monogramme */}
+                        <div className="flex-shrink-0 relative">
+                            <div
+                                className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                                style={{
+                                    background:
+                                        "linear-gradient(135deg, rgba(78,255,206,0.12), rgba(139,92,246,0.12))",
+                                    border: "1px solid rgba(78,255,206,0.2)",
+                                    boxShadow: "0 0 30px rgba(78,255,206,0.15)",
+                                }}
+                            >
+                                <span className="font-display text-3xl font-black text-aurora">
+                                    LC
+                                </span>
+                            </div>
+                            {/* Pulse ring */}
+                            <div className="absolute -inset-1 rounded-2xl border border-aurora/20 animate-pulse" />
+                        </div>
+
+                        {/* Contenu */}
+                        <div className="flex-1 text-center sm:text-left">
+                            <div className="inline-flex items-center gap-2 mb-3">
+                                <span className="h-1.5 w-1.5 rounded-full bg-aurora animate-pulse" />
+                                <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-aurora/70">
+                                    Partenaire Infrastructure · Hébergeur officiel
+                                </span>
+                            </div>
+                            <h3 className="font-display text-3xl sm:text-4xl font-black text-white-soft mb-2 group-hover:text-aurora transition-colors duration-300">
+                                LightChurch
+                            </h3>
+                            <p className="text-[0.85rem] text-mist/70 max-w-sm">
+                                Infrastructure, hébergement et services techniques du festival
+                                marsAI 2026.
+                            </p>
+                        </div>
+
+                        {/* CTA */}
+                        <div className="flex-shrink-0">
+                            <span
+                                className="inline-flex items-center gap-2 rounded-xl px-5 py-3 font-display text-[0.8rem] font-bold text-aurora transition-all duration-200 group-hover:scale-105"
+                                style={{
+                                    background: "rgba(78,255,206,0.08)",
+                                    border: "1px solid rgba(78,255,206,0.25)",
+                                    boxShadow: "0 0 20px rgba(78,255,206,0.1)",
+                                }}
+                            >
+                                Visiter le site
+                                <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 14 14"
+                                    fill="none"
+                                    className="transition-transform duration-200 group-hover:translate-x-1"
+                                >
+                                    <path
+                                        d="M2 7h10M7 2l5 5-5 5"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Animated border bottom */}
+                    <div
+                        className="absolute bottom-0 left-0 right-0 h-px"
+                        style={{
+                            background:
+                                "linear-gradient(90deg, transparent, rgba(139,92,246,0.4), rgba(78,255,206,0.3), transparent)",
+                        }}
+                    />
+                </a>
+            </div>
+
+            {/* ── Séparateur ───────────────────────────────────────────────── */}
+            <div className="flex items-center gap-4 max-w-sm mx-auto mb-12">
+                <div className="flex-1 h-px bg-white/6" />
+                <span className="font-mono text-[0.6rem] uppercase tracking-widest text-mist/30">
+                    Autres partenaires
+                </span>
+                <div className="flex-1 h-px bg-white/6" />
+            </div>
+
             {/* Bandeau scrollant */}
             <div
                 className="overflow-hidden"
