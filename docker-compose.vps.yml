@@ -113,8 +113,18 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=marsai_grafana_2026
       - GF_SERVER_ROOT_URL=https://marsai.lightchurch.fr/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      # Embed dans iframe (panel admin)
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      # Accès anonyme en lecture seule pour l'iframe
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      # Désactiver le login sur la page anonyme
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       mysql:
         condition: service_healthy
