@@ -59,14 +59,14 @@ services:
 
   # ───────────────────────────────────────────
   # MinIO — stockage objet S3-compatible (remplace Scaleway)
-  # Console : https://minio-console.marsai.lightchurch.fr
-  # API S3  : https://minio.marsai.lightchurch.fr
+  # Console : https://marsai.lightchurch.fr/bucket
   # ───────────────────────────────────────────
   minio:
     image: minio/minio:latest
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BROWSER_REDIRECT_URL: https://marsai.lightchurch.fr/bucket
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -81,17 +81,13 @@ services:
       - traefik-network
     labels:
       - "traefik.enable=true"
-      # API S3 (port 9000)
-      - "traefik.http.routers.minio-api.rule=Host(`minio.marsai.lightchurch.fr`)"
-      - "traefik.http.routers.minio-api.entrypoints=websecure"
-      - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.minio-api.service=minio-api-svc"
-      - "traefik.http.services.minio-api-svc.loadbalancer.server.port=9000"
-      # Console (port 9001)
-      - "traefik.http.routers.minio-console.rule=Host(`minio-console.marsai.lightchurch.fr`)"
+      # Console MinIO sur /bucket
+      - "traefik.http.routers.minio-console.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/bucket`)"
       - "traefik.http.routers.minio-console.entrypoints=websecure"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-console.middlewares=minio-strip"
       - "traefik.http.routers.minio-console.service=minio-console-svc"
+      - "traefik.http.middlewares.minio-strip.stripprefix.prefixes=/bucket"
       - "traefik.http.services.minio-console-svc.loadbalancer.server.port=9001"
 
   # Crée le bucket "marsai" au premier démarrage
