@@ -38,9 +38,11 @@ const JuryPanel = (): React.JSX.Element => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [screening]);
 
-    const [evalVariant, setEvalVariantState] = useState<EvalVariant>(
-        () => (localStorage.getItem("jury_eval_variant") as EvalVariant | null) ?? "rapide",
-    );
+    const [evalVariant, setEvalVariantState] = useState<EvalVariant>(() => {
+        const stored = localStorage.getItem("jury_eval_variant") as EvalVariant | null;
+        if (!stored || stored === "classic") return "rapide";
+        return stored;
+    });
 
     const handleEvalVariantChange = (v: EvalVariant): void => {
         localStorage.setItem("jury_eval_variant", v);
