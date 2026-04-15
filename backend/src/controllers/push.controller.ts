@@ -38,6 +38,7 @@ export const savePushToken = async (req: Request, res: Response): Promise<void> 
         );
         res.json({ success: true });
     } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("[push] savePushToken error:", err);
         res.status(500).json({ success: false, message: "Erreur serveur." });
     }
@@ -53,6 +54,7 @@ export const getDevices = async (_req: Request, res: Response): Promise<void> =>
         );
         res.json({ success: true, data: rows });
     } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("[push] getDevices error:", err);
         res.status(500).json({ success: false, message: "Erreur serveur." });
     }
