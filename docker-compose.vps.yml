@@ -64,7 +64,6 @@ services:
   minio:
     image: minio/minio:latest
     ports:
-      - "9100:9000"
       - "9101:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -80,8 +79,17 @@ services:
     restart: unless-stopped
     networks:
       - marsai-network
+      - traefik-network
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
+      # API S3 en HTTPS sur /files — URLs directes (bucket public, pas de presigned URLs)
+      - "traefik.http.routers.minio-api.rule=Host(`marsai.lightchurch.fr`) && PathPrefix(`/files`)"
+      - "traefik.http.routers.minio-api.entrypoints=websecure"
+      - "traefik.http.routers.minio-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-api.middlewares=minio-api-strip"
+      - "traefik.http.routers.minio-api.service=minio-api-svc"
+      - "traefik.http.middlewares.minio-api-strip.stripprefix.prefixes=/files"
+      - "traefik.http.services.minio-api-svc.loadbalancer.server.port=9000"
 
   # Crée le bucket "marsai" au premier démarrage
   createbuckets:
