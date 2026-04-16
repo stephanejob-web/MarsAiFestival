@@ -1,0 +1,191 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_MYSQL",
+      "label": "Base de donnees marsai (MySQL)",
+      "description": "Sélectionnez la source de données MySQL pointant vers marsai",
+      "type": "datasource",
+      "pluginId": "mysql",
+      "pluginName": "MySQL"
+    }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Films",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM film;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Total Realisators",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM realisator;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Total Juries",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM jury;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Total Sponsors",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM sponsor;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Total Active Tickets",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM ticket WHERE status = 'open';", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Global Chat Msgs",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "targets": [{ "rawSql": "SELECT count(id) AS total FROM global_chat_message;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "piechart",
+      "title": "Films by Statut",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 4 },
+      "id": 7,
+      "targets": [{ "rawSql": "SELECT statut, count(id) as count FROM film GROUP BY statut;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "piechart",
+      "title": "Jury Decisions Overview",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 4 },
+      "id": 8,
+      "targets": [{ "rawSql": "SELECT decision, count(id) as count FROM jury_film_commentary WHERE decision IS NOT NULL GROUP BY decision;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "pieType": "pie", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "barchart",
+      "title": "Top Realisator Countries",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 4 },
+      "id": 9,
+      "targets": [{ "rawSql": "SELECT country, count(id) as total FROM realisator GROUP BY country ORDER BY total DESC LIMIT 10;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "orientation": "horizontal" }
+    },
+    {
+      "type": "piechart",
+      "title": "Tickets by Status",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 4 },
+      "id": 10,
+      "targets": [{ "rawSql": "SELECT status, count(id) as count FROM ticket GROUP BY status;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "pieType": "donut" }
+    },
+    {
+      "type": "timeseries",
+      "title": "Chat Activity (Global vs Discussion)",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 11,
+      "targets": [
+        { "rawSql": "SELECT UNIX_TIMESTAMP(sent_at) as time_sec, count(id) as global_chat FROM global_chat_message GROUP BY time_sec ORDER BY time_sec;", "format": "time_series", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} },
+        { "rawSql": "SELECT UNIX_TIMESTAMP(sent_at) as time_sec, count(id) as discussion FROM discussion_message GROUP BY time_sec ORDER BY time_sec;", "format": "time_series", "refId": "B", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Films Submitted Over Time",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 12,
+      "targets": [
+        { "rawSql": "SELECT UNIX_TIMESTAMP(created_at) as time_sec, count(id) as submissions FROM film GROUP BY time_sec ORDER BY time_sec;", "format": "time_series", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Awards & Laureats",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "id": 13,
+      "targets": [
+        { "rawSql": "SELECT a.name AS Award, a.cash_prize AS Prize, f.original_title AS Film, CONCAT(r.first_name, ' ', r.last_name) AS Realisator FROM award a LEFT JOIN film f ON a.laureat = f.id LEFT JOIN realisator r ON f.realisator_id = r.id;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Programme Events",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "id": 14,
+      "targets": [
+        { "rawSql": "SELECT event_date AS Date, time AS Time, title AS Title, type AS Type FROM programme_event ORDER BY event_date, time;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }
+      ]
+    },
+    {
+      "type": "barchart",
+      "title": "Films by IA Class",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 28 },
+      "id": 15,
+      "targets": [{ "rawSql": "SELECT ia_class, count(id) as total FROM film GROUP BY ia_class;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }]
+    },
+    {
+      "type": "table",
+      "title": "Jury Showcases",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 28 },
+      "id": 16,
+      "targets": [
+        { "rawSql": "SELECT name AS Name, display_role AS Role, is_active AS Active FROM jury_showcase ORDER BY sort_order;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "CMS Finalist Count",
+      "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"},
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 28 },
+      "id": 17,
+      "targets": [{ "rawSql": "SELECT finalist_count FROM cms_content LIMIT 1;", "format": "table", "refId": "A", "datasource": {"type": "mysql", "uid": "${DS_MYSQL}"} }],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["marsai", "admin"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Admin Dashboard MarsAiFestival (Live Data)",
+  "uid": "marsai-admin-dashboard",
+  "version": 2
+}

@@ -96,6 +96,7 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
     const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
     const [isFooterOpen, setIsFooterOpen] = useState<boolean>(true);
     const [isWatchingFilm, setIsWatchingFilm] = useState<boolean>(false);
+    const [isEvalOpen, setIsEvalOpen] = useState<boolean>(false);
     const {
         videoRef: playerRef,
         handlePlay,
@@ -106,6 +107,8 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
     const isDragging = useRef<boolean>(false);
     const dragStartX = useRef<number>(0);
     const dragScrollLeft = useRef<number>(0);
+    const footerTouchStartY = useRef<number>(0);
+    const evalTouchStartX = useRef<number>(0);
 
     const sortedFilms = useMemo<JuryFilm[]>(() => {
         const decided = panel.films.filter((f) => f.myDecision !== null);
@@ -162,6 +165,32 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
         if (!carouselRef.current) return;
         carouselRef.current.scrollLeft += e.deltaY;
     }, []);
+
+    const handleFooterTouchStart = (e: React.TouchEvent<HTMLElement>): void => {
+        footerTouchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleFooterTouchEnd = (e: React.TouchEvent<HTMLElement>): void => {
+        const deltaY = e.changedTouches[0].clientY - footerTouchStartY.current;
+        if (deltaY < -40) setIsFooterOpen(true);
+        else if (deltaY > 40) setIsFooterOpen(false);
+    };
+
+    const handleEvalEdgeTouchStart = (e: React.TouchEvent<HTMLDivElement>): void => {
+        evalTouchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleEvalEdgeTouchMove = (e: React.TouchEvent<HTMLDivElement>): void => {
+        if (e.touches[0].clientX - evalTouchStartX.current < -40) setIsEvalOpen(true);
+    };
+
+    const handleEvalPanelTouchStart = (e: React.TouchEvent<HTMLElement>): void => {
+        evalTouchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleEvalPanelTouchEnd = (e: React.TouchEvent<HTMLElement>): void => {
+        if (e.changedTouches[0].clientX - evalTouchStartX.current > 40) setIsEvalOpen(false);
+    };
 
     const toggleDetails = (): void => setIsDetailsOpen((v) => !v);
 
@@ -495,9 +524,32 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                 </div>
             </aside>
 
+            {/* Zone de déclenchement swipe — bord droit, mobile uniquement */}
+            <div
+                className="fixed inset-y-0 right-0 z-50 w-4 md:hidden"
+                onTouchStart={handleEvalEdgeTouchStart}
+                onTouchMove={handleEvalEdgeTouchMove}
+            />
+
+            {/* Backdrop eval — mobile uniquement */}
+            {isEvalOpen && (
+                <div
+                    className="fixed inset-0 z-19 bg-black/50 md:hidden"
+                    onClick={() => setIsEvalOpen(false)}
+                />
+            )}
+
             {/* Floating evaluation panel with right-edge indicator */}
             <div className="absolute bottom-40 right-0 z-20 flex items-center group">
-                <section className="pointer-events-none absolute right-full top-1/2 w-100 -translate-y-1/2 translate-x-full transition-transform duration-300 ease-in-out group-hover:pointer-events-auto group-hover:translate-x-0">
+                <section
+                    className={`fixed top-1/2 -translate-y-1/2 right-0 z-40 w-full transition-transform duration-300 ease-in-out ${
+                        isEvalOpen
+                            ? "translate-x-0 pointer-events-auto"
+                            : "translate-x-full pointer-events-none"
+                    } md:absolute md:right-full md:w-100 md:z-auto md:translate-x-full md:pointer-events-none md:group-hover:translate-x-0 md:group-hover:pointer-events-auto`}
+                    onTouchStart={handleEvalPanelTouchStart}
+                    onTouchEnd={handleEvalPanelTouchEnd}
+                >
                     <div className="bg-slate-800/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mr-1 shadow-2xl">
                         <div className="grid grid-cols-3 gap-3 mb-5">
                             <button
@@ -568,7 +620,10 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                 </section>
 
                 {/* Right-edge indicator tab */}
-                <div className="flex flex-col items-center gap-2 py-5 px-1.5 bg-slate-800/80 backdrop-blur-sm border-y border-l border-white/15 rounded-l-xl cursor-pointer shadow-lg shrink-0 transition-all duration-300 group-hover:bg-slate-700/80 group-hover:border-white/30">
+                <div
+                    onClick={() => setIsEvalOpen((v) => !v)}
+                    className="flex flex-col items-center gap-2 py-5 px-1.5 bg-slate-800/80 backdrop-blur-sm border-y border-l border-white/15 rounded-l-xl cursor-pointer shadow-lg shrink-0 transition-all duration-300 group-hover:bg-slate-700/80 group-hover:border-white/30"
+                >
                     <ChevronLeft
                         size={12}
                         className="text-slate-300 group-hover:text-white transition-colors"
@@ -582,8 +637,19 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                 </div>
             </div>
 
+            {/* Zone de déclenchement swipe — bord bas de l'écran */}
+            <div
+                className="fixed bottom-0 left-0 z-50 h-4 w-full"
+                onTouchStart={handleFooterTouchStart}
+                onTouchEnd={handleFooterTouchEnd}
+            />
+
             {/* Bottom carousel */}
-            <footer className="absolute bottom-0 left-0 w-full z-20">
+            <footer
+                className="absolute bottom-0 left-0 w-full z-20"
+                onTouchStart={handleFooterTouchStart}
+                onTouchEnd={handleFooterTouchEnd}
+            >
                 <div className="flex justify-center px-4">
                     <button
                         type="button"
@@ -595,21 +661,25 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                     </button>
                 </div>
                 <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out px-4 ${isFooterOpen ? "max-h-48" : "max-h-0"}`}
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isFooterOpen ? "max-h-48" : "max-h-0"}`}
                 >
-                    <div className="relative rounded-t-2xl overflow-hidden border border-white/10">
-                        <div className="absolute inset-0 bg-slate-800/90 backdrop-blur-xl opacity-10" />
-                        <div className="relative p-3 flex items-center gap-3">
+                    {/* Conteneur : pleine largeur sur mobile, encadré avec padding sur desktop */}
+                    <div className="relative bg-slate-800/80 backdrop-blur-xl border-t border-white/10 md:mx-4 md:rounded-t-2xl md:border md:border-t md:bg-transparent md:backdrop-blur-none">
+                        <div className="hidden md:block absolute inset-0 bg-slate-800/90 backdrop-blur-xl opacity-10 rounded-t-2xl" />
+                        <div className="relative flex items-center gap-3 py-3 md:p-3">
+                            {/* Flèche gauche — desktop uniquement */}
                             <button
                                 type="button"
                                 onClick={() => scrollCarousel("left")}
-                                className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 border border-slate-700/50"
+                                className="hidden md:flex p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 border border-slate-700/50"
                             >
                                 <ChevronLeft size={18} />
                             </button>
+
+                            {/* Carousel — unique ref, scroll natif sur mobile */}
                             <div
                                 ref={carouselRef}
-                                className="grow overflow-x-auto flex gap-3 snap-x cursor-grab active:cursor-grabbing select-none"
+                                className="grow overflow-x-auto flex gap-3 snap-x select-none px-4 md:px-0 md:cursor-grab md:active:cursor-grabbing"
                                 style={{ scrollbarWidth: "none" }}
                                 onMouseDown={handleMouseDown}
                                 onMouseMove={handleMouseMove}
@@ -626,10 +696,12 @@ const ModernView = ({ panel }: ModernViewProps): React.JSX.Element => {
                                     />
                                 ))}
                             </div>
+
+                            {/* Flèche droite — desktop uniquement */}
                             <button
                                 type="button"
                                 onClick={() => scrollCarousel("right")}
-                                className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 border border-slate-700/50"
+                                className="hidden md:flex p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors shrink-0 border border-slate-700/50"
                             >
                                 <ChevronRight size={18} />
                             </button>

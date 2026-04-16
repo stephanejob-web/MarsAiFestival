@@ -6,13 +6,19 @@ type EvalVariant = "classic" | "modern" | "rapide";
 interface JuryTopbarProps {
     evalVariant?: EvalVariant;
     onEvalVariantChange?: (v: EvalVariant) => void;
+    as?: "header" | "div";
 }
 
-const JuryTopbar = ({ evalVariant, onEvalVariantChange }: JuryTopbarProps): React.JSX.Element => {
+const JuryTopbar = ({
+    evalVariant,
+    onEvalVariantChange,
+    as,
+}: JuryTopbarProps): React.JSX.Element => {
     const showVariantToggle = evalVariant !== undefined && onEvalVariantChange !== undefined;
+    const Tag = (as ?? "header") as React.ElementType;
 
     return (
-        <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-end px-6 py-4">
+        <Tag className="flex flex-1 items-center justify-end px-6 py-4">
             <div className="flex items-center gap-3">
                 {showVariantToggle && (
                     <div className="flex items-center gap-1 rounded-xl border border-white/8 bg-black/30 p-1 backdrop-blur-sm">
@@ -55,7 +61,7 @@ const JuryTopbar = ({ evalVariant, onEvalVariantChange }: JuryTopbarProps): Reac
                     </div>
                 )}
             </div>
-        </header>
+        </Tag>
     );
 };
 

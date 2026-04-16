@@ -110,10 +110,10 @@ const JurySidebar = ({
     return (
         <>
             <div
-                className={`relative transition-all duration-300 ease-in-out ${isDrawerOpen ? "w-[260px]" : "w-0"}`}
+                className={`relative h-full transition-all duration-300 ease-in-out ${isDrawerOpen ? "w-full sm:w-65" : "w-0"}`}
             >
                 <aside
-                    className={`absolute inset-y-0 left-0 flex w-[260px] flex-col border-r border-white/6 bg-surface transition-transform duration-300 ease-in-out ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"}`}
+                    className={`absolute inset-y-0 left-0 flex w-full sm:w-65 flex-col border-r border-white/6 bg-surface transition-transform duration-300 ease-in-out ${isDrawerOpen ? "translate-x-0" : "-translate-x-full"}`}
                 >
                     {/* Header */}
                     <div className="border-b border-white/5 px-5 py-[22px] pb-[18px]">
@@ -477,7 +477,7 @@ const JurySidebar = ({
                     type="button"
                     onClick={() => setIsDrawerOpen((v) => !v)}
                     title={isDrawerOpen ? "Fermer le panneau" : "Ouvrir le panneau"}
-                    className="absolute left-full top-1/2 z-50 flex h-12 w-6 -translate-y-1/2 items-center justify-center rounded-r-lg border border-l-0 border-white/6 bg-surface text-mist transition-colors hover:bg-white/8 hover:text-white-soft"
+                    className="absolute left-full top-1/2 z-50 hidden h-12 w-6 -translate-y-1/2 items-center justify-center rounded-r-lg border border-l-0 border-white/6 bg-surface text-mist transition-colors hover:bg-white/8 hover:text-white-soft md:flex"
                 >
                     {isDrawerOpen ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
                 </button>

@@ -5,9 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import DiscuterView from "../features/jury/components/DiscuterView";
 import EvalView from "../features/jury/components/EvalView";
-import JurySidebar from "../features/jury/components/JurySidebar";
 import JuryToast from "../features/jury/components/JuryToast";
-import JuryTopbar from "../features/jury/components/JuryTopbar";
 import ListesView from "../features/jury/components/ListesView";
 import MobileAppView from "../features/jury/components/MobileAppView";
 import ModalARevoir from "../features/jury/components/ModalARevoir";
@@ -21,6 +19,7 @@ import { useBanProtection } from "../features/admin/hooks/useBanProtection";
 import BanModal from "../features/admin/components/BanModal";
 import SessionExpiredModal from "../features/admin/components/SessionExpiredModal";
 import AdminMessageToast from "../features/admin/components/AdminMessageToast";
+import JuryLayout from "../layouts/JuryLayout";
 
 type EvalVariant = "classic" | "modern" | "rapide";
 
@@ -52,10 +51,10 @@ const JuryPanel = (): React.JSX.Element => {
     if (!user) return <Navigate to="/jury" replace />;
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <>
             <BanModal visible={isBanned} />
             <SessionExpiredModal visible={isSessionExpired} />
-            <JurySidebar
+            <JuryLayout
                 activeView={panel.activeView}
                 onViewChange={panel.setActiveView}
                 pendingCount={panel.pendingCount}
@@ -66,12 +65,9 @@ const JuryPanel = (): React.JSX.Element => {
                 isChatOpen={panel.isChatOpen}
                 onChatToggle={() => panel.setIsChatOpen(!panel.isChatOpen)}
                 screening={screening}
-            />
-            <div className="relative flex flex-1 flex-col overflow-hidden">
-                <JuryTopbar
-                    evalVariant={evalVariant}
-                    onEvalVariantChange={handleEvalVariantChange}
-                />
+                evalVariant={evalVariant}
+                onEvalVariantChange={handleEvalVariantChange}
+            >
                 {(panel.activeView === "eval" || panel.activeView === "tinder") &&
                     (evalVariant === "modern" ? (
                         <ModernView panel={panel} />
@@ -86,7 +82,7 @@ const JuryPanel = (): React.JSX.Element => {
                     <ScreeningView screening={screening} />
                 )}
                 {panel.activeView === "mobile" && <MobileAppView />}
-            </div>
+            </JuryLayout>
             <ModalARevoir
                 isOpen={panel.activeModal === "arevoir"}
                 filmTitle={panel.activeFilm.title}
@@ -110,7 +106,7 @@ const JuryPanel = (): React.JSX.Element => {
             <JuryToast message={panel.toast} />
             <AdminMessageToast message={adminMessage} onClose={clearAdminMessage} />
             <ToastContainer />
-        </div>
+        </>
     );
 };
 
