@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Film } from "lucide-react";
 
 import type { Decision, JuryFilm } from "../types";
@@ -34,6 +34,9 @@ const DECISION_BADGE_CLASS: Record<string, string> = {
     discuter: "bg-lavande/10 text-lavande",
 };
 
+const SWIPE_OPEN_THRESHOLD = 40;
+const SWIPE_CLOSE_THRESHOLD = 50;
+
 const getDecisionLabel = (decision: Decision): string => {
     if (decision === "valide") return "Validé";
     if (decision === "aRevoir") return "À revoir";
@@ -43,59 +46,114 @@ const getDecisionLabel = (decision: Decision): string => {
 };
 
 const FilmList = ({ films, activeFilm, onSelectFilm }: FilmListProps): React.JSX.Element => {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const touchStartX = useRef<number>(0);
+
+    const handleEdgeTouchStart = (e: React.TouchEvent<HTMLDivElement>): void => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleEdgeTouchMove = (e: React.TouchEvent<HTMLDivElement>): void => {
+        const deltaX = e.touches[0].clientX - touchStartX.current;
+        if (deltaX > SWIPE_OPEN_THRESHOLD) {
+            setIsOpen(true);
+        }
+    };
+
+    const handleDrawerTouchStart = (e: React.TouchEvent<HTMLDivElement>): void => {
+        touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleDrawerTouchEnd = (e: React.TouchEvent<HTMLDivElement>): void => {
+        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+        if (deltaX < -SWIPE_CLOSE_THRESHOLD) {
+            setIsOpen(false);
+        }
+    };
+
+    const handleClose = (): void => {
+        setIsOpen(false);
+    };
+
+    const handleFilmSelect = (id: number): void => {
+        onSelectFilm(id);
+        setIsOpen(false);
+    };
+
     return (
-        <div className="flex w-[300px] min-w-[300px] flex-col overflow-y-auto border-r border-white/6 bg-surface p-2">
-            {films.map((film, index) => {
-                const gradientClass = THUMB_GRADIENTS[index % THUMB_GRADIENTS.length];
-                const ThumbIcon = THUMB_ICONS[index % THUMB_ICONS.length];
-                const dotClass = STATUS_DOT_CLASS[film.myDecision ?? "null"] ?? "bg-solar";
-                const isSelected = film.id === activeFilm.id;
+        <>
+            {/* Zone de déclenchement swipe — bord gauche, mobile uniquement */}
+            <div
+                className="fixed inset-y-0 left-0 z-50 w-4 md:hidden"
+                onTouchStart={handleEdgeTouchStart}
+                onTouchMove={handleEdgeTouchMove}
+            />
 
-                return (
-                    <button
-                        key={film.id}
-                        type="button"
-                        onClick={() => onSelectFilm(film.id)}
-                        className={`mb-[3px] flex w-full cursor-pointer items-center gap-2.5 rounded-[8px] border px-2.5 py-[9px] transition-all hover:bg-white/4 ${
-                            isSelected ? "border-aurora/20 bg-aurora/7" : "border-transparent"
-                        }`}
-                    >
-                        {/* Thumbnail */}
-                        <div
-                            className={`relative flex h-[34px] w-[60px] flex-shrink-0 items-center justify-center rounded-[5px] ${gradientClass}`}
+            {/* Backdrop */}
+            {isOpen && (
+                <div className="fixed inset-0 z-30 bg-black/50 md:hidden" onClick={handleClose} />
+            )}
+
+            {/* Drawer / Sidebar */}
+            <div
+                className={`fixed inset-y-0 left-0 z-40 flex w-[300px] min-w-[300px] flex-col overflow-y-auto border-r border-white/6 bg-surface p-2 transition-transform duration-300 ease-in-out md:relative md:inset-y-auto md:z-auto md:translate-x-0 ${
+                    isOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
+                onTouchStart={handleDrawerTouchStart}
+                onTouchEnd={handleDrawerTouchEnd}
+            >
+                {films.map((film, index) => {
+                    const gradientClass = THUMB_GRADIENTS[index % THUMB_GRADIENTS.length];
+                    const ThumbIcon = THUMB_ICONS[index % THUMB_ICONS.length];
+                    const dotClass = STATUS_DOT_CLASS[film.myDecision ?? "null"] ?? "bg-solar";
+                    const isSelected = film.id === activeFilm.id;
+
+                    return (
+                        <button
+                            key={film.id}
+                            type="button"
+                            onClick={() => handleFilmSelect(film.id)}
+                            className={`mb-[3px] flex w-full cursor-pointer items-center gap-2.5 rounded-[8px] border px-2.5 py-[9px] transition-all hover:bg-white/4 ${
+                                isSelected ? "border-aurora/20 bg-aurora/7" : "border-transparent"
+                            }`}
                         >
-                            <ThumbIcon size={16} className="text-aurora/60" />
-                            <span
-                                className={`absolute right-[3px] top-[3px] h-[6px] w-[6px] rounded-full ${dotClass}`}
-                            />
-                        </div>
-
-                        {/* Info */}
-                        <div className="min-w-0 flex-1">
-                            <div className="truncate text-[0.82rem] font-semibold">
-                                {film.title}
-                            </div>
-                            <div className="mt-0.5 text-[0.7rem] text-mist">
-                                {film.author} · {film.country}
-                            </div>
-                        </div>
-
-                        {/* Decision badge */}
-                        {film.myDecision !== null ? (
-                            <span
-                                className={`flex-shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.04em] ${DECISION_BADGE_CLASS[film.myDecision]}`}
+                            {/* Thumbnail */}
+                            <div
+                                className={`relative flex h-[34px] w-[60px] flex-shrink-0 items-center justify-center rounded-[5px] ${gradientClass}`}
                             >
-                                {getDecisionLabel(film.myDecision)}
-                            </span>
-                        ) : (
-                            <span className="flex-shrink-0 text-[0.7rem] font-normal text-mist/35">
-                                —
-                            </span>
-                        )}
-                    </button>
-                );
-            })}
-        </div>
+                                <ThumbIcon size={16} className="text-aurora/60" />
+                                <span
+                                    className={`absolute right-[3px] top-[3px] h-[6px] w-[6px] rounded-full ${dotClass}`}
+                                />
+                            </div>
+
+                            {/* Info */}
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate text-[0.82rem] font-semibold">
+                                    {film.title}
+                                </div>
+                                <div className="mt-0.5 text-[0.7rem] text-mist">
+                                    {film.author} · {film.country}
+                                </div>
+                            </div>
+
+                            {/* Decision badge */}
+                            {film.myDecision !== null ? (
+                                <span
+                                    className={`flex-shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.04em] ${DECISION_BADGE_CLASS[film.myDecision]}`}
+                                >
+                                    {getDecisionLabel(film.myDecision)}
+                                </span>
+                            ) : (
+                                <span className="flex-shrink-0 text-[0.7rem] font-normal text-mist/35">
+                                    —
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        </>
     );
 };
 
